@@ -1,18 +1,61 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [role, setRole] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const router = useRouter()
+  const supabase = createClient()
 
   const handleRegister = async () => {
+    setError('')
+    setSuccess('')
+
+    if (!fullName || !email || !password || !role) {
+      setError('Barcha maydonlarni to\'ldiring')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Parollar mos kelmayapti')
+      return
+    }
+
+    if (password.length < 8) {
+      setError('Parol kamida 8 ta belgi bo\'lishi kerak')
+      return
+    }
+
     setLoading(true)
-    setTimeout(() => setLoading(false), 1000)
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          role: role,
+        }
+      }
+    })
+
+    if (error) {
+      setError('Xatolik: ' + error.message)
+      setLoading(false)
+      return
+    }
+
+    setSuccess('Tabriklaymiz! Email manzilingizni tasdiqlang.')
+    setLoading(false)
   }
 
   return (
@@ -43,6 +86,56 @@ export default function RegisterPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+          <div>
+            <label style={{ color: '#d1d5db', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+              To'liq ism
+            </label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Ism Familiya"
+              style={{
+                width: '100%',
+                backgroundColor: '#1e1e2e',
+                color: 'white',
+                border: '1px solid #2e2e3e',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ color: '#d1d5db', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+              Rol
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={{
+                width: '100%',
+                backgroundColor: '#1e1e2e',
+                color: role ? 'white' : '#6b7280',
+                border: '1px solid #2e2e3e',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            >
+              <option value="">Rolni tanlang</option>
+              <option value="student">🎓 Talaba</option>
+              <option value="doctor">👨‍⚕️ Shifokor</option>
+              <option value="patient">🧑 Bemor</option>
+            </select>
+          </div>
+
           <div>
             <label style={{ color: '#d1d5db', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
               Email
@@ -112,6 +205,14 @@ export default function RegisterPage() {
             />
           </div>
 
+          {error && (
+            <p style={{ color: '#f87171', fontSize: '14px', margin: 0 }}>{error}</p>
+          )}
+
+          {success && (
+            <p style={{ color: '#34d399', fontSize: '14px', margin: 0 }}>{success}</p>
+          )}
+
           <button
             onClick={handleRegister}
             disabled={loading}
@@ -124,11 +225,12 @@ export default function RegisterPage() {
               padding: '14px',
               fontSize: '15px',
               fontWeight: '600',
-              cursor: 'pointer',
-              marginTop: '8px'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginTop: '8px',
+              opacity: loading ? 0.7 : 1
             }}
           >
-            {loading ? 'Ro’yxatdan o’tilmoqda...' : 'Ro’yxatdan o’tish'}
+            {loading ? 'Ro\'yxatdan o\'tilmoqda...' : 'Ro\'yxatdan o\'tish'}
           </button>
 
           <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '14px', margin: 0 }}>
