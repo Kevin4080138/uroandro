@@ -33,6 +33,8 @@ export default function LoginPage() {
       .eq('id', data.user.id)
       .single()
 
+    console.log('DEBUG user.id:', data.user.id, 'profile:', profile, 'profileError:', profileError)
+
     if (profileError) {
       setError('Profil xatosi: ' + profileError.message)
       setLoading(false)
