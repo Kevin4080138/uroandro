@@ -27,11 +27,17 @@ export default function LoginPage() {
       return
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .single()
+
+    if (profileError) {
+      setError('Profil xatosi: ' + profileError.message)
+      setLoading(false)
+      return
+    }
 
     if (profile?.role === 'student') router.push('/student/dashboard')
     else if (profile?.role === 'doctor') router.push('/doctor/dashboard')
