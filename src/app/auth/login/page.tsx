@@ -1,17 +1,43 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
+  const supabase = createClient()
 
   const handleLogin = async () => {
+    setError('')
     setLoading(true)
-    setTimeout(() => setLoading(false), 1000)
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError('Email yoki parol noto\'g\'ri')
+      setLoading(false)
+      return
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+
+    if (profile?.role === 'student') router.push('/student/dashboard')
+    else if (profile?.role === 'doctor') router.push('/doctor/dashboard')
+    else if (profile?.role === 'patient') router.push('/patient/dashboard')
+    else if (profile?.role === 'admin') router.push('/admin/dashboard')
+    else router.push('/dashboard')
   }
 
   return (
@@ -88,6 +114,10 @@ export default function LoginPage() {
             />
           </div>
 
+          {error && (
+            <p style={{ color: '#f87171', fontSize: '14px', margin: 0 }}>{error}</p>
+          )}
+
           <button
             onClick={handleLogin}
             disabled={loading}
@@ -100,8 +130,9 @@ export default function LoginPage() {
               padding: '14px',
               fontSize: '15px',
               fontWeight: '600',
-              cursor: 'pointer',
-              marginTop: '8px'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginTop: '8px',
+              opacity: loading ? 0.7 : 1
             }}
           >
             {loading ? 'Kirish...' : 'Kirish'}
