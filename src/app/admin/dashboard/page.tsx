@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function AdminDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -97,6 +98,32 @@ export default function AdminDashboard() {
               <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
               <p style={{ margin: 0, color: '#6b7280', fontSize: '13px' }}>{item.desc}</p>
             </div>
+          ))}
+        </div>
+
+        <h2 style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '16px' }}>
+          Dashboardlarni ko'rish
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          {[
+            { icon: '🎓', title: 'Talaba', href: '/student/dashboard' },
+            { icon: '👨‍⚕️', title: 'Shifokor', href: '/doctor/dashboard' },
+            { icon: '🧑', title: 'Bemor', href: '/patient/dashboard' },
+            { icon: '🛠️', title: 'Admin', href: '/admin/dashboard' },
+          ].map((item) => (
+            <Link key={item.title} href={item.href} style={{ textDecoration: 'none' }}>
+              <div style={{
+                backgroundColor: '#111118',
+                border: '1px solid #1e1e2e',
+                borderRadius: '12px',
+                padding: '24px',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s'
+              }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: 'white' }}>{item.title}</h3>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
