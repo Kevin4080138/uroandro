@@ -49,7 +49,7 @@ export default function PatientDashboard() {
         alignItems: 'center'
       }}>
         <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uros<span style={{ color: '#60a5fa' }}>fera</span>
+          Uro<span style={{ color: '#60a5fa' }}>sfera</span>
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span style={{ color: '#9ca3af', fontSize: '14px' }}>🧑 {profile.full_name}</span>

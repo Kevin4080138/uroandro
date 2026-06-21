@@ -66,7 +66,7 @@ export default function LoginPage() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', margin: 0 }}>
-            Uros<span style={{ color: '#60a5fa' }}>fera</span>
+            Uro<span style={{ color: '#60a5fa' }}>sfera</span>
           </h1>
           <p style={{ color: '#6b7280', marginTop: '8px', fontSize: '14px' }}>
             Urologiya va Andrologiya platformasi
