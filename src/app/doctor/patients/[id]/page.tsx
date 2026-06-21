@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { tavsiyaBerish } from '@/lib/tavsiya'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
+import { tekshiruvTavsiyalari } from '@/lib/tekshiruvlar'
 
 const inputStyle = {
   width: '100%',
@@ -22,11 +23,12 @@ const labelStyle = { color: '#d1d5db', fontSize: '13px', display: 'block', margi
 
 const holatLabel: Record<string, { text: string; color: string }> = {
   yangi: { text: "Shikoyat qabul qilindi", color: '#f59e0b' },
+  tekshiruv_buyurildi: { text: 'Tekshiruv buyurildi', color: '#f59e0b' },
   natija_kiritildi: { text: 'Tekshiruv natijasi kiritildi', color: '#60a5fa' },
   yakunlandi: { text: 'Tavsiya varaqasi yakunlandi', color: '#4ade80' },
 }
 
-const emptyYangiForm = { shikoyat: '', anamnez: '' }
+const emptyYangiForm = { shikoyat: '', anamnez: '', tekshiruvlar: '' }
 
 const emptyNatijaForm = {
   tomon: 'chap', daraja: 'I', vena_diametri: 3,
@@ -89,6 +91,14 @@ export default function PatientCardPage() {
       prev.includes(nom) ? prev.filter((o) => o !== nom) : [...prev, nom]
     )
   }
+
+  const qoshTekshiruv = (matn: string) => {
+    setYangiForm((f) => {
+      const mavjud = f.tekshiruvlar.split(',').map((s) => s.trim()).filter(Boolean)
+      if (mavjud.includes(matn)) return f
+      return { ...f, tekshiruvlar: [...mavjud, matn].join(', ') }
+    })
+  }
   const setN = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
 
   const handleYangiSave = async () => {
@@ -102,12 +112,15 @@ export default function PatientCardPage() {
       fio: bemor.fio,
       shikoyat: yangiForm.shikoyat,
       anamnez: yangiForm.anamnez,
-      holat: 'yangi',
+      organlar: tanlanganOrganlar.join(', '),
+      buyurilgan_tekshiruvlar: yangiForm.tekshiruvlar,
+      holat: 'tekshiruv_buyurildi',
     })
     setSaving(false)
 
     if (!error) {
       setYangiForm(emptyYangiForm)
+      setTanlanganOrganlar([])
       setShowYangiForm(false)
       load()
     }
@@ -287,12 +300,42 @@ export default function PatientCardPage() {
               <label style={labelStyle}>Kasallik tarixi (anamnez)</label>
               <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.anamnez} onChange={setY('anamnez')} />
             </div>
+
+            {tanlanganOrganlar.length > 0 && (
+              <div style={{ marginTop: '20px' }}>
+                <label style={labelStyle}>Tavsiya etilgan tekshiruvlar</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                  {tanlanganOrganlar
+                    .filter((organ) => tekshiruvTavsiyalari[organ])
+                    .map((organ) => (
+                      <div key={organ} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                        <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{organ}:</span>
+                        {tekshiruvTavsiyalari[organ].map((tek) => (
+                          <button
+                            key={tek}
+                            type="button"
+                            onClick={() => qoshTekshiruv(tek)}
+                            style={{
+                              backgroundColor: '#1e1e2e', color: '#fbbf24', border: '1px solid #2e2e3e',
+                              borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
+                            }}
+                          >
+                            + {tek}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                </div>
+                <textarea style={{ ...inputStyle, minHeight: '50px' }} value={yangiForm.tekshiruvlar} onChange={setY('tekshiruvlar')} placeholder="Buyurilgan tekshiruvlar ro'yxati..." />
+              </div>
+            )}
+
             <button onClick={handleYangiSave} disabled={saving} style={{
               marginTop: '16px', backgroundColor: '#2563eb', color: 'white', border: 'none',
               borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
               fontSize: '14px', fontWeight: 600, opacity: saving ? 0.7 : 1,
             }}>
-              {saving ? 'Saqlanmoqda...' : 'Qabulni boshlash'}
+              {saving ? 'Saqlanmoqda...' : "Saqlash va tekshiruvga yo'llash"}
             </button>
           </div>
         )}
@@ -436,11 +479,20 @@ export default function PatientCardPage() {
                   </div>
                   {t.shikoyat && <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}><strong>Shikoyat:</strong> {t.shikoyat}</p>}
                   {t.anamnez && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#9ca3af' }}><strong>Anamnez:</strong> {t.anamnez}</p>}
+                  {t.buyurilgan_tekshiruvlar && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#fbbf24' }}><strong>Buyurilgan tekshiruvlar:</strong> {t.buyurilgan_tekshiruvlar}</p>}
                   {t.tavsiya && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#60a5fa' }}><strong>Tavsiya:</strong> {t.tavsiya} ({t.daraja}-daraja, {t.tomon})</p>}
                   {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#4ade80' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    {t.holat === 'yangi' && (
+                    {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
+                      <button onClick={() => window.open(`/doctor/print/referral/${t.id}`, '_blank')} style={{
+                        backgroundColor: '#1e1e2e', color: '#fbbf24', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                      }}>
+                        🖨️ Yo&apos;llanma chop etish
+                      </button>
+                    )}
+                    {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
                       <button onClick={() => openNatijaForm(t.id)} style={{
                         backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
