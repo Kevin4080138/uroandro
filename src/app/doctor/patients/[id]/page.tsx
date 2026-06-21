@@ -31,6 +31,24 @@ const holatLabel: Record<string, { text: string; color: string }> = {
 
 const emptyYangiForm = { shikoyat: '', anamnez: '', ogriq: "yo'q", oldin_operatsiya: "yo'q", tekshiruvlar: '' }
 
+function kalkulyatorHavolasi(bemor: any, t: any) {
+  const gradeMap: Record<string, string> = { I: '1', II: '2', III: '3' }
+  const latMap: Record<string, string> = { chap: 'left', "o'ng": 'right', 'ikki tomonlama': 'bilateral' }
+  const params = new URLSearchParams({
+    fio: bemor?.fio ?? '',
+    telefon: bemor?.telefon ?? '',
+    grade: gradeMap[t.daraja] ?? '3',
+    lat: latMap[t.tomon] ?? 'left',
+    recur: t.oldin_operatsiya === 'ha' ? '1' : '0',
+    reflux: t.reflux === 'bor' ? '1' : '0',
+    venaDiametri: String(t.vena_diametri ?? ''),
+    spermKonts: String(t.sperm_konts ?? ''),
+    spermHarakat: String(t.sperm_harakat ?? ''),
+    indic: t.ogriq === 'bor' ? 'pain' : 'infertility',
+  })
+  return `/doctor/calculators/varikotsele/klinik-qaror?${params.toString()}`
+}
+
 export default function PatientCardPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -530,6 +548,14 @@ export default function PatientCardPage() {
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
                         Tavsiya varaqasini yakunlash
+                      </button>
+                    )}
+                    {(t.holat === 'natija_kiritildi' || t.holat === 'yakunlandi') && (
+                      <button onClick={() => router.push(kalkulyatorHavolasi(bemor, t))} style={{
+                        backgroundColor: '#1e1e2e', color: '#a78bfa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                      }}>
+                        🧮 Varikotsele kalkulyatoriga o&apos;tish
                       </button>
                     )}
                     {t.holat === 'yakunlandi' && (

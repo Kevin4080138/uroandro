@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { T, card, input, label, btnPrimary, btnGhost } from '../_theme'
 import { USULLAR, USUL_IDLARI, usulTavsiyaBerish, type QarorKirish } from '@/lib/varikotseleUsullari'
@@ -17,12 +18,42 @@ const seg = (active: boolean): React.CSSProperties => ({
 })
 
 export default function KlinikQarorPage() {
+  return (
+    <Suspense fallback={null}>
+      <KlinikQarorIchki />
+    </Suspense>
+  )
+}
+
+function KlinikQarorIchki() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
   const [bemor, setBemor] = useState(boshBemor)
   const [forma, setForma] = useState<QarorKirish>(bosh)
   const [natija, setNatija] = useState<ReturnType<typeof usulTavsiyaBerish> | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (!searchParams.get('fio')) return
+    setBemor({
+      fio: searchParams.get('fio') ?? '',
+      telefon: searchParams.get('telefon') ?? '',
+      age: '',
+      grade: searchParams.get('grade') ?? '3',
+    })
+    setForma({
+      indic: (searchParams.get('indic') as QarorKirish['indic']) ?? 'infertility',
+      lat: (searchParams.get('lat') as QarorKirish['lat']) ?? 'left',
+      recur: searchParams.get('recur') === '1',
+      expert: true,
+      bmi: 0,
+      venaDiametri: Number(searchParams.get('venaDiametri')) || 0,
+      reflux: searchParams.get('reflux') === '1',
+      spermKonts: Number(searchParams.get('spermKonts')) || 0,
+      spermHarakat: Number(searchParams.get('spermHarakat')) || 0,
+    })
+  }, [searchParams])
 
   const hisobla = () => { setNatija(usulTavsiyaBerish(forma)); setSaved(false) }
 
