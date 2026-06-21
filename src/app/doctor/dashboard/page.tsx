@@ -82,7 +82,7 @@ export default function DoctorDashboard() {
           {[
             { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", color: '#dc2626', href: '/doctor/patients' },
             { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', color: '#2563eb', href: '/doctor/protokollar' },
-            { icon: '🧮', title: 'Kalkulatorlar', desc: "Varikotsele usul tanlash, IPSS, PSA", color: '#7c3aed', href: '/doctor/calculators/varikotsele' },
+            { icon: '🧮', title: 'Kalkulatorlar', desc: "Varikotsele usul tanlash, IPSS, PSA", color: '#7c3aed', href: '/doctor/calculators' },
             { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', color: '#059669' },
             { icon: '🌐', title: 'Qo\'llanmalar', desc: 'EAU, AUA guidelines', color: '#d97706' },
           ].map((item) => (

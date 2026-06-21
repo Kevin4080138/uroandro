@@ -56,11 +56,11 @@ export default function VariCompareLayout({ children }: { children: React.ReactN
         </nav>
 
         <div style={{ padding: 16, borderTop: '1px solid rgba(255,255,255,.08)' }}>
-          <button onClick={() => router.push('/doctor/dashboard')} style={{
+          <button onClick={() => router.push('/doctor/calculators')} style={{
             width: '100%', background: 'rgba(255,255,255,.08)', color: '#CFE3E4', border: 'none',
             borderRadius: 8, padding: '9px 12px', fontSize: 13, cursor: 'pointer',
           }}>
-            ← Urosfera bosh sahifasi
+            ← Kalkulatorlar ro&apos;yxati
           </button>
         </div>
       </aside>
