@@ -456,6 +456,14 @@ export default function PatientCardPage() {
                         Tavsiya varaqasini yakunlash
                       </button>
                     )}
+                    {t.holat === 'yakunlandi' && (
+                      <button onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} style={{
+                        backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                      }}>
+                        🖨️ Chop etish / PDF
+                      </button>
+                    )}
                   </div>
                 </div>
               )
