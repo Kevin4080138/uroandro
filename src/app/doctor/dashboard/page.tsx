@@ -80,17 +80,18 @@ export default function DoctorDashboard() {
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
+            { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", color: '#dc2626', href: '/doctor/patients' },
             { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', color: '#2563eb' },
             { icon: '🧮', title: 'Kalkulatorlar', desc: 'IPSS, PSA va boshqalar', color: '#7c3aed' },
             { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', color: '#059669' },
             { icon: '🌐', title: 'Qo\'llanmalar', desc: 'EAU, AUA guidelines', color: '#d97706' },
           ].map((item) => (
-            <div key={item.title} style={{
+            <div key={item.title} onClick={() => item.href && router.push(item.href)} style={{
               backgroundColor: '#111118',
               border: '1px solid #1e1e2e',
               borderRadius: '12px',
               padding: '24px',
-              cursor: 'pointer',
+              cursor: item.href ? 'pointer' : 'default',
               transition: 'border-color 0.2s'
             }}>
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
