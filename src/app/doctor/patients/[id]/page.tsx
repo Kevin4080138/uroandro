@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { tavsiyaBerish } from '@/lib/tavsiya'
+import { shikoyatToifalari } from '@/lib/shikoyatlar'
 
 const inputStyle = {
   width: '100%',
@@ -73,6 +74,14 @@ export default function PatientCardPage() {
   useEffect(() => { load() }, [id])
 
   const setY = (key: string) => (e: any) => setYangiForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const qoshShikoyat = (matn: string) => {
+    setYangiForm((f) => {
+      const mavjud = f.shikoyat.split(',').map((s) => s.trim()).filter(Boolean)
+      if (mavjud.includes(matn)) return f
+      return { ...f, shikoyat: [...mavjud, matn].join(', ') }
+    })
+  }
   const setN = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
 
   const handleYangiSave = async () => {
@@ -214,7 +223,27 @@ export default function PatientCardPage() {
             <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Shikoyat va kasallik tarixi</h3>
             <div>
               <label style={labelStyle}>Shikoyati</label>
-              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.shikoyat} onChange={setY('shikoyat')} />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                {shikoyatToifalari.map((toifa) => (
+                  <div key={toifa.nom} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                    <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{toifa.nom}:</span>
+                    {toifa.shikoyatlar.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => qoshShikoyat(s)}
+                        style={{
+                          backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e',
+                          borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
+                        }}
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.shikoyat} onChange={setY('shikoyat')} placeholder="Tugmalardan tanlang yoki qo'lda yozing..." />
             </div>
             <div style={{ marginTop: '12px' }}>
               <label style={labelStyle}>Kasallik tarixi (anamnez)</label>
