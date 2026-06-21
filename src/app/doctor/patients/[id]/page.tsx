@@ -19,7 +19,15 @@ const inputStyle = {
 
 const labelStyle = { color: '#d1d5db', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
-const emptyForm = {
+const holatLabel: Record<string, { text: string; color: string }> = {
+  yangi: { text: "Shikoyat qabul qilindi", color: '#f59e0b' },
+  natija_kiritildi: { text: 'Tekshiruv natijasi kiritildi', color: '#60a5fa' },
+  yakunlandi: { text: 'Tavsiya varaqasi yakunlandi', color: '#4ade80' },
+}
+
+const emptyYangiForm = { shikoyat: '', anamnez: '' }
+
+const emptyNatijaForm = {
   tomon: 'chap', daraja: 'I', vena_diametri: 3,
   reflux: 'bor', ogriq: "yo'q", oldin_operatsiya: "yo'q",
   sperm_konts: 20, sperm_harakat: 45, sperm_morf: 5,
@@ -34,10 +42,18 @@ export default function PatientCardPage() {
   const [bemor, setBemor] = useState<any>(null)
   const [tashriflar, setTashriflar] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
+
+  const [showYangiForm, setShowYangiForm] = useState(false)
+  const [yangiForm, setYangiForm] = useState(emptyYangiForm)
+
+  const [natijaTashrifId, setNatijaTashrifId] = useState<string | null>(null)
+  const [natijaForm, setNatijaForm] = useState(emptyNatijaForm)
   const [natija, setNatija] = useState<{ tavsiya: string; sabab: string } | null>(null)
+
+  const [yakunlashTashrifId, setYakunlashTashrifId] = useState<string | null>(null)
+  const [doriMuolaja, setDoriMuolaja] = useState('')
+
+  const [saving, setSaving] = useState(false)
 
   const load = async () => {
     const { data: bemorData } = await supabase.from('bemorlar').select('*').eq('id', id).single()
@@ -56,42 +72,88 @@ export default function PatientCardPage() {
 
   useEffect(() => { load() }, [id])
 
-  const set = (key: string) => (e: any) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const setY = (key: string) => (e: any) => setYangiForm((f) => ({ ...f, [key]: e.target.value }))
+  const setN = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
 
-  const handleSave = async () => {
+  const handleYangiSave = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
-
-    const { tavsiya, sabab } = tavsiyaBerish(
-      form.daraja, form.tomon, form.ogriq, form.oldin_operatsiya,
-      Number(form.sperm_konts), Number(form.sperm_harakat)
-    )
 
     setSaving(true)
     const { error } = await supabase.from('tashriflar').insert({
       bemor_id: id,
       doctor_id: user.id,
       fio: bemor.fio,
-      tomon: form.tomon,
-      daraja: form.daraja,
-      vena_diametri: Number(form.vena_diametri),
-      reflux: form.reflux,
-      ogriq: form.ogriq,
-      oldin_operatsiya: form.oldin_operatsiya,
-      sperm_konts: Number(form.sperm_konts),
-      sperm_harakat: Number(form.sperm_harakat),
-      sperm_morf: Number(form.sperm_morf),
-      testosteron: Number(form.testosteron),
-      fsh: Number(form.fsh),
-      lh: Number(form.lh),
-      tavsiya,
-      izoh: form.izoh,
+      shikoyat: yangiForm.shikoyat,
+      anamnez: yangiForm.anamnez,
+      holat: 'yangi',
     })
     setSaving(false)
 
     if (!error) {
+      setYangiForm(emptyYangiForm)
+      setShowYangiForm(false)
+      load()
+    }
+  }
+
+  const openNatijaForm = (tashrifId: string) => {
+    setNatijaTashrifId(tashrifId)
+    setNatija(null)
+    setNatijaForm(emptyNatijaForm)
+  }
+
+  const handleNatijaSave = async () => {
+    if (!natijaTashrifId) return
+
+    const { tavsiya, sabab } = tavsiyaBerish(
+      natijaForm.daraja, natijaForm.tomon, natijaForm.ogriq, natijaForm.oldin_operatsiya,
+      Number(natijaForm.sperm_konts), Number(natijaForm.sperm_harakat)
+    )
+
+    setSaving(true)
+    const { error } = await supabase.from('tashriflar').update({
+      tomon: natijaForm.tomon,
+      daraja: natijaForm.daraja,
+      vena_diametri: Number(natijaForm.vena_diametri),
+      reflux: natijaForm.reflux,
+      ogriq: natijaForm.ogriq,
+      oldin_operatsiya: natijaForm.oldin_operatsiya,
+      sperm_konts: Number(natijaForm.sperm_konts),
+      sperm_harakat: Number(natijaForm.sperm_harakat),
+      sperm_morf: Number(natijaForm.sperm_morf),
+      testosteron: Number(natijaForm.testosteron),
+      fsh: Number(natijaForm.fsh),
+      lh: Number(natijaForm.lh),
+      izoh: natijaForm.izoh,
+      tavsiya,
+      holat: 'natija_kiritildi',
+    }).eq('id', natijaTashrifId)
+    setSaving(false)
+
+    if (!error) {
       setNatija({ tavsiya, sabab })
-      setForm(emptyForm)
+      load()
+    }
+  }
+
+  const openYakunlash = (tashrifId: string, mavjudDori: string) => {
+    setYakunlashTashrifId(tashrifId)
+    setDoriMuolaja(mavjudDori || '')
+  }
+
+  const handleYakunlashSave = async () => {
+    if (!yakunlashTashrifId) return
+    setSaving(true)
+    const { error } = await supabase.from('tashriflar').update({
+      dori_muolaja: doriMuolaja,
+      holat: 'yakunlandi',
+    }).eq('id', yakunlashTashrifId)
+    setSaving(false)
+
+    if (!error) {
+      setYakunlashTashrifId(null)
+      setDoriMuolaja('')
       load()
     }
   }
@@ -138,23 +200,44 @@ export default function PatientCardPage() {
               {' · '}Tel: {bemor.telefon ?? '—'}
             </p>
           </div>
-          <button onClick={() => { setShowForm(!showForm); setNatija(null) }} style={{
+          <button onClick={() => { setShowYangiForm(!showYangiForm) }} style={{
             backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
           }}>
-            {showForm ? 'Bekor qilish' : '+ Yangi tashrif'}
+            {showYangiForm ? 'Bekor qilish' : '+ Yangi qabul'}
           </button>
         </div>
 
-        {showForm && (
-          <div style={{
-            backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px',
-            padding: '24px', marginBottom: '24px',
-          }}>
+        {/* 1-bosqich: shikoyat va anamnez */}
+        {showYangiForm && (
+          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Shikoyat va kasallik tarixi</h3>
+            <div>
+              <label style={labelStyle}>Shikoyati</label>
+              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.shikoyat} onChange={setY('shikoyat')} />
+            </div>
+            <div style={{ marginTop: '12px' }}>
+              <label style={labelStyle}>Kasallik tarixi (anamnez)</label>
+              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.anamnez} onChange={setY('anamnez')} />
+            </div>
+            <button onClick={handleYangiSave} disabled={saving} style={{
+              marginTop: '16px', backgroundColor: '#2563eb', color: 'white', border: 'none',
+              borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
+              fontSize: '14px', fontWeight: 600, opacity: saving ? 0.7 : 1,
+            }}>
+              {saving ? 'Saqlanmoqda...' : 'Qabulni boshlash'}
+            </button>
+          </div>
+        )}
+
+        {/* 2-bosqich: tekshiruv natijalari */}
+        {natijaTashrifId && (
+          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Tekshiruv natijalari</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Tomoni</label>
-                <select style={inputStyle} value={form.tomon} onChange={set('tomon')}>
+                <select style={inputStyle} value={natijaForm.tomon} onChange={setN('tomon')}>
                   <option value="chap">chap</option>
                   <option value="o'ng">o&apos;ng</option>
                   <option value="ikki tomonlama">ikki tomonlama</option>
@@ -162,7 +245,7 @@ export default function PatientCardPage() {
               </div>
               <div>
                 <label style={labelStyle}>Darajasi (Dubin)</label>
-                <select style={inputStyle} value={form.daraja} onChange={set('daraja')}>
+                <select style={inputStyle} value={natijaForm.daraja} onChange={setN('daraja')}>
                   <option value="I">I</option>
                   <option value="II">II</option>
                   <option value="III">III</option>
@@ -170,104 +253,146 @@ export default function PatientCardPage() {
               </div>
               <div>
                 <label style={labelStyle}>Vena diametri (mm)</label>
-                <input type="number" step="0.1" style={inputStyle} value={form.vena_diametri} onChange={set('vena_diametri')} />
+                <input type="number" step="0.1" style={inputStyle} value={natijaForm.vena_diametri} onChange={setN('vena_diametri')} />
               </div>
               <div>
                 <label style={labelStyle}>Reflux</label>
-                <select style={inputStyle} value={form.reflux} onChange={set('reflux')}>
+                <select style={inputStyle} value={natijaForm.reflux} onChange={setN('reflux')}>
                   <option value="bor">bor</option>
                   <option value="yo'q">yo&apos;q</option>
                 </select>
               </div>
               <div>
                 <label style={labelStyle}>Og&apos;riq / simptom</label>
-                <select style={inputStyle} value={form.ogriq} onChange={set('ogriq')}>
+                <select style={inputStyle} value={natijaForm.ogriq} onChange={setN('ogriq')}>
                   <option value="yo'q">yo&apos;q</option>
                   <option value="bor">bor</option>
                 </select>
               </div>
               <div>
                 <label style={labelStyle}>Oldin operatsiya bo&apos;lganmi?</label>
-                <select style={inputStyle} value={form.oldin_operatsiya} onChange={set('oldin_operatsiya')}>
+                <select style={inputStyle} value={natijaForm.oldin_operatsiya} onChange={setN('oldin_operatsiya')}>
                   <option value="yo'q">yo&apos;q</option>
                   <option value="ha">ha</option>
                 </select>
               </div>
               <div>
                 <label style={labelStyle}>Sperma konsentratsiyasi (mln/ml)</label>
-                <input type="number" style={inputStyle} value={form.sperm_konts} onChange={set('sperm_konts')} />
+                <input type="number" style={inputStyle} value={natijaForm.sperm_konts} onChange={setN('sperm_konts')} />
               </div>
               <div>
                 <label style={labelStyle}>Harakatchanlik (%)</label>
-                <input type="number" style={inputStyle} value={form.sperm_harakat} onChange={set('sperm_harakat')} />
+                <input type="number" style={inputStyle} value={natijaForm.sperm_harakat} onChange={setN('sperm_harakat')} />
               </div>
               <div>
                 <label style={labelStyle}>Normal morfologiya (%)</label>
-                <input type="number" style={inputStyle} value={form.sperm_morf} onChange={set('sperm_morf')} />
+                <input type="number" style={inputStyle} value={natijaForm.sperm_morf} onChange={setN('sperm_morf')} />
               </div>
               <div>
                 <label style={labelStyle}>Testosteron (nmol/l)</label>
-                <input type="number" style={inputStyle} value={form.testosteron} onChange={set('testosteron')} />
+                <input type="number" style={inputStyle} value={natijaForm.testosteron} onChange={setN('testosteron')} />
               </div>
               <div>
                 <label style={labelStyle}>FSH (mIU/ml)</label>
-                <input type="number" style={inputStyle} value={form.fsh} onChange={set('fsh')} />
+                <input type="number" style={inputStyle} value={natijaForm.fsh} onChange={setN('fsh')} />
               </div>
               <div>
                 <label style={labelStyle}>LH (mIU/ml)</label>
-                <input type="number" style={inputStyle} value={form.lh} onChange={set('lh')} />
+                <input type="number" style={inputStyle} value={natijaForm.lh} onChange={setN('lh')} />
               </div>
             </div>
             <div style={{ marginTop: '16px' }}>
-              <label style={labelStyle}>Izoh / kasallik tarixi</label>
-              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={form.izoh} onChange={set('izoh')} />
+              <label style={labelStyle}>Izoh</label>
+              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={natijaForm.izoh} onChange={setN('izoh')} />
             </div>
 
             {natija && (
-              <div style={{
-                marginTop: '16px', backgroundColor: '#0f1f14', border: '1px solid #166534',
-                borderRadius: '10px', padding: '14px',
-              }}>
+              <div style={{ marginTop: '16px', backgroundColor: '#0f1f14', border: '1px solid #166534', borderRadius: '10px', padding: '14px' }}>
                 <p style={{ margin: 0, color: '#4ade80', fontWeight: 600 }}>Tavsiya: {natija.tavsiya}</p>
                 <p style={{ margin: '4px 0 0', color: '#9ca3af', fontSize: '13px' }}>{natija.sabab}</p>
               </div>
             )}
 
-            <button onClick={handleSave} disabled={saving} style={{
-              marginTop: '16px', backgroundColor: '#2563eb', color: 'white', border: 'none',
-              borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
-              fontSize: '14px', fontWeight: 600, opacity: saving ? 0.7 : 1,
-            }}>
-              {saving ? 'Saqlanmoqda...' : 'Tavsiya olish va saqlash'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+              <button onClick={handleNatijaSave} disabled={saving} style={{
+                backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+                padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
+                opacity: saving ? 0.7 : 1,
+              }}>
+                {saving ? 'Saqlanmoqda...' : 'Tavsiya olish va saqlash'}
+              </button>
+              <button onClick={() => setNatijaTashrifId(null)} style={{
+                backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '10px',
+                padding: '12px 24px', cursor: 'pointer', fontSize: '14px',
+              }}>
+                Yopish
+              </button>
+            </div>
           </div>
         )}
 
-        <h3 style={{ fontSize: '16px', color: '#9ca3af', marginBottom: '12px' }}>Mening tashriflarim</h3>
+        {/* 3-bosqich: dori va muolaja */}
+        {yakunlashTashrifId && (
+          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Tavsiya varaqasi — dori va muolaja</h3>
+            <textarea style={{ ...inputStyle, minHeight: '120px' }} value={doriMuolaja} onChange={(e) => setDoriMuolaja(e.target.value)} placeholder="Dorilar, dozalar, muolajalar, tavsiyalar..." />
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+              <button onClick={handleYakunlashSave} disabled={saving} style={{
+                backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+                padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
+                opacity: saving ? 0.7 : 1,
+              }}>
+                {saving ? 'Saqlanmoqda...' : 'Varaqani yakunlash'}
+              </button>
+              <button onClick={() => setYakunlashTashrifId(null)} style={{
+                backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '10px',
+                padding: '12px 24px', cursor: 'pointer', fontSize: '14px',
+              }}>
+                Yopish
+              </button>
+            </div>
+          </div>
+        )}
+
+        <h3 style={{ fontSize: '16px', color: '#9ca3af', marginBottom: '12px' }}>Qabullar tarixi</h3>
         {tashriflar.length === 0 ? (
-          <p style={{ color: '#9ca3af' }}>Hozircha tashrif yo&apos;q.</p>
+          <p style={{ color: '#9ca3af' }}>Hozircha qabul yo&apos;q.</p>
         ) : (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#1a1a24', textAlign: 'left' }}>
-                  {['Sana', 'Tomon', 'Daraja', 'Tavsiya', 'Izoh'].map((h) => (
-                    <th key={h} style={{ padding: '12px 16px', color: '#9ca3af', fontWeight: 500 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tashriflar.map((t) => (
-                  <tr key={t.id} style={{ borderTop: '1px solid #1e1e2e' }}>
-                    <td style={{ padding: '12px 16px', color: '#6b7280' }}>{new Date(t.sana).toLocaleDateString()}</td>
-                    <td style={{ padding: '12px 16px' }}>{t.tomon}</td>
-                    <td style={{ padding: '12px 16px' }}>{t.daraja}</td>
-                    <td style={{ padding: '12px 16px', color: '#60a5fa' }}>{t.tavsiya}</td>
-                    <td style={{ padding: '12px 16px', color: '#9ca3af' }}>{t.izoh || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {tashriflar.map((t) => {
+              const holat = holatLabel[t.holat] ?? holatLabel.yangi
+              return (
+                <div key={t.id} style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={{ color: '#6b7280', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()}</span>
+                    <span style={{ color: holat.color, fontSize: '13px', fontWeight: 600 }}>{holat.text}</span>
+                  </div>
+                  {t.shikoyat && <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}><strong>Shikoyat:</strong> {t.shikoyat}</p>}
+                  {t.anamnez && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#9ca3af' }}><strong>Anamnez:</strong> {t.anamnez}</p>}
+                  {t.tavsiya && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#60a5fa' }}><strong>Tavsiya:</strong> {t.tavsiya} ({t.daraja}-daraja, {t.tomon})</p>}
+                  {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#4ade80' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
+
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    {t.holat === 'yangi' && (
+                      <button onClick={() => openNatijaForm(t.id)} style={{
+                        backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                      }}>
+                        Tekshiruv natijalarini kiritish
+                      </button>
+                    )}
+                    {t.holat === 'natija_kiritildi' && (
+                      <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
+                        backgroundColor: '#1e1e2e', color: '#4ade80', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                      }}>
+                        Tavsiya varaqasini yakunlash
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
