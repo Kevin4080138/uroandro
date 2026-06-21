@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Header } from '@/components/Header'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -31,48 +32,19 @@ export default function StudentDashboard() {
   }
 
   if (!profile) return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'white' }}>Yuklanmoqda...</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', color: 'white' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
 
-      {/* Header */}
-      <div style={{
-        backgroundColor: '#111118',
-        borderBottom: '1px solid #1e1e2e',
-        padding: '16px 32px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uro<span style={{ color: '#60a5fa' }}>sfera</span>
-        </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ color: '#9ca3af', fontSize: '14px' }}>🎓 {profile.full_name}</span>
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: '#1e1e2e',
-              color: '#f87171',
-              border: '1px solid #2e2e3e',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            Chiqish
-          </button>
-        </div>
-      </div>
+      <Header />
 
       {/* Content */}
       <div style={{ padding: '32px' }}>
-        <h2 style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
+        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
           {profile.full_name} 🎓
         </h1>
@@ -86,16 +58,15 @@ export default function StudentDashboard() {
             { icon: '📚', title: 'Kutubxona', desc: 'O\'quv materiallar' },
           ].map((item) => (
             <div key={item.title} style={{
-              backgroundColor: '#111118',
-              border: '1px solid #1e1e2e',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
               borderRadius: '12px',
               padding: '24px',
               cursor: 'pointer',
-              transition: 'border-color 0.2s'
-            }}>
+              }} className="card-hover">
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: '13px' }}>{item.desc}</p>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>
             </div>
           ))}
         </div>

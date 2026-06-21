@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/components/ThemeProvider'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
+  const { theme, toggle } = useTheme()
 
   const handleLogin = async () => {
     setError('')
@@ -49,7 +51,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#0a0a0f',
+      background: 'var(--bg)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -58,24 +60,32 @@ export default function LoginPage() {
       <div style={{
         width: '100%',
         maxWidth: '420px',
-        backgroundColor: '#111118',
+        background: 'var(--surface)',
         borderRadius: '16px',
         padding: '32px',
         boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-        border: '1px solid #1e1e2e'
+        border: '1px solid var(--line)'
       }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+          <button onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
+            background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '8px',
+            padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
+          }}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', margin: 0 }}>
-            Uro<span style={{ color: '#60a5fa' }}>sfera</span>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--ink)', margin: 0 }}>
+            Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
           </h1>
-          <p style={{ color: '#6b7280', marginTop: '8px', fontSize: '14px' }}>
+          <p style={{ color: 'var(--muted)', marginTop: '8px', fontSize: '14px' }}>
             Urologiya va Andrologiya platformasi
           </p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ color: '#d1d5db', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+            <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
               Email
             </label>
             <input
@@ -85,9 +95,9 @@ export default function LoginPage() {
               placeholder="email@example.com"
               style={{
                 width: '100%',
-                backgroundColor: '#1e1e2e',
-                color: 'white',
-                border: '1px solid #2e2e3e',
+                background: 'var(--surface-2)',
+                color: 'var(--ink)',
+                border: '1px solid var(--line)',
                 borderRadius: '10px',
                 padding: '12px 16px',
                 fontSize: '14px',
@@ -98,7 +108,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label style={{ color: '#d1d5db', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+            <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
               Parol
             </label>
             <input
@@ -108,9 +118,9 @@ export default function LoginPage() {
               placeholder="••••••••"
               style={{
                 width: '100%',
-                backgroundColor: '#1e1e2e',
-                color: 'white',
-                border: '1px solid #2e2e3e',
+                background: 'var(--surface-2)',
+                color: 'var(--ink)',
+                border: '1px solid var(--line)',
                 borderRadius: '10px',
                 padding: '12px 16px',
                 fontSize: '14px',
@@ -121,7 +131,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p style={{ color: '#f87171', fontSize: '14px', margin: 0 }}>{error}</p>
+            <p style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>
           )}
 
           <button
@@ -129,7 +139,7 @@ export default function LoginPage() {
             disabled={loading}
             style={{
               width: '100%',
-              backgroundColor: '#2563eb',
+              background: 'var(--accent)',
               color: 'white',
               border: 'none',
               borderRadius: '10px',
@@ -144,9 +154,9 @@ export default function LoginPage() {
             {loading ? 'Kirish...' : 'Kirish'}
           </button>
 
-          <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '14px', margin: 0 }}>
+          <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '14px', margin: 0 }}>
             Hisobingiz yo&apos;qmi?{' '}
-            <a href="/auth/register" style={{ color: '#60a5fa', textDecoration: 'none' }}>
+            <a href="/auth/register" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
               Ro&apos;yxatdan o&apos;ting
             </a>
           </p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { tavsiyaBerish } from '@/lib/tavsiya'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
@@ -10,9 +11,9 @@ import { tekshiruvBoyichaMaydonlar, asosiyMaydonKalitlari, type Maydon } from '@
 
 const inputStyle = {
   width: '100%',
-  backgroundColor: '#1e1e2e',
-  color: 'white',
-  border: '1px solid #2e2e3e',
+  background: 'var(--surface-2)',
+  color: 'var(--ink)',
+  border: '1px solid var(--line)',
   borderRadius: '10px',
   padding: '10px 14px',
   fontSize: '14px',
@@ -20,13 +21,13 @@ const inputStyle = {
   boxSizing: 'border-box' as const,
 }
 
-const labelStyle = { color: '#d1d5db', fontSize: '13px', display: 'block', marginBottom: '6px' }
+const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
 const holatLabel: Record<string, { text: string; color: string }> = {
-  yangi: { text: "Shikoyat qabul qilindi", color: '#f59e0b' },
-  tekshiruv_buyurildi: { text: 'Tekshiruv buyurildi', color: '#f59e0b' },
-  natija_kiritildi: { text: 'Tekshiruv natijasi kiritildi', color: '#60a5fa' },
-  yakunlandi: { text: 'Tavsiya varaqasi yakunlandi', color: '#4ade80' },
+  yangi: { text: "Shikoyat qabul qilindi", color: 'var(--warn)' },
+  tekshiruv_buyurildi: { text: 'Tekshiruv buyurildi', color: 'var(--warn)' },
+  natija_kiritildi: { text: 'Tekshiruv natijasi kiritildi', color: 'var(--accent)' },
+  yakunlandi: { text: 'Tavsiya varaqasi yakunlandi', color: 'var(--good)' },
 }
 
 const emptyYangiForm = { shikoyat: '', anamnez: '', ogriq: "yo'q", oldin_operatsiya: "yo'q", tekshiruvlar: '' }
@@ -244,49 +245,36 @@ export default function PatientCardPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'white' }}>Yuklanmoqda...</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
     </div>
   )
 
   if (!bemor) return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'white' }}>Bemor topilmadi.</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'var(--ink)' }}>Bemor topilmadi.</p>
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', color: 'white' }}>
-      <div style={{
-        backgroundColor: '#111118', borderBottom: '1px solid #1e1e2e',
-        padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uro<span style={{ color: '#60a5fa' }}>sfera</span>
-        </h1>
-        <button onClick={() => router.push('/doctor/patients')} style={{
-          backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e',
-          borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '14px',
-        }}>
-          ← Reestrga qaytish
-        </button>
-      </div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+      <Header backHref="/doctor/patients" backLabel="Reestrga qaytish" />
 
       <div style={{ padding: '32px' }}>
         <div style={{
-          backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px',
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
           padding: '24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <div>
             <h2 style={{ margin: '0 0 8px 0', fontSize: '22px' }}>{bemor.fio}</h2>
-            <p style={{ margin: 0, color: '#9ca3af', fontSize: '13px' }}>
+            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>
               Pasport: {[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ') || '—'}
               {' · '}Tug&apos;ilgan: {bemor.tugilgan_sana ?? '—'}
               {' · '}Tel: {bemor.telefon ?? '—'}
             </p>
           </div>
           <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} style={{
-            backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+            background: 'var(--accent)', color: 'var(--ink)', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
           }}>
             {showYangiForm ? 'Bekor qilish' : '+ Yangi qabul'}
@@ -295,14 +283,14 @@ export default function PatientCardPage() {
 
         {/* 1-bosqich: shikoyat, anamnez, tekshiruv buyurtmasi */}
         {showYangiForm && (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
-            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: 'var(--muted)' }}>
               {editingYangiId ? 'Qabulni tahrirlash' : 'Shikoyat va kasallik tarixi'}
             </h3>
             <div>
               <label style={labelStyle}>Shikoyati</label>
 
-              <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>1) Qaysi organ bilan bog&apos;liq?</p>
+              <p style={{ color: 'var(--muted)', fontSize: '12px', margin: '0 0 8px 0' }}>1) Qaysi organ bilan bog&apos;liq?</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                 {shikoyatToifalari.map((toifa) => {
                   const tanlangan = tanlanganOrganlar.includes(toifa.nom)
@@ -312,9 +300,9 @@ export default function PatientCardPage() {
                       type="button"
                       onClick={() => toggleOrgan(toifa.nom)}
                       style={{
-                        backgroundColor: tanlangan ? '#2563eb' : '#1e1e2e',
-                        color: tanlangan ? 'white' : '#d1d5db',
-                        border: tanlangan ? '1px solid #2563eb' : '1px solid #2e2e3e',
+                        background: tanlangan ? 'var(--accent)' : 'var(--surface-2)',
+                        color: tanlangan ? 'white' : 'var(--ink-soft)',
+                        border: tanlangan ? '1px solid var(--accent)' : '1px solid var(--line)',
                         borderRadius: '20px', padding: '7px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
                       }}
                     >
@@ -326,20 +314,20 @@ export default function PatientCardPage() {
 
               {tanlanganOrganlar.length > 0 && (
                 <>
-                  <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>2) Tegishli shikoyatlarni tanlang</p>
+                  <p style={{ color: 'var(--muted)', fontSize: '12px', margin: '0 0 8px 0' }}>2) Tegishli shikoyatlarni tanlang</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                     {shikoyatToifalari
                       .filter((toifa) => tanlanganOrganlar.includes(toifa.nom))
                       .map((toifa) => (
                         <div key={toifa.nom} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                          <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{toifa.nom}:</span>
+                          <span style={{ color: 'var(--muted)', fontSize: '12px', marginRight: '2px' }}>{toifa.nom}:</span>
                           {toifa.shikoyatlar.map((s) => (
                             <button
                               key={s}
                               type="button"
                               onClick={() => qoshShikoyat(s)}
                               style={{
-                                backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e',
+                                background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)',
                                 borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
                               }}
                             >
@@ -384,14 +372,14 @@ export default function PatientCardPage() {
                     .filter((organ) => tekshiruvTavsiyalari[organ])
                     .map((organ) => (
                       <div key={organ} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                        <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{organ}:</span>
+                        <span style={{ color: 'var(--muted)', fontSize: '12px', marginRight: '2px' }}>{organ}:</span>
                         {tekshiruvTavsiyalari[organ].map((tek) => (
                           <button
                             key={tek}
                             type="button"
                             onClick={() => qoshTekshiruv(tek)}
                             style={{
-                              backgroundColor: '#1e1e2e', color: '#fbbf24', border: '1px solid #2e2e3e',
+                              background: 'var(--surface-2)', color: 'var(--warn)', border: '1px solid var(--line)',
                               borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
                             }}
                           >
@@ -406,7 +394,7 @@ export default function PatientCardPage() {
             )}
 
             <button onClick={handleYangiSave} disabled={saving} style={{
-              marginTop: '16px', backgroundColor: '#2563eb', color: 'white', border: 'none',
+              marginTop: '16px', background: 'var(--accent)', color: 'var(--ink)', border: 'none',
               borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
               fontSize: '14px', fontWeight: 600, opacity: saving ? 0.7 : 1,
             }}>
@@ -417,17 +405,17 @@ export default function PatientCardPage() {
 
         {/* 2-bosqich: tekshiruv natijalari (buyurilgan testlarga mos dinamik maydonlar) */}
         {natijaTashrif && (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
-            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Tekshiruv natijalari</h3>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: 'var(--muted)' }}>Tekshiruv natijalari</h3>
 
             {guruhlanganMaydonlar.length === 0 ? (
-              <p style={{ color: '#6b7280', fontSize: '13px' }}>
+              <p style={{ color: 'var(--muted)', fontSize: '13px' }}>
                 Bu qabulda tekshiruv buyurilmagan. Avval &quot;Tahrirlash&quot; orqali tekshiruv qo&apos;shing.
               </p>
             ) : (
               guruhlanganMaydonlar.map(({ test, maydonlar }: { test: string; maydonlar: Maydon[] }) => (
                 <div key={test} style={{ marginBottom: '16px' }}>
-                  <p style={{ color: '#fbbf24', fontSize: '13px', fontWeight: 600, margin: '0 0 8px 0' }}>{test}</p>
+                  <p style={{ color: 'var(--warn)', fontSize: '13px', fontWeight: 600, margin: '0 0 8px 0' }}>{test}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                     {maydonlar.map((m: Maydon) => (
                       <div key={m.key}>
@@ -453,22 +441,22 @@ export default function PatientCardPage() {
             )}
 
             {natija && (
-              <div style={{ marginTop: '16px', backgroundColor: '#0f1f14', border: '1px solid #166534', borderRadius: '10px', padding: '14px' }}>
-                <p style={{ margin: 0, color: '#4ade80', fontWeight: 600 }}>Tavsiya: {natija.tavsiya}</p>
-                <p style={{ margin: '4px 0 0', color: '#9ca3af', fontSize: '13px' }}>{natija.sabab}</p>
+              <div style={{ marginTop: '16px', background: 'var(--accent-soft)', border: '1px solid var(--good)', borderRadius: '10px', padding: '14px' }}>
+                <p style={{ margin: 0, color: 'var(--good)', fontWeight: 600 }}>Tavsiya: {natija.tavsiya}</p>
+                <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: '13px' }}>{natija.sabab}</p>
               </div>
             )}
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <button onClick={handleNatijaSave} disabled={saving} style={{
-                backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+                background: 'var(--accent)', color: 'var(--ink)', border: 'none', borderRadius: '10px',
                 padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
                 opacity: saving ? 0.7 : 1,
               }}>
                 {saving ? 'Saqlanmoqda...' : 'Natijalarni saqlash'}
               </button>
               <button onClick={() => setNatijaTashrif(null)} style={{
-                backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '10px',
+                background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)', borderRadius: '10px',
                 padding: '12px 24px', cursor: 'pointer', fontSize: '14px',
               }}>
                 Yopish
@@ -479,19 +467,19 @@ export default function PatientCardPage() {
 
         {/* 3-bosqich: dori va muolaja */}
         {yakunlashTashrifId && (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
-            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Tavsiya varaqasi — dori va muolaja</h3>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: 'var(--muted)' }}>Tavsiya varaqasi — dori va muolaja</h3>
             <textarea style={{ ...inputStyle, minHeight: '120px' }} value={doriMuolaja} onChange={(e) => setDoriMuolaja(e.target.value)} placeholder="Dorilar, dozalar, muolajalar, tavsiyalar..." />
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <button onClick={handleYakunlashSave} disabled={saving} style={{
-                backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+                background: 'var(--accent)', color: 'var(--ink)', border: 'none', borderRadius: '10px',
                 padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
                 opacity: saving ? 0.7 : 1,
               }}>
                 {saving ? 'Saqlanmoqda...' : 'Varaqani yakunlash'}
               </button>
               <button onClick={() => setYakunlashTashrifId(null)} style={{
-                backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '10px',
+                background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)', borderRadius: '10px',
                 padding: '12px 24px', cursor: 'pointer', fontSize: '14px',
               }}>
                 Yopish
@@ -500,35 +488,35 @@ export default function PatientCardPage() {
           </div>
         )}
 
-        <h3 style={{ fontSize: '16px', color: '#9ca3af', marginBottom: '12px' }}>Qabullar tarixi</h3>
+        <h3 style={{ fontSize: '16px', color: 'var(--muted)', marginBottom: '12px' }}>Qabullar tarixi</h3>
         {tashriflar.length === 0 ? (
-          <p style={{ color: '#9ca3af' }}>Hozircha qabul yo&apos;q.</p>
+          <p style={{ color: 'var(--muted)' }}>Hozircha qabul yo&apos;q.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {tashriflar.map((t) => {
               const holat = holatLabel[t.holat] ?? holatLabel.yangi
               return (
-                <div key={t.id} style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '20px' }}>
+                <div key={t.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ color: '#6b7280', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()}</span>
+                    <span style={{ color: 'var(--muted)', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()}</span>
                     <span style={{ color: holat.color, fontSize: '13px', fontWeight: 600 }}>{holat.text}</span>
                   </div>
                   {t.shikoyat && <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}><strong>Shikoyat:</strong> {t.shikoyat}</p>}
-                  {t.anamnez && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#9ca3af' }}><strong>Anamnez:</strong> {t.anamnez}</p>}
-                  {t.buyurilgan_tekshiruvlar && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#fbbf24' }}><strong>Buyurilgan tekshiruvlar:</strong> {t.buyurilgan_tekshiruvlar}</p>}
-                  {t.tavsiya && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#60a5fa' }}><strong>Tavsiya:</strong> {t.tavsiya} ({t.daraja}-daraja, {t.tomon})</p>}
-                  {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#4ade80' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
+                  {t.anamnez && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--muted)' }}><strong>Anamnez:</strong> {t.anamnez}</p>}
+                  {t.buyurilgan_tekshiruvlar && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--warn)' }}><strong>Buyurilgan tekshiruvlar:</strong> {t.buyurilgan_tekshiruvlar}</p>}
+                  {t.tavsiya && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--accent)' }}><strong>Tavsiya:</strong> {t.tavsiya} ({t.daraja}-daraja, {t.tomon})</p>}
+                  {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--good)' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
                     <button onClick={() => openYangiForm(t)} style={{
-                      backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e', borderRadius: '8px',
+                      background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px',
                       padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                     }}>
                       ✎ Tahrirlash
                     </button>
                     {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
                       <button onClick={() => window.open(`/doctor/print/referral/${t.id}`, '_blank')} style={{
-                        backgroundColor: '#1e1e2e', color: '#fbbf24', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        background: 'var(--surface-2)', color: 'var(--warn)', border: '1px solid var(--line)', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
                         🖨️ Yo&apos;llanma chop etish
@@ -536,7 +524,7 @@ export default function PatientCardPage() {
                     )}
                     {t.holat !== 'yakunlandi' && (
                       <button onClick={() => openNatijaForm(t)} style={{
-                        backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
                         Tekshiruv natijalarini kiritish
@@ -544,7 +532,7 @@ export default function PatientCardPage() {
                     )}
                     {t.holat === 'natija_kiritildi' && (
                       <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
-                        backgroundColor: '#1e1e2e', color: '#4ade80', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        background: 'var(--surface-2)', color: 'var(--good)', border: '1px solid var(--line)', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
                         Tavsiya varaqasini yakunlash
@@ -552,7 +540,7 @@ export default function PatientCardPage() {
                     )}
                     {(t.holat === 'natija_kiritildi' || t.holat === 'yakunlandi') && (
                       <button onClick={() => router.push(kalkulyatorHavolasi(bemor, t))} style={{
-                        backgroundColor: '#1e1e2e', color: '#a78bfa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                        background: 'var(--surface-2)', color: 'var(--accent-2)', border: '1px solid var(--line)', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
                         🧮 Varikotsele kalkulyatoriga o&apos;tish
@@ -561,19 +549,19 @@ export default function PatientCardPage() {
                     {t.holat === 'yakunlandi' && (
                       <>
                         <button onClick={() => openNatijaForm(t)} style={{
-                          backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)', borderRadius: '8px',
                           padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                         }}>
                           Natijalarni tahrirlash
                         </button>
                         <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
-                          backgroundColor: '#1e1e2e', color: '#4ade80', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          background: 'var(--surface-2)', color: 'var(--good)', border: '1px solid var(--line)', borderRadius: '8px',
                           padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                         }}>
                           Dori/muolajani tahrirlash
                         </button>
                         <button onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} style={{
-                          backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)', borderRadius: '8px',
                           padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                         }}>
                           🖨️ Chop etish / PDF
