@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { tavsiyaBerish } from '@/lib/tavsiya'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
 import { tekshiruvTavsiyalari } from '@/lib/tekshiruvlar'
+import { tekshiruvBoyichaMaydonlar, asosiyMaydonKalitlari, type Maydon } from '@/lib/natijaMaydonlari'
 
 const inputStyle = {
   width: '100%',
@@ -28,14 +29,7 @@ const holatLabel: Record<string, { text: string; color: string }> = {
   yakunlandi: { text: 'Tavsiya varaqasi yakunlandi', color: '#4ade80' },
 }
 
-const emptyYangiForm = { shikoyat: '', anamnez: '', tekshiruvlar: '' }
-
-const emptyNatijaForm = {
-  tomon: 'chap', daraja: 'I', vena_diametri: 3,
-  reflux: 'bor', ogriq: "yo'q", oldin_operatsiya: "yo'q",
-  sperm_konts: 20, sperm_harakat: 45, sperm_morf: 5,
-  testosteron: 15, fsh: 5, lh: 5, izoh: '',
-}
+const emptyYangiForm = { shikoyat: '', anamnez: '', ogriq: "yo'q", oldin_operatsiya: "yo'q", tekshiruvlar: '' }
 
 export default function PatientCardPage() {
   const { id } = useParams<{ id: string }>()
@@ -47,11 +41,12 @@ export default function PatientCardPage() {
   const [loading, setLoading] = useState(true)
 
   const [showYangiForm, setShowYangiForm] = useState(false)
+  const [editingYangiId, setEditingYangiId] = useState<string | null>(null)
   const [yangiForm, setYangiForm] = useState(emptyYangiForm)
   const [tanlanganOrganlar, setTanlanganOrganlar] = useState<string[]>([])
 
-  const [natijaTashrifId, setNatijaTashrifId] = useState<string | null>(null)
-  const [natijaForm, setNatijaForm] = useState(emptyNatijaForm)
+  const [natijaTashrif, setNatijaTashrif] = useState<any>(null)
+  const [natijaForm, setNatijaForm] = useState<Record<string, string>>({})
   const [natija, setNatija] = useState<{ tavsiya: string; sabab: string } | null>(null)
 
   const [yakunlashTashrifId, setYakunlashTashrifId] = useState<string | null>(null)
@@ -99,69 +94,112 @@ export default function PatientCardPage() {
       return { ...f, tekshiruvlar: [...mavjud, matn].join(', ') }
     })
   }
-  const setN = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const openYangiForm = (t?: any) => {
+    if (t) {
+      setEditingYangiId(t.id)
+      setYangiForm({
+        shikoyat: t.shikoyat || '', anamnez: t.anamnez || '',
+        ogriq: t.ogriq || "yo'q", oldin_operatsiya: t.oldin_operatsiya || "yo'q",
+        tekshiruvlar: t.buyurilgan_tekshiruvlar || '',
+      })
+      setTanlanganOrganlar((t.organlar || '').split(',').map((s: string) => s.trim()).filter(Boolean))
+    } else {
+      setEditingYangiId(null)
+      setYangiForm(emptyYangiForm)
+      setTanlanganOrganlar([])
+    }
+    setShowYangiForm(true)
+  }
 
   const handleYangiSave = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
     setSaving(true)
-    const { error } = await supabase.from('tashriflar').insert({
-      bemor_id: id,
-      doctor_id: user.id,
-      fio: bemor.fio,
+    const payload = {
       shikoyat: yangiForm.shikoyat,
       anamnez: yangiForm.anamnez,
+      ogriq: yangiForm.ogriq,
+      oldin_operatsiya: yangiForm.oldin_operatsiya,
       organlar: tanlanganOrganlar.join(', '),
       buyurilgan_tekshiruvlar: yangiForm.tekshiruvlar,
-      holat: 'tekshiruv_buyurildi',
-    })
+    }
+
+    const { error } = editingYangiId
+      ? await supabase.from('tashriflar').update(payload).eq('id', editingYangiId)
+      : await supabase.from('tashriflar').insert({
+          bemor_id: id, doctor_id: user.id, fio: bemor.fio, holat: 'tekshiruv_buyurildi', ...payload,
+        })
     setSaving(false)
 
     if (!error) {
       setYangiForm(emptyYangiForm)
       setTanlanganOrganlar([])
+      setEditingYangiId(null)
       setShowYangiForm(false)
       load()
     }
   }
 
-  const openNatijaForm = (tashrifId: string) => {
-    setNatijaTashrifId(tashrifId)
+  const openNatijaForm = (t: any) => {
+    setNatijaTashrif(t)
     setNatija(null)
-    setNatijaForm(emptyNatijaForm)
+    const boshlangich: Record<string, string> = {}
+    const json = t.natija_json || {}
+    for (const key of asosiyMaydonKalitlari) {
+      if (t[key] !== null && t[key] !== undefined) boshlangich[key] = String(t[key])
+    }
+    for (const key of Object.keys(json)) {
+      boshlangich[key] = String(json[key])
+    }
+    setNatijaForm(boshlangich)
   }
 
-  const handleNatijaSave = async () => {
-    if (!natijaTashrifId) return
+  const setNatijaQiymat = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
 
-    const { tavsiya, sabab } = tavsiyaBerish(
-      natijaForm.daraja, natijaForm.tomon, natijaForm.ogriq, natijaForm.oldin_operatsiya,
-      Number(natijaForm.sperm_konts), Number(natijaForm.sperm_harakat)
-    )
+  const guruhlanganMaydonlar = natijaTashrif
+    ? tekshiruvBoyichaMaydonlar(natijaTashrif.buyurilgan_tekshiruvlar || '')
+    : []
+
+  const handleNatijaSave = async () => {
+    if (!natijaTashrif) return
+
+    const asosiy: Record<string, any> = {}
+    const qoshimcha: Record<string, any> = {}
+    for (const [key, value] of Object.entries(natijaForm)) {
+      if (value === '' || value === undefined) continue
+      if (asosiyMaydonKalitlari.includes(key)) {
+        asosiy[key] = ['vena_diametri', 'sperm_konts', 'sperm_harakat', 'sperm_morf', 'testosteron', 'fsh', 'lh'].includes(key)
+          ? Number(value) : value
+      } else {
+        qoshimcha[key] = value
+      }
+    }
+
+    let tavsiya: string | null = null
+    let sabab = ''
+    if (asosiy.daraja && asosiy.tomon) {
+      const natijaHisob = tavsiyaBerish(
+        asosiy.daraja, asosiy.tomon, natijaTashrif.ogriq || "yo'q", natijaTashrif.oldin_operatsiya || "yo'q",
+        Number(asosiy.sperm_konts) || 0, Number(asosiy.sperm_harakat) || 0
+      )
+      tavsiya = natijaHisob.tavsiya
+      sabab = natijaHisob.sabab
+    }
 
     setSaving(true)
+    const yakunlanganmi = natijaTashrif.holat === 'yakunlandi'
     const { error } = await supabase.from('tashriflar').update({
-      tomon: natijaForm.tomon,
-      daraja: natijaForm.daraja,
-      vena_diametri: Number(natijaForm.vena_diametri),
-      reflux: natijaForm.reflux,
-      ogriq: natijaForm.ogriq,
-      oldin_operatsiya: natijaForm.oldin_operatsiya,
-      sperm_konts: Number(natijaForm.sperm_konts),
-      sperm_harakat: Number(natijaForm.sperm_harakat),
-      sperm_morf: Number(natijaForm.sperm_morf),
-      testosteron: Number(natijaForm.testosteron),
-      fsh: Number(natijaForm.fsh),
-      lh: Number(natijaForm.lh),
-      izoh: natijaForm.izoh,
+      ...asosiy,
+      natija_json: qoshimcha,
       tavsiya,
-      holat: 'natija_kiritildi',
-    }).eq('id', natijaTashrifId)
+      holat: yakunlanganmi ? 'yakunlandi' : 'natija_kiritildi',
+    }).eq('id', natijaTashrif.id)
     setSaving(false)
 
     if (!error) {
-      setNatija({ tavsiya, sabab })
+      if (tavsiya) setNatija({ tavsiya, sabab })
       load()
     }
   }
@@ -229,7 +267,7 @@ export default function PatientCardPage() {
               {' · '}Tel: {bemor.telefon ?? '—'}
             </p>
           </div>
-          <button onClick={() => { setShowYangiForm(!showYangiForm) }} style={{
+          <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} style={{
             backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
           }}>
@@ -237,14 +275,16 @@ export default function PatientCardPage() {
           </button>
         </div>
 
-        {/* 1-bosqich: shikoyat va anamnez */}
+        {/* 1-bosqich: shikoyat, anamnez, tekshiruv buyurtmasi */}
         {showYangiForm && (
           <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
-            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Shikoyat va kasallik tarixi</h3>
+            <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>
+              {editingYangiId ? 'Qabulni tahrirlash' : 'Shikoyat va kasallik tarixi'}
+            </h3>
             <div>
               <label style={labelStyle}>Shikoyati</label>
 
-              <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>1) Qaysi organ bilan bog'liq?</p>
+              <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>1) Qaysi organ bilan bog&apos;liq?</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                 {shikoyatToifalari.map((toifa) => {
                   const tanlangan = tanlanganOrganlar.includes(toifa.nom)
@@ -301,6 +341,23 @@ export default function PatientCardPage() {
               <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.anamnez} onChange={setY('anamnez')} />
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginTop: '12px' }}>
+              <div>
+                <label style={labelStyle}>Og&apos;riq / simptom</label>
+                <select style={inputStyle} value={yangiForm.ogriq} onChange={setY('ogriq')}>
+                  <option value="yo'q">yo&apos;q</option>
+                  <option value="bor">bor</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Oldin operatsiya bo&apos;lganmi?</label>
+                <select style={inputStyle} value={yangiForm.oldin_operatsiya} onChange={setY('oldin_operatsiya')}>
+                  <option value="yo'q">yo&apos;q</option>
+                  <option value="ha">ha</option>
+                </select>
+              </div>
+            </div>
+
             {tanlanganOrganlar.length > 0 && (
               <div style={{ marginTop: '20px' }}>
                 <label style={labelStyle}>Tavsiya etilgan tekshiruvlar</label>
@@ -335,86 +392,47 @@ export default function PatientCardPage() {
               borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
               fontSize: '14px', fontWeight: 600, opacity: saving ? 0.7 : 1,
             }}>
-              {saving ? 'Saqlanmoqda...' : "Saqlash va tekshiruvga yo'llash"}
+              {saving ? 'Saqlanmoqda...' : editingYangiId ? 'O\'zgarishlarni saqlash' : "Saqlash va tekshiruvga yo'llash"}
             </button>
           </div>
         )}
 
-        {/* 2-bosqich: tekshiruv natijalari */}
-        {natijaTashrifId && (
+        {/* 2-bosqich: tekshiruv natijalari (buyurilgan testlarga mos dinamik maydonlar) */}
+        {natijaTashrif && (
           <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
             <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Tekshiruv natijalari</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Tomoni</label>
-                <select style={inputStyle} value={natijaForm.tomon} onChange={setN('tomon')}>
-                  <option value="chap">chap</option>
-                  <option value="o'ng">o&apos;ng</option>
-                  <option value="ikki tomonlama">ikki tomonlama</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Darajasi (Dubin)</label>
-                <select style={inputStyle} value={natijaForm.daraja} onChange={setN('daraja')}>
-                  <option value="I">I</option>
-                  <option value="II">II</option>
-                  <option value="III">III</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Vena diametri (mm)</label>
-                <input type="number" step="0.1" style={inputStyle} value={natijaForm.vena_diametri} onChange={setN('vena_diametri')} />
-              </div>
-              <div>
-                <label style={labelStyle}>Reflux</label>
-                <select style={inputStyle} value={natijaForm.reflux} onChange={setN('reflux')}>
-                  <option value="bor">bor</option>
-                  <option value="yo'q">yo&apos;q</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Og&apos;riq / simptom</label>
-                <select style={inputStyle} value={natijaForm.ogriq} onChange={setN('ogriq')}>
-                  <option value="yo'q">yo&apos;q</option>
-                  <option value="bor">bor</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Oldin operatsiya bo&apos;lganmi?</label>
-                <select style={inputStyle} value={natijaForm.oldin_operatsiya} onChange={setN('oldin_operatsiya')}>
-                  <option value="yo'q">yo&apos;q</option>
-                  <option value="ha">ha</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Sperma konsentratsiyasi (mln/ml)</label>
-                <input type="number" style={inputStyle} value={natijaForm.sperm_konts} onChange={setN('sperm_konts')} />
-              </div>
-              <div>
-                <label style={labelStyle}>Harakatchanlik (%)</label>
-                <input type="number" style={inputStyle} value={natijaForm.sperm_harakat} onChange={setN('sperm_harakat')} />
-              </div>
-              <div>
-                <label style={labelStyle}>Normal morfologiya (%)</label>
-                <input type="number" style={inputStyle} value={natijaForm.sperm_morf} onChange={setN('sperm_morf')} />
-              </div>
-              <div>
-                <label style={labelStyle}>Testosteron (nmol/l)</label>
-                <input type="number" style={inputStyle} value={natijaForm.testosteron} onChange={setN('testosteron')} />
-              </div>
-              <div>
-                <label style={labelStyle}>FSH (mIU/ml)</label>
-                <input type="number" style={inputStyle} value={natijaForm.fsh} onChange={setN('fsh')} />
-              </div>
-              <div>
-                <label style={labelStyle}>LH (mIU/ml)</label>
-                <input type="number" style={inputStyle} value={natijaForm.lh} onChange={setN('lh')} />
-              </div>
-            </div>
-            <div style={{ marginTop: '16px' }}>
-              <label style={labelStyle}>Izoh</label>
-              <textarea style={{ ...inputStyle, minHeight: '60px' }} value={natijaForm.izoh} onChange={setN('izoh')} />
-            </div>
+
+            {guruhlanganMaydonlar.length === 0 ? (
+              <p style={{ color: '#6b7280', fontSize: '13px' }}>
+                Bu qabulda tekshiruv buyurilmagan. Avval &quot;Tahrirlash&quot; orqali tekshiruv qo&apos;shing.
+              </p>
+            ) : (
+              guruhlanganMaydonlar.map(({ test, maydonlar }: { test: string; maydonlar: Maydon[] }) => (
+                <div key={test} style={{ marginBottom: '16px' }}>
+                  <p style={{ color: '#fbbf24', fontSize: '13px', fontWeight: 600, margin: '0 0 8px 0' }}>{test}</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    {maydonlar.map((m: Maydon) => (
+                      <div key={m.key}>
+                        <label style={labelStyle}>{m.label}{m.unit ? ` (${m.unit})` : ''}</label>
+                        {m.type === 'select' ? (
+                          <select style={inputStyle} value={natijaForm[m.key] ?? ''} onChange={setNatijaQiymat(m.key)}>
+                            <option value="">—</option>
+                            {m.options!.map((o) => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            type={m.type === 'number' ? 'number' : 'text'}
+                            style={inputStyle}
+                            value={natijaForm[m.key] ?? ''}
+                            onChange={setNatijaQiymat(m.key)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
 
             {natija && (
               <div style={{ marginTop: '16px', backgroundColor: '#0f1f14', border: '1px solid #166534', borderRadius: '10px', padding: '14px' }}>
@@ -429,9 +447,9 @@ export default function PatientCardPage() {
                 padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
                 opacity: saving ? 0.7 : 1,
               }}>
-                {saving ? 'Saqlanmoqda...' : 'Tavsiya olish va saqlash'}
+                {saving ? 'Saqlanmoqda...' : 'Natijalarni saqlash'}
               </button>
-              <button onClick={() => setNatijaTashrifId(null)} style={{
+              <button onClick={() => setNatijaTashrif(null)} style={{
                 backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '10px',
                 padding: '12px 24px', cursor: 'pointer', fontSize: '14px',
               }}>
@@ -483,7 +501,13 @@ export default function PatientCardPage() {
                   {t.tavsiya && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#60a5fa' }}><strong>Tavsiya:</strong> {t.tavsiya} ({t.daraja}-daraja, {t.tomon})</p>}
                   {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#4ade80' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
 
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                    <button onClick={() => openYangiForm(t)} style={{
+                      backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e', borderRadius: '8px',
+                      padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                    }}>
+                      ✎ Tahrirlash
+                    </button>
                     {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
                       <button onClick={() => window.open(`/doctor/print/referral/${t.id}`, '_blank')} style={{
                         backgroundColor: '#1e1e2e', color: '#fbbf24', border: '1px solid #2e2e3e', borderRadius: '8px',
@@ -492,8 +516,8 @@ export default function PatientCardPage() {
                         🖨️ Yo&apos;llanma chop etish
                       </button>
                     )}
-                    {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
-                      <button onClick={() => openNatijaForm(t.id)} style={{
+                    {t.holat !== 'yakunlandi' && (
+                      <button onClick={() => openNatijaForm(t)} style={{
                         backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
                         padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
                       }}>
@@ -509,12 +533,26 @@ export default function PatientCardPage() {
                       </button>
                     )}
                     {t.holat === 'yakunlandi' && (
-                      <button onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} style={{
-                        backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '8px',
-                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                      }}>
-                        🖨️ Chop etish / PDF
-                      </button>
+                      <>
+                        <button onClick={() => openNatijaForm(t)} style={{
+                          backgroundColor: '#1e1e2e', color: '#60a5fa', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                        }}>
+                          Natijalarni tahrirlash
+                        </button>
+                        <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
+                          backgroundColor: '#1e1e2e', color: '#4ade80', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                        }}>
+                          Dori/muolajani tahrirlash
+                        </button>
+                        <button onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} style={{
+                          backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e', borderRadius: '8px',
+                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
+                        }}>
+                          🖨️ Chop etish / PDF
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
