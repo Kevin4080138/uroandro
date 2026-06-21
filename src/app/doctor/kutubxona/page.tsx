@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 
 const inputStyle = {
-  width: '100%', backgroundColor: '#1e1e2e', color: 'white', border: '1px solid #2e2e3e',
+  width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
-const labelStyle = { color: '#d1d5db', fontSize: '13px', display: 'block', marginBottom: '6px' }
+const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
 type Fayl = { id: string; nom: string; izoh: string | null; file_path: string; created_at: string; doctor_id: string }
 
@@ -68,30 +69,17 @@ export default function KutubxonaPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', color: 'white' }}>
-      <div style={{
-        backgroundColor: '#111118', borderBottom: '1px solid #1e1e2e',
-        padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uro<span style={{ color: '#60a5fa' }}>sfera</span>
-        </h1>
-        <button onClick={() => router.push('/doctor/dashboard')} style={{
-          backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e',
-          borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '14px',
-        }}>
-          ← Bosh sahifa
-        </button>
-      </div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+      <Header />
 
-      <div style={{ padding: '32px', maxWidth: '760px', margin: '0 auto' }}>
+      <div className="fade-in px-8 py-8" style={{ maxWidth: '760px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <h2 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>Kutubxona</h2>
-            <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>PDF materiallar — hamma shifokorlar uchun umumiy.</p>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>PDF materiallar — hamma shifokorlar uchun umumiy.</p>
           </div>
           <button onClick={() => setShowForm(!showForm)} style={{
-            backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+            background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
           }}>
             {showForm ? 'Bekor qilish' : '+ Fayl yuklash'}
@@ -99,7 +87,7 @@ export default function KutubxonaPage() {
         </div>
 
         {showForm && (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
             <div style={{ marginBottom: '14px' }}>
               <label style={labelStyle}>Nomi</label>
               <input style={inputStyle} value={nom} onChange={(e) => setNom(e.target.value)} placeholder="masalan, EAU Varikotsele bo'limi 2025" />
@@ -110,10 +98,10 @@ export default function KutubxonaPage() {
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={labelStyle}>PDF fayl</label>
-              <input ref={fileInput} type="file" accept="application/pdf" onChange={(e) => setTanlanganFayl(e.target.files?.[0] ?? null)} style={{ color: '#9ca3af', fontSize: '14px' }} />
+              <input ref={fileInput} type="file" accept="application/pdf" onChange={(e) => setTanlanganFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
             </div>
             <button onClick={yukla} disabled={saving || !nom.trim() || !tanlanganFayl} style={{
-              backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
               padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
               opacity: saving || !nom.trim() || !tanlanganFayl ? 0.7 : 1,
             }}>
@@ -123,23 +111,23 @@ export default function KutubxonaPage() {
         )}
 
         {loading ? (
-          <p style={{ color: '#9ca3af' }}>Yuklanmoqda...</p>
+          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
         ) : fayllar.length === 0 ? (
-          <p style={{ color: '#9ca3af' }}>Hozircha materiallar yo&apos;q.</p>
+          <p style={{ color: 'var(--muted)' }}>Hozircha materiallar yo&apos;q.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {fayllar.map((f) => (
-              <div key={f.id} style={{
-                backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px',
+              <div key={f.id} className="card-hover" style={{
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
                 padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
               }}>
                 <div onClick={() => ochish(f.file_path)} style={{ cursor: 'pointer', flex: 1 }}>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#60a5fa' }}>📄 {f.nom}</h4>
-                  {f.izoh && <p style={{ margin: 0, fontSize: '13px', color: '#9ca3af' }}>{f.izoh}</p>}
-                  <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#6b7280' }}>{new Date(f.created_at).toLocaleDateString()}</p>
+                  <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: 'var(--accent)' }}>📄 {f.nom}</h4>
+                  {f.izoh && <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>{f.izoh}</p>}
+                  <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: 'var(--muted)' }}>{new Date(f.created_at).toLocaleDateString()}</p>
                 </div>
                 {f.doctor_id === userId && (
-                  <button onClick={() => ochirish(f)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '16px' }}>🗑️</button>
+                  <button onClick={() => ochirish(f)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '16px' }}>🗑️</button>
                 )}
               </div>
             ))}

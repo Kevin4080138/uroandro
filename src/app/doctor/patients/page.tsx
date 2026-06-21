@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Header } from '@/components/Header'
 
 const inputStyle = {
   width: '100%',
-  backgroundColor: '#1e1e2e',
-  color: 'white',
-  border: '1px solid #2e2e3e',
+  background: 'var(--surface-2)',
+  color: 'var(--ink)',
+  border: '1px solid var(--line)',
   borderRadius: '10px',
   padding: '10px 14px',
   fontSize: '14px',
@@ -16,7 +17,7 @@ const inputStyle = {
   boxSizing: 'border-box' as const,
 }
 
-const labelStyle = { color: '#d1d5db', fontSize: '13px', display: 'block', marginBottom: '6px' }
+const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
 const emptyForm = { fio: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', manzil: '' }
 
@@ -70,23 +71,10 @@ export default function PatientsRegistryPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', color: 'white' }}>
-      <div style={{
-        backgroundColor: '#111118', borderBottom: '1px solid #1e1e2e',
-        padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uro<span style={{ color: '#60a5fa' }}>sfera</span>
-        </h1>
-        <button onClick={() => router.push('/doctor/dashboard')} style={{
-          backgroundColor: '#1e1e2e', color: '#9ca3af', border: '1px solid #2e2e3e',
-          borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '14px',
-        }}>
-          ← Bosh sahifa
-        </button>
-      </div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+      <Header />
 
-      <div style={{ padding: '32px' }}>
+      <div className="fade-in px-8 py-8">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
           <h2 style={{ margin: 0, fontSize: '24px' }}>Bemorlar reestri</h2>
           <input
@@ -95,8 +83,8 @@ export default function PatientsRegistryPage() {
             onChange={(e) => setQidiruv(e.target.value)}
             style={{ ...inputStyle, maxWidth: '320px' }}
           />
-          <button onClick={() => setShowForm(!showForm)} style={{
-            backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '10px',
+          <button onClick={() => setShowForm(!showForm)} className="btn-animated" style={{
+            background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
           }}>
             {showForm ? 'Bekor qilish' : '+ Yangi bemor'}
@@ -105,7 +93,7 @@ export default function PatientsRegistryPage() {
 
         {showForm && (
           <div style={{
-            backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px',
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
             padding: '24px', marginBottom: '24px',
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
@@ -135,8 +123,8 @@ export default function PatientsRegistryPage() {
               </div>
             </div>
 
-            <button onClick={handleSave} disabled={saving || !form.fio} style={{
-              marginTop: '16px', backgroundColor: '#2563eb', color: 'white', border: 'none',
+            <button onClick={handleSave} disabled={saving || !form.fio} className="btn-animated" style={{
+              marginTop: '16px', background: 'var(--accent)', color: 'white', border: 'none',
               borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
               fontSize: '14px', fontWeight: 600, opacity: saving || !form.fio ? 0.7 : 1,
             }}>
@@ -146,16 +134,16 @@ export default function PatientsRegistryPage() {
         )}
 
         {loading ? (
-          <p style={{ color: '#9ca3af' }}>Yuklanmoqda...</p>
+          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
         ) : filtered.length === 0 ? (
-          <p style={{ color: '#9ca3af' }}>Hech narsa topilmadi.</p>
+          <p style={{ color: 'var(--muted)' }}>Hech narsa topilmadi.</p>
         ) : (
-          <div style={{ backgroundColor: '#111118', border: '1px solid #1e1e2e', borderRadius: '12px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ backgroundColor: '#1a1a24', textAlign: 'left' }}>
+                <tr style={{ background: 'var(--surface-2)', textAlign: 'left' }}>
                   {['F.I.O.', 'Pasport', "Tug'ilgan sana", 'Telefon', "Qo'shilgan"].map((h) => (
-                    <th key={h} style={{ padding: '12px 16px', color: '#9ca3af', fontWeight: 500 }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', color: 'var(--muted)', fontWeight: 500 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -164,13 +152,14 @@ export default function PatientsRegistryPage() {
                   <tr
                     key={b.id}
                     onClick={() => router.push(`/doctor/patients/${b.id}`)}
-                    style={{ borderTop: '1px solid #1e1e2e', cursor: 'pointer' }}
+                    className="row-hover"
+                    style={{ borderTop: '1px solid var(--line)', cursor: 'pointer' }}
                   >
-                    <td style={{ padding: '12px 16px', color: '#60a5fa' }}>{b.fio}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--accent)' }}>{b.fio}</td>
                     <td style={{ padding: '12px 16px' }}>{[b.passport_seria, b.passport_raqam].filter(Boolean).join(' ')}</td>
                     <td style={{ padding: '12px 16px' }}>{b.tugilgan_sana ?? '—'}</td>
                     <td style={{ padding: '12px 16px' }}>{b.telefon ?? '—'}</td>
-                    <td style={{ padding: '12px 16px', color: '#6b7280' }}>{new Date(b.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--muted)' }}>{new Date(b.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
