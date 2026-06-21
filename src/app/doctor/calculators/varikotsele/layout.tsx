@@ -60,7 +60,7 @@ export default function VariCompareLayout({ children }: { children: React.ReactN
             width: '100%', background: 'rgba(255,255,255,.08)', color: '#CFE3E4', border: 'none',
             borderRadius: 8, padding: '9px 12px', fontSize: 13, cursor: 'pointer',
           }}>
-            ← UroAndro bosh sahifasi
+            ← Urosfera bosh sahifasi
           </button>
         </div>
       </aside>

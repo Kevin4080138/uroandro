@@ -49,7 +49,7 @@ export default function StudentDashboard() {
         alignItems: 'center'
       }}>
         <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Uro<span style={{ color: '#60a5fa' }}>Andro</span>
+          Uros<span style={{ color: '#60a5fa' }}>fera</span>
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span style={{ color: '#9ca3af', fontSize: '14px' }}>🎓 {profile.full_name}</span>

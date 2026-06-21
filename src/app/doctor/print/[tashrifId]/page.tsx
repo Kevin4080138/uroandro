@@ -66,7 +66,7 @@ export default function PrintTashrifPage() {
         borderRadius: '8px', padding: '40px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '24px', borderBottom: '2px solid #111827', paddingBottom: '16px' }}>
-          <h1 style={{ margin: 0, fontSize: '24px' }}>UroAndro</h1>
+          <h1 style={{ margin: 0, fontSize: '24px' }}>Urosfera</h1>
           <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '13px' }}>Urologiya va Andrologiya platformasi</p>
           <h2 style={{ margin: '12px 0 0', fontSize: '16px' }}>Tavsiya varaqasi</h2>
         </div>
