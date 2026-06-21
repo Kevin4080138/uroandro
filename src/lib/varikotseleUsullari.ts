@@ -22,6 +22,10 @@ export type QarorKirish = {
   recur: boolean
   expert: boolean
   bmi: number
+  venaDiametri: number   // mm, USDG
+  reflux: boolean
+  spermKonts: number     // mln/ml
+  spermHarakat: number   // %
 }
 
 export type Sabab = { usul: UsulId; matn: string }
@@ -58,6 +62,18 @@ export function usulTavsiyaBerish(kirish: QarorKirish): {
     s.lap += 1; s.sklero += 1; s.ivan -= 1
     sabablar.push({ usul: 'lap', matn: 'Yuqori BMI — chuqur ingvinal ekspozitsiya qiyinlashishi mumkin, laparoskopik biroz qulayroq.' })
     sabablar.push({ usul: 'ivan', matn: "Yuqori BMI'da Ivanissevichning chuqur ingvinal kesimi texnik jihatdan qiyinlashadi." })
+  }
+
+  if (kirish.reflux && kirish.venaDiametri >= 3) {
+    s.micro += 2; s.palomo += 1; s.sklero -= 1
+    sabablar.push({ usul: 'micro', matn: "Sezilarli reflux va kengaygan vena (≥3 mm) — to'liq ligatsiya beradigan usul (mikrojarrohlik) ishonchliroq." })
+    sabablar.push({ usul: 'sklero', matn: "Sezilarli reflux mavjudligida skleroterapiya yetarli berkitishni har doim ta'minlamasligi mumkin." })
+  }
+
+  const patologikSperma = kirish.spermKonts > 0 && (kirish.spermKonts < 16 || kirish.spermHarakat < 42)
+  if (patologikSperma) {
+    s.micro += 2
+    sabablar.push({ usul: 'micro', matn: "Spermogramma ko'rsatkichlari me'yordan past (WHO 2021) — mikrojarrohlikning reproduktiv natijalari yaxshiroq." })
   }
 
   s.micro += 1; sabablar.push({ usul: 'micro', matn: 'Eng past retsidiv va gidrotsele darajasi mikrojarrohlik usulida.' })

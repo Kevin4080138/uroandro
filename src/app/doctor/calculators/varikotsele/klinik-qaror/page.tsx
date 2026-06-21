@@ -5,7 +5,10 @@ import { createClient } from '@/lib/supabase'
 import { T, card, input, label, btnPrimary, btnGhost } from '../_theme'
 import { USULLAR, USUL_IDLARI, usulTavsiyaBerish, type QarorKirish } from '@/lib/varikotseleUsullari'
 
-const bosh: QarorKirish = { indic: 'infertility', lat: 'left', recur: false, expert: true, bmi: 0 }
+const bosh: QarorKirish = {
+  indic: 'infertility', lat: 'left', recur: false, expert: true, bmi: 0,
+  venaDiametri: 0, reflux: false, spermKonts: 0, spermHarakat: 0,
+}
 const boshBemor = { fio: '', telefon: '', age: '', grade: '3' }
 
 const seg = (active: boolean): React.CSSProperties => ({
@@ -116,6 +119,25 @@ export default function KlinikQarorPage() {
           <div>
             <label style={label}>Tana massasi indeksi (BMI) <span style={{ fontWeight: 400 }}>(ixtiyoriy)</span></label>
             <input type="number" style={input} value={forma.bmi || ''} onChange={(e) => setForma((f) => ({ ...f, bmi: Number(e.target.value) || 0 }))} />
+          </div>
+          <div>
+            <label style={label}>Vena diametri (mm, USDG)</label>
+            <input type="number" step="0.1" style={input} value={forma.venaDiametri || ''} onChange={(e) => setForma((f) => ({ ...f, venaDiametri: Number(e.target.value) || 0 }))} />
+          </div>
+          <div>
+            <label style={label}>Reflux</label>
+            <div style={{ display: 'flex', border: `1.5px solid #C5D4D5`, borderRadius: 9, overflow: 'hidden' }}>
+              <button style={seg(!forma.reflux)} onClick={() => setForma((f) => ({ ...f, reflux: false }))}>Yo&apos;q</button>
+              <button style={seg(forma.reflux)} onClick={() => setForma((f) => ({ ...f, reflux: true }))}>Bor</button>
+            </div>
+          </div>
+          <div>
+            <label style={label}>Sperma konsentratsiyasi (mln/ml) <span style={{ fontWeight: 400 }}>(ixtiyoriy)</span></label>
+            <input type="number" style={input} value={forma.spermKonts || ''} onChange={(e) => setForma((f) => ({ ...f, spermKonts: Number(e.target.value) || 0 }))} />
+          </div>
+          <div>
+            <label style={label}>Sperma harakatchanligi (%) <span style={{ fontWeight: 400 }}>(ixtiyoriy)</span></label>
+            <input type="number" style={input} value={forma.spermHarakat || ''} onChange={(e) => setForma((f) => ({ ...f, spermHarakat: Number(e.target.value) || 0 }))} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>

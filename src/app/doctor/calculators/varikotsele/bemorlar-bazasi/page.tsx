@@ -28,6 +28,24 @@ function gradeLabel(g: number | null) {
   return g ? String(['', 'I', 'II', 'III'][g] ?? g) : '—'
 }
 
+function eksportQil(yozuvlar: Yozuv[]) {
+  const sarlavhalar = ['F.I.O.', 'Telefon', 'Yosh', 'Usul', 'Daraja', "Kuzatuv (oy)", 'Retsidiv', 'Gidrotsele', 'Spermogramma', 'Homiladorlik', 'Izoh', 'Sana']
+  const qatorlar = yozuvlar.map((y) => [
+    y.fio ?? y.pid ?? '', y.telefon ?? '', y.age ?? '', USULLAR[y.method]?.nom ?? y.method, gradeLabel(y.grade),
+    y.followup, y.recur ? 'Ha' : "Yo'q", y.hydro ? 'Ha' : "Yo'q", y.semen ? 'Ha' : "Yo'q", y.preg ? 'Ha' : "Yo'q",
+    y.notes ?? '', new Date(y.created_at).toLocaleDateString(),
+  ])
+  const csv = [sarlavhalar, ...qatorlar]
+    .map((qator) => qator.map((qiymat) => `"${String(qiymat).replace(/"/g, '""')}"`).join(','))
+    .join('\r\n')
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `varikotsele_bemorlar_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
 export default function BemorlarBazasiPage() {
   const supabase = createClient()
   const router = useRouter()
@@ -75,6 +93,12 @@ export default function BemorlarBazasiPage() {
           fontSize: 14.5, fontWeight: 600, cursor: 'pointer',
         }}>
           + Yangi bemor (Klinik qaror)
+        </button>
+        <button onClick={() => eksportQil(yozuvlar)} disabled={yozuvlar.length === 0} style={{
+          background: T.surface2, color: T.inkSoft, border: 'none', borderRadius: 10, padding: '11px 20px',
+          fontSize: 14.5, fontWeight: 600, cursor: yozuvlar.length === 0 ? 'not-allowed' : 'pointer', opacity: yozuvlar.length === 0 ? 0.6 : 1,
+        }}>
+          ⬇️ Excelga (CSV) yuklab olish
         </button>
       </div>
 
