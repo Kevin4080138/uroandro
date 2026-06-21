@@ -6,6 +6,7 @@ import { T, card, input, label, btnPrimary, btnGhost } from '../_theme'
 import { USULLAR, USUL_IDLARI, usulTavsiyaBerish, type QarorKirish } from '@/lib/varikotseleUsullari'
 
 const bosh: QarorKirish = { indic: 'infertility', lat: 'left', recur: false, expert: true, bmi: 0 }
+const boshBemor = { fio: '', telefon: '', age: '', grade: '3' }
 
 const seg = (active: boolean): React.CSSProperties => ({
   flex: 1, border: 'none', padding: '9px 6px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -14,6 +15,7 @@ const seg = (active: boolean): React.CSSProperties => ({
 
 export default function KlinikQarorPage() {
   const supabase = createClient()
+  const [bemor, setBemor] = useState(boshBemor)
   const [forma, setForma] = useState<QarorKirish>(bosh)
   const [natija, setNatija] = useState<ReturnType<typeof usulTavsiyaBerish> | null>(null)
   const [saving, setSaving] = useState(false)
@@ -22,20 +24,23 @@ export default function KlinikQarorPage() {
   const hisobla = () => { setNatija(usulTavsiyaBerish(forma)); setSaved(false) }
 
   const bazagaQoshish = async () => {
-    if (!natija) return
+    if (!natija || !bemor.fio.trim()) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     setSaving(true)
     await supabase.from('varikotsele_tadqiqot').insert({
       doctor_id: user.id,
-      age: null,
+      fio: bemor.fio,
+      telefon: bemor.telefon || null,
+      age: Number(bemor.age) || null,
       method: natija.winner,
-      grade: null,
+      grade: Number(bemor.grade),
       followup: 0,
       notes: '(klinik qaror moduli)',
     })
     setSaving(false)
     setSaved(true)
+    setTimeout(() => { setBemor(boshBemor); setForma(bosh); setNatija(null); setSaved(false) }, 1500)
   }
 
   return (
@@ -49,6 +54,33 @@ export default function KlinikQarorPage() {
       </p>
 
       <div style={{ ...card, marginTop: 22 }}>
+        <div style={{ fontFamily: 'monospace', fontSize: 10.5, letterSpacing: '.1em', textTransform: 'uppercase', color: T.muted, marginBottom: 12 }}>
+          Bemor ma&apos;lumotlari
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18, marginBottom: 22 }}>
+          <div>
+            <label style={label}>F.I.O. <span style={{ color: '#B4520C' }}>*</span></label>
+            <input style={input} value={bemor.fio} onChange={(e) => setBemor((b) => ({ ...b, fio: e.target.value }))} placeholder="Familiya Ism Sharif" />
+          </div>
+          <div>
+            <label style={label}>Telefon</label>
+            <input style={input} value={bemor.telefon} onChange={(e) => setBemor((b) => ({ ...b, telefon: e.target.value }))} placeholder="+998 90 123 45 67" />
+          </div>
+          <div>
+            <label style={label}>Yoshi</label>
+            <input type="number" style={input} value={bemor.age} onChange={(e) => setBemor((b) => ({ ...b, age: e.target.value }))} />
+          </div>
+          <div>
+            <label style={label}>Darajasi (Dubin)</label>
+            <select style={input} value={bemor.grade} onChange={(e) => setBemor((b) => ({ ...b, grade: e.target.value }))}>
+              <option value="1">I</option><option value="2">II</option><option value="3">III</option><option value="0">Subklinik</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ fontFamily: 'monospace', fontSize: 10.5, letterSpacing: '.1em', textTransform: 'uppercase', color: T.muted, marginBottom: 12 }}>
+          Klinik ko&apos;rsatkichlar
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
           <div>
             <label style={label}>Asosiy ko&apos;rsatma</label>
@@ -133,7 +165,7 @@ export default function KlinikQarorPage() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 22, flexWrap: 'wrap' }}>
-              <button style={btnGhost} onClick={bazagaQoshish} disabled={saving}>{saving ? 'Saqlanmoqda...' : saved ? '✓ Bazaga qo\'shildi' : 'Bazaga qo\'shish'}</button>
+              <button style={btnGhost} onClick={bazagaQoshish} disabled={saving || !bemor.fio.trim()} title={!bemor.fio.trim() ? "Avval bemor F.I.O.sini kiriting" : ''}>{saving ? 'Saqlanmoqda...' : saved ? '✓ Bazaga qo\'shildi' : "Bemorlar bazasiga saqlash"}</button>
               <button style={btnGhost} onClick={() => window.print()}>Chop etish</button>
             </div>
           </div>
