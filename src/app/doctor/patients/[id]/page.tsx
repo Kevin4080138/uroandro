@@ -46,6 +46,7 @@ export default function PatientCardPage() {
 
   const [showYangiForm, setShowYangiForm] = useState(false)
   const [yangiForm, setYangiForm] = useState(emptyYangiForm)
+  const [tanlanganOrganlar, setTanlanganOrganlar] = useState<string[]>([])
 
   const [natijaTashrifId, setNatijaTashrifId] = useState<string | null>(null)
   const [natijaForm, setNatijaForm] = useState(emptyNatijaForm)
@@ -81,6 +82,12 @@ export default function PatientCardPage() {
       if (mavjud.includes(matn)) return f
       return { ...f, shikoyat: [...mavjud, matn].join(', ') }
     })
+  }
+
+  const toggleOrgan = (nom: string) => {
+    setTanlanganOrganlar((prev) =>
+      prev.includes(nom) ? prev.filter((o) => o !== nom) : [...prev, nom]
+    )
   }
   const setN = (key: string) => (e: any) => setNatijaForm((f) => ({ ...f, [key]: e.target.value }))
 
@@ -223,26 +230,57 @@ export default function PatientCardPage() {
             <h3 style={{ marginTop: 0, fontSize: '15px', color: '#9ca3af' }}>Shikoyat va kasallik tarixi</h3>
             <div>
               <label style={labelStyle}>Shikoyati</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                {shikoyatToifalari.map((toifa) => (
-                  <div key={toifa.nom} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                    <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{toifa.nom}:</span>
-                    {toifa.shikoyatlar.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => qoshShikoyat(s)}
-                        style={{
-                          backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e',
-                          borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
-                        }}
-                      >
-                        + {s}
-                      </button>
-                    ))}
-                  </div>
-                ))}
+
+              <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>1) Qaysi organ bilan bog'liq?</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+                {shikoyatToifalari.map((toifa) => {
+                  const tanlangan = tanlanganOrganlar.includes(toifa.nom)
+                  return (
+                    <button
+                      key={toifa.nom}
+                      type="button"
+                      onClick={() => toggleOrgan(toifa.nom)}
+                      style={{
+                        backgroundColor: tanlangan ? '#2563eb' : '#1e1e2e',
+                        color: tanlangan ? 'white' : '#d1d5db',
+                        border: tanlangan ? '1px solid #2563eb' : '1px solid #2e2e3e',
+                        borderRadius: '20px', padding: '7px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+                      }}
+                    >
+                      {toifa.nom}
+                    </button>
+                  )
+                })}
               </div>
+
+              {tanlanganOrganlar.length > 0 && (
+                <>
+                  <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 8px 0' }}>2) Tegishli shikoyatlarni tanlang</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    {shikoyatToifalari
+                      .filter((toifa) => tanlanganOrganlar.includes(toifa.nom))
+                      .map((toifa) => (
+                        <div key={toifa.nom} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                          <span style={{ color: '#6b7280', fontSize: '12px', marginRight: '2px' }}>{toifa.nom}:</span>
+                          {toifa.shikoyatlar.map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => qoshShikoyat(s)}
+                              style={{
+                                backgroundColor: '#1e1e2e', color: '#d1d5db', border: '1px solid #2e2e3e',
+                                borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px',
+                              }}
+                            >
+                              + {s}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                  </div>
+                </>
+              )}
+
               <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.shikoyat} onChange={setY('shikoyat')} placeholder="Tugmalardan tanlang yoki qo'lda yozing..." />
             </div>
             <div style={{ marginTop: '12px' }}>
