@@ -3,7 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 
-export function Header({ backHref = '/doctor/dashboard', backLabel = 'Bosh sahifa' }: { backHref?: string; backLabel?: string }) {
+export function Header({
+  backHref, backLabel = 'Bosh sahifa', actions,
+}: { backHref?: string; backLabel?: string; actions?: React.ReactNode }) {
   const router = useRouter()
   const { theme, toggle } = useTheme()
 
@@ -16,6 +18,7 @@ export function Header({ backHref = '/doctor/dashboard', backLabel = 'Bosh sahif
         Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
       </h1>
       <div className="flex items-center gap-2.5">
+        {actions}
         <button
           onClick={toggle}
           aria-label="Temani almashtirish"
@@ -24,13 +27,15 @@ export function Header({ backHref = '/doctor/dashboard', backLabel = 'Bosh sahif
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
-        <button
-          onClick={() => router.push(backHref)}
-          className="btn-animated rounded-lg border px-4 py-2 text-sm"
-          style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
-        >
-          ← {backLabel}
-        </button>
+        {backHref && (
+          <button
+            onClick={() => router.push(backHref)}
+            className="btn-animated rounded-lg border px-4 py-2 text-sm"
+            style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
+          >
+            ← {backLabel}
+          </button>
+        )}
       </div>
     </header>
   )
