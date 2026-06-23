@@ -272,12 +272,20 @@ export default function PatientCardPage() {
               {' · '}Tel: {bemor.telefon ?? '—'}
             </p>
           </div>
-          <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} style={{
-            background: 'var(--accent)', color: 'var(--ink)', border: 'none', borderRadius: '10px',
-            padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
-          }}>
-            {showYangiForm ? 'Bekor qilish' : '+ Yangi qabul'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={() => router.push(`/doctor/patients/${id}/hujjatlar`)} className="btn-animated" style={{
+              background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '10px',
+              padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+            }}>
+              📄 Hujjatlar
+            </button>
+            <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} style={{
+              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
+              padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+            }}>
+              {showYangiForm ? 'Bekor qilish' : '+ Yangi qabul'}
+            </button>
+          </div>
         </div>
 
         {/* 1-bosqich: shikoyat, anamnez, tekshiruv buyurtmasi */}
