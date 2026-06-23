@@ -58,18 +58,18 @@ export default function PatientDashboard() {
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '💡', title: 'Tavsiyalar', desc: 'Sizga mos sog\'liq tavsiyalari' },
-            { icon: '🩺', title: 'Simptomlar', desc: 'Simptomlarni tekshirish' },
-            { icon: '📅', title: 'Qabulga yozilish', desc: 'Shifokorga murojaat qiling' },
-            { icon: '📚', title: 'Ma\'lumotlar', desc: 'Bemorlar uchun maqolalar' },
+            { icon: '🩺', title: 'Yangi murojaat', desc: 'Shikoyatingizni shifokorga yuboring', href: '/patient/murojaat' },
+            { icon: '📨', title: 'Mening murojaatlarim', desc: 'Yuborilgan shikoyatlar va javoblar', href: '/patient/murojaatlarim' },
+            { icon: '📚', title: 'Ma\'lumotlar', desc: 'Bemorlar uchun maqolalar (tez kunda)' },
           ].map((item) => (
-            <div key={item.title} style={{
+            <div key={item.title} onClick={() => item.href && router.push(item.href)} style={{
               background: 'var(--surface)',
               border: '1px solid var(--line)',
               borderRadius: '12px',
               padding: '24px',
-              cursor: 'pointer',
-              }} className="card-hover">
+              cursor: item.href ? 'pointer' : 'default',
+              opacity: item.href ? 1 : 0.55,
+              }} className={item.href ? 'card-hover' : ''}>
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
               <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 const NAV = [
   { href: '/doctor/dashboard', icon: '🏠', label: 'Bosh sahifa' },
   { href: '/doctor/patients', icon: '🧑‍🤝‍🧑', label: 'Bemorlar' },
+  { href: '/doctor/murojaatlar', icon: '📨', label: 'Murojaatlar' },
   { href: '/doctor/protokollar', icon: '📋', label: 'Protokollar' },
   { href: '/doctor/calculators', icon: '🧮', label: 'Kalkulatorlar' },
   { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
