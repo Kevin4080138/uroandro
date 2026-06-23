@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
+import { telefonToEmail, telefonFormatTogri } from '@/lib/patientAuth'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
+  const [telefon, setTelefon] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -18,12 +20,19 @@ export default function RegisterPage() {
   const supabase = createClient()
   const { theme, toggle } = useTheme()
 
+  const isPatient = role === 'patient'
+
   const handleRegister = async () => {
     setError('')
     setSuccess('')
 
-    if (!fullName || !email || !password || !role) {
+    if (!fullName || !role || (isPatient ? !telefon : !email) || !password) {
       setError('Barcha maydonlarni to\'ldiring')
+      return
+    }
+
+    if (isPatient && !telefonFormatTogri(telefon)) {
+      setError("To'g'ri telefon raqami kiriting")
       return
     }
 
@@ -40,12 +49,13 @@ export default function RegisterPage() {
     setLoading(true)
 
     const { error } = await supabase.auth.signUp({
-      email,
+      email: isPatient ? telefonToEmail(telefon) : email,
       password,
       options: {
         data: {
           full_name: fullName,
           role: role,
+          telefon: isPatient ? telefon : null,
         }
       }
     })
@@ -56,7 +66,7 @@ export default function RegisterPage() {
       return
     }
 
-    setSuccess('Tabriklaymiz! Email manzilingizni tasdiqlang.')
+    setSuccess(isPatient ? 'Tabriklaymiz! Endi telefon va parolingiz orqali kira olasiz.' : 'Tabriklaymiz! Email manzilingizni tasdiqlang.')
     setLoading(false)
   }
 
@@ -129,8 +139,8 @@ export default function RegisterPage() {
               onChange={(e) => setRole(e.target.value)}
               style={{
                 width: '100%',
-                backgroundColor: '#1e1e2e',
-                color: role ? 'white' : '#6b7280',
+                background: 'var(--surface-2)',
+                color: role ? 'var(--ink)' : 'var(--muted)',
                 border: '1px solid var(--line)',
                 borderRadius: '10px',
                 padding: '12px 16px',
@@ -146,28 +156,53 @@ export default function RegisterPage() {
             </select>
           </div>
 
-          <div>
-            <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              style={{
-                width: '100%',
-                background: 'var(--surface-2)',
-                color: 'var(--ink)',
-                border: '1px solid var(--line)',
-                borderRadius: '10px',
-                padding: '12px 16px',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
+          {isPatient ? (
+            <div>
+              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                Telefon raqami
+              </label>
+              <input
+                type="tel"
+                value={telefon}
+                onChange={(e) => setTelefon(e.target.value)}
+                placeholder="+998 90 123 45 67"
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-2)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          ) : (
+            <div>
+              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-2)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          )}
 
           <div>
             <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>

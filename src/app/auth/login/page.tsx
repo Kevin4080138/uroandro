@@ -4,9 +4,12 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
+import { telefonToEmail } from '@/lib/patientAuth'
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<'staff' | 'patient'>('staff')
   const [email, setEmail] = useState('')
+  const [telefon, setTelefon] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -19,12 +22,12 @@ export default function LoginPage() {
     setLoading(true)
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: mode === 'patient' ? telefonToEmail(telefon) : email,
       password,
     })
 
     if (error) {
-      setError('Email yoki parol noto\'g\'ri')
+      setError(mode === 'patient' ? "Telefon yoki parol noto'g'ri" : "Email yoki parol noto'g'ri")
       setLoading(false)
       return
     }
@@ -83,29 +86,71 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
+        <div style={{ display: 'flex', border: '1.5px solid var(--line)', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }}>
+          {([['staff', "Shifokor / Talaba"], ['patient', 'Bemor']] as const).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => { setMode(v); setError('') }}
+              className="btn-animated"
               style={{
-                width: '100%',
-                background: 'var(--surface-2)',
-                color: 'var(--ink)',
-                border: '1px solid var(--line)',
-                borderRadius: '10px',
-                padding: '12px 16px',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box'
+                flex: 1, border: 'none', padding: '10px 6px', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer',
+                background: mode === v ? 'var(--accent)' : 'var(--surface-2)',
+                color: mode === v ? 'white' : 'var(--muted)',
               }}
-            />
-          </div>
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {mode === 'patient' ? (
+            <div>
+              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                Telefon raqami
+              </label>
+              <input
+                type="tel"
+                value={telefon}
+                onChange={(e) => setTelefon(e.target.value)}
+                placeholder="+998 90 123 45 67"
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-2)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          ) : (
+            <div>
+              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-2)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          )}
 
           <div>
             <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
