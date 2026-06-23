@@ -9,24 +9,23 @@ function shikoyatMatni(d: Record<string, any>) {
   return s.length ? s.join(', ').toLowerCase() + '.' : '—'
 }
 
-function statusPraesens(d: Record<string, any>): HujjatBlok[] {
-  return [
-    { tur: 'matn', matn: `Умумий аҳволи нисбатан қониқарли. Тана харорати-${ro(d.harorat, '36,6')} С. Суяк ва бўғим тизими деформациясиз.` },
-    { tur: 'matn', matn: 'Нафас олиш тизими: Кўкрак қафаси деформациясиз. Нафас олиш бурун орқали равон. Ўпкаларда везикуляр нафас. Перкутор ўпка товуши.' },
-    { tur: 'matn', matn: `Юрак қон томир тизими: Юрак қон томир уриши бир маромда, пульс 1 дақиқада ${ro(d.puls, '72')} та, АКБ ${ro(d.akb, '110/80')} мм.сим.уст.` },
-    { tur: 'matn', matn: 'Овқат ҳазм қилиш тизими: Тили тоза, қорин пальпацияда юмшоқ, оғриқсиз. Жигар ва талоғи қўлга палпацияланмайди. Ич келиши меъёрда.' },
-    { tur: 'matn', matn: 'Сийдик ажратув тизими: Бел соҳаси симметрик. Тукиллатиш симптоми икки томонлама манфий. Сийиши мустақил.' },
-  ]
+// Status praesens — bitta oqib turuvchi paragraf (haqiqiy hujjatdagidek)
+function statusPraesensMatni(d: Record<string, any>) {
+  return `Умумий аҳволи нисбатан қониқарли. Тана харорати-${ro(d.harorat, '36,6')} С. Суяк ва бўғим тизими деформациясиз. `
+    + 'Нафас олиш тизими: Кўкрак қафаси деформациясиз. Нафас олиш бурун орқали равон. Ўпкаларда везикуляр нафас. Перкутор ўпка товуши. '
+    + `Юрак қон томир тизими: Юрак қон томир уриши бир маромда пульс 1 дақиқада ${ro(d.puls, '72')} та, АКБ ${ro(d.akb, '110/80')} мм.сим.уст. `
+    + 'Овқат хазм қилиш тизими: Тили тоза, қорин пальпацияда юмшоқ, оғриқсиз. Жигар ва талоғи қўлга палпацияланмайди. Ич келиши меъёрда. '
+    + 'Сийдик ажратув тизими: Бел соҳаси симметрик. Тукиллатиш симптоми икки томонлама манфий. Сийиши мустақил.'
 }
 
 function tekshiruvlar(d: Record<string, any>): HujjatBlok[] {
   return [
-    { tur: 'qator', chap: 'Сийдик копи (УЗИ)', ong: `Ҳажми-${ro(d.usi_qop_hajm, '140')} мл, шиллиқ қавати-${ro(d.usi_shilliq, '2')} мм` },
-    { tur: 'qator', chap: 'Простата бези', ong: `ўлчамлари ${ro(d.prostata_olcham, '40х30х32')} мм, ҳажми-${ro(d.prostata_hajm, '19')} см³` },
-    { tur: 'qator', chap: 'Умумий қон таҳлили', ong: `Hb-${ro(d.hb, '140')}; Эр-${ro(d.eritrotsit, '5.0')}; Ht-${ro(d.gematokrit, '41,9')}; Лей-${ro(d.leykotsit, '8.5')}; ЭЧТ-${ro(d.echt, '13')}` },
-    { tur: 'qator', chap: 'Серология (RW/ВИЧ/HBs/HCV)', ong: ro(d.serologiya, 'Манфий') },
-    { tur: 'qator', chap: 'Нечипоренко бўйича', ong: `Лей-${ro(d.nech_ley, '5000')}; Эр-${ro(d.nech_er, '1250')}; pH-${ro(d.nech_ph, '6,0')}; зичлиги-${ro(d.nech_zichlik, '1027')}` },
-    { tur: 'qator', chap: 'Простата суюқлиги', ong: `Лей-${ro(d.pr_ley, '15-20')}; Эр-${ro(d.pr_er, '1-3')}; эпителий-${ro(d.pr_epitel, '6-8')}; сперматогенез-${ro(d.pr_spermatogenez, '1%')}` },
+    { tur: 'matn', matn: `УЗИ: Сийдик копи: Хажми-${ro(d.usi_qop_hajm, '140')} мл, шиллик кавати-${ro(d.usi_shilliq, '2')} мм.` },
+    { tur: 'matn', matn: `Простата бези: улчамлари ${ro(d.prostata_olcham, '40х30х32')} мм, хажми-${ro(d.prostata_hajm, '19')} см³.` },
+    { tur: 'matn', matn: `Умумий қон таҳлили: Гемоглобин-${ro(d.hb, '140')}; Эритроцитлар-${ro(d.eritrotsit, '5.0')}; Гематокрит-${ro(d.gematokrit, '41,9')}; Лейкоцитлар-${ro(d.leykotsit, '8.5')}; ЭЧТ-${ro(d.echt, '13')}.` },
+    { tur: 'matn', matn: `RW/ВИЧ/HBS-Ag/Анти HCV — ${ro(d.serologiya, 'Манфий')}.` },
+    { tur: 'matn', matn: `Нечипоренко бўйича сийдик тахлили: Лейкоцитлар-${ro(d.nech_ley, '5000')}; Эритроцитлар-${ro(d.nech_er, '1250')}; pH-${ro(d.nech_ph, '6,0')}; нисбий зичлиги-${ro(d.nech_zichlik, '1027')}.` },
+    { tur: 'matn', matn: `Простата бези суюклиги тахлили: Лейкоцитлар-${ro(d.pr_ley, '15-20')}; Эритроцитлар-${ro(d.pr_er, '1-3')}; эпителий-${ro(d.pr_epitel, '6-8')}; сперматогенез-${ro(d.pr_spermatogenez, '1%')}.` },
   ]
 }
 
@@ -42,15 +41,13 @@ function davoRoyxat(d: Record<string, any>) {
 function imzolar(d: Record<string, any>, shifokorIsmi: string): HujjatBlok[] {
   return [
     { tur: 'bosh' },
-    { tur: 'qator', chap: 'Даволовчи врач', ong: ro(d.davolovchi, shifokorIsmi) },
-    { tur: 'qator', chap: 'Бўлим мудири', ong: ro(d.bolim_mudiri, shifokorIsmi) },
+    { tur: 'imzo', chap: 'Даволовчи врач', ong: ro(d.davolovchi, shifokorIsmi) },
+    { tur: 'imzo', chap: 'Бўлим мудири', ong: ro(d.bolim_mudiri, shifokorIsmi) },
   ]
 }
 
-function bemorBosh(d: Record<string, any>, bemor: any): HujjatBlok[] {
-  return [
-    { tur: 'qator', chap: 'Бемор', ong: `${ro(bemor?.fio, '—')}${d.tugilgan_yil ? `, ${d.tugilgan_yil}-йил` : ''}` },
-  ]
+function bemorTavsifi(bemor: any, d: Record<string, any>) {
+  return `${ro(bemor?.fio, '—')} ${ro(d.tugilgan_yil, '____')}-йил.`
 }
 
 export const prostatitShablon: Shablon = {
@@ -64,6 +61,8 @@ export const prostatitShablon: Shablon = {
         { key: 'manzil', label: 'Manzili', type: 'text' },
         { key: 'ish_joyi', label: 'Ish joyi', type: 'select', variantlar: ['Ишсиз', 'Ишчи', 'Хизматчи', 'Тадбиркор', 'Нафақахўр'] },
         { key: 'tarix_raqami', label: 'Kasallik tarixi №', type: 'text' },
+        { key: 'korik_sana', label: 'Ko\'rik sanasi', type: 'date' },
+        { key: 'korik_vaqt', label: 'Ko\'rik vaqti', type: 'select', default: '10:45', variantlar: ['08:30', '09:15', '10:00', '10:45', '11:30', '14:00'] },
         { key: 'kelgan_sana', label: 'Kelgan sana', type: 'date' },
         { key: 'chiqgan_sana', label: 'Chiqgan sana', type: 'date' },
       ],
@@ -74,9 +73,9 @@ export const prostatitShablon: Shablon = {
         {
           key: 'shikoyatlar', label: 'Shikoyatlar', type: 'checklist',
           variantlar: [
-            'Тез-тез сийишга', 'Сийдик босимини пасайишига', 'Қолдиқ сийдик ҳиссига',
-            'Тунги сийдикка чақириқни кўплигига', 'Жинсий алоқани сусайишига',
-            'Сийишда ачишишга', 'Иккала бел соҳасидаги суст оғриққа', 'Умумий ҳолсизликка',
+            'Тез-тез сийишга', 'Сийдиганда ачишишга', 'Сийдик босимини пасайишига', 'Қолдиқ сийдик ҳиссига',
+            'Тунги сийдикка чақирувни кўплигига', 'Жинсий алоқани сусайишига',
+            'Иккала бел соҳасидаги суст оғриққа', 'Умумий ҳолсизликка',
           ],
         },
       ],
@@ -132,12 +131,13 @@ export const prostatitShablon: Shablon = {
         {
           key: 'davo', label: 'Tavsiya etilgan dorilar', type: 'checklist',
           variantlar: [
-            'Sol. Levofloxocini 100 ml в/в 1 маҳал 7 кун',
+            'Стол №7, режим — умумий',
+            'Sol. Levofloxocini 100 ml в/в синама билан 1 маҳал 7 кун',
             'Sol. Reosorbilakti 200 ml в/в 1 маҳал томчилаб 5 кун',
             'Sol. Glucosae 5%-200 ml + Sol. Acidi ascorbinici 5%-6,0 ml в/в 1 маҳал 7 кун',
+            'Sol. Ketorolaci 2,0 ml в/м 1 маҳал овқатдан сўнг 5 кун',
             'Caps. Tamsulozini 0,4 mg 1 капс х 1 маҳал 10 кун',
             'Supp. Diclofenaci 100 mg 1 св. х 1 маҳал 10 кун',
-            'Стол №7, режим — умумий',
           ],
         },
         { key: 'chiqish_tavsiya', label: 'Chiqishdagi tavsiya', type: 'textarea', default: '1. Левофлоксоцин 500 мг 1 таб х 1 маҳал 7 кун\n2. Яшаш жойи уролог назорати\n3. Қайта кўрик 10 кундан сўнг' },
@@ -154,28 +154,24 @@ export const prostatitShablon: Shablon = {
   ],
 
   hujjatlar: [
-    // 1. Birlamchi ko'rik
+    // 1. Birlamchi ko'rik (oqib turuvchi matn — haqiqiy hujjatdek)
     {
       id: 'birlamchi',
       nom: 'Birlamchi ko\'rik',
       render: (d, bemor, shifokorIsmi) => [
-        { tur: 'sarlavha', matn: 'Урология бўлимида кўрик' },
-        ...bemorBosh(d, bemor),
-        { tur: 'qator', chap: 'Бемор шикоятлари', ong: shikoyatMatni(d) },
-        { tur: 'bosh' },
-        { tur: 'sarlavha', matn: 'Anamnesis morbi' },
-        { tur: 'matn', matn: ro(d.anamnez_morbi) },
-        { tur: 'sarlavha', matn: 'Anamnesis vitae' },
-        { tur: 'matn', matn: ro(d.anamnez_vitae) },
-        { tur: 'qator', chap: 'Аллергологик анамнез', ong: ro(d.allergiya) },
-        { tur: 'sarlavha', matn: 'Status praesens' },
-        ...statusPraesens(d),
-        { tur: 'sarlavha', matn: 'Текширувларда' },
+        { tur: 'matn', matn: `${ro(d.korik_sana, '__.__.____')}-й   Соат: ${ro(d.korik_vaqt, '____')}        Урология бўлимида кўрик.` },
+        { tur: 'band', etiket: 'Бемор', matn: bemorTavsifi(bemor, d) },
+        { tur: 'band', etiket: 'Бемор шикоятлари', matn: shikoyatMatni(d) },
+        { tur: 'band', etiket: 'Anamnesis morbi', matn: ro(d.anamnez_morbi) },
+        { tur: 'band', etiket: 'Anamnesis vitae', matn: `${ro(d.anamnez_vitae)} Аллергологик анамнез: ${ro(d.allergiya)}` },
+        { tur: 'band', etiket: 'Status praesens', matn: statusPraesensMatni(d) },
+        { tur: 'matn', matn: 'Текширувларда:' },
         ...tekshiruvlar(d),
-        { tur: 'sarlavha', matn: 'Ташхис' },
-        { tur: 'matn', matn: tashxisMatni(d) },
-        { tur: 'sarlavha', matn: 'Тавсия' },
+        { tur: 'matn', matn: 'Юкоридагиларга асосланиб куйидаги дастлабки ташхис куйилди:' },
+        { tur: 'band', etiket: 'Ташхис', matn: tashxisMatni(d) },
+        { tur: 'band', etiket: 'Тавсия', matn: '' },
         { tur: 'royxat', bandlar: davoRoyxat(d) },
+        { tur: 'matn', matn: 'ВМ 404 сонли буйрук 1-илова 9-бандига кура шифохонада йук дорилар бемор кулига ёзиб берилди. Дорилар мувофиклиги, яроклилик муддати, урамлар бутунлиги, тиниклиги текширилди.' },
         ...imzolar(d, shifokorIsmi),
       ],
     },
@@ -197,14 +193,13 @@ export const prostatitShablon: Shablon = {
       nom: 'Klinik tashxisni asoslash',
       render: (d, bemor, shifokorIsmi) => [
         { tur: 'sarlavha', matn: 'КЛИНИК ТАШХИСНИ АСОСЛАШ' },
-        ...bemorBosh(d, bemor),
-        { tur: 'qator', chap: 'Бемор шикоятлари', ong: shikoyatMatni(d) },
+        { tur: 'band', etiket: 'Бемор', matn: bemorTavsifi(bemor, d) },
+        { tur: 'band', etiket: 'Бемор шикоятлари', matn: shikoyatMatni(d) },
         { tur: 'matn', matn: ro(d.anamnez_morbi) },
-        { tur: 'sarlavha', matn: 'Текширувларда' },
+        { tur: 'matn', matn: 'Текширувларда:' },
         ...tekshiruvlar(d),
-        { tur: 'matn', matn: 'Юқоридагиларга асосланиб қуйидаги клиник ташхис қўйилди:' },
-        { tur: 'sarlavha', matn: 'Диагноз' },
-        { tur: 'matn', matn: tashxisMatni(d) },
+        { tur: 'matn', matn: 'Юкоридагиларга асосланиб куйидаги клиник ташхис куйилди:' },
+        { tur: 'band', etiket: 'Диагноз', matn: tashxisMatni(d) },
         ...imzolar(d, shifokorIsmi),
       ],
     },

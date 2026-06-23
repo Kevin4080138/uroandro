@@ -54,6 +54,9 @@ export default function HujjatlarPage() {
       // pasport ma'lumotlarini bemordan avtomatik to'ldirish
       if (b?.tugilgan_sana) boshlang.tugilgan_yil = String(b.tugilgan_sana).slice(0, 4)
       if (b?.manzil) boshlang.manzil = b.manzil
+      // vrach maydonlari — ro'yxatdan o'tgan shifokor ismi (o'zgartirsa bo'ladi)
+      boshlang.davolovchi = prof?.full_name ?? ''
+      boshlang.bolim_mudiri = prof?.full_name ?? ''
       setData({ ...boshlang, ...(hd?.malumot ?? {}) })
       setLoading(false)
     }
@@ -270,14 +273,25 @@ function HujjatVaraq({ bloklar, chop, print }: { bloklar: HujjatBlok[]; chop?: b
       maxWidth: print ? '720px' : 'none', margin: print ? '0 auto' : 0,
     }}>
       {bloklar.map((b, i) => {
-        if (b.tur === 'bosh') return <div key={i} style={{ height: '10px' }} />
-        if (b.tur === 'sarlavha') return <h3 key={i} style={{ fontSize: '14px', fontWeight: 700, margin: '14px 0 6px', textTransform: b.matn === b.matn.toUpperCase() ? 'none' : undefined }}>{b.matn}</h3>
-        if (b.tur === 'matn') return <p key={i} style={{ margin: '0 0 6px', whiteSpace: 'pre-wrap' }}>{b.matn}</p>
-        if (b.tur === 'royxat') return <ul key={i} style={{ margin: '0 0 6px', paddingLeft: '20px' }}>{b.bandlar.map((x, j) => <li key={j}>{x}</li>)}</ul>
-        // qator
+        if (b.tur === 'bosh') return <div key={i} style={{ height: '12px' }} />
+        if (b.tur === 'sarlavha') return <h3 key={i} style={{ fontSize: '14px', fontWeight: 700, margin: '12px 0 5px' }}>{b.matn}</h3>
+        if (b.tur === 'matn') return <p key={i} style={{ margin: '0 0 4px', whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{b.matn}</p>
+        if (b.tur === 'band') return (
+          <p key={i} style={{ margin: '0 0 5px', textAlign: 'justify' }}>
+            <strong>{b.etiket}:</strong>{b.matn ? ' ' + b.matn : ''}
+          </p>
+        )
+        if (b.tur === 'royxat') return <ul key={i} style={{ margin: '0 0 6px', paddingLeft: '24px' }}>{b.bandlar.map((x, j) => <li key={j} style={{ marginBottom: '2px' }}>{x}</li>)}</ul>
+        if (b.tur === 'imzo') return (
+          <div key={i} style={{ display: 'flex', justifyContent: 'flex-end', gap: '40px', padding: '6px 0' }}>
+            <strong>{b.chap}:</strong>
+            <span style={{ minWidth: '150px' }}>{b.ong}</span>
+          </div>
+        )
+        // qator (label: value)
         return (
-          <div key={i} style={{ display: 'flex', gap: '10px', padding: '3px 0' }}>
-            <span style={{ color: print ? '#555' : 'var(--muted)', minWidth: '170px', flexShrink: 0 }}>{b.chap}:</span>
+          <div key={i} style={{ display: 'flex', gap: '10px', padding: '2px 0' }}>
+            <span style={{ color: print ? '#555' : 'var(--muted)', minWidth: '150px', flexShrink: 0 }}>{b.chap}:</span>
             <span style={{ fontWeight: 500 }}>{b.ong}</span>
           </div>
         )
