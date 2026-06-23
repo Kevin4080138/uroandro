@@ -120,11 +120,13 @@ export default function HujjatlarPage() {
     <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`}>
       <style>{`
         .ajratgich:hover > div { background: var(--accent) !important; width: 3px !important; }
+        .bosma { display: none; }
         @media print {
-          .no-print { display: none !important; }
-          .hujjat-doc { display: none !important; }
-          .hujjat-doc.chop { display: block !important; box-shadow: none !important; border: none !important; }
-          body { background: white !important; }
+          body * { visibility: hidden !important; }
+          .bosma, .bosma * { visibility: visible !important; }
+          .bosma { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+          @page { size: A4; margin: 12mm 15mm; }
+          html, body { background: #fff !important; }
         }
       `}</style>
 
@@ -214,13 +216,12 @@ export default function HujjatlarPage() {
         </div>
       </div>
 
-      {/* Chop uchun (alohida, faqat print rejimida ko'rinadi) */}
-      <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden>
-        {hujjatlar.map((h) => (
-          <div key={h.id} className={`hujjat-doc ${chopId === h.id ? 'chop' : ''}`}>
-            <HujjatVaraq bloklar={h.bloklar} chop print />
-          </div>
-        ))}
+      {/* Bosma — faqat chop rejimida ko'rinadi, sidebar/header chiqmaydi */}
+      <div className="bosma">
+        {chopId && (() => {
+          const h = hujjatlar.find((x) => x.id === chopId)
+          return h ? <HujjatVaraq bloklar={h.bloklar} print /> : null
+        })()}
       </div>
     </AppShell>
   )
@@ -264,34 +265,39 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
   )
 }
 
-function HujjatVaraq({ bloklar, chop, print }: { bloklar: HujjatBlok[]; chop?: boolean; print?: boolean }) {
+function HujjatVaraq({ bloklar, print }: { bloklar: HujjatBlok[]; chop?: boolean; print?: boolean }) {
+  // chop rejimida kompakt — bitta A4 varaqqa sig'sin
+  const fs = print ? '11px' : '13.5px'
+  const lh = print ? 1.32 : 1.6
+  const pm = print ? '2px' : '4px'   // paragraf orasidagi masofa
   return (
     <div style={{
-      background: print ? 'white' : 'var(--surface)', color: print ? '#111' : 'var(--ink)',
+      background: print ? 'white' : 'var(--surface)', color: print ? '#000' : 'var(--ink)',
       border: print ? 'none' : '1px solid var(--line)', borderRadius: print ? 0 : '12px',
-      padding: print ? '40px' : '28px 32px', fontSize: '13.5px', lineHeight: 1.6,
-      maxWidth: print ? '720px' : 'none', margin: print ? '0 auto' : 0,
+      padding: print ? 0 : '28px 32px', fontSize: fs, lineHeight: lh,
+      maxWidth: 'none', margin: 0,
+      fontFamily: print ? "'Times New Roman', Georgia, serif" : 'inherit',
     }}>
       {bloklar.map((b, i) => {
-        if (b.tur === 'bosh') return <div key={i} style={{ height: '12px' }} />
-        if (b.tur === 'sarlavha') return <h3 key={i} style={{ fontSize: '14px', fontWeight: 700, margin: '12px 0 5px' }}>{b.matn}</h3>
-        if (b.tur === 'matn') return <p key={i} style={{ margin: '0 0 4px', whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{b.matn}</p>
+        if (b.tur === 'bosh') return <div key={i} style={{ height: print ? '8px' : '12px' }} />
+        if (b.tur === 'sarlavha') return <h3 key={i} style={{ fontSize: print ? '12px' : '14px', fontWeight: 700, margin: print ? '8px 0 3px' : '12px 0 5px' }}>{b.matn}</h3>
+        if (b.tur === 'matn') return <p key={i} style={{ margin: `0 0 ${pm}`, whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{b.matn}</p>
         if (b.tur === 'band') return (
-          <p key={i} style={{ margin: '0 0 5px', textAlign: 'justify' }}>
+          <p key={i} style={{ margin: `0 0 ${pm}`, textAlign: 'justify', textIndent: print ? '1.2em' : 0 }}>
             <strong>{b.etiket}:</strong>{b.matn ? ' ' + b.matn : ''}
           </p>
         )
-        if (b.tur === 'royxat') return <ul key={i} style={{ margin: '0 0 6px', paddingLeft: '24px' }}>{b.bandlar.map((x, j) => <li key={j} style={{ marginBottom: '2px' }}>{x}</li>)}</ul>
+        if (b.tur === 'royxat') return <ul key={i} style={{ margin: `0 0 ${pm}`, paddingLeft: '24px' }}>{b.bandlar.map((x, j) => <li key={j} style={{ marginBottom: print ? '1px' : '2px' }}>{x}</li>)}</ul>
         if (b.tur === 'imzo') return (
-          <div key={i} style={{ display: 'flex', justifyContent: 'flex-end', gap: '40px', padding: '6px 0' }}>
+          <div key={i} style={{ display: 'flex', justifyContent: 'flex-end', gap: '40px', padding: print ? '3px 0' : '6px 0' }}>
             <strong>{b.chap}:</strong>
             <span style={{ minWidth: '150px' }}>{b.ong}</span>
           </div>
         )
         // qator (label: value)
         return (
-          <div key={i} style={{ display: 'flex', gap: '10px', padding: '2px 0' }}>
-            <span style={{ color: print ? '#555' : 'var(--muted)', minWidth: '150px', flexShrink: 0 }}>{b.chap}:</span>
+          <div key={i} style={{ display: 'flex', gap: '10px', padding: print ? '1px 0' : '2px 0' }}>
+            <span style={{ color: print ? '#000' : 'var(--muted)', minWidth: '150px', flexShrink: 0 }}>{b.chap}:</span>
             <span style={{ fontWeight: 500 }}>{b.ong}</span>
           </div>
         )
