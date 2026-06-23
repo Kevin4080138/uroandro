@@ -32,6 +32,7 @@ export default function HujjatlarPage() {
   const [saqlandi, setSaqlandi] = useState(false)
   const [chopId, setChopId] = useState<string | null>(null)
   const [chapKeng, setChapKeng] = useState(380)
+  const [faolIndex, setFaolIndex] = useState(0)
 
   useEffect(() => {
     const load = async () => {
@@ -162,22 +163,51 @@ export default function HujjatlarPage() {
           <div style={{ width: '2px', background: 'var(--line)', borderRadius: '2px', minHeight: '120px' }} />
         </div>
 
-        {/* O'NG PANEL — hujjatlar */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {hujjatlar.map((h) => (
-            <div key={h.id}>
+        {/* O'NG PANEL — hujjatlar (bittadan, tab bilan) */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Tab qatori */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {hujjatlar.map((h, i) => (
+              <button key={h.id} onClick={() => setFaolIndex(i)} className="btn-animated" style={{
+                border: 'none', borderRadius: '999px', padding: '7px 14px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
+                background: i === faolIndex ? 'var(--accent)' : 'var(--surface-2)', color: i === faolIndex ? 'white' : 'var(--ink-soft)',
+              }}>
+                {i + 1}. {h.nom}
+              </button>
+            ))}
+          </div>
+
+          {hujjatlar[faolIndex] && (
+            <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--accent)' }}>{h.nom}</h4>
-                <button onClick={() => chopEt(h.id)} className="btn-animated" style={{
+                <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--accent)' }}>{hujjatlar[faolIndex].nom}</h4>
+                <button onClick={() => chopEt(hujjatlar[faolIndex].id)} className="btn-animated" style={{
                   background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px',
                   padding: '6px 14px', cursor: 'pointer', fontSize: '12.5px',
                 }}>
                   🖨️ Chop etish
                 </button>
               </div>
-              <HujjatVaraq bloklar={h.bloklar} chop={chopId === h.id} />
+              <HujjatVaraq bloklar={hujjatlar[faolIndex].bloklar} chop={chopId === hujjatlar[faolIndex].id} />
+
+              {/* Oldingi / Keyingi */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '14px' }}>
+                <button onClick={() => setFaolIndex((i) => Math.max(i - 1, 0))} disabled={faolIndex === 0} className="btn-animated" style={{
+                  background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px',
+                  padding: '9px 18px', cursor: faolIndex === 0 ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: faolIndex === 0 ? 0.5 : 1,
+                }}>
+                  ← Oldingi hujjat
+                </button>
+                <button onClick={() => setFaolIndex((i) => Math.min(i + 1, hujjatlar.length - 1))} disabled={faolIndex === hujjatlar.length - 1} className="btn-animated" style={{
+                  background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px',
+                  padding: '9px 18px', cursor: faolIndex === hujjatlar.length - 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: 600,
+                  opacity: faolIndex === hujjatlar.length - 1 ? 0.5 : 1,
+                }}>
+                  Keyingi hujjat →
+                </button>
+              </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
