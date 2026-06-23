@@ -143,15 +143,24 @@ export default function HujjatlarPage() {
             </button>
           </div>
 
-          <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {shablon.guruhlar.map((g) => (
-              <div key={g.nom}>
-                <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--muted)', margin: '0 0 8px 0' }}>{g.nom}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {g.maydonlar.map((m) => <MaydonRender key={m.key} m={m} value={data[m.key]} set={set} toggle={toggleChecklist} />)}
+          <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {shablon.guruhlar.map((g) => {
+              const faolId = hujjatlar[faolIndex]?.id
+              const maydonlar = g.maydonlar.filter((m) => !m.faqat || (faolId && m.faqat.includes(faolId)))
+              if (maydonlar.length === 0) return null
+              return (
+                <div key={g.nom}>
+                  <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--muted)', margin: '0 0 8px 0' }}>{g.nom}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 10px' }}>
+                    {maydonlar.map((m) => (
+                      <div key={m.key} style={{ flex: m.keng || m.type === 'checklist' || m.type === 'textarea' ? '1 1 100%' : '1 1 calc(50% - 5px)', minWidth: 0 }}>
+                        <MaydonRender m={m} value={data[m.key]} set={set} toggle={toggleChecklist} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -232,7 +241,10 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
     return (
       <div>
         <label style={lbl}>{m.label}</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '130px', overflowY: 'auto',
+          background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '8px',
+        }}>
           {m.variantlar?.map((v) => (
             <button key={v} type="button" style={chip(Array.isArray(value) && value.includes(v))} onClick={() => toggle(m.key, v)}>{v}</button>
           ))}
@@ -243,9 +255,8 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
   if (m.type === 'select') {
     return (
       <div>
-        <label style={lbl}>{m.label}</label>
-        <input list={`dl-${m.key}`} style={input} value={value ?? ''} onChange={(e) => set(m.key, e.target.value)} />
-        <datalist id={`dl-${m.key}`}>{m.variantlar?.map((v) => <option key={v} value={v} />)}</datalist>
+        <label style={lbl}>{m.label}{m.birlik ? ` (${m.birlik})` : ''}</label>
+        <VariantSelect value={value ?? ''} variantlar={m.variantlar ?? []} onChange={(v) => set(m.key, v)} />
       </div>
     )
   }
@@ -261,6 +272,48 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
     <div>
       <label style={lbl}>{m.label}{m.birlik ? ` (${m.birlik})` : ''}</label>
       <input type={m.type === 'date' ? 'date' : m.type === 'number' ? 'number' : 'text'} style={input} value={value ?? ''} onChange={(e) => set(m.key, e.target.value)} />
+    </div>
+  )
+}
+
+function VariantSelect({ value, variantlar, onChange }: { value: string; variantlar: string[]; onChange: (v: string) => void }) {
+  const [ochiq, setOchiq] = useState(false)
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex' }}>
+        <input
+          style={{ ...input, borderRadius: '8px 0 0 8px', borderRight: 'none' }}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setOchiq(true)}
+        />
+        <button type="button" onClick={() => setOchiq((o) => !o)} style={{
+          background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)',
+          borderRadius: '0 8px 8px 0', padding: '0 10px', cursor: 'pointer', fontSize: '11px',
+        }}>▼</button>
+      </div>
+      {ochiq && (
+        <>
+          <div onClick={() => setOchiq(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 2px)', left: 0, right: 0, zIndex: 41,
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '8px',
+            boxShadow: 'var(--shadow)', maxHeight: '200px', overflowY: 'auto', padding: '4px',
+          }}>
+            {variantlar.map((v) => (
+              <div key={v} onClick={() => { onChange(v); setOchiq(false) }} style={{
+                padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px',
+                background: v === value ? 'var(--accent-soft)' : 'transparent', color: v === value ? 'var(--accent)' : 'var(--ink)',
+              }}
+                onMouseEnter={(e) => { if (v !== value) (e.currentTarget.style.background = 'var(--surface-2)') }}
+                onMouseLeave={(e) => { if (v !== value) (e.currentTarget.style.background = 'transparent') }}
+              >
+                {v}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

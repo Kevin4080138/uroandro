@@ -5,6 +5,8 @@ export type Maydon = {
   variantlar?: string[]      // select yoki checklist uchun
   default?: string
   birlik?: string            // masalan "мл", "мм"
+  faqat?: string[]           // faqat shu hujjat id'larida ko'rinadi (bo'sh bo'lsa — hammasida)
+  keng?: boolean             // formada to'liq kenglikni egallaydi
 }
 
 export type MaydonGuruh = { nom: string; maydonlar: Maydon[] }

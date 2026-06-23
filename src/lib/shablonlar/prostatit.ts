@@ -60,13 +60,13 @@ export const prostatitShablon: Shablon = {
       nom: 'Bemor ma\'lumotlari',
       maydonlar: [
         { key: 'tugilgan_yil', label: 'Tug\'ilgan yili', type: 'text' },
-        { key: 'manzil', label: 'Manzili', type: 'text' },
-        { key: 'ish_joyi', label: 'Ish joyi', type: 'select', variantlar: ['Ишсиз', 'Ишчи', 'Хизматчи', 'Тадбиркор', 'Нафақахўр'] },
-        { key: 'tarix_raqami', label: 'Kasallik tarixi №', type: 'text' },
-        { key: 'korik_sana', label: 'Ko\'rik sanasi', type: 'date' },
-        { key: 'korik_vaqt', label: 'Ko\'rik vaqti', type: 'select', default: '10:45', variantlar: ['08:30', '09:15', '10:00', '10:45', '11:30', '14:00'] },
-        { key: 'kelgan_sana', label: 'Kelgan sana', type: 'date' },
-        { key: 'chiqgan_sana', label: 'Chiqgan sana', type: 'date' },
+        { key: 'korik_sana', label: 'Ko\'rik sanasi', type: 'date', faqat: ['birlamchi', 'asoslash'] },
+        { key: 'korik_vaqt', label: 'Ko\'rik vaqti', type: 'select', default: '10:45', variantlar: ['08:30', '09:15', '10:00', '10:45', '11:30', '14:00'], faqat: ['birlamchi', 'asoslash'] },
+        { key: 'manzil', label: 'Manzili', type: 'text', keng: true, faqat: ['epikriz'] },
+        { key: 'ish_joyi', label: 'Ish joyi', type: 'select', variantlar: ['Ишсиз', 'Ишчи', 'Хизматчи', 'Тадбиркор', 'Нафақахўр'], faqat: ['epikriz'] },
+        { key: 'tarix_raqami', label: 'Kasallik tarixi №', type: 'text', faqat: ['epikriz'] },
+        { key: 'kelgan_sana', label: 'Kelgan sana', type: 'date', faqat: ['epikriz'] },
+        { key: 'chiqgan_sana', label: 'Chiqgan sana', type: 'date', faqat: ['epikriz'] },
       ],
     },
     {
@@ -85,9 +85,9 @@ export const prostatitShablon: Shablon = {
     {
       nom: 'Anamnez',
       maydonlar: [
-        { key: 'anamnez_morbi', label: 'Anamnesis morbi', type: 'textarea', default: 'Анамнезидан ўзини бир неча ойдан буён хаста деб билади. Хасталигини совуқ шароитдаги иш муҳити билан боғлайди. Хасталиги бўйича аввал даволанган. Юқоридаги шикоятлар билан текширувлардан ўтиш ва стационар даво учун MERIDIAN DIAGNOSTIC HOSPITAL клиникасига мурожаат қилиб келди.' },
-        { key: 'anamnez_vitae', label: 'Anamnesis vitae', type: 'textarea', default: 'Ёшлигидан қониқарли оила шароитида ўсиб улғайган. Бемор сўзидан операция муолажалари ўтказмаган. Сурункали касалликлар ўтказмаган.' },
-        { key: 'allergiya', label: 'Allergologik anamnez', type: 'text', default: 'Дори-дармонларга нисбатан ножўя ҳолат кузатилмаган.' },
+        { key: 'anamnez_morbi', label: 'Anamnesis morbi', type: 'textarea', keng: true, default: 'Анамнезидан ўзини бир неча ойдан буён хаста деб билади. Хасталигини совуқ шароитдаги иш муҳити билан боғлайди. Хасталиги бўйича аввал даволанган. Юқоридаги шикоятлар билан текширувлардан ўтиш ва стационар даво учун MERIDIAN DIAGNOSTIC HOSPITAL клиникасига мурожаат қилиб келди.' },
+        { key: 'anamnez_vitae', label: 'Anamnesis vitae', type: 'textarea', keng: true, faqat: ['birlamchi'], default: 'Ёшлигидан қониқарли оила шароитида ўсиб улғайган. Бемор сўзидан операция муолажалари ўтказмаган. Сурункали касалликлар ўтказмаган.' },
+        { key: 'allergiya', label: 'Allergologik anamnez', type: 'text', keng: true, faqat: ['birlamchi'], default: 'Дори-дармонларга нисбатан ножўя ҳолат кузатилмаган.' },
       ],
     },
     {
@@ -101,26 +101,26 @@ export const prostatitShablon: Shablon = {
     {
       nom: 'Tekshiruvlar',
       maydonlar: [
-        { key: 'usi_qop_hajm', label: 'Siydik qopi hajmi', type: 'text', birlik: 'ml', default: '140' },
-        { key: 'usi_shilliq', label: 'Siydik qopi shilliq qavati', type: 'text', birlik: 'mm', default: '2' },
-        { key: 'prostata_olcham', label: 'Prostata o\'lchami', type: 'text', default: '40х30х32' },
-        { key: 'prostata_hajm', label: 'Prostata hajmi', type: 'text', birlik: 'sm³', default: '19' },
-        { key: 'hb', label: 'Gemoglobin', type: 'text', default: '140' },
-        { key: 'leykotsit', label: 'Leykotsit', type: 'text', default: '8.5' },
-        { key: 'echt', label: 'EChT', type: 'text', default: '13' },
-        { key: 'rw', label: 'RW', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'] },
-        { key: 'vich', label: 'ВИЧ', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'] },
-        { key: 'hbsag', label: 'HBs-Ag (ВГ "В")', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'] },
-        { key: 'hcv', label: 'Анти HCV (ВГ "С")', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'] },
-        { key: 'nech_ley', label: 'Nechiporenko leykotsit', type: 'text', default: '5000' },
-        { key: 'pr_ley', label: 'Prostata suyuqligi leykotsit', type: 'select', default: '15-20', variantlar: ['1-3', '5-10', '15-20', '25-30', '30-40', 'спл'] },
+        { key: 'usi_qop_hajm', label: 'Siydik qopi hajmi', type: 'text', birlik: 'ml', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'usi_shilliq', label: 'Siydik qopi shilliq', type: 'text', birlik: 'mm', default: '2', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'prostata_olcham', label: 'Prostata o\'lchami', type: 'text', default: '40х30х32', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'prostata_hajm', label: 'Prostata hajmi', type: 'text', birlik: 'sm³', default: '19', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'hb', label: 'Gemoglobin', type: 'text', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'leykotsit', label: 'Leykotsit', type: 'text', default: '8.5', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'echt', label: 'EChT', type: 'text', default: '13', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'rw', label: 'RW', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'vich', label: 'ВИЧ', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'hbsag', label: 'HBs-Ag (ВГ "В")', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'hcv', label: 'Анти HCV (ВГ "С")', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'nech_ley', label: 'Nechiporenko leykotsit', type: 'text', default: '5000', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'pr_ley', label: 'Prostata suyuqligi ley.', type: 'select', default: '15-20', variantlar: ['1-3', '5-10', '15-20', '25-30', '30-40', 'спл'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
       ],
     },
     {
       nom: 'Tashxis',
       maydonlar: [
         {
-          key: 'tashxis', label: 'Klinik tashxis', type: 'select',
+          key: 'tashxis', label: 'Klinik tashxis', type: 'select', keng: true,
           variantlar: [
             'Асоратланмаган ПСЙИ. Яллиғланган простатит 3а категория. Эректил дисфункция.',
             'Асоратланмаган ПСЙИ. Яллиғланган простатит 3b категория.',
@@ -134,7 +134,7 @@ export const prostatitShablon: Shablon = {
       nom: 'Davolash',
       maydonlar: [
         {
-          key: 'davo', label: 'Tavsiya etilgan dorilar', type: 'checklist',
+          key: 'davo', label: 'Tavsiya etilgan dorilar', type: 'checklist', faqat: ['birlamchi', 'epikriz'],
           variantlar: [
             'Стол №7, режим — умумий',
             'Sol. Levofloxocini 100 ml в/в синама билан 1 маҳал 7 кун',
@@ -145,7 +145,7 @@ export const prostatitShablon: Shablon = {
             'Supp. Diclofenaci 100 mg 1 св. х 1 маҳал 10 кун',
           ],
         },
-        { key: 'chiqish_tavsiya', label: 'Chiqishdagi tavsiya', type: 'textarea', default: '1. Левофлоксоцин 500 мг 1 таб х 1 маҳал 7 кун\n2. Яшаш жойи уролог назорати\n3. Қайта кўрик 10 кундан сўнг' },
+        { key: 'chiqish_tavsiya', label: 'Chiqishdagi tavsiya', type: 'textarea', keng: true, faqat: ['epikriz'], default: '1. Левофлоксоцин 500 мг 1 таб х 1 маҳал 7 кун\n2. Яшаш жойи уролог назорати\n3. Қайта кўрик 10 кундан сўнг' },
       ],
     },
     {
@@ -153,7 +153,7 @@ export const prostatitShablon: Shablon = {
       maydonlar: [
         { key: 'davolovchi', label: 'Davolovchi vrach', type: 'text' },
         { key: 'bolim_mudiri', label: 'Bo\'lim mudiri', type: 'text' },
-        { key: 'bosh_vrach', label: 'Bosh vrach', type: 'text' },
+        { key: 'bosh_vrach', label: 'Bosh vrach', type: 'text', faqat: ['epikriz'] },
       ],
     },
   ],
