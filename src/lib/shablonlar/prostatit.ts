@@ -92,9 +92,9 @@ export const prostatitShablon: Shablon = {
     {
       nom: 'Status praesens (ko\'rsatkichlar)',
       maydonlar: [
-        { key: 'harorat', label: 'Tana harorati', type: 'text', birlik: '°C', default: '36,6' },
-        { key: 'puls', label: 'Puls', type: 'number', birlik: 'bpm', default: '72' },
-        { key: 'akb', label: 'AKB', type: 'text', birlik: 'mm.sim.', default: '110/80' },
+        { key: 'harorat', label: 'Tana harorati', type: 'select', birlik: '°C', default: '36,6', variantlar: ['36,4', '36,5', '36,6', '36,8', '37,0', '37,2', '37,5', '38,0'] },
+        { key: 'puls', label: 'Puls', type: 'select', birlik: 'bpm', default: '72', variantlar: ['66', '68', '70', '72', '74', '76', '78', '80', '84', '88'] },
+        { key: 'akb', label: 'AKB', type: 'select', birlik: 'mm.sim.', default: '110/80', variantlar: ['100/60', '110/70', '110/80', '120/80', '120/90', '130/80', '130/90', '140/90'] },
       ],
     },
     {
@@ -107,8 +107,9 @@ export const prostatitShablon: Shablon = {
         { key: 'hb', label: 'Gemoglobin', type: 'text', default: '140' },
         { key: 'leykotsit', label: 'Leykotsit', type: 'text', default: '8.5' },
         { key: 'echt', label: 'EChT', type: 'text', default: '13' },
+        { key: 'serologiya', label: 'Serologiya (RW/VICH/HBs/HCV)', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'] },
         { key: 'nech_ley', label: 'Nechiporenko leykotsit', type: 'text', default: '5000' },
-        { key: 'pr_ley', label: 'Prostata suyuqligi leykotsit', type: 'text', default: '15-20' },
+        { key: 'pr_ley', label: 'Prostata suyuqligi leykotsit', type: 'select', default: '15-20', variantlar: ['1-3', '5-10', '15-20', '25-30', '30-40', 'спл'] },
       ],
     },
     {

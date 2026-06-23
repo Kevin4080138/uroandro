@@ -31,6 +31,7 @@ export default function HujjatlarPage() {
   const [saving, setSaving] = useState(false)
   const [saqlandi, setSaqlandi] = useState(false)
   const [chopId, setChopId] = useState<string | null>(null)
+  const [chapKeng, setChapKeng] = useState(380)
 
   useEffect(() => {
     const load = async () => {
@@ -49,11 +50,33 @@ export default function HujjatlarPage() {
         if (m.default) boshlang[m.key] = m.default
         if (m.type === 'checklist') boshlang[m.key] = []
       }
+      // pasport ma'lumotlarini bemordan avtomatik to'ldirish
+      if (b?.tugilgan_sana) boshlang.tugilgan_yil = String(b.tugilgan_sana).slice(0, 4)
+      if (b?.manzil) boshlang.manzil = b.manzil
       setData({ ...boshlang, ...(hd?.malumot ?? {}) })
       setLoading(false)
     }
     load()
   }, [id])
+
+  // o'rtadagi ajratgichni sudrash
+  const sudrashBoshla = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const boshX = e.clientX
+    const boshKeng = chapKeng
+    const harakat = (ev: MouseEvent) => {
+      const yangi = Math.min(Math.max(boshKeng + (ev.clientX - boshX), 280), 640)
+      setChapKeng(yangi)
+    }
+    const tugat = () => {
+      window.removeEventListener('mousemove', harakat)
+      window.removeEventListener('mouseup', tugat)
+      document.body.style.userSelect = ''
+    }
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', harakat)
+    window.addEventListener('mouseup', tugat)
+  }
 
   const set = (key: string, val: any) => { setData((d) => ({ ...d, [key]: val })); setSaqlandi(false) }
   const toggleChecklist = (key: string, val: string) => {
@@ -92,6 +115,7 @@ export default function HujjatlarPage() {
   return (
     <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`}>
       <style>{`
+        .ajratgich:hover > div { background: var(--accent) !important; width: 3px !important; }
         @media print {
           .no-print { display: none !important; }
           .hujjat-doc { display: none !important; }
@@ -100,9 +124,9 @@ export default function HujjatlarPage() {
         }
       `}</style>
 
-      <div className="no-print px-8 py-6" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', alignItems: 'start' }}>
+      <div className="no-print px-8 py-6" style={{ display: 'flex', gap: '0', alignItems: 'start' }}>
         {/* CHAP PANEL — forma */}
-        <div style={{ position: 'sticky', top: '80px' }}>
+        <div style={{ width: chapKeng, flexShrink: 0, position: 'sticky', top: '80px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <h3 style={{ margin: 0, fontSize: '15px' }}>Ma&apos;lumotlar</h3>
             <button onClick={saqla} disabled={saving} className="btn-animated" style={{
@@ -125,8 +149,21 @@ export default function HujjatlarPage() {
           </div>
         </div>
 
+        {/* SURILADIGAN AJRATGICH */}
+        <div
+          className="ajratgich"
+          onMouseDown={sudrashBoshla}
+          title="O'lchamni o'zgartirish uchun suring"
+          style={{
+            width: '10px', flexShrink: 0, cursor: 'col-resize', alignSelf: 'stretch',
+            display: 'flex', justifyContent: 'center', position: 'sticky', top: '80px',
+          }}
+        >
+          <div style={{ width: '2px', background: 'var(--line)', borderRadius: '2px', minHeight: '120px' }} />
+        </div>
+
         {/* O'NG PANEL — hujjatlar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {hujjatlar.map((h) => (
             <div key={h.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
