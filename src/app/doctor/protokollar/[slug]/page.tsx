@@ -1,12 +1,33 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
-import { PROTOKOLLAR } from '@/lib/protokollar'
+import { createClient } from '@/lib/supabase'
+
+type Protokol = {
+  id: string; slug: string; nom: string; toifa: string; qisqa: string
+  korsatma: string; tashxis: string[]; davolash: string[]; manba: string | null
+}
 
 export default function ProtokolDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const protokol = PROTOKOLLAR.find((p) => p.slug === slug)
+  const supabase = createClient()
+  const [protokol, setProtokol] = useState<Protokol | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.from('protokollar').select('*').eq('slug', slug).single().then(({ data }) => {
+      setProtokol(data)
+      setLoading(false)
+    })
+  }, [slug])
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+    </div>
+  )
 
   if (!protokol) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -40,9 +61,11 @@ export default function ProtokolDetailPage() {
           </ul>
         </div>
 
-        <div style={{ marginTop: '18px', background: 'var(--accent-soft)', border: '1px solid var(--line)', borderRadius: '10px', padding: '13px 15px', fontSize: '12.5px', color: 'var(--warn)' }}>
-          Manba: {protokol.manba}. Bu qisqacha yo&apos;naltiruvchi xulosa — yakuniy klinik qaror to&apos;liq rasmiy qo&apos;llanma va shifokorning shaxsiy baholashiga asoslanishi kerak.
-        </div>
+        {protokol.manba && (
+          <div style={{ marginTop: '18px', background: 'var(--accent-soft)', border: '1px solid var(--line)', borderRadius: '10px', padding: '13px 15px', fontSize: '12.5px', color: 'var(--warn)' }}>
+            Manba: {protokol.manba}. Bu qisqacha yo&apos;naltiruvchi xulosa — yakuniy klinik qaror to&apos;liq rasmiy qo&apos;llanma va shifokorning shaxsiy baholashiga asoslanishi kerak.
+          </div>
+        )}
       </div>
     </AppShell>
   )

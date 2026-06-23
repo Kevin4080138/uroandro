@@ -53,18 +53,19 @@ export default function AdminDashboard() {
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '👥', title: 'Foydalanuvchilar', desc: 'Talaba, bemor, shifokorlarni boshqarish' },
-            { icon: '📝', title: 'Kontent', desc: 'Protokol, maqola va materiallarni tahrirlash' },
-            { icon: '❓', title: 'Testlar', desc: 'Quizlarni boshqarish' },
-            { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi' },
+            { icon: '👥', title: 'Foydalanuvchilar', desc: 'Talaba, bemor, shifokorlarni boshqarish', href: '/admin/users' },
+            { icon: '📝', title: 'Kontent', desc: 'Protokol va kutubxona materiallarini boshqarish', href: '/admin/content' },
+            { icon: '❓', title: 'Testlar', desc: 'Quizlarni boshqarish (tez kunda)' },
+            { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi (tez kunda)' },
           ].map((item) => (
-            <div key={item.title} style={{
+            <div key={item.title} onClick={() => item.href && router.push(item.href)} style={{
               background: 'var(--surface)',
               border: '1px solid var(--line)',
               borderRadius: '12px',
               padding: '24px',
-              cursor: 'pointer',
-              }} className="card-hover">
+              cursor: item.href ? 'pointer' : 'default',
+              opacity: item.href ? 1 : 0.55,
+              }} className={item.href ? 'card-hover' : ''}>
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
               <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>

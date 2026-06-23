@@ -34,12 +34,19 @@ export default function LoginPage() {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, faol')
       .eq('id', data.user.id)
       .single()
 
     if (profileError) {
       setError('Profil xatosi: ' + profileError.message)
+      setLoading(false)
+      return
+    }
+
+    if (profile?.faol === false) {
+      await supabase.auth.signOut()
+      setError('Hisobingiz bloklangan. Administrator bilan bog\'laning.')
       setLoading(false)
       return
     }
