@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 
 const KALKULYATORLAR = [
   { href: '/doctor/calculators/varikotsele', icon: '🧮', title: 'Varikotsele solishtirish', desc: "Laparoskopik, Marmar, Skleroterapiya, Palomo, Ivanissevich usullarini qiyosiy tahlil qilish", faol: true },
@@ -14,11 +14,8 @@ export default function CalculatorsHubPage() {
   const router = useRouter()
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header />
-
-      <div className="fade-in mx-auto max-w-[900px] px-8 py-8">
-        <h2 className="mb-1 text-2xl font-bold">Kalkulatorlar</h2>
+    <AppShell title="Kalkulatorlar">
+      <div className="mx-auto max-w-[900px] px-8 py-8">
         <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '24px' }}>
           Klinik qaror qabul qilishda yordam beradigan hisoblash vositalari.
         </p>
@@ -54,6 +51,6 @@ export default function CalculatorsHubPage() {
           ))}
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }

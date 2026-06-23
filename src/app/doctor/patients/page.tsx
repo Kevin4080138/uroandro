@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 
 const inputStyle = {
   width: '100%',
@@ -71,12 +71,9 @@ export default function PatientsRegistryPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header />
-
-      <div className="fade-in px-8 py-8">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
-          <h2 style={{ margin: 0, fontSize: '24px' }}>Bemorlar reestri</h2>
+    <AppShell title="Bemorlar reestri">
+      <div className="px-8 py-8">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
           <input
             placeholder="F.I.O, pasport yoki telefon bo'yicha qidirish..."
             value={qidiruv}
@@ -167,6 +164,6 @@ export default function PatientsRegistryPage() {
           </div>
         )}
       </div>
-    </div>
+    </AppShell>
   )
 }

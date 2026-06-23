@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 import { PROTOKOLLAR } from '@/lib/protokollar'
 
 export default function ProtokolDetailPage() {
@@ -15,10 +15,8 @@ export default function ProtokolDetailPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header backHref="/doctor/protokollar" backLabel="Protokollar ro'yxati" />
-
-      <div className="fade-in mx-auto max-w-[760px] px-8 py-8">
+    <AppShell title={protokol.nom}>
+      <div className="mx-auto max-w-[760px] px-8 py-8">
         <span style={{ fontSize: '12px', color: 'var(--accent-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{protokol.toifa}</span>
         <h2 style={{ margin: '6px 0 8px 0', fontSize: '26px' }}>{protokol.nom}</h2>
         <p style={{ color: 'var(--muted)', fontSize: '15px' }}>{protokol.qisqa}</p>
@@ -46,6 +44,6 @@ export default function ProtokolDetailPage() {
           Manba: {protokol.manba}. Bu qisqacha yo&apos;naltiruvchi xulosa — yakuniy klinik qaror to&apos;liq rasmiy qo&apos;llanma va shifokorning shaxsiy baholashiga asoslanishi kerak.
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }

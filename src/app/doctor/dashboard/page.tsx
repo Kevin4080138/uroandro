@@ -3,14 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
-import { useTheme } from '@/components/ThemeProvider'
+import { AppShell } from '@/components/AppShell'
 
 export default function DoctorDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
-  const { theme, toggle } = useTheme()
 
   useEffect(() => {
     const getProfile = async () => {
@@ -40,35 +38,19 @@ export default function DoctorDashboard() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <header
-        className="sticky top-0 z-20 flex items-center justify-between px-8 py-4"
-        style={{ background: 'var(--header)', borderBottom: '1px solid var(--line)' }}
-      >
-        <h1 className="m-0 text-xl font-bold">
-          Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
-        </h1>
-        <div className="flex items-center gap-4">
-          <span style={{ color: 'var(--muted)', fontSize: '14px' }}>👨‍⚕️ {profile.full_name}</span>
-          <button
-            onClick={toggle}
-            aria-label="Temani almashtirish"
-            className="btn-animated rounded-lg border px-3 py-2 text-sm"
-            style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-          <button
-            onClick={handleLogout}
-            className="btn-animated rounded-lg border px-4 py-2 text-sm"
-            style={{ background: 'var(--surface-2)', color: 'var(--danger)', borderColor: 'var(--line)' }}
-          >
-            Chiqish
-          </button>
-        </div>
-      </header>
-
-      <div className="fade-in px-8 py-8">
+    <AppShell
+      title={`👨‍⚕️ ${profile.full_name}`}
+      actions={
+        <button
+          onClick={handleLogout}
+          className="btn-animated rounded-lg border px-4 py-2 text-sm"
+          style={{ background: 'var(--surface-2)', color: 'var(--danger)', borderColor: 'var(--line)' }}
+        >
+          Chiqish
+        </button>
+      }
+    >
+      <div className="px-8 py-8">
         <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
           Dr. {profile.full_name} 👨‍⚕️
@@ -76,11 +58,11 @@ export default function DoctorDashboard() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", color: 'var(--danger)', href: '/doctor/patients' },
-            { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', color: 'var(--accent)', href: '/doctor/protokollar' },
-            { icon: '🧮', title: 'Kalkulatorlar', desc: "Varikotsele usul tanlash, IPSS, PSA", color: 'var(--accent-2)', href: '/doctor/calculators' },
-            { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', color: 'var(--good)', href: '/doctor/kutubxona' },
-            { icon: '🌐', title: "Qo'llanmalar", desc: 'EAU, AUA guidelines', color: 'var(--warn)', href: '/doctor/qollanmalar' },
+            { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", href: '/doctor/patients' },
+            { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', href: '/doctor/protokollar' },
+            { icon: '🧮', title: 'Kalkulatorlar', desc: "Varikotsele usul tanlash, IPSS, PSA", href: '/doctor/calculators' },
+            { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', href: '/doctor/kutubxona' },
+            { icon: '🌐', title: "Qo'llanmalar", desc: 'EAU, AUA guidelines', href: '/doctor/qollanmalar' },
           ].map((item) => (
             <div
               key={item.title}
@@ -101,6 +83,6 @@ export default function DoctorDashboard() {
           ))}
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
+import { IconButton } from '@/components/IconButton'
 import { createClient } from '@/lib/supabase'
 import { tavsiyaBerish } from '@/lib/tavsiya'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
@@ -257,9 +258,7 @@ export default function PatientCardPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header backHref="/doctor/patients" backLabel="Reestrga qaytish" />
-
+    <AppShell title={bemor.fio}>
       <div style={{ padding: '32px' }}>
         <div style={{
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
@@ -508,64 +507,24 @@ export default function PatientCardPage() {
                   {t.dori_muolaja && <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: 'var(--good)' }}><strong>Dori/muolaja:</strong> {t.dori_muolaja}</p>}
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                    <button onClick={() => openYangiForm(t)} style={{
-                      background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px',
-                      padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                    }}>
-                      ✎ Tahrirlash
-                    </button>
+                    <IconButton icon="✎" label="Tahrirlash" onClick={() => openYangiForm(t)} />
                     {(t.holat === 'yangi' || t.holat === 'tekshiruv_buyurildi') && (
-                      <button onClick={() => window.open(`/doctor/print/referral/${t.id}`, '_blank')} style={{
-                        background: 'var(--surface-2)', color: 'var(--warn)', border: '1px solid var(--line)', borderRadius: '8px',
-                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                      }}>
-                        🖨️ Yo&apos;llanma chop etish
-                      </button>
+                      <IconButton icon="🖨️" label="Yo'llanma chop etish" color="var(--warn)" onClick={() => window.open(`/doctor/print/referral/${t.id}`, '_blank')} />
                     )}
                     {t.holat !== 'yakunlandi' && (
-                      <button onClick={() => openNatijaForm(t)} style={{
-                        background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)', borderRadius: '8px',
-                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                      }}>
-                        Tekshiruv natijalarini kiritish
-                      </button>
+                      <IconButton icon="🧪" label="Tekshiruv natijalarini kiritish" color="var(--accent)" onClick={() => openNatijaForm(t)} />
                     )}
                     {t.holat === 'natija_kiritildi' && (
-                      <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
-                        background: 'var(--surface-2)', color: 'var(--good)', border: '1px solid var(--line)', borderRadius: '8px',
-                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                      }}>
-                        Tavsiya varaqasini yakunlash
-                      </button>
+                      <IconButton icon="📝" label="Tavsiya varaqasini yakunlash" color="var(--good)" onClick={() => openYakunlash(t.id, t.dori_muolaja)} />
                     )}
                     {(t.holat === 'natija_kiritildi' || t.holat === 'yakunlandi') && (
-                      <button onClick={() => router.push(kalkulyatorHavolasi(bemor, t))} style={{
-                        background: 'var(--surface-2)', color: 'var(--accent-2)', border: '1px solid var(--line)', borderRadius: '8px',
-                        padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                      }}>
-                        🧮 Varikotsele kalkulyatoriga o&apos;tish
-                      </button>
+                      <IconButton icon="🧮" label="Varikotsele kalkulyatoriga o'tish" color="var(--accent-2)" onClick={() => router.push(kalkulyatorHavolasi(bemor, t))} />
                     )}
                     {t.holat === 'yakunlandi' && (
                       <>
-                        <button onClick={() => openNatijaForm(t)} style={{
-                          background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)', borderRadius: '8px',
-                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                        }}>
-                          Natijalarni tahrirlash
-                        </button>
-                        <button onClick={() => openYakunlash(t.id, t.dori_muolaja)} style={{
-                          background: 'var(--surface-2)', color: 'var(--good)', border: '1px solid var(--line)', borderRadius: '8px',
-                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                        }}>
-                          Dori/muolajani tahrirlash
-                        </button>
-                        <button onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} style={{
-                          background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)', borderRadius: '8px',
-                          padding: '8px 14px', cursor: 'pointer', fontSize: '13px',
-                        }}>
-                          🖨️ Chop etish / PDF
-                        </button>
+                        <IconButton icon="🧪" label="Natijalarni tahrirlash" color="var(--accent)" onClick={() => openNatijaForm(t)} />
+                        <IconButton icon="📝" label="Dori/muolajani tahrirlash" color="var(--good)" onClick={() => openYakunlash(t.id, t.dori_muolaja)} />
+                        <IconButton icon="🖨️" label="Chop etish / PDF" onClick={() => window.open(`/doctor/print/${t.id}`, '_blank')} />
                       </>
                     )}
                   </div>
@@ -575,6 +534,6 @@ export default function PatientCardPage() {
           </div>
         )}
       </div>
-    </div>
+    </AppShell>
   )
 }

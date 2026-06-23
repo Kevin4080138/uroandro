@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
+import { IconButton } from '@/components/IconButton'
 import { createClient } from '@/lib/supabase'
 
 const inputStyle = {
@@ -69,15 +70,10 @@ export default function KutubxonaPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header />
-
-      <div className="fade-in px-8 py-8" style={{ maxWidth: '760px', margin: '0 auto' }}>
+    <AppShell title="Kutubxona">
+      <div className="px-8 py-8" style={{ maxWidth: '760px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div>
-            <h2 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>Kutubxona</h2>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>PDF materiallar — hamma shifokorlar uchun umumiy.</p>
-          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>PDF materiallar — hamma shifokorlar uchun umumiy.</p>
           <button onClick={() => setShowForm(!showForm)} style={{
             background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
             padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
@@ -127,13 +123,13 @@ export default function KutubxonaPage() {
                   <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: 'var(--muted)' }}>{new Date(f.created_at).toLocaleDateString()}</p>
                 </div>
                 {f.doctor_id === userId && (
-                  <button onClick={() => ochirish(f)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '16px' }}>🗑️</button>
+                  <IconButton icon="🗑️" label="O'chirish" onClick={() => ochirish(f)} variant="danger" />
                 )}
               </div>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </AppShell>
   )
 }

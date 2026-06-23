@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 import { PROTOKOLLAR } from '@/lib/protokollar'
 
 export default function ProtokollarPage() {
@@ -15,12 +15,9 @@ export default function ProtokollarPage() {
   const toifalar = Array.from(new Set(filtered.map((p) => p.toifa)))
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header />
-
-      <div className="fade-in mx-auto max-w-[900px] px-8 py-8">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px', flexWrap: 'wrap' }}>
-          <h2 className="text-2xl font-bold">Klinik protokollar</h2>
+    <AppShell title="Klinik protokollar">
+      <div className="mx-auto max-w-[900px] px-8 py-8">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
           <input
             placeholder="Qidirish..."
             value={qidiruv}
@@ -51,6 +48,6 @@ export default function ProtokollarPage() {
 
         {filtered.length === 0 && <p style={{ color: 'var(--muted)' }}>Hech narsa topilmadi.</p>}
       </div>
-    </div>
+    </AppShell>
   )
 }

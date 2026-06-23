@@ -1,15 +1,12 @@
 'use client'
 
-import { Header } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 import { QOLLANMALAR } from '@/lib/qollanmalar'
 
 export default function QollanmalarPage() {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header />
-
-      <div className="fade-in mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="mb-1 text-2xl font-bold">Qo&apos;llanmalar</h2>
+    <AppShell title="Qo'llanmalar">
+      <div className="mx-auto max-w-[760px] px-8 py-8">
         <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '24px' }}>
           Rasmiy xalqaro urologiya/andrologiya tashkilotlarining klinik qo&apos;llanmalariga havolalar.
         </p>
@@ -37,6 +34,6 @@ export default function QollanmalarPage() {
           ))}
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }
