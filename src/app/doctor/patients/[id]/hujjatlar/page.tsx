@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
@@ -33,6 +33,8 @@ export default function HujjatlarPage() {
   const [chopId, setChopId] = useState<string | null>(null)
   const [chapKeng, setChapKeng] = useState(380)
   const [faolIndex, setFaolIndex] = useState(0)
+  const [bosmaScale, setBosmaScale] = useState(1)
+  const bosmaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -104,7 +106,17 @@ export default function HujjatlarPage() {
 
   const chopEt = (hid: string) => {
     setChopId(hid)
-    setTimeout(() => { window.print(); setChopId(null) }, 100)
+    setBosmaScale(1)
+    // avval scale=1 da render bo'lsin, keyin balandlikni o'lchab bitta betga moslaymiz
+    setTimeout(() => {
+      const el = bosmaRef.current
+      const target = 1000 // A4 chop maydoni balandligi (~px, 96dpi)
+      if (el) {
+        const h = el.scrollHeight
+        setBosmaScale(h > target ? target / h : 1)
+      }
+      setTimeout(() => { window.print(); setChopId(null); setBosmaScale(1) }, 90)
+    }, 60)
   }
 
   const hujjatlar = useMemo(
@@ -120,11 +132,11 @@ export default function HujjatlarPage() {
     <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`}>
       <style>{`
         .ajratgich:hover > div { background: var(--accent) !important; width: 3px !important; }
-        .bosma { display: none; }
+        .bosma { position: absolute; left: -10000px; top: 0; width: 680px; }
         @media print {
           body * { visibility: hidden !important; }
           .bosma, .bosma * { visibility: visible !important; }
-          .bosma { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+          .bosma { left: 0 !important; top: 0 !important; width: 100% !important; }
           @page { size: A4; margin: 12mm 15mm; }
           html, body { background: #fff !important; }
         }
@@ -225,8 +237,8 @@ export default function HujjatlarPage() {
         </div>
       </div>
 
-      {/* Bosma — faqat chop rejimida ko'rinadi, sidebar/header chiqmaydi */}
-      <div className="bosma">
+      {/* Bosma — faqat chop rejimida ko'rinadi, sidebar/header chiqmaydi, bitta betga sig'adi */}
+      <div className="bosma" ref={bosmaRef} style={{ zoom: bosmaScale }}>
         {chopId && (() => {
           const h = hujjatlar.find((x) => x.id === chopId)
           return h ? <HujjatVaraq bloklar={h.bloklar} print /> : null
@@ -241,14 +253,15 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
     return (
       <div>
         <label style={lbl}>{m.label}</label>
-        <div style={{
-          display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '130px', overflowY: 'auto',
-          background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '8px',
-        }}>
-          {m.variantlar?.map((v) => (
-            <button key={v} type="button" style={chip(Array.isArray(value) && value.includes(v))} onClick={() => toggle(m.key, v)}>{v}</button>
-          ))}
-        </div>
+        <MultiSelect tanlangan={Array.isArray(value) ? value : []} variantlar={m.variantlar ?? []} toggle={(v) => toggle(m.key, v)} />
+      </div>
+    )
+  }
+  if (m.type === 'olcham') {
+    return (
+      <div>
+        <label style={lbl}>{m.label}</label>
+        <Olcham value={value ?? ''} onChange={(olcham, hajm) => { set(m.key, olcham); set('prostata_hajm', hajm) }} />
       </div>
     )
   }
@@ -272,6 +285,87 @@ function MaydonRender({ m, value, set, toggle }: { m: Maydon; value: any; set: (
     <div>
       <label style={lbl}>{m.label}{m.birlik ? ` (${m.birlik})` : ''}</label>
       <input type={m.type === 'date' ? 'date' : m.type === 'number' ? 'number' : 'text'} style={input} value={value ?? ''} onChange={(e) => set(m.key, e.target.value)} />
+    </div>
+  )
+}
+
+// Kompakt ko'p tanlovli: tanlanganlar kichik teg, qo'shish uchun dropdown
+function MultiSelect({ tanlangan, variantlar, toggle }: { tanlangan: string[]; variantlar: string[]; toggle: (v: string) => void }) {
+  const [ochiq, setOchiq] = useState(false)
+  const qoldiq = variantlar.filter((v) => !tanlangan.includes(v))
+  return (
+    <div>
+      {tanlangan.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '6px' }}>
+          {tanlangan.map((v) => (
+            <span key={v} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--accent)', color: 'white', borderRadius: '14px', padding: '4px 6px 4px 10px', fontSize: '12px' }}>
+              {v}
+              <button type="button" onClick={() => toggle(v)} style={{ background: 'rgba(255,255,255,.25)', border: 'none', borderRadius: '50%', width: '16px', height: '16px', cursor: 'pointer', color: 'white', fontSize: '11px', lineHeight: 1 }}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{ position: 'relative' }}>
+        <button type="button" onClick={() => setOchiq((o) => !o)} style={{ ...input, textAlign: 'left', cursor: 'pointer', color: 'var(--muted)' }}>
+          + Tanlash...
+        </button>
+        {ochiq && (
+          <>
+            <div onClick={() => setOchiq(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+            <div style={{ position: 'absolute', top: 'calc(100% + 2px)', left: 0, right: 0, zIndex: 41, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '8px', boxShadow: 'var(--shadow)', maxHeight: '220px', overflowY: 'auto', padding: '4px' }}>
+              {qoldiq.length === 0 ? (
+                <div style={{ padding: '8px 10px', fontSize: '12.5px', color: 'var(--muted)' }}>Hammasi tanlangan</div>
+              ) : qoldiq.map((v) => (
+                <div key={v} onClick={() => { toggle(v); setOchiq(false) }} style={{ padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', color: 'var(--ink)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >{v}</div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Prostata o'lchami: 3 raqam (a×b×c) → hajm avtomatik (ellipsoid: 0.52)
+function Olcham({ value, onChange }: { value: string; onChange: (olcham: string, hajm: string) => void }) {
+  const qismlar = value.split(/[х×x]/).map((s) => s.trim())
+  const [a, setA] = useState(qismlar[0] ?? '')
+  const [b, setB] = useState(qismlar[1] ?? '')
+  const [c, setC] = useState(qismlar[2] ?? '')
+
+  // boshlang'ichda hajmni hisoblab qo'yish
+  useEffect(() => {
+    if (a && b && c) {
+      const A = parseFloat(a), B = parseFloat(b), C = parseFloat(c)
+      if (A && B && C) onChange([a, b, c].join('х'), ((A / 10) * (B / 10) * (C / 10) * 0.52).toFixed(1).replace('.', ','))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const yangila = (na: string, nb: string, nc: string) => {
+    setA(na); setB(nb); setC(nc)
+    const olcham = [na, nb, nc].filter(Boolean).join('х')
+    const A = parseFloat(na), B = parseFloat(nb), C = parseFloat(nc)
+    let hajm = ''
+    if (A && B && C) hajm = ((A / 10) * (B / 10) * (C / 10) * 0.52).toFixed(1).replace('.', ',')
+    onChange(olcham, hajm)
+  }
+
+  const A = parseFloat(a), B = parseFloat(b), C = parseFloat(c)
+  const hajm = A && B && C ? ((A / 10) * (B / 10) * (C / 10) * 0.52).toFixed(1).replace('.', ',') : '—'
+
+  const num = { ...input, textAlign: 'center' as const, padding: '8px 4px' }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <input style={num} value={a} onChange={(e) => yangila(e.target.value, b, c)} placeholder="40" />
+      <span style={{ color: 'var(--muted)' }}>×</span>
+      <input style={num} value={b} onChange={(e) => yangila(a, e.target.value, c)} placeholder="30" />
+      <span style={{ color: 'var(--muted)' }}>×</span>
+      <input style={num} value={c} onChange={(e) => yangila(a, b, e.target.value)} placeholder="32" />
+      <span style={{ fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>мм → <strong style={{ color: 'var(--accent)' }}>{hajm}</strong> см³</span>
     </div>
   )
 }

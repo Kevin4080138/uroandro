@@ -1,7 +1,7 @@
 export type Maydon = {
   key: string
   label: string
-  type: 'text' | 'number' | 'textarea' | 'select' | 'checklist' | 'date'
+  type: 'text' | 'number' | 'textarea' | 'select' | 'checklist' | 'date' | 'olcham'
   variantlar?: string[]      // select yoki checklist uchun
   default?: string
   birlik?: string            // masalan "мл", "мм"

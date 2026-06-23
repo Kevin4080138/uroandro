@@ -103,8 +103,7 @@ export const prostatitShablon: Shablon = {
       maydonlar: [
         { key: 'usi_qop_hajm', label: 'Siydik qopi hajmi', type: 'text', birlik: 'ml', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'usi_shilliq', label: 'Siydik qopi shilliq', type: 'text', birlik: 'mm', default: '2', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
-        { key: 'prostata_olcham', label: 'Prostata o\'lchami', type: 'text', default: '40х30х32', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
-        { key: 'prostata_hajm', label: 'Prostata hajmi', type: 'text', birlik: 'sm³', default: '19', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'prostata_olcham', label: 'Prostata o\'lchami (hajm avtomatik)', type: 'olcham', keng: true, default: '40х30х32', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'hb', label: 'Gemoglobin', type: 'text', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'leykotsit', label: 'Leykotsit', type: 'text', default: '8.5', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'echt', label: 'EChT', type: 'text', default: '13', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
