@@ -40,7 +40,7 @@ export default function PatientDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
 
-      <Header actions={
+      <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} actions={
         <button onClick={handleLogout} className="btn-animated rounded-lg border px-4 py-2 text-sm" style={{
           background: 'var(--surface-2)', color: 'var(--danger)', borderColor: 'var(--line)',
         }}>
