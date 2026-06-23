@@ -72,26 +72,39 @@ export default function PatientsRegistryPage() {
 
   return (
     <AppShell title="Bemorlar reestri">
-      <div className="px-8 py-8">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
-          <input
-            placeholder="F.I.O, pasport yoki telefon bo'yicha qidirish..."
-            value={qidiruv}
-            onChange={(e) => setQidiruv(e.target.value)}
-            style={{ ...inputStyle, maxWidth: '320px' }}
-          />
-          <button onClick={() => setShowForm(!showForm)} className="btn-animated" style={{
-            background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
-            padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
-          }}>
-            {showForm ? 'Bekor qilish' : '+ Yangi bemor'}
-          </button>
+      <div className="mx-auto max-w-[920px] px-8 py-8">
+        {/* Sarlavha + qidiruv */}
+        <div className="rise" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px', gap: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700 }}>Bemorlar</h2>
+            <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+              Jami <strong style={{ color: 'var(--ink)' }}>{bemorlar.length}</strong> ta bemor
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
+              <input
+                placeholder="Qidirish..."
+                value={qidiruv}
+                onChange={(e) => setQidiruv(e.target.value)}
+                style={{ ...inputStyle, width: '260px', paddingLeft: '36px', borderRadius: '999px' }}
+              />
+            </div>
+            <button onClick={() => setShowForm(!showForm)} className="btn-animated soft-press" style={{
+              background: showForm ? 'var(--surface-2)' : 'var(--accent)', color: showForm ? 'var(--ink-soft)' : 'white',
+              border: showForm ? '1px solid var(--line)' : 'none', borderRadius: '999px',
+              padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+            }}>
+              {showForm ? 'Bekor qilish' : '+ Yangi bemor'}
+            </button>
+          </div>
         </div>
 
         {showForm && (
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
-            padding: '24px', marginBottom: '24px',
+          <div className="rise" style={{
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+            padding: '24px', marginBottom: '20px', boxShadow: 'var(--shadow)',
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               <div>
@@ -131,39 +144,51 @@ export default function PatientsRegistryPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} style={{ height: '64px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', opacity: 0.5 }} />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <p style={{ color: 'var(--muted)' }}>Hech narsa topilmadi.</p>
+          <div className="rise" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
+            <div style={{ fontSize: '40px', marginBottom: '10px', opacity: 0.6 }}>🗂️</div>
+            <p style={{ margin: 0, fontSize: '14px' }}>{qidiruv ? 'Hech narsa topilmadi.' : 'Hozircha bemor yo\'q. Yangi bemor qo\'shing.'}</p>
+          </div>
         ) : (
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr style={{ background: 'var(--surface-2)', textAlign: 'left' }}>
-                  {['F.I.O.', 'Pasport', "Tug'ilgan sana", 'Telefon', "Qo'shilgan"].map((h) => (
-                    <th key={h} style={{ padding: '12px 16px', color: 'var(--muted)', fontWeight: 500 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((b) => (
-                  <tr
-                    key={b.id}
-                    onClick={() => router.push(`/doctor/patients/${b.id}`)}
-                    className="row-hover"
-                    style={{ borderTop: '1px solid var(--line)', cursor: 'pointer' }}
-                  >
-                    <td style={{ padding: '12px 16px', color: 'var(--accent)' }}>{b.fio}</td>
-                    <td style={{ padding: '12px 16px' }}>{[b.passport_seria, b.passport_raqam].filter(Boolean).join(' ')}</td>
-                    <td style={{ padding: '12px 16px' }}>{b.tugilgan_sana ?? '—'}</td>
-                    <td style={{ padding: '12px 16px' }}>{b.telefon ?? '—'}</td>
-                    <td style={{ padding: '12px 16px', color: 'var(--muted)' }}>{new Date(b.created_at).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {filtered.map((b, i) => (
+              <div
+                key={b.id}
+                onClick={() => router.push(`/doctor/patients/${b.id}`)}
+                className="lift rise"
+                style={{
+                  animationDelay: `${Math.min(i * 0.04, 0.4)}s`,
+                  display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer',
+                  background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '14px 18px',
+                }}
+              >
+                <span className="avatar" style={{ width: '42px', height: '42px', fontSize: '15px' }}>{ismBoshHarflar(b.fio)}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '15px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.fio}</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    {(b.passport_seria || b.passport_raqam) && <span>🪪 {[b.passport_seria, b.passport_raqam].filter(Boolean).join(' ')}</span>}
+                    {b.telefon && <span>📞 {b.telefon}</span>}
+                    {b.tugilgan_sana && <span>🎂 {b.tugilgan_sana}</span>}
+                  </div>
+                </div>
+                <span style={{ fontSize: '11.5px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{new Date(b.created_at).toLocaleDateString()}</span>
+                <span className="chevron" style={{ color: 'var(--muted)', fontSize: '18px' }}>›</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
     </AppShell>
   )
+}
+
+function ismBoshHarflar(fio?: string) {
+  if (!fio) return '—'
+  const qismlar = fio.trim().split(/\s+/)
+  return ((qismlar[0]?.[0] ?? '') + (qismlar[1]?.[0] ?? '')).toUpperCase()
 }

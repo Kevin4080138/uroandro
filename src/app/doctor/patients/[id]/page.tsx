@@ -259,28 +259,34 @@ export default function PatientCardPage() {
 
   return (
     <AppShell title={bemor.fio}>
-      <div style={{ padding: '32px' }}>
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
-          padding: '24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      <div className="mx-auto max-w-[900px]" style={{ padding: '28px 32px' }}>
+        <div className="rise" style={{
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+          padding: '22px 24px', marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          gap: '16px', flexWrap: 'wrap', boxShadow: 'var(--shadow)',
+          backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface))',
         }}>
-          <div>
-            <h2 style={{ margin: '0 0 8px 0', fontSize: '22px' }}>{bemor.fio}</h2>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>
-              Pasport: {[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ') || '—'}
-              {' · '}Tug&apos;ilgan: {bemor.tugilgan_sana ?? '—'}
-              {' · '}Tel: {bemor.telefon ?? '—'}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+            <span className="avatar" style={{ width: '54px', height: '54px', fontSize: '19px' }}>{bemorBoshHarflar(bemor.fio)}</span>
+            <div style={{ minWidth: 0 }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '21px', fontWeight: 700 }}>{bemor.fio}</h2>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '12.5px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                {(bemor.passport_seria || bemor.passport_raqam) && <span>🪪 {[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ')}</span>}
+                {bemor.tugilgan_sana && <span>🎂 {bemor.tugilgan_sana}</span>}
+                {bemor.telefon && <span>📞 {bemor.telefon}</span>}
+              </p>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => router.push(`/doctor/patients/${id}/hujjatlar`)} className="btn-animated" style={{
-              background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '10px',
+            <button onClick={() => router.push(`/doctor/patients/${id}/hujjatlar`)} className="btn-animated soft-press" style={{
+              background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
               padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
             }}>
               📄 Hujjatlar
             </button>
-            <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} style={{
-              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
+            <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} className="soft-press" style={{
+              background: showYangiForm ? 'var(--surface-2)' : 'var(--accent)', color: showYangiForm ? 'var(--ink-soft)' : 'white',
+              border: showYangiForm ? '1px solid var(--line)' : 'none', borderRadius: '999px',
               padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
             }}>
               {showYangiForm ? 'Bekor qilish' : '+ Yangi qabul'}
@@ -495,15 +501,21 @@ export default function PatientCardPage() {
           </div>
         )}
 
-        <h3 style={{ fontSize: '16px', color: 'var(--muted)', marginBottom: '12px' }}>Qabullar tarixi</h3>
+        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ width: '3px', height: '16px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
+          Qabullar tarixi
+        </h3>
         {tashriflar.length === 0 ? (
-          <p style={{ color: 'var(--muted)' }}>Hozircha qabul yo&apos;q.</p>
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)', background: 'var(--surface)', border: '1px dashed var(--line)', borderRadius: '14px' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.6 }}>🩺</div>
+            <p style={{ margin: 0, fontSize: '13.5px' }}>Hozircha qabul yo&apos;q. &quot;+ Yangi qabul&quot; orqali boshlang.</p>
+          </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {tashriflar.map((t) => {
+            {tashriflar.map((t, i) => {
               const holat = holatLabel[t.holat] ?? holatLabel.yangi
               return (
-                <div key={t.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '20px' }}>
+                <div key={t.id} className="lift rise" style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s`, background: 'var(--surface)', border: '1px solid var(--line)', borderLeft: `3px solid ${holat.color}`, borderRadius: '12px', padding: '18px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <span style={{ color: 'var(--muted)', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()}</span>
                     <span style={{ color: holat.color, fontSize: '13px', fontWeight: 600 }}>{holat.text}</span>
@@ -544,4 +556,10 @@ export default function PatientCardPage() {
       </div>
     </AppShell>
   )
+}
+
+function bemorBoshHarflar(fio?: string) {
+  if (!fio) return '—'
+  const q = fio.trim().split(/\s+/)
+  return ((q[0]?.[0] ?? '') + (q[1]?.[0] ?? '')).toUpperCase()
 }
