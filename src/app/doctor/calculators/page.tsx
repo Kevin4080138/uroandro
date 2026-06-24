@@ -33,9 +33,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #dc2626, #f97316)',
   },
   {
-    href: '#', icon: '🍈', title: 'Prostata hajmi',
+    href: '/doctor/calculators/prostata-hajmi', icon: '🍈', title: 'Prostata hajmi',
     desc: 'USI o\'lchamlari (uzunlik × kenglik × balandlik) asosida ellipsoid formula bo\'yicha hajm',
-    kategoriya: 'Prostata', faol: false, gradient: 'linear-gradient(135deg, #ea580c, #facc15)',
+    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #ea580c, #facc15)',
   },
   {
     href: '#', icon: '🧬', title: 'WHO 2021 spermogramma',
