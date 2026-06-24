@@ -75,6 +75,10 @@ export default function HujjatlarPage() {
   }, [id])
 
   const faolId = shablon.hujjatlar[faolIndex]?.id ?? ASOS_HUJJAT
+  const maydonVariant = (key: string): string[] => {
+    for (const g of shablon.guruhlar) for (const m of g.maydonlar) if (m.key === key) return m.variantlar ?? []
+    return []
+  }
 
   // hujjat uchun amaldagi ma'lumot: default + asos hujjat + shu hujjat o'zgarishlari
   const effective = (docId: string) => ({ ...defaults, ...(docData[ASOS_HUJJAT] ?? {}), ...(docData[docId] ?? {}) })
@@ -176,25 +180,37 @@ export default function HujjatlarPage() {
           </div>
 
           <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {shablon.guruhlar.map((g) => {
-              const maydonlar = g.maydonlar.filter((m) => !m.faqat || (faolId && m.faqat.includes(faolId)))
-              if (maydonlar.length === 0) return null
-              return (
-                <div key={g.nom} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px 16px' }}>
-                  <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', fontWeight: 700, margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                    <span style={{ width: '3px', height: '12px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
-                    {g.nom}
-                  </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 10px' }}>
-                    {maydonlar.map((m) => (
-                      <div key={m.key} style={{ flex: m.keng || m.type === 'checklist' || m.type === 'textarea' || m.type === 'olcham' ? '1 1 100%' : '1 1 calc(50% - 5px)', minWidth: 0 }}>
-                        <MaydonRender m={m} value={faolData[m.key]} set={set} toggle={toggleChecklist} />
-                      </div>
-                    ))}
+            {shablon.hujjatlar[faolIndex]?.kunlik ? (
+              <KunlikEditor
+                kunlar={Array.isArray(faolData.kunlar) ? faolData.kunlar : []}
+                onChange={(arr) => set('kunlar', arr)}
+                shikoyatVariant={maydonVariant('shikoyatlar')}
+                haroratVariant={maydonVariant('harorat')}
+                pulsVariant={maydonVariant('puls')}
+                akbVariant={maydonVariant('akb')}
+                vaqtVariant={maydonVariant('korik_vaqt')}
+              />
+            ) : (
+              shablon.guruhlar.map((g) => {
+                const maydonlar = g.maydonlar.filter((m) => !m.faqat || (faolId && m.faqat.includes(faolId)))
+                if (maydonlar.length === 0) return null
+                return (
+                  <div key={g.nom} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px 16px' }}>
+                    <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', fontWeight: 700, margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                      <span style={{ width: '3px', height: '12px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
+                      {g.nom}
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 10px' }}>
+                      {maydonlar.map((m) => (
+                        <div key={m.key} style={{ flex: m.keng || m.type === 'checklist' || m.type === 'textarea' || m.type === 'olcham' ? '1 1 100%' : '1 1 calc(50% - 5px)', minWidth: 0 }}>
+                          <MaydonRender m={m} value={faolData[m.key]} set={set} toggle={toggleChecklist} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })
+            )}
           </div>
         </div>
 
@@ -393,6 +409,75 @@ function Olcham({ value, onChange }: { value: string; onChange: (olcham: string,
       <span style={{ color: 'var(--muted)' }}>×</span>
       <input style={num} value={c} onChange={(e) => yangila(a, b, e.target.value)} placeholder="32" />
       <span style={{ fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>мм → <strong style={{ color: 'var(--accent)' }}>{hajm}</strong> см³</span>
+    </div>
+  )
+}
+
+// Bir nechta kunlik yozuvni boshqarish
+function KunlikEditor({ kunlar, onChange, shikoyatVariant, haroratVariant, pulsVariant, akbVariant, vaqtVariant }: {
+  kunlar: any[]; onChange: (arr: any[]) => void
+  shikoyatVariant: string[]; haroratVariant: string[]; pulsVariant: string[]; akbVariant: string[]; vaqtVariant: string[]
+}) {
+  const yangila = (i: number, key: string, val: any) => {
+    const arr = kunlar.map((k, j) => (j === i ? { ...k, [key]: val } : k))
+    onChange(arr)
+  }
+  const toggleShik = (i: number, v: string) => {
+    const cur: string[] = Array.isArray(kunlar[i]?.shikoyatlar) ? kunlar[i].shikoyatlar : []
+    yangila(i, 'shikoyatlar', cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v])
+  }
+  const qoshish = () => onChange([...kunlar, { harorat: '36,6', puls: '72', akb: '110/70', tavsiya: 'Даво муолажаларини давом эттириш.', shikoyatlar: [] }])
+  const ochirish = (i: number) => onChange(kunlar.filter((_, j) => j !== i))
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {kunlar.length === 0 && (
+        <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>Hali kunlik yozuv yo&apos;q. Quyidan qo&apos;shing.</p>
+      )}
+      {kunlar.map((k, i) => (
+        <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)' }}>{i + 1}-kun</span>
+            <button onClick={() => ochirish(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '14px' }}>🗑️</button>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ flex: '1 1 calc(50% - 5px)' }}>
+              <label style={lbl}>Sana</label>
+              <input type="date" style={input} value={k.sana ?? ''} onChange={(e) => yangila(i, 'sana', e.target.value)} />
+            </div>
+            <div style={{ flex: '1 1 calc(50% - 5px)' }}>
+              <label style={lbl}>Vaqt</label>
+              <VariantSelect value={k.vaqt ?? '08:30'} variantlar={vaqtVariant} onChange={(v) => yangila(i, 'vaqt', v)} />
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={lbl}>Shikoyatlari</label>
+              <MultiSelect tanlangan={Array.isArray(k.shikoyatlar) ? k.shikoyatlar : []} variantlar={shikoyatVariant} toggle={(v) => toggleShik(i, v)} />
+            </div>
+            <div style={{ flex: '1 1 calc(33% - 7px)' }}>
+              <label style={lbl}>Harorat</label>
+              <VariantSelect value={k.harorat ?? '36,6'} variantlar={haroratVariant} onChange={(v) => yangila(i, 'harorat', v)} />
+            </div>
+            <div style={{ flex: '1 1 calc(33% - 7px)' }}>
+              <label style={lbl}>Puls</label>
+              <VariantSelect value={k.puls ?? '72'} variantlar={pulsVariant} onChange={(v) => yangila(i, 'puls', v)} />
+            </div>
+            <div style={{ flex: '1 1 calc(33% - 7px)' }}>
+              <label style={lbl}>AKB</label>
+              <VariantSelect value={k.akb ?? '110/70'} variantlar={akbVariant} onChange={(v) => yangila(i, 'akb', v)} />
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={lbl}>Tavsiya</label>
+              <VariantSelect value={k.tavsiya ?? 'Даво муолажаларини давом эттириш.'} variantlar={['Даво муолажаларини давом эттириш.', 'Амбулатор даво.']} onChange={(v) => yangila(i, 'tavsiya', v)} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button onClick={qoshish} className="btn-animated soft-press" style={{
+        background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px dashed var(--accent)', borderRadius: '10px',
+        padding: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+      }}>
+        + Yangi kun qo&apos;shish
+      </button>
     </div>
   )
 }

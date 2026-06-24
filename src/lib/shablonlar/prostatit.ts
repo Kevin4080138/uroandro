@@ -192,17 +192,25 @@ export const prostatitShablon: Shablon = {
         ...imzolar(d, shifokorIsmi),
       ],
     },
-    // 2. Kunlik yozuvlar (qisqa)
+    // 2. Kunlik yozuvlar (bir nechta kun)
     {
       id: 'kunlik',
-      nom: 'Kunlik yozuv',
-      render: (d, bemor, shifokorIsmi) => [
-        { tur: 'sarlavha', matn: 'Даволовчи врач кўриги' },
-        { tur: 'qator', chap: 'Шикоятлари', ong: shikoyatMatni(d) },
-        { tur: 'matn', matn: `Умумий аҳволи нисбатан қониқарли. Тана харорати-${ro(d.harorat, '36,6')} С. Юрак уриши бир маромда, пульс ${ro(d.puls, '72')} та, АКБ ${ro(d.akb, '110/80')} мм.сим.уст. Тили тоза, қорин юмшоқ, оғриқсиз. Бел соҳаси симметрик, тукиллатиш симптоми икки томонлама манфий. Сийдик ажралиши мустақил.` },
-        { tur: 'qator', chap: 'Тавсия', ong: 'Даво муолажаларини давом эттириш.' },
-        ...imzolar(d, shifokorIsmi),
-      ],
+      nom: 'Kunlik yozuvlar',
+      kunlik: true,
+      render: (d, bemor, shifokorIsmi) => {
+        const kunlar: any[] = Array.isArray(d.kunlar) && d.kunlar.length ? d.kunlar : [{}]
+        const bloklar: HujjatBlok[] = []
+        kunlar.forEach((k, idx) => {
+          const shik = Array.isArray(k.shikoyatlar) && k.shikoyatlar.length ? k.shikoyatlar.join(', ').toLowerCase() + '.' : '—'
+          if (idx > 0) bloklar.push({ tur: 'bosh' })
+          bloklar.push({ tur: 'matn', matn: `${ro(k.sana, '__.__.____')}-й   Соат: ${ro(k.vaqt, '____')}        Даволовчи врач кўриги.` })
+          bloklar.push({ tur: 'band', etiket: 'Шикоятлари', matn: shik })
+          bloklar.push({ tur: 'matn', matn: `Умумий аҳволи нисбатан қониқарли. Кўринадиган тери ва шиллиқ қаватлари одатдаги рангда. Тана харорати-${ro(k.harorat, '36,6')} С. Кўкрак қафаси деформациясиз. Нафас олиш бурун орқали равон. Ўпкаларда везикуляр нафас. Юрак қон томир уриши бир маромда, пульс 1 дақиқада ${ro(k.puls, '72')} та, АКБ ${ro(k.akb, '110/70')} мм.сим.уст. Тили тоза, қорин пальпацияда юмшоқ оғриқсиз, жигар ва талоғи қўлга палпацияланмайди. Ич келиши меъёрда. Бел соҳаси симметрик. Тукиллатиш симптоми икки томонлама манфий. Сийдик ажралиши мустақил.` })
+          bloklar.push({ tur: 'band', etiket: 'Тавсия', matn: ro(k.tavsiya, 'Даво муолажаларини давом эттириш.') })
+          bloklar.push({ tur: 'imzo', chap: 'Даволовчи врач', ong: ro(d.davolovchi, shifokorIsmi) })
+        })
+        return bloklar
+      },
     },
     // 3. Klinik tashxisni asoslash
     {

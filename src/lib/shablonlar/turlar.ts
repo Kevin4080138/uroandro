@@ -23,6 +23,7 @@ export type HujjatBlok =
 export type Hujjat = {
   id: string
   nom: string
+  kunlik?: boolean   // bir nechta kunlik yozuvni boshqaradi (d.kunlar massivi)
   render: (d: Record<string, any>, bemor: any, shifokorIsmi: string) => HujjatBlok[]
 }
 
