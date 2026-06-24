@@ -73,9 +73,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #57534e, #a8a29e)',
   },
   {
-    href: '#', icon: '🗺️', title: 'R.E.N.A.L. nefrometriya',
+    href: '/doctor/calculators/renal', icon: '🗺️', title: 'R.E.N.A.L. nefrometriya',
     desc: 'Buyrak o\'smasi murakkabligini USI/KT o\'lchamlari bo\'yicha ballash',
-    kategoriya: 'Buyrak', faol: false, gradient: 'linear-gradient(135deg, #15803d, #84cc16)',
+    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #15803d, #84cc16)',
   },
   {
     href: '#', icon: '💧', title: 'Uroflowmetriya baholash',
