@@ -63,9 +63,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0369a1, #38bdf8)',
   },
   {
-    href: '#', icon: '⚗️', title: 'Kreatinin klirensi (Cockcroft-Gault)',
+    href: '/doctor/calculators/cockcroft-gault', icon: '⚗️', title: 'Kreatinin klirensi (Cockcroft-Gault)',
     desc: 'Tana vazni, yosh va kreatinin asosida klirensni baholash',
-    kategoriya: 'Buyrak', faol: false, gradient: 'linear-gradient(135deg, #0e7490, #06b6d4)',
+    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0e7490, #06b6d4)',
   },
   {
     href: '#', icon: '🪨', title: 'STONE skor',
