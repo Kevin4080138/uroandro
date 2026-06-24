@@ -51,54 +51,43 @@ export default function AdminDashboard() {
 
       {/* Content */}
       <div style={{ padding: '32px' }}>
-        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
-          {profile.full_name} 🛠️
+        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+          {profile.full_name}
         </h1>
 
         {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '34px' }}>
           {[
-            { icon: '👥', title: 'Foydalanuvchilar', desc: 'Talaba, bemor, shifokorlarni boshqarish', href: '/admin/users' },
-            { icon: '📝', title: 'Kontent', desc: 'Protokol va kutubxona materiallarini boshqarish', href: '/admin/content' },
-            { icon: '❓', title: 'Testlar', desc: 'Quizlarni boshqarish (tez kunda)' },
-            { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi', href: '/admin/statistika' },
-          ].map((item) => (
-            <div key={item.title} onClick={() => item.href && router.push(item.href)} style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: '12px',
-              padding: '24px',
-              cursor: item.href ? 'pointer' : 'default',
-              opacity: item.href ? 1 : 0.55,
-              }} className={item.href ? 'card-hover' : ''}>
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
-              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>
+            { icon: '👥', title: 'Foydalanuvchilar', desc: 'Talaba, bemor, shifokorlarni boshqarish', href: '/admin/users', c: 'var(--accent)' },
+            { icon: '📝', title: 'Kontent', desc: 'Protokol va kutubxona materiallarini boshqarish', href: '/admin/content', c: 'var(--accent-2)' },
+            { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi', href: '/admin/statistika', c: 'var(--good)' },
+            { icon: '❓', title: 'Testlar', desc: 'Quizlarni boshqarish (tez kunda)', c: 'var(--warn)' },
+          ].map((item, i) => (
+            <div key={item.title} onClick={() => item.href && router.push(item.href)}
+              className={`dash-card rise ${item.href ? '' : 'dash-soon'}`}
+              style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s`, opacity: item.href ? 1 : 0.5, cursor: item.href ? 'pointer' : 'default' }}>
+              <div className="dash-icon">{item.icon}</div>
+              <h3 className="dash-title">{item.title}</h3>
+              <p className="dash-desc">{item.desc}</p>
             </div>
           ))}
         </div>
 
-        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '16px' }}>
-          Dashboardlarni ko'rish
+        <h2 style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '.05em', fontFamily: 'var(--font-inter)', fontWeight: 600 }}>
+          Dashboardlarni ko&apos;rish
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
           {[
-            { icon: '🎓', title: 'Talaba', href: '/student/dashboard' },
-            { icon: '👨‍⚕️', title: 'Shifokor', href: '/doctor/dashboard' },
-            { icon: '🧑', title: 'Bemor', href: '/patient/dashboard' },
-            { icon: '🛠️', title: 'Admin', href: '/admin/dashboard' },
+            { icon: '🎓', title: 'Talaba', href: '/student/dashboard', c: 'var(--accent)' },
+            { icon: '👨‍⚕️', title: 'Shifokor', href: '/doctor/dashboard', c: 'var(--good)' },
+            { icon: '🧑', title: 'Bemor', href: '/patient/dashboard', c: 'var(--accent-2)' },
+            { icon: '🛠️', title: 'Admin', href: '/admin/dashboard', c: 'var(--warn)' },
           ].map((item) => (
             <Link key={item.title} href={item.href} style={{ textDecoration: 'none' }}>
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: '12px',
-                padding: '24px',
-                cursor: 'pointer',
-                }} className="card-hover">
-                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-                <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--ink)' }}>{item.title}</h3>
+              <div className="dash-card" style={{ ['--c' as any]: item.c }}>
+                <div className="dash-icon">{item.icon}</div>
+                <h3 className="dash-title" style={{ margin: 0 }}>{item.title}</h3>
               </div>
             </Link>
           ))}

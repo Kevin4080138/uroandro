@@ -51,34 +51,29 @@ export default function DoctorDashboard() {
       }
     >
       <div className="px-8 py-8">
-        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
-          Dr. {profile.full_name} 👨‍⚕️
+        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+          Dr. {profile.full_name}
         </h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", href: '/doctor/patients' },
-            { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', href: '/doctor/protokollar' },
-            { icon: '🧮', title: 'Kalkulatorlar', desc: "Varikotsele usul tanlash, IPSS, PSA", href: '/doctor/calculators' },
-            { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', href: '/doctor/kutubxona' },
-            { icon: '🌐', title: "Qo'llanmalar", desc: 'EAU, AUA guidelines', href: '/doctor/qollanmalar' },
-          ].map((item) => (
+            { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", href: '/doctor/patients', c: 'var(--danger)' },
+            { icon: '📨', title: 'Murojaatlar', desc: 'Bemor shikoyatlari', href: '/doctor/murojaatlar', c: 'var(--accent-2)' },
+            { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', href: '/doctor/protokollar', c: 'var(--accent)' },
+            { icon: '🧮', title: 'Kalkulatorlar', desc: 'Varikotsele usul tanlash, IPSS, PSA', href: '/doctor/calculators', c: 'var(--accent-2)' },
+            { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', href: '/doctor/kutubxona', c: 'var(--good)' },
+            { icon: '🌐', title: "Qo'llanmalar", desc: 'EAU, AUA guidelines', href: '/doctor/qollanmalar', c: 'var(--warn)' },
+          ].map((item, i) => (
             <div
               key={item.title}
               onClick={() => item.href && router.push(item.href)}
-              className="card-hover"
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: '12px',
-                padding: '24px',
-                cursor: item.href ? 'pointer' : 'default',
-              }}
+              className="dash-card rise"
+              style={{ ['--c' as any]: item.c, animationDelay: `${Math.min(i * 0.05, 0.4)}s` }}
             >
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
-              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>
+              <div className="dash-icon">{item.icon}</div>
+              <h3 className="dash-title">{item.title}</h3>
+              <p className="dash-desc">{item.desc}</p>
             </div>
           ))}
         </div>

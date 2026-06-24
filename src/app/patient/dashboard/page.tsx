@@ -50,29 +50,24 @@ export default function PatientDashboard() {
 
       {/* Content */}
       <div style={{ padding: '32px' }}>
-        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
-          {profile.full_name} 🧑
+        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+          {profile.full_name}
         </h1>
 
         {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '🩺', title: 'Yangi murojaat', desc: 'Shikoyatingizni shifokorga yuboring', href: '/patient/murojaat' },
-            { icon: '📨', title: 'Mening murojaatlarim', desc: 'Yuborilgan shikoyatlar va javoblar', href: '/patient/murojaatlarim' },
-            { icon: '📚', title: 'Ma\'lumotlar', desc: 'Bemorlar uchun maqolalar (tez kunda)' },
-          ].map((item) => (
-            <div key={item.title} onClick={() => item.href && router.push(item.href)} style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: '12px',
-              padding: '24px',
-              cursor: item.href ? 'pointer' : 'default',
-              opacity: item.href ? 1 : 0.55,
-              }} className={item.href ? 'card-hover' : ''}>
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
-              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>
+            { icon: '🩺', title: 'Yangi murojaat', desc: 'Shikoyatingizni shifokorga yuboring', href: '/patient/murojaat', c: 'var(--accent)' },
+            { icon: '📨', title: 'Mening murojaatlarim', desc: 'Yuborilgan shikoyatlar va javoblar', href: '/patient/murojaatlarim', c: 'var(--good)' },
+            { icon: '📚', title: 'Ma\'lumotlar', desc: 'Bemorlar uchun maqolalar (tez kunda)', c: 'var(--warn)' },
+          ].map((item, i) => (
+            <div key={item.title} onClick={() => item.href && router.push(item.href)}
+              className="dash-card rise"
+              style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s`, opacity: item.href ? 1 : 0.5, cursor: item.href ? 'pointer' : 'default' }}>
+              <div className="dash-icon">{item.icon}</div>
+              <h3 className="dash-title">{item.title}</h3>
+              <p className="dash-desc">{item.desc}</p>
             </div>
           ))}
         </div>

@@ -50,29 +50,23 @@ export default function StudentDashboard() {
 
       {/* Content */}
       <div style={{ padding: '32px' }}>
-        <h2 style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '8px' }}>Xush kelibsiz</h2>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
-          {profile.full_name} 🎓
+        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+          {profile.full_name}
         </h1>
 
         {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
-            { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari' },
-            { icon: '❓', title: 'Testlar', desc: 'Bilimni sinash uchun quizlar' },
-            { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress' },
-            { icon: '📚', title: 'Kutubxona', desc: 'O\'quv materiallar' },
-          ].map((item) => (
-            <div key={item.title} style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: '12px',
-              padding: '24px',
-              cursor: 'pointer',
-              }} className="card-hover">
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{item.title}</h3>
-              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{item.desc}</p>
+            { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)' },
+            { icon: '❓', title: 'Testlar', desc: 'Bilimni sinash uchun quizlar', c: 'var(--accent-2)' },
+            { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)' },
+            { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)' },
+          ].map((item, i) => (
+            <div key={item.title} className="dash-card rise" style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s` }}>
+              <div className="dash-icon">{item.icon}</div>
+              <h3 className="dash-title">{item.title}</h3>
+              <p className="dash-desc">{item.desc}</p>
             </div>
           ))}
         </div>
