@@ -28,9 +28,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #2563eb, #0891b2)',
   },
   {
-    href: '#', icon: '🩸', title: 'PSA kalkulyatori',
+    href: '/doctor/calculators/psa', icon: '🩸', title: 'PSA kalkulyatori',
     desc: 'Yoshga moslashgan me\'zonlar, PSA zichligi va erkin/umumiy PSA nisbati',
-    kategoriya: 'Prostata', faol: false, gradient: 'linear-gradient(135deg, #dc2626, #f97316)',
+    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #dc2626, #f97316)',
   },
   {
     href: '#', icon: '🍈', title: 'Prostata hajmi',
