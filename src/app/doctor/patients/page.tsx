@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { HududTanlash } from '@/components/HududTanlash'
 
 const inputStyle = {
   width: '100%',
@@ -19,7 +20,7 @@ const inputStyle = {
 
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
-const emptyForm = { familiya: '', ism: '', otasi: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', manzil: '' }
+const emptyForm = { familiya: '', ism: '', otasi: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', viloyat: '', tuman: '', manzil_qolgan: '' }
 
 export default function PatientsRegistryPage() {
   const [bemorlar, setBemorlar] = useState<any[]>([])
@@ -46,17 +47,18 @@ export default function PatientsRegistryPage() {
     if (!user) { router.push('/auth/login'); return }
 
     const fio = [form.familiya, form.ism, form.otasi].map((x) => x.trim()).filter(Boolean).join(' ')
+    const manzil = [form.viloyat, form.tuman, form.manzil_qolgan].map((x) => x.trim()).filter(Boolean).join(', ')
     setSaving(true)
     const { error } = await supabase.from('bemorlar').insert({
       fio,
       familiya: form.familiya.trim() || null,
       ism: form.ism.trim() || null,
       otasi: form.otasi.trim() || null,
-      passport_seria: form.passport_seria,
+      passport_seria: form.passport_seria.toUpperCase(),
       passport_raqam: form.passport_raqam,
       tugilgan_sana: form.tugilgan_sana || null,
       telefon: form.telefon,
-      manzil: form.manzil,
+      manzil,
       created_by: user.id,
     })
     setSaving(false)
@@ -124,12 +126,19 @@ export default function PatientsRegistryPage() {
                 <input style={inputStyle} value={form.otasi} onChange={set('otasi')} placeholder="Akmal o'g'li" />
               </div>
               <div>
-                <label style={labelStyle}>Pasport seriyasi</label>
-                <input style={inputStyle} value={form.passport_seria} onChange={set('passport_seria')} placeholder="AB" />
-              </div>
-              <div>
-                <label style={labelStyle}>Pasport raqami</label>
-                <input style={inputStyle} value={form.passport_raqam} onChange={set('passport_raqam')} placeholder="1234567" />
+                <label style={labelStyle}>Pasport</label>
+                <input
+                  style={{ ...inputStyle, textTransform: 'uppercase' }}
+                  value={`${form.passport_seria}${form.passport_raqam ? ' ' + form.passport_raqam : ''}`}
+                  onChange={(e) => {
+                    const raw = e.target.value.toUpperCase()
+                    const harflar = (raw.match(/^[A-Z]{0,2}/)?.[0]) || ''
+                    const qolgan = raw.slice(harflar.length).replace(/[^0-9]/g, '')
+                    setForm((f) => ({ ...f, passport_seria: harflar, passport_raqam: qolgan }))
+                  }}
+                  placeholder="AB 1234567"
+                  maxLength={10}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Tug&apos;ilgan sana</label>
@@ -139,9 +148,16 @@ export default function PatientsRegistryPage() {
                 <label style={labelStyle}>Telefon</label>
                 <input style={inputStyle} value={form.telefon} onChange={set('telefon')} placeholder="+998 90 123 45 67" />
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: 'span 3' }}>
                 <label style={labelStyle}>Manzil</label>
-                <input style={inputStyle} value={form.manzil} onChange={set('manzil')} placeholder="Viloyat, tuman, MFY, uy" />
+                <HududTanlash
+                  viloyat={form.viloyat}
+                  tuman={form.tuman}
+                  qolgan={form.manzil_qolgan}
+                  onViloyat={(v) => setForm((f) => ({ ...f, viloyat: v }))}
+                  onTuman={(v) => setForm((f) => ({ ...f, tuman: v }))}
+                  onQolgan={(v) => setForm((f) => ({ ...f, manzil_qolgan: v }))}
+                />
               </div>
             </div>
 

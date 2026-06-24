@@ -93,11 +93,17 @@ export default function PatientCardPage() {
 
   const setY = (key: string) => (e: any) => setYangiForm((f) => ({ ...f, [key]: e.target.value }))
 
+  const formatShikoyat = (royxat: string[]) =>
+    royxat
+      .map((s, i) => (i === 0 ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s.toLowerCase()))
+      .join(', ')
+
   const qoshShikoyat = (matn: string) => {
     setYangiForm((f) => {
       const mavjud = f.shikoyat.split(',').map((s) => s.trim()).filter(Boolean)
-      if (mavjud.includes(matn)) return f
-      return { ...f, shikoyat: [...mavjud, matn].join(', ') }
+      const past = mavjud.map((s) => s.toLowerCase())
+      if (past.includes(matn.toLowerCase())) return f
+      return { ...f, shikoyat: formatShikoyat([...mavjud, matn]) }
     })
   }
 
