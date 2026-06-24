@@ -88,9 +88,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #9333ea, #d946ef)',
   },
   {
-    href: '#', icon: '🔥', title: 'NIH-CPSI',
+    href: '/doctor/calculators/nih-cpsi', icon: '🔥', title: 'NIH-CPSI',
     desc: 'Surunkali prostatit / chanoq og\'rig\'i sindromi indeksi',
-    kategoriya: 'Prostata', faol: false, gradient: 'linear-gradient(135deg, #b91c1c, #ea580c)',
+    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #b91c1c, #ea580c)',
   },
 ]
 
