@@ -83,9 +83,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #1d4ed8, #06b6d4)',
   },
   {
-    href: '#', icon: '🚻', title: 'OAB-V8',
+    href: '/doctor/calculators/oab-v8', icon: '🚻', title: 'OAB-V8',
     desc: 'Giperaktiv siydik pufagi simptomlarini skrining anketasi orqali baholash',
-    kategoriya: 'Siydik pufagi', faol: false, gradient: 'linear-gradient(135deg, #9333ea, #d946ef)',
+    kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #9333ea, #d946ef)',
   },
   {
     href: '#', icon: '🔥', title: 'NIH-CPSI',
