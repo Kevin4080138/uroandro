@@ -19,7 +19,7 @@ const inputStyle = {
 
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
-const emptyForm = { fio: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', manzil: '' }
+const emptyForm = { familiya: '', ism: '', otasi: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', manzil: '' }
 
 export default function PatientsRegistryPage() {
   const [bemorlar, setBemorlar] = useState<any[]>([])
@@ -45,9 +45,13 @@ export default function PatientsRegistryPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
+    const fio = [form.familiya, form.ism, form.otasi].map((x) => x.trim()).filter(Boolean).join(' ')
     setSaving(true)
     const { error } = await supabase.from('bemorlar').insert({
-      fio: form.fio,
+      fio,
+      familiya: form.familiya.trim() || null,
+      ism: form.ism.trim() || null,
+      otasi: form.otasi.trim() || null,
       passport_seria: form.passport_seria,
       passport_raqam: form.passport_raqam,
       tugilgan_sana: form.tugilgan_sana || null,
@@ -65,9 +69,9 @@ export default function PatientsRegistryPage() {
   }
 
   const filtered = bemorlar.filter((b) =>
-    `${b.fio} ${b.passport_seria ?? ''}${b.passport_raqam ?? ''} ${b.telefon ?? ''}`
+    `${b.fio} №${b.raqam ?? ''} ${b.passport_seria ?? ''}${b.passport_raqam ?? ''} ${b.telefon ?? ''}`
       .toLowerCase()
-      .includes(qidiruv.toLowerCase())
+      .includes(qidiruv.toLowerCase().replace('№', ''))
   )
 
   return (
@@ -108,8 +112,16 @@ export default function PatientsRegistryPage() {
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>F.I.O.</label>
-                <input style={inputStyle} value={form.fio} onChange={set('fio')} />
+                <label style={labelStyle}>Familiya *</label>
+                <input style={inputStyle} value={form.familiya} onChange={set('familiya')} placeholder="Aliyev" />
+              </div>
+              <div>
+                <label style={labelStyle}>Ism *</label>
+                <input style={inputStyle} value={form.ism} onChange={set('ism')} placeholder="Abdusattor" />
+              </div>
+              <div>
+                <label style={labelStyle}>Otasining ismi</label>
+                <input style={inputStyle} value={form.otasi} onChange={set('otasi')} placeholder="Akmal o'g'li" />
               </div>
               <div>
                 <label style={labelStyle}>Pasport seriyasi</label>
@@ -127,16 +139,16 @@ export default function PatientsRegistryPage() {
                 <label style={labelStyle}>Telefon</label>
                 <input style={inputStyle} value={form.telefon} onChange={set('telefon')} placeholder="+998 90 123 45 67" />
               </div>
-              <div>
+              <div style={{ gridColumn: 'span 2' }}>
                 <label style={labelStyle}>Manzil</label>
-                <input style={inputStyle} value={form.manzil} onChange={set('manzil')} />
+                <input style={inputStyle} value={form.manzil} onChange={set('manzil')} placeholder="Viloyat, tuman, MFY, uy" />
               </div>
             </div>
 
-            <button onClick={handleSave} disabled={saving || !form.fio} className="btn-animated" style={{
+            <button onClick={handleSave} disabled={saving || !form.familiya || !form.ism} className="btn-animated" style={{
               marginTop: '16px', background: 'var(--accent)', color: 'white', border: 'none',
               borderRadius: '10px', padding: '12px 24px', cursor: saving ? 'not-allowed' : 'pointer',
-              fontSize: '14px', fontWeight: 600, opacity: saving || !form.fio ? 0.7 : 1,
+              fontSize: '14px', fontWeight: 600, opacity: saving || !form.familiya || !form.ism ? 0.7 : 1,
             }}>
               {saving ? 'Saqlanmoqda...' : 'Reestrga qo\'shish'}
             </button>
@@ -167,9 +179,14 @@ export default function PatientsRegistryPage() {
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '14px 18px',
                 }}
               >
-                <span className="avatar" style={{ width: '42px', height: '42px', fontSize: '15px' }}>{ismBoshHarflar(b.fio)}</span>
+                <span className="avatar" style={{ width: '42px', height: '42px', fontSize: '15px', position: 'relative' }}>
+                  {ismBoshHarflar(b.fio)}
+                </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '15px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.fio}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {b.raqam && <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--accent)', background: 'var(--accent-soft)', borderRadius: '6px', padding: '1px 7px', fontWeight: 700 }}>№{b.raqam}</span>}
+                    {b.fio}
+                  </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     {(b.passport_seria || b.passport_raqam) && <span>🪪 {[b.passport_seria, b.passport_raqam].filter(Boolean).join(' ')}</span>}
                     {b.telefon && <span>📞 {b.telefon}</span>}
