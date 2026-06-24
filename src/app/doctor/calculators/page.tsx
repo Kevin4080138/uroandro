@@ -38,9 +38,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #ea580c, #facc15)',
   },
   {
-    href: '#', icon: '🧬', title: 'WHO 2021 spermogramma',
+    href: '/doctor/calculators/spermogramma', icon: '🧬', title: 'WHO 2021 spermogramma',
     desc: 'Sperma tahlili ko\'rsatkichlarini WHO 6-nashr me\'zonlari bilan solishtirish',
-    kategoriya: 'Erkak bepushtligi', faol: false, gradient: 'linear-gradient(135deg, #0d9488, #22c55e)',
+    kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #0d9488, #22c55e)',
   },
   {
     href: '#', icon: '🔬', title: 'Dubin-Amelar darajasi',
