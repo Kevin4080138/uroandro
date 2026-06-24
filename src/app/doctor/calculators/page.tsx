@@ -43,9 +43,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #0d9488, #22c55e)',
   },
   {
-    href: '#', icon: '🔬', title: 'Dubin-Amelar darajasi',
+    href: '/doctor/calculators/dubin-amelar', icon: '🔬', title: 'Dubin-Amelar darajasi',
     desc: 'Varikotsele klinik darajasini (I–III) tekshiruv natijalari bo\'yicha aniqlash',
-    kategoriya: 'Erkak bepushtligi', faol: false, gradient: 'linear-gradient(135deg, #7c3aed, #c026d3)',
+    kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #7c3aed, #c026d3)',
   },
   {
     href: '#', icon: '💙', title: 'IIEF-5 (SHIM)',
