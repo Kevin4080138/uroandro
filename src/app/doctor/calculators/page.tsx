@@ -68,9 +68,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0e7490, #06b6d4)',
   },
   {
-    href: '#', icon: '🪨', title: 'STONE skor',
+    href: '/doctor/calculators/stone', icon: '🪨', title: 'STONE skor',
     desc: 'Siydik yo\'li toshi ehtimolini klinik belgilar bo\'yicha bashorat qilish',
-    kategoriya: 'Buyrak', faol: false, gradient: 'linear-gradient(135deg, #57534e, #a8a29e)',
+    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #57534e, #a8a29e)',
   },
   {
     href: '#', icon: '🗺️', title: 'R.E.N.A.L. nefrometriya',
