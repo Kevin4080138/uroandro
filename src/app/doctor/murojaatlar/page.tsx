@@ -9,6 +9,7 @@ type Murojaat = {
   sabablar: string | null; tavsiya: string | null; javob: string | null
   holat: string; shoshilinch: boolean; created_at: string
   doctor_id: string | null; target_doctor_id: string | null
+  bemor_korgan: boolean; arxiv: boolean
 }
 type BemorInfo = { name: string; telefon: string | null }
 
@@ -26,6 +27,7 @@ export default function DoctorMurojaatlarPage() {
   const [loading, setLoading] = useState(true)
   const [javobMatn, setJavobMatn] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
+  const [arxivKorsat, setArxivKorsat] = useState(false)
 
   const load = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -65,8 +67,14 @@ export default function DoctorMurojaatlarPage() {
 
   const setJavob = (id: string, val: string) => setJavobMatn((p) => ({ ...p, [id]: val }))
 
-  const navbat = murojaatlar.filter((m) => !m.target_doctor_id && !m.doctor_id && m.holat === 'kutilmoqda')
-  const menikilar = murojaatlar.filter((m) => m.doctor_id === myId || (m.target_doctor_id === myId && !m.doctor_id))
+  const arxivla = async (m: Murojaat, holat: boolean) => {
+    await supabase.from('murojaatlar').update({ arxiv: holat }).eq('id', m.id)
+    load()
+  }
+
+  const navbat = murojaatlar.filter((m) => !m.target_doctor_id && !m.doctor_id && m.holat === 'kutilmoqda' && !m.arxiv)
+  const menikilar = murojaatlar.filter((m) => (m.doctor_id === myId || (m.target_doctor_id === myId && !m.doctor_id)) && !m.arxiv)
+  const arxivlar = murojaatlar.filter((m) => m.arxiv && (m.doctor_id === myId || m.target_doctor_id === myId))
 
   const sarlavha = (matn: string, son: number) => (
     <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -89,7 +97,7 @@ export default function DoctorMurojaatlarPage() {
               : navbat.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} />
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
               ))}
 
             <div style={{ height: '24px' }} />
@@ -99,8 +107,28 @@ export default function DoctorMurojaatlarPage() {
               : menikilar.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} />
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
               ))}
+
+            {arxivlar.length > 0 && (
+              <>
+                <button onClick={() => setArxivKorsat((v) => !v)} className="btn-animated" style={{
+                  marginTop: '28px', background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--muted)', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
+                }}>
+                  🗄️ Arxiv ({arxivlar.length}) {arxivKorsat ? '▲' : '▼'}
+                </button>
+                {arxivKorsat && (
+                  <div style={{ marginTop: '12px' }}>
+                    {arxivlar.map((m, i) => (
+                      <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
+                        javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
+                        qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
       </div>
@@ -108,10 +136,11 @@ export default function DoctorMurojaatlarPage() {
   )
 }
 
-function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, saving }: {
+function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, saving, arxivla }: {
   m: Murojaat; i: number; bemor?: BemorInfo
   javobMatn: string; setJavob: (id: string, v: string) => void
   qabulQil: (m: Murojaat) => void; javobYubor: (m: Murojaat) => void; saving: boolean
+  arxivla: (m: Murojaat, holat: boolean) => void
 }) {
   const holat = HOLAT_LABEL[m.holat] ?? HOLAT_LABEL.kutilmoqda
   const boshHarf = (bemor?.name ?? 'B').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()
@@ -160,12 +189,27 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
               outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit',
             }}
           />
-          <button onClick={() => javobYubor(m)} disabled={saving} className="btn-animated soft-press" style={{
-            marginTop: '8px', background: 'var(--good)', color: 'white', border: 'none', borderRadius: '999px',
-            padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: saving ? 0.7 : 1,
-          }}>
-            {saving ? 'Yuborilmoqda...' : m.javob ? '✓ Javobni yangilash' : '📤 Javobni yuborish'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
+            <button onClick={() => javobYubor(m)} disabled={saving} className="btn-animated soft-press" style={{
+              background: 'var(--good)', color: 'white', border: 'none', borderRadius: '999px',
+              padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: saving ? 0.7 : 1,
+            }}>
+              {saving ? 'Yuborilmoqda...' : m.javob ? '✓ Javobni yangilash' : '📤 Javobni yuborish'}
+            </button>
+            {/* Ko'rildi belgisi */}
+            {m.javob && (
+              <span style={{ fontSize: '12px', color: m.bemor_korgan ? 'var(--accent)' : 'var(--muted)', fontWeight: 600 }}>
+                {m.bemor_korgan ? '✓✓ Bemor ko\'rdi' : '✓ Yuborildi'}
+              </span>
+            )}
+            {/* Arxivlash */}
+            <button onClick={() => arxivla(m, !m.arxiv)} className="soft-press" style={{
+              marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', fontSize: '12.5px', fontWeight: 600,
+            }}>
+              {m.arxiv ? '↩️ Arxivdan chiqarish' : '🗄️ Arxivlash'}
+            </button>
+          </div>
         </>
       )}
     </div>

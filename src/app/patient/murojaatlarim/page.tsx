@@ -7,7 +7,7 @@ import { Header } from '@/components/Header'
 type Murojaat = {
   id: string; shikoyatlar: string; taxminiy_tashxis: string | null; tavsiya: string | null
   javob: string | null; holat: string; shoshilinch: boolean; created_at: string
-  doctor_id: string | null; target_doctor_id: string | null
+  doctor_id: string | null; target_doctor_id: string | null; bemor_korgan?: boolean
 }
 
 const HOLAT_LABEL: Record<string, { text: string; color: string }> = {
@@ -36,6 +36,12 @@ export default function MurojaatlarimPage() {
         setDoctorNames(map)
       }
       setLoading(false)
+
+      // javob bor, lekin hali "ko'rildi" deb belgilanmagan murojaatlarni belgilash
+      const korilmagan = list.filter((m) => m.javob && !m.bemor_korgan)
+      for (const m of korilmagan) {
+        await supabase.rpc('murojaat_korildi', { m_id: m.id })
+      }
     }
     load()
   }, [])

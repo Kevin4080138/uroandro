@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 const NAV = [
   { href: '/doctor/dashboard', icon: '🏠', label: 'Bosh sahifa' },
@@ -18,11 +19,28 @@ export function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [yangiMurojaat, setYangiMurojaat] = useState(0)
 
   useEffect(() => {
     setMounted(true)
     setCollapsed(localStorage.getItem('urosfera-sidebar') === 'collapsed')
-  }, [])
+
+    // yangi murojaatlar sonini hisoblash (navbat + javob berilmagan o'zimnikilar)
+    const supabase = createClient()
+    const hisobla = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('murojaatlar').select('doctor_id, target_doctor_id, holat, arxiv')
+      const son = (data ?? []).filter((m: any) => !m.arxiv && (
+        (!m.target_doctor_id && !m.doctor_id && m.holat === 'kutilmoqda') ||
+        (m.doctor_id === user.id && m.holat === 'qabul_qilindi')
+      )).length
+      setYangiMurojaat(son)
+    }
+    hisobla()
+    const interval = setInterval(hisobla, 30000)
+    return () => clearInterval(interval)
+  }, [pathname])
 
   const toggle = () => {
     const next = !collapsed
@@ -56,6 +74,7 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-1 p-2.5">
         {NAV.map((item) => {
           const active = pathname === item.href || (item.href !== '/doctor/dashboard' && pathname.startsWith(item.href))
+          const badge = item.href === '/doctor/murojaatlar' && yangiMurojaat > 0 ? yangiMurojaat : 0
           return (
             <div key={item.href} className="group relative">
               <Link
@@ -68,8 +87,16 @@ export function Sidebar() {
                   justifyContent: collapsed ? 'center' : 'flex-start',
                 }}
               >
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
-                {!collapsed && <span>{item.label}</span>}
+                <span style={{ fontSize: 18, position: 'relative' }}>
+                  {item.icon}
+                  {badge > 0 && collapsed && (
+                    <span style={{ position: 'absolute', top: '-4px', right: '-6px', minWidth: '16px', height: '16px', background: 'var(--danger)', color: '#fff', borderRadius: '999px', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{badge}</span>
+                  )}
+                </span>
+                {!collapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+                {!collapsed && badge > 0 && (
+                  <span style={{ minWidth: '20px', height: '20px', background: 'var(--danger)', color: '#fff', borderRadius: '999px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>{badge}</span>
+                )}
               </Link>
               {collapsed && (
                 <span
