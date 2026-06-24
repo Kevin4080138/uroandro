@@ -58,6 +58,8 @@ export default function PatientCardPage() {
 
   const [bemor, setBemor] = useState<any>(null)
   const [tashriflar, setTashriflar] = useState<any[]>([])
+  const [kalkulyatorNatijalari, setKalkulyatorNatijalari] = useState<any[]>([])
+  const [kalkulyatorMenyu, setKalkulyatorMenyu] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const [showYangiForm, setShowYangiForm] = useState(false)
@@ -86,6 +88,13 @@ export default function PatientCardPage() {
       .eq('doctor_id', user?.id)
       .order('sana', { ascending: false })
     setTashriflar(tashriflarData ?? [])
+
+    const { data: kalkData } = await supabase
+      .from('kalkulyator_natijalari')
+      .select('*')
+      .eq('bemor_id', id)
+      .order('created_at', { ascending: false })
+    setKalkulyatorNatijalari(kalkData ?? [])
     setLoading(false)
   }
 
@@ -119,6 +128,11 @@ export default function PatientCardPage() {
       if (mavjud.includes(matn)) return f
       return { ...f, tekshiruvlar: [...mavjud, matn].join(', ') }
     })
+  }
+
+  const kalkulyatorNatijasiniOchir = async (natijaId: string) => {
+    await supabase.from('kalkulyator_natijalari').delete().eq('id', natijaId)
+    setKalkulyatorNatijalari((arr) => arr.filter((n) => n.id !== natijaId))
   }
 
   const openYangiForm = (t?: any) => {
@@ -290,6 +304,44 @@ export default function PatientCardPage() {
             }}>
               📄 Hujjatlar
             </button>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setKalkulyatorMenyu((v) => !v)} className="btn-animated soft-press" style={{
+                background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
+                padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+              }}>
+                🧮 Kalkulyatorlar
+              </button>
+              {kalkulyatorMenyu && (
+                <>
+                  <div onClick={() => setKalkulyatorMenyu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '220px',
+                    background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
+                    boxShadow: '0 10px 28px rgba(0,0,0,0.15)', overflow: 'hidden',
+                  }}>
+                    {[
+                      { href: 'ipss', label: 'IPSS / AUA-SS', icon: '📊' },
+                      { href: 'psa', label: 'PSA kalkulyatori', icon: '🩸' },
+                      { href: 'prostata-hajmi', label: 'Prostata hajmi', icon: '🍈' },
+                      { href: 'spermogramma', label: 'WHO 2021 spermogramma', icon: '🧬' },
+                    ].map((k) => (
+                      <button
+                        key={k.href}
+                        onClick={() => router.push(`/doctor/calculators/${k.href}?bemorId=${id}`)}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left',
+                          background: 'none', border: 'none', padding: '11px 16px', cursor: 'pointer',
+                          fontSize: '13.5px', fontWeight: 600, color: 'var(--ink)',
+                        }}
+                        className="hover-row"
+                      >
+                        <span>{k.icon}</span>{k.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <button onClick={() => (showYangiForm ? setShowYangiForm(false) : openYangiForm())} className="soft-press" style={{
               background: showYangiForm ? 'var(--surface-2)' : 'var(--accent)', color: showYangiForm ? 'var(--ink-soft)' : 'white',
               border: showYangiForm ? '1px solid var(--line)' : 'none', borderRadius: '999px',
@@ -299,6 +351,36 @@ export default function PatientCardPage() {
             </button>
           </div>
         </div>
+
+        {/* Kalkulyator natijalari tarixi */}
+        {kalkulyatorNatijalari.length > 0 && (
+          <div className="rise" style={{
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+            padding: '18px 20px', marginBottom: '22px',
+          }}>
+            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', fontWeight: 700, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: '3px', height: '12px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
+              Kalkulyator natijalari
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {kalkulyatorNatijalari.map((n) => (
+                <div key={n.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                  background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 14px', flexWrap: 'wrap',
+                }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{n.sarlavha}</div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)', marginTop: '2px' }}>{n.xulosa}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '3px' }}>{new Date(n.created_at).toLocaleString('uz-UZ')}</div>
+                  </div>
+                  <button onClick={() => kalkulyatorNatijasiniOchir(n.id)} style={{
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '14px', flexShrink: 0,
+                  }}>🗑️</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 1-bosqich: shikoyat, anamnez, tekshiruv buyurtmasi */}
         {showYangiForm && (

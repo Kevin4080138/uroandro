@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -19,7 +22,25 @@ function hajmDarajasi(hajm: number) {
 }
 
 export default function ProstataHajmiKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <ProstataHajmiIchki />
+    </Suspense>
+  )
+}
+
+function ProstataHajmiIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [a, setA] = useState('')
   const [b, setB] = useState('')
   const [c, setC] = useState('')
@@ -35,6 +56,17 @@ export default function ProstataHajmiKalkulyator() {
   const psaN = parseFloat(psa)
   const psad = hajm && Number.isFinite(psaN) && hajm > 0 ? psaN / hajm : null
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    const qismlar = [`Hajm: ${hajm!.toFixed(1)} sm³ (${daraja!.nom})`]
+    if (psad !== null) qismlar.push(`PSAD: ${psad.toFixed(3)}`)
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'prostata-hajmi', sarlavha: 'Prostata hajmi',
+      xulosa: qismlar.join(', '),
+      malumot: { a: aN, b: bN, c: cN, hajm, psa: psaN, psad },
+    })
+  }
+
   return (
     <AppShell title="Prostata hajmi kalkulyatori">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -44,6 +76,8 @@ export default function ProstataHajmiKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #ea580c, #facc15)', color: 'white',

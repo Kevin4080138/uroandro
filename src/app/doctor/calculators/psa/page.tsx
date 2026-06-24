@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -32,11 +35,33 @@ function fpsaXavf(foiz: number) {
 }
 
 export default function PSAKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <PSAIchki />
+    </Suspense>
+  )
+}
+
+function PSAIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
   const [yosh, setYosh] = useState('')
   const [psa, setPsa] = useState('')
   const [erkinPsa, setErkinPsa] = useState('')
   const [hajm, setHajm] = useState('')
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio, tugilgan_sana').eq('id', bemorId).single().then(({ data }) => {
+      setBemor(data)
+      const y = yoshHisobla(data?.tugilgan_sana)
+      if (y !== null) setYosh(String(y))
+    })
+  }, [bemorId])
 
   const yoshN = parseFloat(yosh)
   const psaN = parseFloat(psa)
@@ -51,6 +76,19 @@ export default function PSAKalkulyator() {
 
   const tuldi = Number.isFinite(psaN)
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    const qismlar = [`PSA: ${psaN} ng/mL`]
+    if (mezon) qismlar.push(yuqoriChegaradan ? "yoshga moslashgan chegaradan yuqori" : "me'zon doirasida")
+    if (psad !== null) qismlar.push(`PSAD: ${psad.toFixed(3)}`)
+    if (fpsaFoiz !== null) qismlar.push(`%fPSA: ${fpsaFoiz.toFixed(1)}%`)
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'psa', sarlavha: 'PSA kalkulyatori',
+      xulosa: qismlar.join(', '),
+      malumot: { yosh: yoshN, psa: psaN, erkinPsa: erkinN, hajm: hajmN, psad, fpsaFoiz },
+    })
+  }
+
   return (
     <AppShell title="PSA kalkulyatori">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -60,6 +98,8 @@ export default function PSAKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #dc2626, #f97316)', color: 'white',

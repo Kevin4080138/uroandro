@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 // Savol matnlari — har biri 0–5 ball, "1-haftalik" tajriba bo'yicha javob beriladi.
 const SAVOLLAR = [
@@ -55,13 +58,40 @@ function daraja(jami: number) {
 }
 
 export default function IPSSPage() {
+  return (
+    <Suspense fallback={null}>
+      <IPSSIchki />
+    </Suspense>
+  )
+}
+
+function IPSSIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(7).fill(null))
   const [qol, setQol] = useState<number | null>(null)
 
   const tuldi = javoblar.every((v) => v !== null)
   const jami = useMemo(() => javoblar.reduce((s: number, v) => s + (v ?? 0), 0), [javoblar])
   const natija = daraja(jami)
+
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'ipss', sarlavha: 'IPSS / AUA-SS',
+      xulosa: `Jami: ${jami} — ${natija.nom}${qol !== null ? `, QoL: ${qol}` : ''}`,
+      malumot: { javoblar, qol, jami },
+    })
+  }
 
   const javobBer = (i: number, val: number) => setJavoblar((arr) => arr.map((v, j) => (j === i ? val : v)))
   const qaytaBoshla = () => { setJavoblar(Array(7).fill(null)); setQol(null) }
@@ -75,6 +105,8 @@ export default function IPSSPage() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         {/* Sarlavha va ma'lumot */}
         <div className="rise" style={{

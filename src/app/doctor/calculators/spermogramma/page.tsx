@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -36,7 +39,25 @@ function tashxisAniqla(natija: Record<string, { qiymat: number; norma: boolean }
 }
 
 export default function SpermogrammaKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <SpermogrammaIchki />
+    </Suspense>
+  )
+}
+
+function SpermogrammaIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [qiymatlar, setQiymatlar] = useState<Record<string, string>>({})
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => setQiymatlar((q) => ({ ...q, [key]: e.target.value }))
@@ -54,6 +75,15 @@ export default function SpermogrammaKalkulyator() {
 
   const tashxis = tuldi ? tashxisAniqla(natija) : null
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'spermogramma', sarlavha: 'WHO 2021 spermogramma',
+      xulosa: tashxis ? tashxis.nom : '—',
+      malumot: { qiymatlar, tashxis: tashxis?.nom },
+    })
+  }
+
   return (
     <AppShell title="WHO 2021 spermogramma">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -63,6 +93,8 @@ export default function SpermogrammaKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #0d9488, #22c55e)', color: 'white',
