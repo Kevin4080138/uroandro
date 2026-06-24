@@ -78,9 +78,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #15803d, #84cc16)',
   },
   {
-    href: '#', icon: '💧', title: 'Uroflowmetriya baholash',
+    href: '/doctor/calculators/uroflowmetriya', icon: '💧', title: 'Uroflowmetriya baholash',
     desc: 'Siydik oqimi tezligi (Qmax) natijalarini yosh me\'zonlari bilan izohlash',
-    kategoriya: 'Siydik pufagi', faol: false, gradient: 'linear-gradient(135deg, #1d4ed8, #06b6d4)',
+    kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #1d4ed8, #06b6d4)',
   },
   {
     href: '#', icon: '🚻', title: 'OAB-V8',
