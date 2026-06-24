@@ -1,18 +1,20 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { shablonTop, type HujjatBlok, type Maydon } from '@/lib/shablonlar'
 
 const SHABLON_ID = 'prostatit'
+const ASOS_HUJJAT = 'birlamchi'   // boshqa hujjatlar shundan boshlang'ich ma'lumot oladi
 
 const input = {
-  width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
-  borderRadius: '8px', padding: '8px 10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const,
+  width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1.5px solid var(--line)',
+  borderRadius: '9px', padding: '9px 11px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const,
 }
-const lbl = { color: 'var(--ink-soft)', fontSize: '12px', display: 'block', marginBottom: '4px' }
+const lbl = { color: 'var(--ink-soft)', fontSize: '12px', fontWeight: 600 as const, display: 'block', marginBottom: '5px' }
 
 const chip = (active: boolean): React.CSSProperties => ({
   border: 'none', borderRadius: '16px', padding: '5px 11px', cursor: 'pointer', fontSize: '12px', fontWeight: 600,
@@ -26,7 +28,8 @@ export default function HujjatlarPage() {
 
   const [bemor, setBemor] = useState<any>(null)
   const [shifokorIsmi, setShifokorIsmi] = useState('')
-  const [data, setData] = useState<Record<string, any>>({})
+  const [defaults, setDefaults] = useState<Record<string, any>>({})
+  const [docData, setDocData] = useState<Record<string, Record<string, any>>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saqlandi, setSaqlandi] = useState(false)
@@ -59,11 +62,23 @@ export default function HujjatlarPage() {
       // vrach maydonlari — ro'yxatdan o'tgan shifokor ismi (o'zgartirsa bo'ladi)
       boshlang.davolovchi = prof?.full_name ?? ''
       boshlang.bolim_mudiri = prof?.full_name ?? ''
-      setData({ ...boshlang, ...(hd?.malumot ?? {}) })
+      setDefaults(boshlang)
+
+      // saqlangan ma'lumot: yangi (hujjat bo'yicha) yoki eski (yassi) format
+      const saqlangan = hd?.malumot ?? {}
+      const hujjatIdlar = shablon.hujjatlar.map((h) => h.id)
+      const yangiFormat = Object.keys(saqlangan).some((k) => hujjatIdlar.includes(k))
+      setDocData(yangiFormat ? saqlangan : { [ASOS_HUJJAT]: saqlangan })
       setLoading(false)
     }
     load()
   }, [id])
+
+  const faolId = shablon.hujjatlar[faolIndex]?.id ?? ASOS_HUJJAT
+
+  // hujjat uchun amaldagi ma'lumot: default + asos hujjat + shu hujjat o'zgarishlari
+  const effective = (docId: string) => ({ ...defaults, ...(docData[ASOS_HUJJAT] ?? {}), ...(docData[docId] ?? {}) })
+  const faolData = effective(faolId)
 
   // o'rtadagi ajratgichni sudrash
   const sudrashBoshla = (e: React.MouseEvent) => {
@@ -84,11 +99,16 @@ export default function HujjatlarPage() {
     window.addEventListener('mouseup', tugat)
   }
 
-  const set = (key: string, val: any) => { setData((d) => ({ ...d, [key]: val })); setSaqlandi(false) }
+  // o'zgartirishlar faqat faol hujjatga yoziladi (boshqalariga ta'sir qilmaydi)
+  const set = (key: string, val: any) => {
+    setDocData((d) => ({ ...d, [faolId]: { ...(d[faolId] ?? {}), [key]: val } }))
+    setSaqlandi(false)
+  }
   const toggleChecklist = (key: string, val: string) => {
-    setData((d) => {
-      const cur: string[] = Array.isArray(d[key]) ? d[key] : []
-      return { ...d, [key]: cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val] }
+    setDocData((d) => {
+      const cur: string[] = Array.isArray(faolData[key]) ? faolData[key] : []
+      const yangi = cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val]
+      return { ...d, [faolId]: { ...(d[faolId] ?? {}), [key]: yangi } }
     })
     setSaqlandi(false)
   }
@@ -98,7 +118,7 @@ export default function HujjatlarPage() {
     if (!user) return
     setSaving(true)
     await supabase.from('hujjat_malumotlari').upsert({
-      bemor_id: id, doctor_id: user.id, shablon: SHABLON_ID, malumot: data, updated_at: new Date().toISOString(),
+      bemor_id: id, doctor_id: user.id, shablon: SHABLON_ID, malumot: docData, updated_at: new Date().toISOString(),
     }, { onConflict: 'bemor_id,doctor_id,shablon' })
     setSaving(false)
     setSaqlandi(true)
@@ -110,18 +130,19 @@ export default function HujjatlarPage() {
     // avval scale=1 da render bo'lsin, keyin balandlikni o'lchab bitta betga moslaymiz
     setTimeout(() => {
       const el = bosmaRef.current
-      const target = 1000 // A4 chop maydoni balandligi (~px, 96dpi)
+      const target = 1015 // A4 chop maydoni balandligi (~px, 96dpi, 11mm chet)
       if (el) {
         const h = el.scrollHeight
         setBosmaScale(h > target ? target / h : 1)
       }
-      setTimeout(() => { window.print(); setChopId(null); setBosmaScale(1) }, 90)
-    }, 60)
+      setTimeout(() => { window.print(); setChopId(null); setBosmaScale(1) }, 120)
+    }, 80)
   }
 
   const hujjatlar = useMemo(
-    () => shablon.hujjatlar.map((h) => ({ ...h, bloklar: h.render(data, bemor, shifokorIsmi) })),
-    [shablon, data, bemor, shifokorIsmi]
+    () => shablon.hujjatlar.map((h) => ({ ...h, bloklar: h.render(effective(h.id), bemor, shifokorIsmi) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shablon, defaults, docData, bemor, shifokorIsmi]
   )
 
   if (loading) return (
@@ -132,12 +153,11 @@ export default function HujjatlarPage() {
     <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`}>
       <style>{`
         .ajratgich:hover > div { background: var(--accent) !important; width: 3px !important; }
-        .bosma { position: absolute; left: -10000px; top: 0; width: 680px; }
+        .bosma-portal { position: fixed; left: -10000px; top: 0; width: 680px; background: #fff; }
         @media print {
-          body * { visibility: hidden !important; }
-          .bosma, .bosma * { visibility: visible !important; }
-          .bosma { left: 0 !important; top: 0 !important; width: 100% !important; }
-          @page { size: A4; margin: 12mm 15mm; }
+          body > *:not(.bosma-portal) { display: none !important; }
+          .bosma-portal { position: static !important; left: 0 !important; width: auto !important; }
+          @page { size: A4; margin: 11mm 14mm; }
           html, body { background: #fff !important; }
         }
       `}</style>
@@ -146,27 +166,29 @@ export default function HujjatlarPage() {
         {/* CHAP PANEL — forma */}
         <div style={{ width: chapKeng, flexShrink: 0, position: 'sticky', top: '80px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <h3 style={{ margin: 0, fontSize: '15px' }}>Ma&apos;lumotlar</h3>
-            <button onClick={saqla} disabled={saving} className="btn-animated" style={{
-              background: saqlandi ? 'var(--good)' : 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px',
-              padding: '7px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Ma&apos;lumotlar</h3>
+            <button onClick={saqla} disabled={saving} className="btn-animated soft-press" style={{
+              background: saqlandi ? 'var(--good)' : 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
+              padding: '8px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
             }}>
               {saving ? 'Saqlanmoqda...' : saqlandi ? '✓ Saqlandi' : 'Saqlash'}
             </button>
           </div>
 
-          <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {shablon.guruhlar.map((g) => {
-              const faolId = hujjatlar[faolIndex]?.id
               const maydonlar = g.maydonlar.filter((m) => !m.faqat || (faolId && m.faqat.includes(faolId)))
               if (maydonlar.length === 0) return null
               return (
-                <div key={g.nom}>
-                  <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--muted)', margin: '0 0 8px 0' }}>{g.nom}</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 10px' }}>
+                <div key={g.nom} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px 16px' }}>
+                  <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', fontWeight: 700, margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                    <span style={{ width: '3px', height: '12px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
+                    {g.nom}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 10px' }}>
                     {maydonlar.map((m) => (
-                      <div key={m.key} style={{ flex: m.keng || m.type === 'checklist' || m.type === 'textarea' ? '1 1 100%' : '1 1 calc(50% - 5px)', minWidth: 0 }}>
-                        <MaydonRender m={m} value={data[m.key]} set={set} toggle={toggleChecklist} />
+                      <div key={m.key} style={{ flex: m.keng || m.type === 'checklist' || m.type === 'textarea' || m.type === 'olcham' ? '1 1 100%' : '1 1 calc(50% - 5px)', minWidth: 0 }}>
+                        <MaydonRender m={m} value={faolData[m.key]} set={set} toggle={toggleChecklist} />
                       </div>
                     ))}
                   </div>
@@ -237,13 +259,18 @@ export default function HujjatlarPage() {
         </div>
       </div>
 
-      {/* Bosma — faqat chop rejimida ko'rinadi, sidebar/header chiqmaydi, bitta betga sig'adi */}
-      <div className="bosma" ref={bosmaRef} style={{ zoom: bosmaScale }}>
-        {chopId && (() => {
-          const h = hujjatlar.find((x) => x.id === chopId)
-          return h ? <HujjatVaraq bloklar={h.bloklar} print /> : null
-        })()}
-      </div>
+      {/* Bosma — body'ga portal, faqat chop rejimida ko'rinadi (boshqa hammasi yashiriladi) */}
+      {chopId && typeof document !== 'undefined' && createPortal(
+        <div className="bosma-portal">
+          <div ref={bosmaRef} style={{ zoom: bosmaScale }}>
+            {(() => {
+              const h = hujjatlar.find((x) => x.id === chopId)
+              return h ? <HujjatVaraq bloklar={h.bloklar} print /> : null
+            })()}
+          </div>
+        </div>,
+        document.body
+      )}
     </AppShell>
   )
 }
@@ -414,8 +441,8 @@ function VariantSelect({ value, variantlar, onChange }: { value: string; variant
 
 function HujjatVaraq({ bloklar, print }: { bloklar: HujjatBlok[]; chop?: boolean; print?: boolean }) {
   // chop rejimida kompakt — bitta A4 varaqqa sig'sin
-  const fs = print ? '11px' : '13.5px'
-  const lh = print ? 1.32 : 1.6
+  const fs = print ? '10.5px' : '13.5px'
+  const lh = print ? 1.28 : 1.6
   const pm = print ? '2px' : '4px'   // paragraf orasidagi masofa
   return (
     <div style={{
