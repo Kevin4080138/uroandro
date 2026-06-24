@@ -58,9 +58,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #4338ca, #6366f1)',
   },
   {
-    href: '#', icon: '🫘', title: 'eGFR (CKD-EPI)',
+    href: '/doctor/calculators/egfr', icon: '🫘', title: 'eGFR (CKD-EPI)',
     desc: 'Kreatinin, yosh va jins asosida buyrak filtratsiya tezligini hisoblash',
-    kategoriya: 'Buyrak', faol: false, gradient: 'linear-gradient(135deg, #0369a1, #38bdf8)',
+    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0369a1, #38bdf8)',
   },
   {
     href: '#', icon: '⚗️', title: 'Kreatinin klirensi (Cockcroft-Gault)',
