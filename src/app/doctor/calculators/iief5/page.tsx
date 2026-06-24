@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 // IIEF-5 (SHIM) — 5 savol, har biri 1–5 ball (1-savolda "jinsiy aloqa bo'lmagan" uchun 0 variant ham bor)
 const SAVOLLAR = [
@@ -37,7 +40,25 @@ function daraja(jami: number) {
 }
 
 export default function IIEF5Page() {
+  return (
+    <Suspense fallback={null}>
+      <IIEF5Ichki />
+    </Suspense>
+  )
+}
+
+function IIEF5Ichki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(5).fill(null))
 
   const tuldi = javoblar.every((v) => v !== null)
@@ -46,6 +67,15 @@ export default function IIEF5Page() {
 
   const javobBer = (i: number, val: number) => setJavoblar((arr) => arr.map((v, j) => (j === i ? val : v)))
   const qaytaBoshla = () => setJavoblar(Array(5).fill(null))
+
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'iief5', sarlavha: 'IIEF-5 (SHIM)',
+      xulosa: `Jami: ${jami} — ${natija.nom}`,
+      malumot: { javoblar, jami },
+    })
+  }
 
   return (
     <AppShell title="IIEF-5 (SHIM)">
@@ -56,6 +86,8 @@ export default function IIEF5Page() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #db2777, #f43f5e)', color: 'white',

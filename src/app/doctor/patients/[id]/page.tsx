@@ -315,29 +315,59 @@ export default function PatientCardPage() {
                 <>
                   <div onClick={() => setKalkulyatorMenyu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
                   <div className="menyu-ochilish" style={{
-                    position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '220px',
+                    position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '250px',
                     background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
                     boxShadow: '0 10px 28px rgba(0,0,0,0.15)', overflow: 'hidden',
-                    transformOrigin: 'top right',
+                    transformOrigin: 'top right', maxHeight: '420px', overflowY: 'auto',
                   }}>
                     {[
-                      { href: 'ipss', label: 'IPSS / AUA-SS', icon: '📊' },
-                      { href: 'psa', label: 'PSA kalkulyatori', icon: '🩸' },
-                      { href: 'prostata-hajmi', label: 'Prostata hajmi', icon: '🍈' },
-                      { href: 'spermogramma', label: 'WHO 2021 spermogramma', icon: '🧬' },
-                    ].map((k) => (
-                      <button
-                        key={k.href}
-                        onClick={() => router.push(`/doctor/calculators/${k.href}?bemorId=${id}`)}
-                        style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left',
-                          background: 'none', border: 'none', padding: '11px 16px', cursor: 'pointer',
-                          fontSize: '13.5px', fontWeight: 600, color: 'var(--ink)',
-                        }}
-                        className="hover-row"
-                      >
-                        <span>{k.icon}</span>{k.label}
-                      </button>
+                      { guruh: 'Prostata', kalk: [
+                        { href: 'ipss', label: 'IPSS / AUA-SS', icon: '📊' },
+                        { href: 'psa', label: 'PSA kalkulyatori', icon: '🩸' },
+                        { href: 'prostata-hajmi', label: 'Prostata hajmi', icon: '🍈' },
+                        { href: 'nih-cpsi', label: 'NIH-CPSI', icon: '🔥' },
+                      ] },
+                      { guruh: 'Erkak bepushtligi', kalk: [
+                        { href: 'spermogramma', label: 'WHO 2021 spermogramma', icon: '🧬' },
+                        { href: 'dubin-amelar', label: 'Dubin-Amelar darajasi', icon: '🔬' },
+                      ] },
+                      { guruh: 'Erektil funksiya', kalk: [
+                        { href: 'iief5', label: 'IIEF-5 (SHIM)', icon: '💙' },
+                        { href: 'adam', label: 'Testosteron tanqisligi (ADAM)', icon: '🧪' },
+                      ] },
+                      { guruh: 'Buyrak', kalk: [
+                        { href: 'egfr', label: 'eGFR (CKD-EPI)', icon: '🫘' },
+                        { href: 'cockcroft-gault', label: 'Kreatinin klirensi', icon: '⚗️' },
+                        { href: 'stone', label: 'STONE skori', icon: '🪨' },
+                        { href: 'renal', label: 'R.E.N.A.L. nefrometriya', icon: '🗺️' },
+                      ] },
+                      { guruh: 'Siydik pufagi', kalk: [
+                        { href: 'uroflowmetriya', label: 'Uroflowmetriya baholash', icon: '💧' },
+                        { href: 'oab-v8', label: 'OAB-V8', icon: '🚻' },
+                      ] },
+                    ].map((g) => (
+                      <div key={g.guruh}>
+                        <div style={{
+                          fontSize: '10.5px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase',
+                          letterSpacing: '.04em', padding: '9px 16px 5px', background: 'var(--surface-2)',
+                        }}>
+                          {g.guruh}
+                        </div>
+                        {g.kalk.map((k) => (
+                          <button
+                            key={k.href}
+                            onClick={() => router.push(`/doctor/calculators/${k.href}?bemorId=${id}`)}
+                            style={{
+                              width: '100%', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left',
+                              background: 'none', border: 'none', padding: '10px 16px', cursor: 'pointer',
+                              fontSize: '13.5px', fontWeight: 600, color: 'var(--ink)',
+                            }}
+                            className="hover-row"
+                          >
+                            <span>{k.icon}</span>{k.label}
+                          </button>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </>

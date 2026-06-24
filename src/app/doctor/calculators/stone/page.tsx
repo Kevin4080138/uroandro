@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 // STONE skori — 5 ta klinik parametr (Moore va boshq., 2014)
 // S — Sex (jins), T — Time (boshlanish vaqti), O — Origin (irq), N — Nausea (ko'ngil aynishi), E — Erythrocytes (eritrotsiturya)
@@ -37,7 +40,25 @@ function natijaDarajasi(jami: number) {
 }
 
 export default function StoneSkorKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <StoneSkorIchki />
+    </Suspense>
+  )
+}
+
+function StoneSkorIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [javoblar, setJavoblar] = useState<Record<string, number | null>>({})
 
   const tuldi = SAVOLLAR.every((s) => javoblar[s.key] !== undefined && javoblar[s.key] !== null)
@@ -46,6 +67,15 @@ export default function StoneSkorKalkulyator() {
 
   const javobBer = (key: string, b: number) => setJavoblar((j) => ({ ...j, [key]: b }))
   const qaytaBoshla = () => setJavoblar({})
+
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'stone', sarlavha: 'STONE skori',
+      xulosa: `Jami: ${jami} — ${natija!.nom} (${natija!.ehtimol})`,
+      malumot: { javoblar, jami },
+    })
+  }
 
   return (
     <AppShell title="STONE skori">
@@ -56,6 +86,8 @@ export default function StoneSkorKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #57534e, #a8a29e)', color: 'white',

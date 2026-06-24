@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -19,12 +22,34 @@ function qmaxIzoh(qmax: number, yosh: number) {
 }
 
 export default function UroflowmetriyaKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <UroflowmetriyaIchki />
+    </Suspense>
+  )
+}
+
+function UroflowmetriyaIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
   const [hajm, setHajm] = useState('')
   const [qmax, setQmax] = useState('')
   const [vaqt, setVaqt] = useState('')
   const [qoldiq, setQoldiq] = useState('')
   const [yosh, setYosh] = useState('60')
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio, tugilgan_sana').eq('id', bemorId).single().then(({ data }) => {
+      setBemor(data)
+      const y = yoshHisobla(data?.tugilgan_sana)
+      if (y !== null) setYosh(String(y))
+    })
+  }, [bemorId])
 
   const hajmN = parseFloat(hajm)
   const qmaxN = parseFloat(qmax)
@@ -38,6 +63,15 @@ export default function UroflowmetriyaKalkulyator() {
   const qoFlow = Number.isFinite(hajmN) && Number.isFinite(vaqtN) && vaqtN > 0 ? hajmN / vaqtN : null
   const natija = tuldi ? qmaxIzoh(qmaxN, yoshN) : null
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'uroflowmetriya', sarlavha: 'Uroflowmetriya baholash',
+      xulosa: `Qmax: ${qmaxN} mL/s — ${natija!.nom}`,
+      malumot: { yosh: yoshN, hajm: hajmN, qmax: qmaxN, vaqt: vaqtN, qoldiq: qoldiqN, qoFlow },
+    })
+  }
+
   return (
     <AppShell title="Uroflowmetriya baholash">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -47,6 +81,8 @@ export default function UroflowmetriyaKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #1d4ed8, #06b6d4)', color: 'white',

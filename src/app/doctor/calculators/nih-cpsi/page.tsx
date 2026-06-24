@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 // NIH-CPSI — 9 savol, 3 domenga bo'lingan: og'riq (1-4), siyish (5-6), hayot sifati (7-9)
 const OGRIQ_SAVOLLARI = [
@@ -35,7 +38,25 @@ function daraja(jami: number) {
 }
 
 export default function NIHCPSIPage() {
+  return (
+    <Suspense fallback={null}>
+      <NIHCPSIIchki />
+    </Suspense>
+  )
+}
+
+function NIHCPSIIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [ogriqJoy, setOgriqJoy] = useState<(number | null)[]>(Array(4).fill(null))
   const [ogriqTezTez, setOgriqTezTez] = useState<number | null>(null)
   const [ogriqDaraja, setOgriqDaraja] = useState<number | null>(null)
@@ -55,6 +76,15 @@ export default function NIHCPSIPage() {
   const jami = ogriqBall + siyishBall + qolBall
   const natija = daraja(jami)
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'nih-cpsi', sarlavha: 'NIH-CPSI',
+      xulosa: `Jami: ${jami} — ${natija.nom} (Og'riq: ${ogriqBall}, Siyish: ${siyishBall}, Hayot sifati: ${qolBall})`,
+      malumot: { ogriqJoy, ogriqTezTez, ogriqDaraja, siyish, qol, ogriqBall, siyishBall, qolBall, jami },
+    })
+  }
+
   return (
     <AppShell title="NIH-CPSI">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -64,6 +94,8 @@ export default function NIHCPSIPage() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #b91c1c, #ea580c)', color: 'white',

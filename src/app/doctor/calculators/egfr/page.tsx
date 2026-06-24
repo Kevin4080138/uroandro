@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -31,11 +34,33 @@ function bosqich(egfr: number) {
 }
 
 export default function EGFRKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <EGFRIchki />
+    </Suspense>
+  )
+}
+
+function EGFRIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
   const [yosh, setYosh] = useState('')
   const [jins, setJins] = useState<'erkak' | 'ayol'>('erkak')
   const [kreatininBirlik, setKreatininBirlik] = useState<'mgdl' | 'umoll'>('umoll')
   const [kreatinin, setKreatinin] = useState('')
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio, tugilgan_sana').eq('id', bemorId).single().then(({ data }) => {
+      setBemor(data)
+      const y = yoshHisobla(data?.tugilgan_sana)
+      if (y !== null) setYosh(String(y))
+    })
+  }, [bemorId])
 
   const yoshN = parseFloat(yosh)
   const kreatininN = parseFloat(kreatinin)
@@ -46,6 +71,15 @@ export default function EGFRKalkulyator() {
   const egfr = useMemo(() => (tuldi ? ckdEpi2021(kreatininMgDl, yoshN, jins) : null), [tuldi, kreatininMgDl, yoshN, jins])
   const natija = egfr !== null ? bosqich(egfr) : null
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'egfr', sarlavha: 'eGFR (CKD-EPI)',
+      xulosa: `eGFR: ${egfr!.toFixed(0)} mL/min/1.73m² — ${natija!.nom}`,
+      malumot: { yosh: yoshN, jins, kreatinin: kreatininN, kreatininBirlik, egfr },
+    })
+  }
+
   return (
     <AppShell title="eGFR (CKD-EPI)">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -55,6 +89,8 @@ export default function EGFRKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #0369a1, #38bdf8)', color: 'white',

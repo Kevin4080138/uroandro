@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -25,12 +28,34 @@ function daraja(klirens: number) {
 }
 
 export default function CockcroftGaultKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <CockcroftGaultIchki />
+    </Suspense>
+  )
+}
+
+function CockcroftGaultIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
   const [yosh, setYosh] = useState('')
   const [vazn, setVazn] = useState('')
   const [jins, setJins] = useState<'erkak' | 'ayol'>('erkak')
   const [kreatininBirlik, setKreatininBirlik] = useState<'mgdl' | 'umoll'>('umoll')
   const [kreatinin, setKreatinin] = useState('')
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio, tugilgan_sana').eq('id', bemorId).single().then(({ data }) => {
+      setBemor(data)
+      const y = yoshHisobla(data?.tugilgan_sana)
+      if (y !== null) setYosh(String(y))
+    })
+  }, [bemorId])
 
   const yoshN = parseFloat(yosh)
   const vaznN = parseFloat(vazn)
@@ -42,6 +67,15 @@ export default function CockcroftGaultKalkulyator() {
   const klirens = useMemo(() => (tuldi ? cockcroftGault(yoshN, vaznN, kreatininMgDl, jins) : null), [tuldi, yoshN, vaznN, kreatininMgDl, jins])
   const natija = klirens !== null ? daraja(klirens) : null
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'cockcroft-gault', sarlavha: 'Kreatinin klirensi (Cockcroft-Gault)',
+      xulosa: `CrCl: ${klirens!.toFixed(0)} mL/min — ${natija!.nom}`,
+      malumot: { yosh: yoshN, vazn: vaznN, jins, kreatinin: kreatininN, kreatininBirlik, klirens },
+    })
+  }
+
   return (
     <AppShell title="Kreatinin klirensi (Cockcroft-Gault)">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -51,6 +85,8 @@ export default function CockcroftGaultKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #0e7490, #06b6d4)', color: 'white',

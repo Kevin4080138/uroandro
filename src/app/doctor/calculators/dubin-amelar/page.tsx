@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -42,12 +45,40 @@ const VARIANTLAR = [
 ] as const
 
 export default function DubinAmelarKalkulyator() {
+  return (
+    <Suspense fallback={null}>
+      <DubinAmelarIchki />
+    </Suspense>
+  )
+}
+
+function DubinAmelarIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [tanlangan, setTanlangan] = useState<string | null>(null)
   const [venaDiametri, setVenaDiametri] = useState('')
 
   const natija = VARIANTLAR.find((v) => v.key === tanlangan) ?? null
   const venaN = parseFloat(venaDiametri)
+
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    if (!natija) return { error: 'Daraja tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'dubin-amelar', sarlavha: 'Dubin-Amelar darajasi',
+      xulosa: `${natija.daraja}${Number.isFinite(venaN) && venaN > 0 ? `, vena diametri: ${venaN} mm` : ''}`,
+      malumot: { daraja: natija.key, venaDiametri: venaN },
+    })
+  }
 
   return (
     <AppShell title="Dubin-Amelar darajasi">
@@ -58,6 +89,8 @@ export default function DubinAmelarKalkulyator() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={!!natija} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #7c3aed, #c026d3)', color: 'white',

@@ -1,8 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 // OAB-V8 — 8 savol, har biri 0-5 ball ("so'nggi 4 hafta ichida qanchalik bezovta qildi")
 const SAVOLLAR = [
@@ -24,7 +27,25 @@ function natijaDarajasi(jami: number) {
 }
 
 export default function OABV8Page() {
+  return (
+    <Suspense fallback={null}>
+      <OABV8Ichki />
+    </Suspense>
+  )
+}
+
+function OABV8Ichki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(8).fill(null))
 
   const tuldi = javoblar.every((v) => v !== null)
@@ -36,6 +57,15 @@ export default function OABV8Page() {
   const javobBer = (i: number, val: number) => setJavoblar((arr) => arr.map((v, j) => (j === i ? val : v)))
   const qaytaBoshla = () => setJavoblar(Array(8).fill(null))
 
+  const saqlash = async () => {
+    if (!bemorId) return { error: 'Bemor tanlanmagan' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'oab-v8', sarlavha: 'OAB-V8',
+      xulosa: `Jami: ${jami} — ${natija.nom}`,
+      malumot: { javoblar, jami },
+    })
+  }
+
   return (
     <AppShell title="OAB-V8">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -45,6 +75,8 @@ export default function OABV8Page() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #9333ea, #d946ef)', color: 'white',
