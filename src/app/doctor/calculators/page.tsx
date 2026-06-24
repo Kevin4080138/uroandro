@@ -48,9 +48,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #7c3aed, #c026d3)',
   },
   {
-    href: '#', icon: '💙', title: 'IIEF-5 (SHIM)',
+    href: '/doctor/calculators/iief5', icon: '💙', title: 'IIEF-5 (SHIM)',
     desc: 'Erektil disfunksiyani 5 savollik anketa orqali baholash',
-    kategoriya: 'Erektil funksiya', faol: false, gradient: 'linear-gradient(135deg, #db2777, #f43f5e)',
+    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #db2777, #f43f5e)',
   },
   {
     href: '#', icon: '🧪', title: 'Testosteron tanqisligi (ADAM)',
