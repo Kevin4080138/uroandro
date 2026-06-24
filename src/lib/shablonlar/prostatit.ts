@@ -19,10 +19,12 @@ function statusPraesensMatni(d: Record<string, any>) {
 }
 
 function tekshiruvlar(d: Record<string, any>): HujjatBlok[] {
+  const kjs = ro(d.kjs, 'кенгаймаган')
   return [
-    { tur: 'matn', matn: `УЗИ: Сийдик копи: Хажми-${ro(d.usi_qop_hajm, '140')} мл, шиллик кавати-${ro(d.usi_shilliq, '2')} мм.` },
+    { tur: 'matn', matn: `УЗИ: Унг буйрак котурлари-тугри, улчами ${ro(d.ung_buyrak, '105х49')} мм, ТПП-${ro(d.ung_tpp, '18')} мм, КЖС-${kjs}. Чап буйрак котурлари-тугри, улчами ${ro(d.chap_buyrak, '110х59')} мм, ТПП-${ro(d.chap_tpp, '19')} мм, КЖС-${kjs}.` },
+    { tur: 'matn', matn: `Сийдик копи: Хажми-${ro(d.usi_qop_hajm, '140')} мл, шиллик кавати-${ro(d.usi_shilliq, '2')} мм.` },
     { tur: 'matn', matn: `Простата бези: улчамлари ${ro(d.prostata_olcham, '40х30х32')} мм, хажми-${ro(d.prostata_hajm, '19')} см³.` },
-    { tur: 'matn', matn: `Умумий қон таҳлили: Гемоглобин-${ro(d.hb, '140')}; Эритроцитлар-${ro(d.eritrotsit, '5.0')}; Гематокрит-${ro(d.gematokrit, '41,9')}; Лейкоцитлар-${ro(d.leykotsit, '8.5')}; ЭЧТ-${ro(d.echt, '13')}.` },
+    { tur: 'matn', matn: `Умумий қон таҳлили: Гемоглобин-${ro(d.hb, '140')}; Эритроцитлар-${ro(d.eritrotsit, '5.0')}; Гематокрит-${ro(d.gematokrit, '41,9')}; Лейкоцитлар-${ro(d.leykotsit, '8.5')}; ЭЧТ-${ro(d.echt, '5')}; Қон ивиш вақти-${ro(d.kon_ivish, '240-450')}.` },
     { tur: 'matn', matn: `RW – ${ro(d.rw, 'Манфий')}    ВИЧ – ${ro(d.vich, 'Манфий')}` },
     { tur: 'matn', matn: `HBS-Ag ВГ "В" – ${ro(d.hbsag, 'Манфий')}` },
     { tur: 'matn', matn: `Анти HCV ВГ "С" антитела – ${ro(d.hcv, 'Манфий')}` },
@@ -99,7 +101,17 @@ export const prostatitShablon: Shablon = {
       ],
     },
     {
-      nom: 'Tekshiruvlar',
+      nom: 'Tekshiruvlar — Buyrak USI',
+      maydonlar: [
+        { key: 'ung_buyrak', label: "O'ng buyrak o'lchami", type: 'text', birlik: 'mm', default: '105х49', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'ung_tpp', label: "O'ng TPP", type: 'text', birlik: 'mm', default: '18', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'chap_buyrak', label: 'Chap buyrak o\'lchami', type: 'text', birlik: 'mm', default: '110х59', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'chap_tpp', label: 'Chap TPP', type: 'text', birlik: 'mm', default: '19', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'kjs', label: 'KJS (kosa-jom)', type: 'select', default: 'кенгаймаган', variantlar: ['кенгаймаган', 'кенгайган'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+      ],
+    },
+    {
+      nom: 'Tekshiruvlar — Qolgan',
       maydonlar: [
         { key: 'usi_qop_hajm', label: 'Siydik qopi hajmi', type: 'text', birlik: 'ml', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'usi_shilliq', label: 'Siydik qopi shilliq', type: 'text', birlik: 'mm', default: '2', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
@@ -107,6 +119,7 @@ export const prostatitShablon: Shablon = {
         { key: 'hb', label: 'Gemoglobin', type: 'text', default: '140', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'leykotsit', label: 'Leykotsit', type: 'text', default: '8.5', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'echt', label: 'EChT', type: 'text', default: '13', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
+        { key: 'kon_ivish', label: 'Qon ivish vaqti', type: 'text', default: '240-450', faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'rw', label: 'RW', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'vich', label: 'ВИЧ', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
         { key: 'hbsag', label: 'HBs-Ag (ВГ "В")', type: 'select', default: 'Манфий', variantlar: ['Манфий', 'Мусбат'], faqat: ['birlamchi', 'asoslash', 'epikriz'] },
