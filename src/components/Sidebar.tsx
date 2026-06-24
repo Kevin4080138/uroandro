@@ -35,7 +35,7 @@ export function Sidebar() {
   return (
     <aside
       className="sticky top-0 flex h-screen flex-shrink-0 flex-col transition-[width] duration-200"
-      style={{ width: mounted ? width : 220, background: 'var(--surface)', borderRight: '1px solid var(--line)' }}
+      style={{ width: mounted ? width : 220, background: 'var(--surface)', borderRight: '1px solid var(--line)', zIndex: 30 }}
     >
       <div className="flex items-center justify-between px-3 py-4" style={{ borderBottom: '1px solid var(--line)' }}>
         {!collapsed && (
@@ -73,8 +73,8 @@ export function Sidebar() {
               </Link>
               {collapsed && (
                 <span
-                  className="pointer-events-none absolute left-[60px] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs opacity-0 transition-opacity group-hover:opacity-100"
-                  style={{ background: 'var(--ink)', color: 'var(--bg)', zIndex: 50 }}
+                  className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  style={{ background: 'var(--ink)', color: 'var(--bg)', zIndex: 60, boxShadow: '0 4px 14px rgba(0,0,0,.25)' }}
                 >
                   {item.label}
                 </span>
