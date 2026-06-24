@@ -23,9 +23,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
   },
   {
-    href: '#', icon: '📊', title: 'IPSS / AUA-SS',
+    href: '/doctor/calculators/ipss', icon: '📊', title: 'IPSS / AUA-SS',
     desc: 'Xalqaro prostata simptomlari indeksi — 7 savol bo\'yicha og\'irlik darajasini baholash',
-    kategoriya: 'Prostata', faol: false, gradient: 'linear-gradient(135deg, #2563eb, #0891b2)',
+    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #2563eb, #0891b2)',
   },
   {
     href: '#', icon: '🩸', title: 'PSA kalkulyatori',
