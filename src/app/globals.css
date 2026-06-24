@@ -138,6 +138,14 @@ h1, h2, h3, h4 {
 .chevron { transition: transform .2s ease, color .2s ease; }
 .lift:hover .chevron { transform: translateX(3px); color: var(--accent); }
 
+.menyu-ochilish {
+  animation: menyuOchilish .16s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes menyuOchilish {
+  from { opacity: 0; transform: scale(.94) translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Dashboard kartochkasi — kuchli, zamonaviy */
 .dash-card {
   position: relative;

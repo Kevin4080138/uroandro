@@ -94,7 +94,7 @@ function SpermogrammaIchki() {
           ← Kalkulyatorlarga qaytish
         </button>
 
-        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #0d9488, #22c55e)', color: 'white',

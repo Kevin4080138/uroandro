@@ -77,7 +77,7 @@ function ProstataHajmiIchki() {
           ← Kalkulyatorlarga qaytish
         </button>
 
-        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #ea580c, #facc15)', color: 'white',

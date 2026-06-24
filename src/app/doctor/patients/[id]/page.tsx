@@ -283,7 +283,7 @@ export default function PatientCardPage() {
         <div className="rise" style={{
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
           padding: '22px 24px', marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          gap: '16px', flexWrap: 'wrap', boxShadow: 'var(--shadow)',
+          gap: '16px', flexWrap: 'wrap', boxShadow: 'var(--shadow)', position: 'relative', zIndex: 30,
           backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface))',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
@@ -314,10 +314,11 @@ export default function PatientCardPage() {
               {kalkulyatorMenyu && (
                 <>
                   <div onClick={() => setKalkulyatorMenyu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
-                  <div style={{
+                  <div className="menyu-ochilish" style={{
                     position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '220px',
                     background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
                     boxShadow: '0 10px 28px rgba(0,0,0,0.15)', overflow: 'hidden',
+                    transformOrigin: 'top right',
                   }}>
                     {[
                       { href: 'ipss', label: 'IPSS / AUA-SS', icon: '📊' },

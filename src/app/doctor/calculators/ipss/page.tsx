@@ -106,7 +106,7 @@ function IPSSIchki() {
           ← Kalkulyatorlarga qaytish
         </button>
 
-        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         {/* Sarlavha va ma'lumot */}
         <div className="rise" style={{

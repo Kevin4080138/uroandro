@@ -99,7 +99,7 @@ function PSAIchki() {
           ← Kalkulyatorlarga qaytish
         </button>
 
-        <KalkulyatorBemorPaneli bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tuldi} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #dc2626, #f97316)', color: 'white',
