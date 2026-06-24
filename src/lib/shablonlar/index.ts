@@ -1,9 +1,11 @@
 import type { Shablon } from './turlar'
 import { prostatitShablon } from './prostatit'
+import { varikotseleShablon } from './varikotsele'
 
 export const SHABLONLAR: Shablon[] = [
   prostatitShablon,
-  // kelajakda: varikotseleShablon, urolitiazShablon, ...
+  varikotseleShablon,
+  // kelajakda: urolitiazShablon, ...
 ]
 
 export function shablonTop(id: string) {

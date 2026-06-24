@@ -5,9 +5,8 @@ import { createPortal } from 'react-dom'
 import { useParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
-import { shablonTop, type HujjatBlok, type Maydon } from '@/lib/shablonlar'
+import { shablonTop, SHABLONLAR, type HujjatBlok, type Maydon } from '@/lib/shablonlar'
 
-const SHABLON_ID = 'prostatit'
 const ASOS_HUJJAT = 'birlamchi'   // boshqa hujjatlar shundan boshlang'ich ma'lumot oladi
 
 const input = {
@@ -24,7 +23,9 @@ const chip = (active: boolean): React.CSSProperties => ({
 export default function HujjatlarPage() {
   const { id } = useParams<{ id: string }>()
   const supabase = createClient()
-  const shablon = shablonTop(SHABLON_ID)!
+
+  const [shablonId, setShablonId] = useState('prostatit')
+  const shablon = shablonTop(shablonId)!
 
   const [bemor, setBemor] = useState<any>(null)
   const [shifokorIsmi, setShifokorIsmi] = useState('')
@@ -40,12 +41,14 @@ export default function HujjatlarPage() {
   const bosmaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setLoading(true)
+    setFaolIndex(0)
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       const [{ data: b }, { data: prof }, { data: hd }] = await Promise.all([
         supabase.from('bemorlar').select('*').eq('id', id).single(),
         supabase.from('profiles').select('full_name').eq('id', user?.id).single(),
-        supabase.from('hujjat_malumotlari').select('malumot').eq('bemor_id', id).eq('doctor_id', user?.id).eq('shablon', SHABLON_ID).maybeSingle(),
+        supabase.from('hujjat_malumotlari').select('malumot').eq('bemor_id', id).eq('doctor_id', user?.id).eq('shablon', shablonId).maybeSingle(),
       ])
       setBemor(b)
       setShifokorIsmi(prof?.full_name ?? '')
@@ -72,7 +75,8 @@ export default function HujjatlarPage() {
       setLoading(false)
     }
     load()
-  }, [id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, shablonId])
 
   const faolId = shablon.hujjatlar[faolIndex]?.id ?? ASOS_HUJJAT
   const maydonVariant = (key: string): string[] => {
@@ -122,7 +126,7 @@ export default function HujjatlarPage() {
     if (!user) return
     setSaving(true)
     await supabase.from('hujjat_malumotlari').upsert({
-      bemor_id: id, doctor_id: user.id, shablon: SHABLON_ID, malumot: docData, updated_at: new Date().toISOString(),
+      bemor_id: id, doctor_id: user.id, shablon: shablonId, malumot: docData, updated_at: new Date().toISOString(),
     }, { onConflict: 'bemor_id,doctor_id,shablon' })
     setSaving(false)
     setSaqlandi(true)
@@ -169,7 +173,7 @@ export default function HujjatlarPage() {
       <div className="no-print px-8 py-6" style={{ display: 'flex', gap: '0', alignItems: 'start' }}>
         {/* CHAP PANEL — forma */}
         <div style={{ width: chapKeng, flexShrink: 0, position: 'sticky', top: '80px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Ma&apos;lumotlar</h3>
             <button onClick={saqla} disabled={saving} className="btn-animated soft-press" style={{
               background: saqlandi ? 'var(--good)' : 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
@@ -177,6 +181,14 @@ export default function HujjatlarPage() {
             }}>
               {saving ? 'Saqlanmoqda...' : saqlandi ? '✓ Saqlandi' : 'Saqlash'}
             </button>
+          </div>
+
+          {/* Kasallik shabloni tanlash */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={lbl}>Kasallik shabloni</label>
+            <select value={shablonId} onChange={(e) => setShablonId(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
+              {SHABLONLAR.map((s) => <option key={s.id} value={s.id}>{s.kasallik}</option>)}
+            </select>
           </div>
 
           <div style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', paddingRight: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
