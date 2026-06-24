@@ -53,9 +53,9 @@ const KALKULYATORLAR: Kalk[] = [
     kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #db2777, #f43f5e)',
   },
   {
-    href: '#', icon: '🧪', title: 'Testosteron tanqisligi (ADAM)',
+    href: '/doctor/calculators/adam', icon: '🧪', title: 'Testosteron tanqisligi (ADAM)',
     desc: 'Erkaklarda androgen yetishmovchiligi anketasi orqali dastlabki baholash',
-    kategoriya: 'Erektil funksiya', faol: false, gradient: 'linear-gradient(135deg, #4338ca, #6366f1)',
+    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #4338ca, #6366f1)',
   },
   {
     href: '#', icon: '🫘', title: 'eGFR (CKD-EPI)',
