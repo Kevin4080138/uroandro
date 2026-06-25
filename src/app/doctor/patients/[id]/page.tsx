@@ -469,6 +469,8 @@ export default function PatientCardPage() {
               </button>
               {kalkulyatorMenyu && (
                 <>
+                  {/* Tugma va dropdown orasidagi bo'shliqni "ko'prik" bilan to'ldirish — hover uzilib qolmasligi uchun */}
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, height: '6px', zIndex: 49 }} />
                   <div className="menyu-ochilish" style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50, width: '250px', maxWidth: 'calc(100vw - 32px)',
                     background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',

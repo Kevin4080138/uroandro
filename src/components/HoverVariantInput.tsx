@@ -34,6 +34,9 @@ export function HoverVariantInput({ value, onChange, variantlar, placeholder, ty
         placeholder={placeholder}
       />
       {ochiq && mosKeluvchilar.length > 0 && (
+        <>
+          {/* Tugma va dropdown orasidagi bo'shliqni "ko'prik" bilan to'ldirish — hover uzilib qolmasligi uchun */}
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, height: '4px', zIndex: 59 }} />
         <div className="menyu-ochilish" style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 60,
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '10px',
@@ -57,6 +60,7 @@ export function HoverVariantInput({ value, onChange, variantlar, placeholder, ty
             </button>
           ))}
         </div>
+        </>
       )}
     </div>
   )
