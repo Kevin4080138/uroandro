@@ -9,6 +9,8 @@ import { tavsiyaBerish } from '@/lib/tavsiya'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
 import { tekshiruvTavsiyalari } from '@/lib/tekshiruvlar'
 import { tekshiruvBoyichaMaydonlar, asosiyMaydonKalitlari, type Maydon } from '@/lib/natijaMaydonlari'
+import { HoverVariantInput } from '@/components/HoverVariantInput'
+import { DORI_NOMLARI, DOZA_VARIANTLARI, KUNIGA_MARTA_VARIANTLARI, MUDDAT_KUN_VARIANTLARI, IZOH_VARIANTLARI } from '@/lib/doriVariantlari'
 
 const inputStyle = {
   width: '100%',
@@ -562,23 +564,23 @@ export default function PatientCardPage() {
                   }}>
                     <div style={{ flex: '2 1 160px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Dori nomi</label>
-                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.nomi} onChange={(e) => yangiRetseptYangila(i, 'nomi', e.target.value)} placeholder="masalan, Tamsulozin" />
+                      <HoverVariantInput value={d.nomi} onChange={(v) => yangiRetseptYangila(i, 'nomi', v)} variantlar={DORI_NOMLARI} placeholder="masalan, Tamsulozin" />
                     </div>
                     <div style={{ flex: '1 1 110px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Dozasi</label>
-                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.dozasi} onChange={(e) => yangiRetseptYangila(i, 'dozasi', e.target.value)} placeholder="0.4 mg, 1 tab" />
+                      <HoverVariantInput value={d.dozasi} onChange={(v) => yangiRetseptYangila(i, 'dozasi', v)} variantlar={DOZA_VARIANTLARI} placeholder="0.4 mg, 1 tab" />
                     </div>
                     <div style={{ flex: '0 1 100px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Kuniga marta</label>
-                      <input type="number" min={1} max={6} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.kuniga_marta} onChange={(e) => yangiRetseptYangila(i, 'kuniga_marta', parseInt(e.target.value) || 1)} />
+                      <HoverVariantInput type="number" value={d.kuniga_marta} onChange={(v) => yangiRetseptYangila(i, 'kuniga_marta', parseInt(v) || 1)} variantlar={KUNIGA_MARTA_VARIANTLARI} />
                     </div>
                     <div style={{ flex: '0 1 100px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
-                      <input type="number" min={1} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.muddat_kun} onChange={(e) => yangiRetseptYangila(i, 'muddat_kun', parseInt(e.target.value) || 1)} />
+                      <HoverVariantInput type="number" value={d.muddat_kun} onChange={(v) => yangiRetseptYangila(i, 'muddat_kun', parseInt(v) || 1)} variantlar={MUDDAT_KUN_VARIANTLARI} />
                     </div>
                     <div style={{ flex: '2 1 160px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
-                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.izoh} onChange={(e) => yangiRetseptYangila(i, 'izoh', e.target.value)} placeholder="ovqatdan keyin" />
+                      <HoverVariantInput value={d.izoh} onChange={(v) => yangiRetseptYangila(i, 'izoh', v)} variantlar={IZOH_VARIANTLARI} placeholder="ovqatdan keyin" />
                     </div>
                     <button onClick={() => yangiRetseptOchirish(i)} style={{
                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
@@ -845,23 +847,23 @@ export default function PatientCardPage() {
                     }}>
                       <div style={{ flex: '2 1 160px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Dori nomi</label>
-                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.nomi} onChange={(e) => doriYangila(i, 'nomi', e.target.value)} placeholder="masalan, Tamsulozin" />
+                        <HoverVariantInput value={d.nomi} onChange={(v) => doriYangila(i, 'nomi', v)} variantlar={DORI_NOMLARI} placeholder="masalan, Tamsulozin" />
                       </div>
                       <div style={{ flex: '1 1 110px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Dozasi</label>
-                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.dozasi} onChange={(e) => doriYangila(i, 'dozasi', e.target.value)} placeholder="0.4 mg, 1 tab" />
+                        <HoverVariantInput value={d.dozasi} onChange={(v) => doriYangila(i, 'dozasi', v)} variantlar={DOZA_VARIANTLARI} placeholder="0.4 mg, 1 tab" />
                       </div>
                       <div style={{ flex: '0 1 100px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Kuniga marta</label>
-                        <input type="number" min={1} max={6} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.kuniga_marta} onChange={(e) => doriYangila(i, 'kuniga_marta', parseInt(e.target.value) || 1)} />
+                        <HoverVariantInput type="number" value={d.kuniga_marta} onChange={(v) => doriYangila(i, 'kuniga_marta', parseInt(v) || 1)} variantlar={KUNIGA_MARTA_VARIANTLARI} />
                       </div>
                       <div style={{ flex: '0 1 100px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
-                        <input type="number" min={1} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.muddat_kun} onChange={(e) => doriYangila(i, 'muddat_kun', parseInt(e.target.value) || 1)} />
+                        <HoverVariantInput type="number" value={d.muddat_kun} onChange={(v) => doriYangila(i, 'muddat_kun', parseInt(v) || 1)} variantlar={MUDDAT_KUN_VARIANTLARI} />
                       </div>
                       <div style={{ flex: '2 1 160px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
-                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.izoh} onChange={(e) => doriYangila(i, 'izoh', e.target.value)} placeholder="ovqatdan keyin" />
+                        <HoverVariantInput value={d.izoh} onChange={(v) => doriYangila(i, 'izoh', v)} variantlar={IZOH_VARIANTLARI} placeholder="ovqatdan keyin" />
                       </div>
                       <button onClick={() => doriOchirish(i)} style={{
                         background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
