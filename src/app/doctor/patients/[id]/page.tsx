@@ -420,7 +420,11 @@ export default function PatientCardPage() {
                 </span>
               )}
             </button>
-            <div style={{ position: 'relative' }}>
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setKalkulyatorMenyu(true)}
+              onMouseLeave={() => setKalkulyatorMenyu(false)}
+            >
               <button onClick={() => setKalkulyatorMenyu((v) => !v)} className="btn-animated soft-press" style={{
                 background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
                 padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
@@ -429,7 +433,6 @@ export default function PatientCardPage() {
               </button>
               {kalkulyatorMenyu && (
                 <>
-                  <div onClick={() => setKalkulyatorMenyu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
                   <div className="menyu-ochilish" style={{
                     position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '250px',
                     background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
