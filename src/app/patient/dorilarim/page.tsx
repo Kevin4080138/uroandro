@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
-import { vaqtJadvali, faolKunMi, qolganKunlar } from '@/lib/doriEslatma'
+import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi } from '@/lib/doriEslatma'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 
 type Retsept = {
@@ -190,6 +190,9 @@ export default function DorilarimPage() {
                       </span>
                     </div>
                     {r.izoh && <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>📝 {r.izoh}</p>}
+                    <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                      📅 {r.boshlanish_sanasi} — {tugashSanasi(r.boshlanish_sanasi, r.muddat_kun)}
+                    </p>
 
                     <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
                       {vaqtlar.map((vaqt, vi) => {

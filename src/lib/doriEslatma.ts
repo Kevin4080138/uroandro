@@ -25,6 +25,12 @@ export function faolKunMi(boshlanishSanasi: string, muddatKun: number): boolean 
   return bugun >= boshlanish && bugun < tugash
 }
 
+export function tugashSanasi(boshlanishSanasi: string, muddatKun: number): string {
+  const d = new Date(boshlanishSanasi)
+  d.setDate(d.getDate() + muddatKun - 1)
+  return d.toISOString().slice(0, 10)
+}
+
 export function qolganKunlar(boshlanishSanasi: string, muddatKun: number): number {
   const boshlanish = new Date(boshlanishSanasi)
   const tugash = new Date(boshlanish)

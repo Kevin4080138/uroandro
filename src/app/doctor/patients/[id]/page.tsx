@@ -75,11 +75,11 @@ export default function PatientCardPage() {
 
   const [yakunlashTashrifId, setYakunlashTashrifId] = useState<string | null>(null)
   const [doriMuolaja, setDoriMuolaja] = useState('')
-  const [dorilarRoyxati, setDorilarRoyxati] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; izoh: string }[]>([])
+  const [dorilarRoyxati, setDorilarRoyxati] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; boshlanish_sanasi: string; izoh: string }[]>([])
 
   const [showRetsept, setShowRetsept] = useState(false)
   const [bemorRetseptlari, setBemorRetseptlari] = useState<any[]>([])
-  const [yangiRetseptlar, setYangiRetseptlar] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; izoh: string }[]>([])
+  const [yangiRetseptlar, setYangiRetseptlar] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; boshlanish_sanasi: string; izoh: string }[]>([])
   const [retseptSaving, setRetseptSaving] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -266,11 +266,18 @@ export default function PatientCardPage() {
     setDorilarRoyxati([])
   }
 
-  const doriQoshish = () => setDorilarRoyxati((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, izoh: '' }])
+  const bugunSana = () => new Date().toISOString().slice(0, 10)
+  const sanaQoshish = (sana: string, kun: number) => {
+    const d = new Date(sana)
+    d.setDate(d.getDate() + kun - 1)
+    return d.toISOString().slice(0, 10)
+  }
+
+  const doriQoshish = () => setDorilarRoyxati((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, boshlanish_sanasi: bugunSana(), izoh: '' }])
   const doriOchirish = (i: number) => setDorilarRoyxati((arr) => arr.filter((_, j) => j !== i))
   const doriYangila = (i: number, key: string, val: any) => setDorilarRoyxati((arr) => arr.map((d, j) => (j === i ? { ...d, [key]: val } : d)))
 
-  const yangiRetseptQoshish = () => setYangiRetseptlar((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, izoh: '' }])
+  const yangiRetseptQoshish = () => setYangiRetseptlar((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, boshlanish_sanasi: bugunSana(), izoh: '' }])
   const yangiRetseptOchirish = (i: number) => setYangiRetseptlar((arr) => arr.filter((_, j) => j !== i))
   const yangiRetseptYangila = (i: number, key: string, val: any) => setYangiRetseptlar((arr) => arr.map((d, j) => (j === i ? { ...d, [key]: val } : d)))
 
@@ -302,6 +309,7 @@ export default function PatientCardPage() {
         dozasi: d.dozasi.trim() || null,
         kuniga_marta: d.kuniga_marta,
         muddat_kun: d.muddat_kun,
+        boshlanish_sanasi: d.boshlanish_sanasi || bugunSana(),
         izoh: d.izoh.trim() || null,
       }))
     )
@@ -349,6 +357,7 @@ export default function PatientCardPage() {
           dozasi: d.dozasi.trim() || null,
           kuniga_marta: d.kuniga_marta,
           muddat_kun: d.muddat_kun,
+          boshlanish_sanasi: d.boshlanish_sanasi || bugunSana(),
           izoh: d.izoh.trim() || null,
         }))
       )
@@ -594,9 +603,16 @@ export default function PatientCardPage() {
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
                       <HoverVariantInput type="number" value={d.muddat_kun} onChange={(v) => yangiRetseptYangila(i, 'muddat_kun', parseInt(v) || 1)} variantlar={MUDDAT_KUN_VARIANTLARI} />
                     </div>
+                    <div style={{ flex: '1 1 130px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Boshlanish sanasi</label>
+                      <input type="date" style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.boshlanish_sanasi} onChange={(e) => yangiRetseptYangila(i, 'boshlanish_sanasi', e.target.value)} />
+                    </div>
                     <div style={{ flex: '2 1 160px' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
                       <HoverVariantInput value={d.izoh} onChange={(v) => yangiRetseptYangila(i, 'izoh', v)} variantlar={IZOH_VARIANTLARI} placeholder="ovqatdan keyin" />
+                    </div>
+                    <div style={{ flex: '1 1 100%', fontSize: '11.5px', color: 'var(--muted)' }}>
+                      📅 {d.boshlanish_sanasi || bugunSana()} — {sanaQoshish(d.boshlanish_sanasi || bugunSana(), d.muddat_kun)} oralig'ida ({d.muddat_kun} kun)
                     </div>
                     <button onClick={() => yangiRetseptOchirish(i)} style={{
                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
@@ -877,9 +893,16 @@ export default function PatientCardPage() {
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
                         <HoverVariantInput type="number" value={d.muddat_kun} onChange={(v) => doriYangila(i, 'muddat_kun', parseInt(v) || 1)} variantlar={MUDDAT_KUN_VARIANTLARI} />
                       </div>
+                      <div style={{ flex: '1 1 130px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Boshlanish sanasi</label>
+                        <input type="date" style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.boshlanish_sanasi} onChange={(e) => doriYangila(i, 'boshlanish_sanasi', e.target.value)} />
+                      </div>
                       <div style={{ flex: '2 1 160px' }}>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
                         <HoverVariantInput value={d.izoh} onChange={(v) => doriYangila(i, 'izoh', v)} variantlar={IZOH_VARIANTLARI} placeholder="ovqatdan keyin" />
+                      </div>
+                      <div style={{ flex: '1 1 100%', fontSize: '11.5px', color: 'var(--muted)' }}>
+                        📅 {d.boshlanish_sanasi || bugunSana()} — {sanaQoshish(d.boshlanish_sanasi || bugunSana(), d.muddat_kun)} oralig'ida ({d.muddat_kun} kun)
                       </div>
                       <button onClick={() => doriOchirish(i)} style={{
                         background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
