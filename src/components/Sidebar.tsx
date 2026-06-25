@@ -13,6 +13,7 @@ const NAV = [
   { href: '/doctor/calculators', icon: '🧮', label: 'Kalkulatorlar' },
   { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
   { href: '/doctor/qollanmalar', icon: '🌐', label: "Qo'llanmalar" },
+  { href: '/doctor/bemor-bolimi', icon: '👁️', label: 'Bemor bo\'limi' },
 ]
 
 function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
