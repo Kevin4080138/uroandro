@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { AppShell } from '@/components/AppShell'
+import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 
 type Murojaat = {
   id: string; patient_id: string; shikoyatlar: string; taxminiy_tashxis: string | null
@@ -17,6 +18,50 @@ const HOLAT_LABEL: Record<string, { text: string; color: string }> = {
   kutilmoqda: { text: 'Kutilmoqda', color: 'var(--warn)' },
   qabul_qilindi: { text: 'Qabul qilindi', color: 'var(--accent)' },
   javob_berildi: { text: 'Javob berildi', color: 'var(--good)' },
+}
+
+function PushToggleTugmasi() {
+  const [holat, setHolat] = useState<'qollab-bolmaydi' | 'ruxsat-berilmagan' | 'rad-etilgan' | 'yoqilgan' | 'tekshirilmoqda'>('tekshirilmoqda')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => { pushDastagiHolati().then(setHolat) }, [])
+
+  if (holat === 'tekshirilmoqda' || holat === 'qollab-bolmaydi') return null
+
+  const bosildi = async () => {
+    setSaving(true)
+    if (holat === 'yoqilgan') {
+      await pushOchirish()
+      setHolat('ruxsat-berilmagan')
+    } else {
+      const res = await pushYoqish()
+      if (res.ok) setHolat('yoqilgan')
+    }
+    setSaving(false)
+  }
+
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+      background: holat === 'yoqilgan' ? 'color-mix(in srgb, var(--good) 10%, var(--surface))' : 'var(--accent-soft)',
+      border: `1px solid ${holat === 'yoqilgan' ? 'var(--good)' : 'var(--accent)'}`,
+      borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px',
+    }}>
+      <span>
+        {holat === 'yoqilgan' ? '🔔 Yangi murojaatlar uchun bildirishnoma yoqilgan' : holat === 'rad-etilgan' ? '🔕 Bildirishnomalar brauzerda bloklangan' : '🔔 Yangi murojaat kelganda bildirishnoma olish'}
+      </span>
+      {holat !== 'rad-etilgan' && (
+        <button onClick={bosildi} disabled={saving} className="soft-press" style={{
+          background: holat === 'yoqilgan' ? 'var(--surface-2)' : 'var(--accent)',
+          color: holat === 'yoqilgan' ? 'var(--ink-soft)' : 'white',
+          border: holat === 'yoqilgan' ? '1px solid var(--line)' : 'none',
+          borderRadius: '999px', padding: '6px 16px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700,
+        }}>
+          {saving ? '...' : holat === 'yoqilgan' ? "O'chirish" : 'Yoqish'}
+        </button>
+      )}
+    </div>
+  )
 }
 
 export default function DoctorMurojaatlarPage() {
@@ -60,6 +105,10 @@ export default function DoctorMurojaatlarPage() {
     if (!matn) return
     setSaving(m.id)
     await supabase.from('murojaatlar').update({ javob: matn, holat: 'javob_berildi', doctor_id: myId }).eq('id', m.id)
+    fetch('/api/push/murojaat-javob', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ murojaatId: m.id }),
+    }).catch(() => {})
     setSaving(null)
     setJavobMatn((p) => { const c = { ...p }; delete c[m.id]; return c })
     load()
@@ -87,6 +136,7 @@ export default function DoctorMurojaatlarPage() {
   return (
     <AppShell title="Murojaatlar">
       <div className="mx-auto max-w-[700px] px-8 py-8">
+        <PushToggleTugmasi />
         {loading ? (
           <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
         ) : (

@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server'
-import webpush from 'web-push'
 import { createAdminClient } from '@/lib/supabaseAdmin'
+import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
 import { vaqtJadvali, faolKunMi } from '@/lib/doriEslatma'
-
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
 
 function tashkentVaqt() {
   const fmt = new Intl.DateTimeFormat('en-CA', {
@@ -17,6 +11,12 @@ function tashkentVaqt() {
   const parts = fmt.formatToParts(new Date())
   const get = (t: string) => parts.find((p) => p.type === t)?.value
   return { sana: `${get('year')}-${get('month')}-${get('day')}`, hhmm: `${get('hour')}:${get('minute')}` }
+}
+
+function kunFarqi(sana1: string, sana2: string) {
+  const a = new Date(sana1); a.setHours(0, 0, 0, 0)
+  const b = new Date(sana2); b.setHours(0, 0, 0, 0)
+  return Math.round((a.getTime() - b.getTime()) / (24 * 3600 * 1000))
 }
 
 export async function GET(req: Request) {
@@ -36,6 +36,7 @@ export async function GET(req: Request) {
 
   let yuborildi = 0
   let tekshirildi = 0
+  let tugashEslatmasi = 0
 
   for (const r of retseptlar ?? []) {
     if (!faolKunMi(r.boshlanish_sanasi, r.muddat_kun)) continue
@@ -59,25 +60,40 @@ export async function GET(req: Request) {
     })
     if (insertError) continue
 
-    const { data: obunalar } = await supabase.from('push_obunalari').select('*').eq('user_id', r.bemor_user_id)
-    for (const o of obunalar ?? []) {
-      try {
-        await webpush.sendNotification(
-          { endpoint: o.endpoint, keys: { p256dh: o.p256dh, auth: o.auth } },
-          JSON.stringify({
-            title: '💊 Dori vaqti keldi',
-            body: `${r.nomi}${r.dozasi ? ' — ' + r.dozasi : ''} ichish vaqti keldi`,
-            url: '/patient/dorilarim',
-          })
-        )
-        yuborildi++
-      } catch (e: any) {
-        if (e.statusCode === 404 || e.statusCode === 410) {
-          await supabase.from('push_obunalari').delete().eq('endpoint', o.endpoint)
-        }
-      }
+    // Kursning so'nggi kuni ekanini aniqlash — eslatma matniga qo'shamiz
+    const tugashKuni = new Date(r.boshlanish_sanasi)
+    tugashKuni.setDate(tugashKuni.getDate() + r.muddat_kun - 1)
+    const oxirgiKun = kunFarqi(tugashKuni.toISOString().slice(0, 10), sana) === 0
+
+    yuborildi += await foydalanuvchigaPushYubor(r.bemor_user_id, {
+      title: oxirgiKun ? '💊 Dorining oxirgi kuni!' : '💊 Dori vaqti keldi',
+      body: `${r.nomi}${r.dozasi ? ' — ' + r.dozasi : ''} ichish vaqti keldi${oxirgiKun ? " (kursning so'nggi kuni)" : ''}`,
+      url: '/patient/dorilarim',
+    })
+  }
+
+  // Ertaga tugaydigan kurslar haqida bir martalik eslatma (faqat kuniga 1 marta — soat 09:00 da tekshiramiz)
+  if (hhmm === '09:00') {
+    for (const r of retseptlar ?? []) {
+      const tugashKuni = new Date(r.boshlanish_sanasi)
+      tugashKuni.setDate(tugashKuni.getDate() + r.muddat_kun - 1)
+      const tugashSanaStr = tugashKuni.toISOString().slice(0, 10)
+      const ertangiSana = new Date(sana)
+      ertangiSana.setDate(ertangiSana.getDate() + 1)
+      if (tugashSanaStr !== ertangiSana.toISOString().slice(0, 10)) continue
+
+      const { error: insertError } = await supabase.from('dori_eslatma_yuborilgan').insert({
+        retsept_id: r.id, sana, vaqt_tartibi: 0, // 0 — "ertaga tugaydi" eslatmasi belgisi
+      })
+      if (insertError) continue
+
+      tugashEslatmasi += await foydalanuvchigaPushYubor(r.bemor_user_id, {
+        title: '⏳ Dori kursi ertaga tugaydi',
+        body: `${r.nomi} kursi ertaga (${tugashSanaStr}) tugaydi`,
+        url: '/patient/dorilarim',
+      })
     }
   }
 
-  return NextResponse.json({ ok: true, vaqt: hhmm, tekshirildi, yuborildi })
+  return NextResponse.json({ ok: true, vaqt: hhmm, tekshirildi, yuborildi, tugashEslatmasi })
 }

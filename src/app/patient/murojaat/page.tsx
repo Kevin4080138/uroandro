@@ -47,7 +47,7 @@ export default function MurojaatYuborishPage() {
     if (!user) { router.push('/auth/login'); return }
 
     setSaving(true)
-    await supabase.from('murojaatlar').insert({
+    const { data: yangiMurojaat } = await supabase.from('murojaatlar').insert({
       patient_id: user.id,
       target_doctor_id: targetDoctorId,
       organlar: organlar.join(', '),
@@ -56,7 +56,15 @@ export default function MurojaatYuborishPage() {
       sabablar: tashxislar.flatMap((t) => t.sabablar).join(', '),
       tavsiya: tashxislar.flatMap((t) => t.tavsiya).join(', '),
       shoshilinch,
-    })
+    }).select('id').single()
+
+    if (yangiMurojaat) {
+      fetch('/api/push/yangi-murojaat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ murojaatId: yangiMurojaat.id }),
+      }).catch(() => {})
+    }
+
     setSaving(false)
     setYuborildi(true)
   }
