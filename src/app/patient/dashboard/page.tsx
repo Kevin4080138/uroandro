@@ -60,7 +60,7 @@ export default function PatientDashboard() {
           {[
             { icon: '🩺', title: 'Yangi murojaat', desc: 'Shikoyatingizni shifokorga yuboring', href: '/patient/murojaat', c: 'var(--accent)' },
             { icon: '📨', title: 'Mening murojaatlarim', desc: 'Yuborilgan shikoyatlar va javoblar', href: '/patient/murojaatlarim', c: 'var(--good)' },
-            { icon: '📚', title: 'Ma\'lumotlar', desc: 'Bemorlar uchun maqolalar (tez kunda)', c: 'var(--warn)' },
+            { icon: '❓', title: 'Savol-javob', desc: "Eng ko'p beriladigan savollarga javoblar", href: '/patient/savollar', c: 'var(--warn)' },
           ].map((item, i) => (
             <div key={item.title} onClick={() => item.href && router.push(item.href)}
               className="dash-card rise"
