@@ -89,6 +89,23 @@ export default function HujjatlarPage() {
   const effective = (docId: string) => ({ ...defaults, ...(docData[ASOS_HUJJAT] ?? {}), ...(docData[docId] ?? {}) })
   const faolData = effective(faolId)
 
+  // hujjat to'ldirilganlik darajasi — tab'larda progress ko'rsatish uchun
+  const hujjatHolati = (h: { id: string; kunlik?: boolean }): 'bosh' | 'qisman' | 'toldi' => {
+    const data = effective(h.id)
+    if (h.kunlik) return Array.isArray(data.kunlar) && data.kunlar.length > 0 ? 'toldi' : 'bosh'
+    const maydonlar = shablon.guruhlar.flatMap((g) => g.maydonlar).filter((m) => !m.faqat || m.faqat.includes(h.id))
+    if (maydonlar.length === 0) return 'bosh'
+    const toldirilgan = maydonlar.filter((m) => {
+      const v = data[m.key]
+      if (Array.isArray(v)) return v.length > 0
+      return v !== undefined && v !== null && String(v).trim() !== ''
+    }).length
+    const nisbat = toldirilgan / maydonlar.length
+    if (nisbat === 0) return 'bosh'
+    if (nisbat >= 0.7) return 'toldi'
+    return 'qisman'
+  }
+
   // o'rtadagi ajratgichni sudrash
   const sudrashBoshla = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -257,14 +274,28 @@ export default function HujjatlarPage() {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Tab qatori */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {hujjatlar.map((h, i) => (
-              <button key={h.id} onClick={() => setFaolIndex(i)} className="btn-animated" style={{
-                border: 'none', borderRadius: '999px', padding: '7px 14px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
-                background: i === faolIndex ? 'var(--accent)' : 'var(--surface-2)', color: i === faolIndex ? 'white' : 'var(--ink-soft)',
-              }}>
-                {i + 1}. {h.nom}
-              </button>
-            ))}
+            {hujjatlar.map((h, i) => {
+              const holat = hujjatHolati(h)
+              const faol = i === faolIndex
+              return (
+                <button key={h.id} onClick={() => setFaolIndex(i)} className="btn-animated" style={{
+                  border: 'none', borderRadius: '999px', padding: '7px 14px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
+                  background: faol ? 'var(--accent)' : 'var(--surface-2)', color: faol ? 'white' : 'var(--ink-soft)',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: '16px', height: '16px', borderRadius: '50%', fontSize: '10px', flexShrink: 0,
+                    background: holat === 'toldi' ? 'var(--good)' : holat === 'qisman' ? 'var(--warn)' : (faol ? 'rgba(255,255,255,.25)' : 'var(--surface)'),
+                    color: holat === 'bosh' ? (faol ? 'white' : 'var(--muted)') : 'white',
+                    border: holat === 'bosh' ? `1px solid ${faol ? 'rgba(255,255,255,.5)' : 'var(--line)'}` : 'none',
+                  }}>
+                    {holat === 'toldi' ? '✓' : holat === 'qisman' ? '•' : ''}
+                  </span>
+                  {i + 1}. {h.nom}
+                </button>
+              )
+            })}
           </div>
 
           {hujjatlar[faolIndex] && (
