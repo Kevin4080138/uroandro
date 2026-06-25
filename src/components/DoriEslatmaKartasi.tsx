@@ -136,11 +136,14 @@ export function DoriEslatmaKartasi() {
           {dozalar.map((d) => {
             const kalit = dozaKaliti(d)
             const otibKetdi = !d.qabulQilingan && d.vaqt <= hozirgiVaqt
+            const kechikishDaqiqa = otibKetdi ? (now.getHours() * 60 + now.getMinutes()) - (parseInt(d.vaqt.slice(0, 2)) * 60 + parseInt(d.vaqt.slice(3, 5))) : 0
+            const judaKechikdi = otibKetdi && kechikishDaqiqa > 60
             const hozirErta = ertaXabar === kalit
             return (
               <div key={kalit} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
-                background: d.qabulQilingan ? 'transparent' : otibKetdi ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'var(--surface-2)',
+                background: d.qabulQilingan ? 'transparent' : judaKechikdi ? 'color-mix(in srgb, var(--danger) 16%, transparent)' : otibKetdi ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'var(--surface-2)',
+                border: judaKechikdi ? '1px solid var(--danger)' : 'none',
                 borderRadius: '10px', padding: '8px 10px', opacity: d.qabulQilingan ? 0.55 : 1,
               }}>
                 <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -150,6 +153,9 @@ export function DoriEslatmaKartasi() {
                   <span style={{ fontSize: '13px', fontWeight: 600, textDecoration: d.qabulQilingan ? 'line-through' : 'none' }}>
                     {d.retsept.nomi}{d.retsept.dozasi ? ` — ${d.retsept.dozasi}` : ''}
                   </span>
+                  {judaKechikdi && (
+                    <span style={{ fontSize: '10.5px', color: 'var(--danger)', fontWeight: 800, flexShrink: 0 }}>⚠️ Juda kechikdi</span>
+                  )}
                 </div>
                 {d.qabulQilingan ? (
                   <span style={{ fontSize: '12px', color: 'var(--good)', fontWeight: 700, flexShrink: 0 }}>✓</span>

@@ -6,6 +6,7 @@ import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi } from '@/lib/doriEslatma'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
+import { HaftalikIntizom } from '@/components/HaftalikIntizom'
 
 type Retsept = {
   id: string
@@ -16,6 +17,7 @@ type Retsept = {
   boshlanish_sanasi: string
   izoh: string | null
   faol: boolean
+  davom_sorovi_yuborilgan: boolean
 }
 
 export default function DorilarimPage() {
@@ -88,6 +90,11 @@ export default function DorilarimPage() {
     })
   }
 
+  const sorovYubor = async (retseptId: string) => {
+    setRetseptlar((arr) => arr.map((r) => (r.id === retseptId ? { ...r, davom_sorovi_yuborilgan: true } : r)))
+    await supabase.rpc('dori_davom_sorovi', { retsept_id: retseptId })
+  }
+
   const jamiDozalarBugun = faolRetseptlar.reduce((s, r) => s + r.kuniga_marta, 0)
   const qabulQilinganBugun = faolRetseptlar.reduce((s, r) => {
     let count = 0
@@ -139,6 +146,8 @@ export default function DorilarimPage() {
             {pushXato && <span style={{ color: 'var(--danger)', fontSize: '12px', width: '100%' }}>{pushXato}</span>}
           </div>
         )}
+
+        {!loading && <HaftalikIntizom />}
 
         {!loading && faolRetseptlar.length > 0 && (
           <div className="rise" style={{
@@ -217,6 +226,21 @@ export default function DorilarimPage() {
                         )
                       })}
                     </div>
+
+                    {qolgan <= 1 && (
+                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--line)' }}>
+                        {r.davom_sorovi_yuborilgan ? (
+                          <span style={{ fontSize: '12px', color: 'var(--good)', fontWeight: 700 }}>✓ Davom ettirish so&apos;rovi yuborildi</span>
+                        ) : (
+                          <button onClick={() => sorovYubor(r.id)} className="soft-press" style={{
+                            background: 'var(--warn)', color: 'white', border: 'none', borderRadius: '999px',
+                            padding: '7px 16px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700,
+                          }}>
+                            🔄 {qolgan === 0 ? 'Kurs tugadi' : 'Kurs ertaga tugaydi'} — davom ettirishni so&apos;rash
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -232,9 +256,19 @@ export default function DorilarimPage() {
                     <div key={r.id} style={{
                       background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 14px',
                       fontSize: '13px', color: 'var(--muted)', display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'center', gap: '10px', flexWrap: 'wrap',
                     }}>
                       <span>{r.nomi} {r.dozasi}</span>
-                      <span>tugagan</span>
+                      {r.davom_sorovi_yuborilgan ? (
+                        <span style={{ color: 'var(--good)', fontWeight: 700, fontSize: '11.5px' }}>✓ So&apos;rov yuborildi</span>
+                      ) : (
+                        <button onClick={() => sorovYubor(r.id)} className="soft-press" style={{
+                          background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', borderRadius: '999px',
+                          padding: '4px 12px', cursor: 'pointer', fontSize: '11.5px', fontWeight: 700,
+                        }}>
+                          🔄 Davom ettirishni so&apos;rash
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

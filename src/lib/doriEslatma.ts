@@ -31,6 +31,18 @@ export function tugashSanasi(boshlanishSanasi: string, muddatKun: number): strin
   return d.toISOString().slice(0, 10)
 }
 
+// faolKunMi'ning istalgan sanaga nisbatan ishlaydigan umumlashtirilgan ko'rinishi (statistika hisoblash uchun)
+export function faolKunMiSana(boshlanishSanasi: string, muddatKun: number, sanaStr: string): boolean {
+  const boshlanish = new Date(boshlanishSanasi)
+  const tugash = new Date(boshlanish)
+  tugash.setDate(tugash.getDate() + muddatKun)
+  const sana = new Date(sanaStr)
+  sana.setHours(0, 0, 0, 0)
+  boshlanish.setHours(0, 0, 0, 0)
+  tugash.setHours(0, 0, 0, 0)
+  return sana >= boshlanish && sana < tugash
+}
+
 export function qolganKunlar(boshlanishSanasi: string, muddatKun: number): number {
   const boshlanish = new Date(boshlanishSanasi)
   const tugash = new Date(boshlanish)
