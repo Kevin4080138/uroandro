@@ -11,6 +11,7 @@ import { tekshiruvTavsiyalari } from '@/lib/tekshiruvlar'
 import { tekshiruvBoyichaMaydonlar, asosiyMaydonKalitlari, type Maydon } from '@/lib/natijaMaydonlari'
 import { HoverVariantInput } from '@/components/HoverVariantInput'
 import { DORI_NOMLARI, DOZA_VARIANTLARI, KUNIGA_MARTA_VARIANTLARI, MUDDAT_KUN_VARIANTLARI, IZOH_VARIANTLARI } from '@/lib/doriVariantlari'
+import { bemorHisobiniTop } from '@/lib/telefonMos'
 
 const inputStyle = {
   width: '100%',
@@ -288,16 +289,7 @@ export default function PatientCardPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setRetseptSaving(false); return }
 
-    let bemorUserId: string | null = null
-    if (bemor?.telefon) {
-      const { data: mosBemor } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'patient')
-        .eq('telefon', bemor.telefon)
-        .maybeSingle()
-      bemorUserId = mosBemor?.id ?? null
-    }
+    const bemorUserId = await bemorHisobiniTop(supabase, bemor?.telefon)
 
     const { data: qoshilganRetseptlar } = await supabase.from('dori_retseptlari').insert(
       haqiqiyDorilar.map((d) => ({
@@ -331,6 +323,18 @@ export default function PatientCardPage() {
     load()
   }
 
+  const [qaytaBoglashSaving, setQaytaBoglashSaving] = useState(false)
+  const hisobniQaytaBoglash = async () => {
+    setQaytaBoglashSaving(true)
+    const bemorUserId = await bemorHisobiniTop(supabase, bemor?.telefon)
+    if (bemorUserId) {
+      await supabase.from('dori_retseptlari').update({ bemor_user_id: bemorUserId }).eq('bemor_id', id).is('bemor_user_id', null)
+    }
+    await load()
+    setQaytaBoglashSaving(false)
+    alert(bemorUserId ? "Bemor hisobi topildi va retseptlar bog'landi ✓" : "Bu telefon raqami bilan ro'yxatdan o'tgan bemor hisobi topilmadi. Bemor ilovaga telefon raqami orqali ro'yxatdan o'tganini tekshiring.")
+  }
+
   const handleYakunlashSave = async () => {
     if (!yakunlashTashrifId) return
     setSaving(true)
@@ -343,16 +347,7 @@ export default function PatientCardPage() {
     // Tuzilgan dori retseptlarini bemorga bog'lab saqlash — telefon raqami bo'yicha bemor hisobini topishga harakat qilamiz.
     const haqiqiyDorilar = dorilarRoyxati.filter((d) => d.nomi.trim())
     if (!error && haqiqiyDorilar.length > 0 && user) {
-      let bemorUserId: string | null = null
-      if (bemor?.telefon) {
-        const { data: mosBemor } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('role', 'patient')
-          .eq('telefon', bemor.telefon)
-          .maybeSingle()
-        bemorUserId = mosBemor?.id ?? null
-      }
+      const bemorUserId = await bemorHisobiniTop(supabase, bemor?.telefon)
 
       const { data: qoshilganRetseptlar } = await supabase.from('dori_retseptlari').insert(
         haqiqiyDorilar.map((d) => ({
@@ -551,10 +546,18 @@ export default function PatientCardPage() {
                 width: '36px', height: '36px', borderRadius: '10px', background: 'var(--accent-soft)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
               }}>💊</span>
-              <div>
+              <div style={{ flex: 1 }}>
                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Dori retsepti</h3>
                 <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Bemor ilovasida &quot;Dorilarim&quot; bo&apos;limida eslatma sifatida ko&apos;rinadi</p>
               </div>
+              {bemorRetseptlari.some((r) => r.faol && !r.bemor_user_id) && (
+                <button onClick={hisobniQaytaBoglash} disabled={qaytaBoglashSaving} className="soft-press" style={{
+                  background: 'var(--warn)', color: 'white', border: 'none', borderRadius: '8px',
+                  padding: '7px 13px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                }}>
+                  {qaytaBoglashSaving ? '...' : '🔗 Hisobni qayta tekshirish'}
+                </button>
+              )}
             </div>
 
             {/* Faol retseptlar */}
