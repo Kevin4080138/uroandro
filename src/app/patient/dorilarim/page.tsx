@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { vaqtJadvali, faolKunMi, qolganKunlar } from '@/lib/doriEslatma'
+import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 
 type Retsept = {
   id: string
@@ -24,8 +25,27 @@ export default function DorilarimPage() {
   const [retseptlar, setRetseptlar] = useState<Retsept[]>([])
   const [qabullar, setQabullar] = useState<Record<string, true>>({}) // key: `${retsept_id}_${vaqt_tartibi}`
   const [loading, setLoading] = useState(true)
+  const [pushHolati, setPushHolati] = useState<'qollab-bolmaydi' | 'ruxsat-berilmagan' | 'rad-etilgan' | 'yoqilgan' | 'tekshirilmoqda'>('tekshirilmoqda')
+  const [pushSaving, setPushSaving] = useState(false)
+  const [pushXato, setPushXato] = useState<string | null>(null)
 
   const bugun = new Date().toISOString().slice(0, 10)
+
+  useEffect(() => { pushDastagiHolati().then(setPushHolati) }, [])
+
+  const pushTugmaBosildi = async () => {
+    setPushXato(null)
+    setPushSaving(true)
+    if (pushHolati === 'yoqilgan') {
+      await pushOchirish()
+      setPushHolati('ruxsat-berilmagan')
+    } else {
+      const res = await pushYoqish()
+      if (res.ok) setPushHolati('yoqilgan')
+      else setPushXato(res.error ?? "Yoqib bo'lmadi")
+    }
+    setPushSaving(false)
+  }
 
   const load = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -83,6 +103,42 @@ export default function DorilarimPage() {
         <p className="rise" style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Shifokoringiz yozgan retseptlar va bugungi qabul eslatmalari.
         </p>
+
+        {pushHolati !== 'tekshirilmoqda' && pushHolati !== 'qollab-bolmaydi' && (
+          <div className="rise" style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
+            background: pushHolati === 'yoqilgan' ? 'color-mix(in srgb, var(--good) 10%, var(--surface))' : 'var(--accent-soft)',
+            border: `1px solid ${pushHolati === 'yoqilgan' ? 'var(--good)' : 'var(--accent)'}`,
+            borderRadius: '14px', padding: '14px 18px', marginBottom: '18px', animationDelay: '.07s',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '18px' }}>{pushHolati === 'yoqilgan' ? '🔔' : pushHolati === 'rad-etilgan' ? '🔕' : '🔔'}</span>
+              <div>
+                <div style={{ fontSize: '13.5px', fontWeight: 700 }}>
+                  {pushHolati === 'yoqilgan' ? 'Push-bildirishnomalar yoqilgan' : pushHolati === 'rad-etilgan' ? 'Bildirishnomalar bloklangan' : 'Qabul vaqti kelganda eslatma olish'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
+                  {pushHolati === 'rad-etilgan'
+                    ? "Brauzer sozlamalaridan ushbu sayt uchun bildirishnomaga ruxsat bering"
+                    : pushHolati === 'yoqilgan'
+                      ? "Dori vaqti kelganda telefon/brauzeringizga bildirishnoma keladi"
+                      : "Dori ichish vaqti kelganda avtomatik bildirishnoma olish uchun yoqing"}
+                </div>
+              </div>
+            </div>
+            {pushHolati !== 'rad-etilgan' && (
+              <button onClick={pushTugmaBosildi} disabled={pushSaving} className="soft-press" style={{
+                background: pushHolati === 'yoqilgan' ? 'var(--surface-2)' : 'var(--accent)',
+                color: pushHolati === 'yoqilgan' ? 'var(--ink-soft)' : 'white',
+                border: pushHolati === 'yoqilgan' ? '1px solid var(--line)' : 'none',
+                borderRadius: '999px', padding: '8px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+              }}>
+                {pushSaving ? '...' : pushHolati === 'yoqilgan' ? "O'chirish" : '🔔 Yoqish'}
+              </button>
+            )}
+            {pushXato && <span style={{ color: 'var(--danger)', fontSize: '12px', width: '100%' }}>{pushXato}</span>}
+          </div>
+        )}
 
         {!loading && faolRetseptlar.length > 0 && (
           <div className="rise" style={{
