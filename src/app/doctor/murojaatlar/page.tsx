@@ -123,6 +123,8 @@ export default function DoctorMurojaatlarPage() {
 
   const navbat = murojaatlar.filter((m) => !m.target_doctor_id && !m.doctor_id && m.holat === 'kutilmoqda' && !m.arxiv)
   const menikilar = murojaatlar.filter((m) => (m.doctor_id === myId || (m.target_doctor_id === myId && !m.doctor_id)) && !m.arxiv)
+  const javobKutilayotgan = menikilar.filter((m) => m.holat !== 'javob_berildi')
+  const javobBerilganlar = menikilar.filter((m) => m.holat === 'javob_berildi')
   const arxivlar = murojaatlar.filter((m) => m.arxiv && (m.doctor_id === myId || m.target_doctor_id === myId))
 
   const sarlavha = (matn: string, son: number) => (
@@ -151,10 +153,20 @@ export default function DoctorMurojaatlarPage() {
               ))}
 
             <div style={{ height: '24px' }} />
-            {sarlavha('Mening murojaatlarim', menikilar.length)}
-            {menikilar.length === 0
+            {sarlavha('Javob kutilayotgan', javobKutilayotgan.length)}
+            {javobKutilayotgan.length === 0
               ? <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Hozircha yo&apos;q.</p>
-              : menikilar.map((m, i) => (
+              : javobKutilayotgan.map((m, i) => (
+                <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
+                  javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+              ))}
+
+            <div style={{ height: '24px' }} />
+            {sarlavha('Javob berilgan', javobBerilganlar.length)}
+            {javobBerilganlar.length === 0
+              ? <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Hozircha yo&apos;q.</p>
+              : javobBerilganlar.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
                   qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
