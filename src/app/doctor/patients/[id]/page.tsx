@@ -73,6 +73,7 @@ export default function PatientCardPage() {
 
   const [yakunlashTashrifId, setYakunlashTashrifId] = useState<string | null>(null)
   const [doriMuolaja, setDoriMuolaja] = useState('')
+  const [dorilarRoyxati, setDorilarRoyxati] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; izoh: string }[]>([])
 
   const [saving, setSaving] = useState(false)
 
@@ -247,20 +248,57 @@ export default function PatientCardPage() {
   const openYakunlash = (tashrifId: string, mavjudDori: string) => {
     setYakunlashTashrifId(tashrifId)
     setDoriMuolaja(mavjudDori || '')
+    setDorilarRoyxati([])
   }
+
+  const doriQoshish = () => setDorilarRoyxati((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, izoh: '' }])
+  const doriOchirish = (i: number) => setDorilarRoyxati((arr) => arr.filter((_, j) => j !== i))
+  const doriYangila = (i: number, key: string, val: any) => setDorilarRoyxati((arr) => arr.map((d, j) => (j === i ? { ...d, [key]: val } : d)))
 
   const handleYakunlashSave = async () => {
     if (!yakunlashTashrifId) return
     setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('tashriflar').update({
       dori_muolaja: doriMuolaja,
       holat: 'yakunlandi',
     }).eq('id', yakunlashTashrifId)
+
+    // Tuzilgan dori retseptlarini bemorga bog'lab saqlash — telefon raqami bo'yicha bemor hisobini topishga harakat qilamiz.
+    const haqiqiyDorilar = dorilarRoyxati.filter((d) => d.nomi.trim())
+    if (!error && haqiqiyDorilar.length > 0 && user) {
+      let bemorUserId: string | null = null
+      if (bemor?.telefon) {
+        const { data: mosBemor } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'patient')
+          .eq('telefon', bemor.telefon)
+          .maybeSingle()
+        bemorUserId = mosBemor?.id ?? null
+      }
+
+      await supabase.from('dori_retseptlari').insert(
+        haqiqiyDorilar.map((d) => ({
+          tashrif_id: yakunlashTashrifId,
+          bemor_id: id,
+          bemor_user_id: bemorUserId,
+          doctor_id: user.id,
+          nomi: d.nomi.trim(),
+          dozasi: d.dozasi.trim() || null,
+          kuniga_marta: d.kuniga_marta,
+          muddat_kun: d.muddat_kun,
+          izoh: d.izoh.trim() || null,
+        }))
+      )
+    }
+
     setSaving(false)
 
     if (!error) {
       setYakunlashTashrifId(null)
       setDoriMuolaja('')
+      setDorilarRoyxati([])
       load()
     }
   }
@@ -602,6 +640,59 @@ export default function PatientCardPage() {
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
             <h3 style={{ marginTop: 0, fontSize: '15px', color: 'var(--muted)' }}>Tavsiya varaqasi — dori va muolaja</h3>
             <textarea style={{ ...inputStyle, minHeight: '120px' }} value={doriMuolaja} onChange={(e) => setDoriMuolaja(e.target.value)} placeholder="Dorilar, dozalar, muolajalar, tavsiyalar..." />
+
+            {/* Tuzilgan retsept — bemor ilovasiga avtomatik eslatma sifatida tushadi */}
+            <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px dashed var(--line)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--ink)' }}>
+                  💊 Dori retsepti <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(bemor ilovasida eslatma sifatida ko&apos;rinadi)</span>
+                </h4>
+                <button onClick={doriQoshish} className="soft-press" style={{
+                  background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', borderRadius: '8px',
+                  padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+                }}>
+                  + Dori qo&apos;shish
+                </button>
+              </div>
+
+              {dorilarRoyxati.length === 0 ? (
+                <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)' }}>Hali dori qo&apos;shilmagan.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {dorilarRoyxati.map((d, i) => (
+                    <div key={i} style={{
+                      background: 'var(--surface-2)', borderRadius: '10px', padding: '12px 14px',
+                      display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'flex-end',
+                    }}>
+                      <div style={{ flex: '2 1 160px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Dori nomi</label>
+                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.nomi} onChange={(e) => doriYangila(i, 'nomi', e.target.value)} placeholder="masalan, Tamsulozin" />
+                      </div>
+                      <div style={{ flex: '1 1 110px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Dozasi</label>
+                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.dozasi} onChange={(e) => doriYangila(i, 'dozasi', e.target.value)} placeholder="0.4 mg, 1 tab" />
+                      </div>
+                      <div style={{ flex: '0 1 100px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Kuniga marta</label>
+                        <input type="number" min={1} max={6} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.kuniga_marta} onChange={(e) => doriYangila(i, 'kuniga_marta', parseInt(e.target.value) || 1)} />
+                      </div>
+                      <div style={{ flex: '0 1 100px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
+                        <input type="number" min={1} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.muddat_kun} onChange={(e) => doriYangila(i, 'muddat_kun', parseInt(e.target.value) || 1)} />
+                      </div>
+                      <div style={{ flex: '2 1 160px' }}>
+                        <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
+                        <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.izoh} onChange={(e) => doriYangila(i, 'izoh', e.target.value)} placeholder="ovqatdan keyin" />
+                      </div>
+                      <button onClick={() => doriOchirish(i)} style={{
+                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
+                      }}>🗑️</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <button onClick={handleYakunlashSave} disabled={saving} style={{
                 background: 'var(--accent)', color: 'var(--ink)', border: 'none', borderRadius: '10px',
