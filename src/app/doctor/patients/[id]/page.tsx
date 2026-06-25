@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { IconButton } from '@/components/IconButton'
@@ -391,6 +391,13 @@ export default function PatientCardPage() {
     }
   }
 
+  // Qabullar va kalkulyator natijalarini bir umumiy, sanasiga ko'ra tartiblangan tarixga birlashtirish
+  const umumiyTarix = useMemo(() => {
+    const kalkElementlar = kalkulyatorNatijalari.map((n) => ({ tur: 'kalk' as const, vaqt: n.created_at, data: n }))
+    const tashrifElementlar = tashriflar.map((t) => ({ tur: 'tashrif' as const, vaqt: t.sana, data: t }))
+    return [...kalkElementlar, ...tashrifElementlar].sort((a, b) => new Date(b.vaqt).getTime() - new Date(a.vaqt).getTime())
+  }, [kalkulyatorNatijalari, tashriflar])
+
   if (loading) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
@@ -655,36 +662,6 @@ export default function PatientCardPage() {
                 {retseptSaving ? 'Saqlanmoqda...' : '💾 Retseptni bemorga yuborish'}
               </button>
             )}
-          </div>
-        )}
-
-        {/* Kalkulyator natijalari tarixi */}
-        {kalkulyatorNatijalari.length > 0 && (
-          <div className="rise" style={{
-            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-            padding: '18px 20px', marginBottom: '22px',
-          }}>
-            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', fontWeight: 700, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <span style={{ width: '3px', height: '12px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
-              Kalkulyator natijalari
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {kalkulyatorNatijalari.map((n) => (
-                <div key={n.id} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
-                  background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 14px', flexWrap: 'wrap',
-                }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{n.sarlavha}</div>
-                    <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)', marginTop: '2px' }}>{n.xulosa}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '3px' }}>{new Date(n.created_at).toLocaleString('uz-UZ')}</div>
-                  </div>
-                  <button onClick={() => kalkulyatorNatijasiniOchir(n.id)} style={{
-                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '14px', flexShrink: 0,
-                  }}>🗑️</button>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
@@ -957,21 +934,43 @@ export default function PatientCardPage() {
 
         <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '3px', height: '16px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
-          Qabullar tarixi
+          Tarix
         </h3>
-        {tashriflar.length === 0 ? (
+        {umumiyTarix.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)', background: 'var(--surface)', border: '1px dashed var(--line)', borderRadius: '14px' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.6 }}>🩺</div>
             <p style={{ margin: 0, fontSize: '13.5px' }}>Hozircha qabul yo&apos;q. &quot;+ Yangi qabul&quot; orqali boshlang.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {tashriflar.map((t, i) => {
+            {umumiyTarix.map((el, i) => {
+              if (el.tur === 'kalk') {
+                const n = el.data
+                return (
+                  <div key={`kalk_${n.id}`} className="rise" style={{
+                    animationDelay: `${Math.min(i * 0.05, 0.3)}s`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                    background: 'var(--surface)', border: '1px solid var(--line)', borderLeft: '3px solid var(--accent-2)',
+                    borderRadius: '12px', padding: '14px 18px', flexWrap: 'wrap',
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>{new Date(n.created_at).toLocaleString('uz-UZ')} · 🧮 Kalkulyator</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700 }}>{n.sarlavha}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--ink-soft)', marginTop: '2px' }}>{n.xulosa}</div>
+                    </div>
+                    <button onClick={() => kalkulyatorNatijasiniOchir(n.id)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '14px', flexShrink: 0,
+                    }}>🗑️</button>
+                  </div>
+                )
+              }
+
+              const t = el.data
               const holat = holatLabel[t.holat] ?? holatLabel.yangi
               return (
-                <div key={t.id} className="lift rise" style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s`, background: 'var(--surface)', border: '1px solid var(--line)', borderLeft: `3px solid ${holat.color}`, borderRadius: '12px', padding: '18px 20px' }}>
+                <div key={`tashrif_${t.id}`} className="lift rise" style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s`, background: 'var(--surface)', border: '1px solid var(--line)', borderLeft: `3px solid ${holat.color}`, borderRadius: '12px', padding: '18px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--muted)', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()}</span>
+                    <span style={{ color: 'var(--muted)', fontSize: '13px' }}>{new Date(t.sana).toLocaleString()} · 🩺 Qabul</span>
                     <span style={{ color: holat.color, fontSize: '13px', fontWeight: 600 }}>{holat.text}</span>
                   </div>
                   {t.shikoyat && <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}><strong>Shikoyat:</strong> {t.shikoyat}</p>}
