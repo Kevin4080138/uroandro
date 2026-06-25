@@ -1,5 +1,5 @@
 {
   "crons": [
-    { "path": "/api/cron/dori-eslatmalari", "schedule": "*/5 * * * *" }
+    { "path": "/api/cron/dori-eslatmalari", "schedule": "0 9 * * *" }
   ]
 }
