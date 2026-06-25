@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { DARSLAR } from '@/lib/talim/darslar'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
+  const [bajarilganSoni, setBajarilganSoni] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
@@ -22,6 +24,13 @@ export default function StudentDashboard() {
         .single()
 
       setProfile(data)
+
+      const { data: natijalar } = await supabase
+        .from('talim_natijalari')
+        .select('dars_slug')
+        .eq('student_id', user.id)
+      const yakunlangan = new Set((natijalar ?? []).map((n: any) => n.dars_slug))
+      setBajarilganSoni(yakunlangan.size)
     }
     getProfile()
   }, [])
@@ -37,6 +46,15 @@ export default function StudentDashboard() {
     </div>
   )
 
+  const jamiDars = DARSLAR.length
+  const progress = jamiDars ? Math.round((bajarilganSoni / jamiDars) * 100) : 0
+
+  const KARTALAR = [
+    { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
+    { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
+    { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
+  ]
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
 
@@ -51,19 +69,36 @@ export default function StudentDashboard() {
       {/* Content */}
       <div style={{ padding: '32px' }}>
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '20px' }}>
           {profile.full_name}
         </h1>
 
+        {/* Progress */}
+        <div className="rise" style={{
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+          padding: '20px 24px', marginBottom: '28px', maxWidth: '520px', animationDelay: '.04s',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish darajangiz</span>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars} dars</span>
+          </div>
+          <div style={{ height: '10px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: '999px', width: `${progress}%`,
+              background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s ease',
+            }} />
+          </div>
+        </div>
+
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-          {[
-            { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)' },
-            { icon: '❓', title: 'Testlar', desc: 'Bilimni sinash uchun quizlar', c: 'var(--accent-2)' },
-            { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)' },
-            { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)' },
-          ].map((item, i) => (
-            <div key={item.title} className="dash-card rise" style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s` }}>
+          {KARTALAR.map((item, i) => (
+            <div
+              key={item.title}
+              onClick={() => router.push(item.href)}
+              className="dash-card rise"
+              style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s`, cursor: 'pointer' }}
+            >
               <div className="dash-icon">{item.icon}</div>
               <h3 className="dash-title">{item.title}</h3>
               <p className="dash-desc">{item.desc}</p>
