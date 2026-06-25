@@ -28,14 +28,26 @@ export function BildirishnomalarPaneli() {
       ])
 
       const elementlar: Bildirishnoma[] = []
+      const dorilar = retseptlar ?? []
 
-      for (const r of retseptlar ?? []) {
+      if (dorilar.length === 1) {
+        const r = dorilar[0]
         elementlar.push({
           key: `dori_${r.id}`,
           ikon: '💊',
-          matn: `Sizga yangi dori tayinlandi: ${r.nomi}${r.dozasi ? ' — ' + r.dozasi : ''}`,
+          matn: `Yangi dori: ${r.nomi}${r.dozasi ? ' — ' + r.dozasi : ''}`,
           href: '/patient/dorilarim',
           yopish: async () => { await supabase.rpc('dori_korildi', { retsept_id: r.id }) },
+        })
+      } else if (dorilar.length > 1) {
+        elementlar.push({
+          key: 'dori_guruh',
+          ikon: '💊',
+          matn: `${dorilar.length} ta yangi dori tayinlandi: ${dorilar.map((d) => d.nomi).join(', ')}`,
+          href: '/patient/dorilarim',
+          yopish: async () => {
+            await Promise.all(dorilar.map((r) => supabase.rpc('dori_korildi', { retsept_id: r.id })))
+          },
         })
       }
 
@@ -43,7 +55,7 @@ export function BildirishnomalarPaneli() {
         elementlar.push({
           key: `murojaat_${m.id}`,
           ikon: '💬',
-          matn: 'Shifokoringiz murojaatingizga javob berdi',
+          matn: 'Shifokoringiz javob berdi',
           href: '/patient/murojaatlarim',
           yopish: async () => { await supabase.rpc('murojaat_korildi', { m_id: m.id }) },
         })
@@ -62,28 +74,33 @@ export function BildirishnomalarPaneli() {
   if (royxat.length === 0) return null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
       {royxat.map((b, i) => (
         <div
           key={b.key}
           className="rise"
           style={{
             animationDelay: `${Math.min(i * 0.05, 0.3)}s`,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-            background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: '14px',
-            padding: '13px 16px', cursor: 'pointer',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+            background: 'var(--accent-soft)', border: '1px solid var(--line)', borderRadius: '10px',
+            padding: '8px 12px', cursor: 'pointer',
           }}
           onClick={() => router.push(b.href)}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-            <span style={{ fontSize: '18px', flexShrink: 0 }}>{b.ikon}</span>
-            <span style={{ fontSize: '13.5px', fontWeight: 700 }}>{b.matn}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <span style={{ fontSize: '14px', flexShrink: 0 }}>{b.ikon}</span>
+            <span style={{
+              fontSize: '12.5px', fontWeight: 600, color: 'var(--ink)', whiteSpace: 'nowrap',
+              overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {b.matn}
+            </span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); yopish(b) }}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '16px',
-              flexShrink: 0, padding: '2px 6px',
+              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '13px',
+              flexShrink: 0, padding: '2px 4px', lineHeight: 1,
             }}
             aria-label="Yopish"
           >
