@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { IconButton } from '@/components/IconButton'
@@ -63,7 +63,16 @@ export default function PatientCardPage() {
   const [tashriflar, setTashriflar] = useState<any[]>([])
   const [kalkulyatorNatijalari, setKalkulyatorNatijalari] = useState<any[]>([])
   const [kalkulyatorMenyu, setKalkulyatorMenyu] = useState(false)
+  const kalkulyatorMenyuRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const tashqi = (e: MouseEvent) => {
+      if (kalkulyatorMenyuRef.current && !kalkulyatorMenyuRef.current.contains(e.target as Node)) setKalkulyatorMenyu(false)
+    }
+    document.addEventListener('mousedown', tashqi)
+    return () => document.removeEventListener('mousedown', tashqi)
+  }, [])
 
   const [showYangiForm, setShowYangiForm] = useState(false)
   const [editingYangiId, setEditingYangiId] = useState<string | null>(null)
@@ -451,11 +460,7 @@ export default function PatientCardPage() {
                 </span>
               )}
             </button>
-            <div
-              style={{ position: 'relative' }}
-              onMouseEnter={() => setKalkulyatorMenyu(true)}
-              onMouseLeave={() => setKalkulyatorMenyu(false)}
-            >
+            <div ref={kalkulyatorMenyuRef} style={{ position: 'relative' }}>
               <button onClick={() => setKalkulyatorMenyu((v) => !v)} className="btn-animated soft-press" style={{
                 background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
                 padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',

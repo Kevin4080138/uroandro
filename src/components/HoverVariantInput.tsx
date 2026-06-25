@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const inputStyleAsosiy = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -15,28 +15,30 @@ export function HoverVariantInput({ value, onChange, variantlar, placeholder, ty
   type?: 'text' | 'number'
 }) {
   const [ochiq, setOchiq] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const tashqi = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOchiq(false) }
+    document.addEventListener('mousedown', tashqi)
+    return () => document.removeEventListener('mousedown', tashqi)
+  }, [])
 
   const mosKeluvchilar = type === 'text' && typeof value === 'string' && value.trim()
     ? variantlar.filter((v) => String(v).toLowerCase().includes(value.toLowerCase()))
     : variantlar
 
   return (
-    <div
-      style={{ position: 'relative' }}
-      onMouseEnter={() => setOchiq(true)}
-      onMouseLeave={() => setOchiq(false)}
-    >
+    <div ref={ref} style={{ position: 'relative' }}>
       <input
         type={type}
         style={inputStyleAsosiy}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setOchiq(true)}
+        onClick={() => setOchiq(true)}
         placeholder={placeholder}
       />
       {ochiq && mosKeluvchilar.length > 0 && (
-        <>
-          {/* Tugma va dropdown orasidagi bo'shliqni "ko'prik" bilan to'ldirish — hover uzilib qolmasligi uchun */}
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, height: '4px', zIndex: 59 }} />
         <div className="menyu-ochilish" style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 60,
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '10px',
@@ -60,7 +62,6 @@ export function HoverVariantInput({ value, onChange, variantlar, placeholder, ty
             </button>
           ))}
         </div>
-        </>
       )}
     </div>
   )

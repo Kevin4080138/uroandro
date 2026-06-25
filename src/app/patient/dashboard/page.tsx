@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { DoriEslatmaKartasi } from '@/components/DoriEslatmaKartasi'
+import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -56,6 +57,7 @@ export default function PatientDashboard() {
           {profile.full_name}
         </h1>
 
+        <BildirishnomalarPaneli />
         <DoriEslatmaKartasi />
 
         {/* Cards */}
