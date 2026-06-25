@@ -17,7 +17,8 @@ export function DoriEslatmaKartasi() {
   const [dozalar, setDozalar] = useState<Doza[] | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [now, setNow] = useState(new Date())
-  const [belgilanmoqda, setBelgilanmoqda] = useState(false)
+  const [belgilanmoqda, setBelgilanmoqda] = useState<string | null>(null)
+  const [ertaXabar, setErtaXabar] = useState<string | null>(null)
 
   const bugun = new Date().toISOString().slice(0, 10)
 
@@ -65,67 +66,113 @@ export function DoriEslatmaKartasi() {
     return dozalar.find((d) => !d.qabulQilingan) ?? null
   }, [dozalar])
 
-  const oxirgiQabulQilingan = useMemo(() => {
+  const hammasiQabulQilingan = useMemo(() => {
     if (!dozalar) return false
     return dozalar.length > 0 && dozalar.every((d) => d.qabulQilingan)
   }, [dozalar])
 
-  const belgila = async () => {
-    if (!keyingiDoza || !userId) return
-    setBelgilanmoqda(true)
+  const dozaKaliti = (d: Doza) => `${d.retsept.id}_${d.tartibi}`
+
+  const belgila = async (d: Doza) => {
+    if (!userId) return
+    if (d.vaqt > hozirgiVaqt) {
+      // Hali vaqti kelmagan dozani belgilashga urinish — ogohlantirish ko'rsatamiz, belgilamaymiz
+      const kalit = dozaKaliti(d)
+      setErtaXabar(kalit)
+      setTimeout(() => setErtaXabar((x) => (x === kalit ? null : x)), 2200)
+      return
+    }
+    setBelgilanmoqda(dozaKaliti(d))
     await supabase.from('dori_qabullari').insert({
-      retsept_id: keyingiDoza.retsept.id, bemor_user_id: userId, sana: bugun, vaqt_tartibi: keyingiDoza.tartibi,
+      retsept_id: d.retsept.id, bemor_user_id: userId, sana: bugun, vaqt_tartibi: d.tartibi,
     })
     await load()
-    setBelgilanmoqda(false)
+    setBelgilanmoqda(null)
   }
 
-  if (dozalar === null) return null
-  if (dozalar.length === 0) return null
-
-  const otibKetdi = keyingiDoza && keyingiDoza.vaqt <= hozirgiVaqt
+  // Yuklanmaguncha hech narsa ko'rsatmaymiz, lekin karta doim bitta barqaror joy egallaydi
+  if (dozalar === null) {
+    return <div style={{ minHeight: '0' }} />
+  }
 
   return (
-    <div
-      className="rise"
-      onClick={() => router.push('/patient/dorilarim')}
-      style={{
-        background: keyingiDoza ? (otibKetdi ? 'color-mix(in srgb, var(--danger) 10%, var(--surface))' : 'var(--accent-soft)') : 'color-mix(in srgb, var(--good) 10%, var(--surface))',
-        border: `1px solid ${keyingiDoza ? (otibKetdi ? 'var(--danger)' : 'var(--accent)') : 'var(--good)'}`,
-        borderRadius: '16px', padding: '18px 20px', marginBottom: '24px', cursor: 'pointer',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-        <span style={{ fontSize: '24px', flexShrink: 0 }}>{oxirgiQabulQilingan ? '✅' : otibKetdi ? '⏰' : '💊'}</span>
-        <div style={{ minWidth: 0 }}>
-          {oxirgiQabulQilingan ? (
-            <div style={{ fontSize: '14px', fontWeight: 700 }}>Bugungi barcha dozalar qabul qilindi 🎉</div>
-          ) : keyingiDoza ? (
-            <>
-              <div style={{ fontSize: '14.5px', fontWeight: 800 }}>
-                {otibKetdi ? "Dori ichish vaqti keldi!" : `Keyingi doza: ${keyingiDoza.vaqt}`}
-              </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)', marginTop: '2px' }}>
-                {keyingiDoza.retsept.nomi}{keyingiDoza.retsept.dozasi ? ` — ${keyingiDoza.retsept.dozasi}` : ''}
-                {!otibKetdi && ` · soat ${keyingiDoza.vaqt}da`}
-              </div>
-            </>
-          ) : null}
-        </div>
+    <div className="rise" style={{
+      background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+      padding: '16px 18px', marginBottom: '24px',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: dozalar.length ? '12px' : 0 }}>
+        <span style={{ fontSize: '13.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '7px' }}>
+          💊 Bugungi dorilar
+          {dozalar.length > 0 && (
+            <span style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 600 }}>
+              ({dozalar.filter((d) => d.qabulQilingan).length}/{dozalar.length})
+            </span>
+          )}
+        </span>
+        {dozalar.length > 0 && (
+          <button
+            onClick={() => router.push('/patient/dorilarim')}
+            style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+          >
+            Batafsil →
+          </button>
+        )}
       </div>
-      {keyingiDoza && (
-        <button
-          onClick={(e) => { e.stopPropagation(); belgila() }}
-          disabled={belgilanmoqda}
-          className="soft-press"
-          style={{
-            background: otibKetdi ? 'var(--danger)' : 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
-            padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
-          }}
-        >
-          {belgilanmoqda ? '...' : '✓ Ichdim'}
-        </button>
+
+      {dozalar.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '14px 0', color: 'var(--muted)' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>📭</div>
+          <p style={{ margin: 0, fontSize: '13px' }}>Sizda hozircha faol dori retsepti mavjud emas.</p>
+        </div>
+      ) : hammasiQabulQilingan ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 4px',
+          color: 'var(--good)', fontWeight: 700, fontSize: '13.5px',
+        }}>
+          ✅ Bugungi barcha dozalar qabul qilindi 🎉
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '230px', overflowY: 'auto' }}>
+          {dozalar.map((d) => {
+            const kalit = dozaKaliti(d)
+            const otibKetdi = !d.qabulQilingan && d.vaqt <= hozirgiVaqt
+            const hozirErta = ertaXabar === kalit
+            return (
+              <div key={kalit} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+                background: d.qabulQilingan ? 'transparent' : otibKetdi ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'var(--surface-2)',
+                borderRadius: '10px', padding: '8px 10px', opacity: d.qabulQilingan ? 0.55 : 1,
+              }}>
+                <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: otibKetdi ? 'var(--danger)' : 'var(--ink-soft)', flexShrink: 0, width: '38px' }}>
+                    {d.vaqt}
+                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, textDecoration: d.qabulQilingan ? 'line-through' : 'none' }}>
+                    {d.retsept.nomi}{d.retsept.dozasi ? ` — ${d.retsept.dozasi}` : ''}
+                  </span>
+                </div>
+                {d.qabulQilingan ? (
+                  <span style={{ fontSize: '12px', color: 'var(--good)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                ) : (
+                  <button
+                    onClick={() => belgila(d)}
+                    disabled={belgilanmoqda === kalit}
+                    className="soft-press"
+                    style={{
+                      background: hozirErta ? 'var(--surface-2)' : otibKetdi ? 'var(--danger)' : 'var(--accent-soft)',
+                      color: hozirErta ? 'var(--warn)' : otibKetdi ? 'white' : 'var(--accent)',
+                      border: hozirErta ? '1px solid var(--warn)' : 'none',
+                      borderRadius: '999px', padding: '5px 11px', cursor: 'pointer', fontSize: '11.5px', fontWeight: 700,
+                      whiteSpace: 'nowrap', flexShrink: 0,
+                    }}
+                  >
+                    {belgilanmoqda === kalit ? '...' : hozirErta ? `⏳ ${d.vaqt}dan keyin` : '✓ Ichdim'}
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )
