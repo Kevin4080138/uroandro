@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { shablonTop, SHABLONLAR, type HujjatBlok, type Maydon } from '@/lib/shablonlar'
@@ -22,6 +22,7 @@ const chip = (active: boolean): React.CSSProperties => ({
 
 export default function HujjatlarPage() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
   const supabase = createClient()
 
   const [shablonId, setShablonId] = useState('prostatit')
@@ -153,12 +154,25 @@ export default function HujjatlarPage() {
     [shablon, defaults, docData, bemor, shifokorIsmi]
   )
 
+  const orqagaTugmasi = (
+    <button
+      onClick={() => router.push(`/doctor/patients/${id}`)}
+      className="btn-animated soft-press"
+      style={{
+        background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
+        padding: '8px 16px', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
+      }}
+    >
+      ← Bemorga qaytish
+    </button>
+  )
+
   if (loading) return (
-    <AppShell title="Hujjatlar"><div className="px-8 py-8"><p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p></div></AppShell>
+    <AppShell title="Hujjatlar" actions={orqagaTugmasi}><div className="px-8 py-8"><p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p></div></AppShell>
   )
 
   return (
-    <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`}>
+    <AppShell title={`Hujjatlar — ${bemor?.fio ?? ''}`} actions={orqagaTugmasi}>
       <style>{`
         .ajratgich:hover > div { background: var(--accent) !important; width: 3px !important; }
         .bosma-portal { position: fixed; left: -10000px; top: 0; width: 680px; background: #fff; }

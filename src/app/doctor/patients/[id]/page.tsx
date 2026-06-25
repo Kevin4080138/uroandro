@@ -75,6 +75,11 @@ export default function PatientCardPage() {
   const [doriMuolaja, setDoriMuolaja] = useState('')
   const [dorilarRoyxati, setDorilarRoyxati] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; izoh: string }[]>([])
 
+  const [showRetsept, setShowRetsept] = useState(false)
+  const [bemorRetseptlari, setBemorRetseptlari] = useState<any[]>([])
+  const [yangiRetseptlar, setYangiRetseptlar] = useState<{ nomi: string; dozasi: string; kuniga_marta: number; muddat_kun: number; izoh: string }[]>([])
+  const [retseptSaving, setRetseptSaving] = useState(false)
+
   const [saving, setSaving] = useState(false)
 
   const load = async () => {
@@ -96,6 +101,14 @@ export default function PatientCardPage() {
       .eq('bemor_id', id)
       .order('created_at', { ascending: false })
     setKalkulyatorNatijalari(kalkData ?? [])
+
+    const { data: retseptData } = await supabase
+      .from('dori_retseptlari')
+      .select('*')
+      .eq('bemor_id', id)
+      .order('created_at', { ascending: false })
+    setBemorRetseptlari(retseptData ?? [])
+
     setLoading(false)
   }
 
@@ -255,6 +268,52 @@ export default function PatientCardPage() {
   const doriOchirish = (i: number) => setDorilarRoyxati((arr) => arr.filter((_, j) => j !== i))
   const doriYangila = (i: number, key: string, val: any) => setDorilarRoyxati((arr) => arr.map((d, j) => (j === i ? { ...d, [key]: val } : d)))
 
+  const yangiRetseptQoshish = () => setYangiRetseptlar((arr) => [...arr, { nomi: '', dozasi: '', kuniga_marta: 1, muddat_kun: 7, izoh: '' }])
+  const yangiRetseptOchirish = (i: number) => setYangiRetseptlar((arr) => arr.filter((_, j) => j !== i))
+  const yangiRetseptYangila = (i: number, key: string, val: any) => setYangiRetseptlar((arr) => arr.map((d, j) => (j === i ? { ...d, [key]: val } : d)))
+
+  const retseptlarniSaqla = async () => {
+    const haqiqiyDorilar = yangiRetseptlar.filter((d) => d.nomi.trim())
+    if (haqiqiyDorilar.length === 0) return
+    setRetseptSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setRetseptSaving(false); return }
+
+    let bemorUserId: string | null = null
+    if (bemor?.telefon) {
+      const { data: mosBemor } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'patient')
+        .eq('telefon', bemor.telefon)
+        .maybeSingle()
+      bemorUserId = mosBemor?.id ?? null
+    }
+
+    await supabase.from('dori_retseptlari').insert(
+      haqiqiyDorilar.map((d) => ({
+        tashrif_id: null,
+        bemor_id: id,
+        bemor_user_id: bemorUserId,
+        doctor_id: user.id,
+        nomi: d.nomi.trim(),
+        dozasi: d.dozasi.trim() || null,
+        kuniga_marta: d.kuniga_marta,
+        muddat_kun: d.muddat_kun,
+        izoh: d.izoh.trim() || null,
+      }))
+    )
+
+    setYangiRetseptlar([])
+    setRetseptSaving(false)
+    load()
+  }
+
+  const retseptniOchirish = async (retseptId: string) => {
+    await supabase.from('dori_retseptlari').update({ faol: false }).eq('id', retseptId)
+    load()
+  }
+
   const handleYakunlashSave = async () => {
     if (!yakunlashTashrifId) return
     setSaving(true)
@@ -342,6 +401,23 @@ export default function PatientCardPage() {
             }}>
               📄 Hujjatlar
             </button>
+            <button onClick={() => setShowRetsept((v) => !v)} className="btn-animated soft-press" style={{
+              background: showRetsept ? 'var(--accent)' : 'var(--surface-2)', color: showRetsept ? 'white' : 'var(--ink-soft)',
+              border: showRetsept ? 'none' : '1px solid var(--line)', borderRadius: '999px',
+              padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+              position: 'relative',
+            }}>
+              💊 Retsept
+              {bemorRetseptlari.filter((r) => r.faol).length > 0 && (
+                <span style={{
+                  position: 'absolute', top: '-6px', right: '-6px', background: 'var(--danger)', color: 'white',
+                  borderRadius: '999px', fontSize: '10px', fontWeight: 800, minWidth: '18px', height: '18px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+                }}>
+                  {bemorRetseptlari.filter((r) => r.faol).length}
+                </span>
+              )}
+            </button>
             <div style={{ position: 'relative' }}>
               <button onClick={() => setKalkulyatorMenyu((v) => !v)} className="btn-animated soft-press" style={{
                 background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
@@ -420,6 +496,109 @@ export default function PatientCardPage() {
             </button>
           </div>
         </div>
+
+        {/* Dori retsepti paneli */}
+        {showRetsept && (
+          <div className="rise" style={{
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+            padding: '22px 24px', marginBottom: '22px', boxShadow: 'var(--shadow)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <span style={{
+                width: '36px', height: '36px', borderRadius: '10px', background: 'var(--accent-soft)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+              }}>💊</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Dori retsepti</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Bemor ilovasida &quot;Dorilarim&quot; bo&apos;limida eslatma sifatida ko&apos;rinadi</p>
+              </div>
+            </div>
+
+            {/* Faol retseptlar */}
+            {bemorRetseptlari.filter((r) => r.faol).length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+                {bemorRetseptlari.filter((r) => r.faol).map((r) => (
+                  <div key={r.id} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                    background: 'var(--surface-2)', borderRadius: '10px', padding: '11px 16px', flexWrap: 'wrap',
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontSize: '13.5px', fontWeight: 700 }}>{r.nomi}</span>
+                      {r.dozasi && <span style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}> — {r.dozasi}</span>}
+                      <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px' }}>
+                        Kuniga {r.kuniga_marta} marta · {r.muddat_kun} kun
+                        {!r.bemor_user_id && <span style={{ color: 'var(--warn)' }}> · ⚠ bemor hisobi topilmadi</span>}
+                      </div>
+                    </div>
+                    <button onClick={() => retseptniOchirish(r.id)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '12px', fontWeight: 600,
+                    }}>
+                      To&apos;xtatish
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Yangi dori qo'shish */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.03em' }}>Yangi dori qo&apos;shish</span>
+              <button onClick={yangiRetseptQoshish} className="soft-press" style={{
+                background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', borderRadius: '8px',
+                padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+              }}>
+                + Dori qo&apos;shish
+              </button>
+            </div>
+
+            {yangiRetseptlar.length === 0 ? (
+              <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)' }}>Hali yangi dori qo&apos;shilmagan.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                {yangiRetseptlar.map((d, i) => (
+                  <div key={i} style={{
+                    background: 'var(--surface-2)', borderRadius: '10px', padding: '12px 14px',
+                    display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'flex-end',
+                  }}>
+                    <div style={{ flex: '2 1 160px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Dori nomi</label>
+                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.nomi} onChange={(e) => yangiRetseptYangila(i, 'nomi', e.target.value)} placeholder="masalan, Tamsulozin" />
+                    </div>
+                    <div style={{ flex: '1 1 110px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Dozasi</label>
+                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.dozasi} onChange={(e) => yangiRetseptYangila(i, 'dozasi', e.target.value)} placeholder="0.4 mg, 1 tab" />
+                    </div>
+                    <div style={{ flex: '0 1 100px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Kuniga marta</label>
+                      <input type="number" min={1} max={6} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.kuniga_marta} onChange={(e) => yangiRetseptYangila(i, 'kuniga_marta', parseInt(e.target.value) || 1)} />
+                    </div>
+                    <div style={{ flex: '0 1 100px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Necha kun</label>
+                      <input type="number" min={1} style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.muddat_kun} onChange={(e) => yangiRetseptYangila(i, 'muddat_kun', parseInt(e.target.value) || 1)} />
+                    </div>
+                    <div style={{ flex: '2 1 160px' }}>
+                      <label style={{ ...labelStyle, fontSize: '11px' }}>Izoh (ixtiyoriy)</label>
+                      <input style={{ ...inputStyle, padding: '8px 10px', fontSize: '13px' }} value={d.izoh} onChange={(e) => yangiRetseptYangila(i, 'izoh', e.target.value)} placeholder="ovqatdan keyin" />
+                    </div>
+                    <button onClick={() => yangiRetseptOchirish(i)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '15px', padding: '8px',
+                    }}>🗑️</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {yangiRetseptlar.length > 0 && (
+              <button onClick={retseptlarniSaqla} disabled={retseptSaving} className="btn-animated soft-press" style={{
+                background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
+                padding: '11px 22px', cursor: retseptSaving ? 'not-allowed' : 'pointer', fontSize: '13.5px', fontWeight: 700,
+                opacity: retseptSaving ? 0.7 : 1,
+              }}>
+                {retseptSaving ? 'Saqlanmoqda...' : '💾 Retseptni bemorga yuborish'}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Kalkulyator natijalari tarixi */}
         {kalkulyatorNatijalari.length > 0 && (
