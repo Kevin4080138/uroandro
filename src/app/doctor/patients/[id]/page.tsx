@@ -577,7 +577,7 @@ export default function PatientCardPage() {
                       <span style={{ fontSize: '13.5px', fontWeight: 700 }}>{r.nomi}</span>
                       {r.dozasi && <span style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}> — {r.dozasi}</span>}
                       <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px' }}>
-                        Kuniga {r.kuniga_marta} marta · {r.muddat_kun} kun
+                        Kuniga {r.kuniga_marta} marta · {r.muddat_kun} kun · 📅 {r.boshlanish_sanasi} — {sanaQoshish(r.boshlanish_sanasi, r.muddat_kun)}
                         {!r.bemor_user_id && <span style={{ color: 'var(--warn)' }}> · ⚠ bemor hisobi topilmadi</span>}
                       </div>
                     </div>
