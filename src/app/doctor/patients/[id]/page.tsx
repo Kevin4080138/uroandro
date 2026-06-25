@@ -299,7 +299,7 @@ export default function PatientCardPage() {
       bemorUserId = mosBemor?.id ?? null
     }
 
-    await supabase.from('dori_retseptlari').insert(
+    const { data: qoshilganRetseptlar } = await supabase.from('dori_retseptlari').insert(
       haqiqiyDorilar.map((d) => ({
         tashrif_id: null,
         bemor_id: id,
@@ -312,7 +312,14 @@ export default function PatientCardPage() {
         boshlanish_sanasi: d.boshlanish_sanasi || bugunSana(),
         izoh: d.izoh.trim() || null,
       }))
-    )
+    ).select('id')
+
+    if (qoshilganRetseptlar?.length) {
+      fetch('/api/push/yangi-retsept', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ retseptIds: qoshilganRetseptlar.map((r) => r.id) }),
+      }).catch(() => {})
+    }
 
     setYangiRetseptlar([])
     setRetseptSaving(false)
@@ -347,7 +354,7 @@ export default function PatientCardPage() {
         bemorUserId = mosBemor?.id ?? null
       }
 
-      await supabase.from('dori_retseptlari').insert(
+      const { data: qoshilganRetseptlar } = await supabase.from('dori_retseptlari').insert(
         haqiqiyDorilar.map((d) => ({
           tashrif_id: yakunlashTashrifId,
           bemor_id: id,
@@ -360,7 +367,14 @@ export default function PatientCardPage() {
           boshlanish_sanasi: d.boshlanish_sanasi || bugunSana(),
           izoh: d.izoh.trim() || null,
         }))
-      )
+      ).select('id')
+
+      if (qoshilganRetseptlar?.length) {
+        fetch('/api/push/yangi-retsept', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ retseptIds: qoshilganRetseptlar.map((r) => r.id) }),
+        }).catch(() => {})
+      }
     }
 
     setSaving(false)

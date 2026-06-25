@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { DoriEslatmaKartasi } from '@/components/DoriEslatmaKartasi'
 
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -51,9 +52,11 @@ export default function PatientDashboard() {
       {/* Content */}
       <div style={{ padding: '32px' }}>
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '20px' }}>
           {profile.full_name}
         </h1>
+
+        <DoriEslatmaKartasi />
 
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
