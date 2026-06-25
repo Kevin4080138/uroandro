@@ -376,8 +376,21 @@ export default function PatientCardPage() {
     </div>
   )
 
+  const orqagaTugmasi = (
+    <button
+      onClick={() => router.push('/doctor/patients')}
+      className="btn-animated soft-press"
+      style={{
+        background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
+        padding: '8px 16px', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
+      }}
+    >
+      ← Bemorlar
+    </button>
+  )
+
   return (
-    <AppShell title={bemor.fio}>
+    <AppShell title={bemor.fio} actions={orqagaTugmasi}>
       <div className="mx-auto max-w-[900px]" style={{ padding: '28px 32px' }}>
         <div className="rise" style={{
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',

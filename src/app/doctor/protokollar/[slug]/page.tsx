@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 
@@ -12,6 +12,7 @@ type Protokol = {
 
 export default function ProtokolDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const router = useRouter()
   const supabase = createClient()
   const [protokol, setProtokol] = useState<Protokol | null>(null)
   const [loading, setLoading] = useState(true)
@@ -35,8 +36,21 @@ export default function ProtokolDetailPage() {
     </div>
   )
 
+  const orqagaTugmasi = (
+    <button
+      onClick={() => router.push('/doctor/protokollar')}
+      className="btn-animated soft-press"
+      style={{
+        background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
+        padding: '8px 16px', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
+      }}
+    >
+      ← Protokollar
+    </button>
+  )
+
   return (
-    <AppShell title={protokol.nom}>
+    <AppShell title={protokol.nom} actions={orqagaTugmasi}>
       <div className="mx-auto max-w-[760px] px-8 py-8">
         <span style={{ fontSize: '12px', color: 'var(--accent-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{protokol.toifa}</span>
         <h2 style={{ margin: '6px 0 8px 0', fontSize: '26px' }}>{protokol.nom}</h2>
