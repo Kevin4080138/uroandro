@@ -391,7 +391,7 @@ export default function PatientCardPage() {
 
   return (
     <AppShell title={bemor.fio} actions={orqagaTugmasi}>
-      <div className="mx-auto max-w-[900px]" style={{ padding: '28px 32px' }}>
+      <div className="mx-auto max-w-[900px] px-4 py-6 sm:px-8 sm:py-7">
         <div className="rise" style={{
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
           padding: '22px 24px', marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -409,7 +409,7 @@ export default function PatientCardPage() {
               </p>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => router.push(`/doctor/patients/${id}/hujjatlar`)} className="btn-animated soft-press" style={{
               background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
               padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
@@ -447,10 +447,10 @@ export default function PatientCardPage() {
               {kalkulyatorMenyu && (
                 <>
                   <div className="menyu-ochilish" style={{
-                    position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 50, minWidth: '250px',
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50, width: '250px', maxWidth: 'calc(100vw - 32px)',
                     background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
                     boxShadow: '0 10px 28px rgba(0,0,0,0.15)', overflow: 'hidden',
-                    transformOrigin: 'top right', maxHeight: '420px', overflowY: 'auto',
+                    transformOrigin: 'top left', maxHeight: '420px', overflowY: 'auto',
                   }}>
                     {[
                       { guruh: 'Prostata', kalk: [

@@ -183,3 +183,14 @@ h1, h2, h3, h4 {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Telefon ekranlarida moslashuvchanlik */
+@media (max-width: 768px) {
+  .hujjat-split { flex-direction: column !important; }
+  .hujjat-chap { width: 100% !important; position: static !important; top: auto !important; }
+  .hujjat-ajratgich { display: none !important; }
+
+  /* Ko'p sahifada ishlatilgan qattiq gorizontal padding'ni kamaytirish */
+  .px-8 { padding-left: 16px !important; padding-right: 16px !important; }
+  .py-8 { padding-top: 16px !important; padding-bottom: 16px !important; }
+}

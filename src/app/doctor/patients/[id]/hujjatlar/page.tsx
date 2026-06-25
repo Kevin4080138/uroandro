@@ -201,9 +201,9 @@ export default function HujjatlarPage() {
         }
       `}</style>
 
-      <div className="no-print px-8 py-6" style={{ display: 'flex', gap: '0', alignItems: 'start' }}>
+      <div className="no-print hujjat-split px-4 py-4 sm:px-8 sm:py-6" style={{ display: 'flex', gap: '0', alignItems: 'start' }}>
         {/* CHAP PANEL — forma */}
-        <div style={{ width: chapKeng, flexShrink: 0, position: 'sticky', top: '80px' }}>
+        <div className="hujjat-chap" style={{ width: chapKeng, flexShrink: 0, position: 'sticky', top: '80px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Ma&apos;lumotlar</h3>
             <button onClick={saqla} disabled={saving} className="btn-animated soft-press" style={{
@@ -259,7 +259,7 @@ export default function HujjatlarPage() {
 
         {/* SURILADIGAN AJRATGICH */}
         <div
-          className="ajratgich"
+          className="ajratgich hujjat-ajratgich"
           onMouseDown={sudrashBoshla}
           title="O'lchamni o'zgartirish uchun suring"
           style={{

@@ -87,14 +87,14 @@ export default function PatientsRegistryPage() {
               Jami <strong style={{ color: 'var(--ink)' }}>{bemorlar.length}</strong> ta bemor
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', width: '100%', maxWidth: '420px' }}>
+            <div style={{ position: 'relative', flex: '1 1 180px', minWidth: 0 }}>
               <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
               <input
                 placeholder="Qidirish..."
                 value={qidiruv}
                 onChange={(e) => setQidiruv(e.target.value)}
-                style={{ ...inputStyle, width: '260px', paddingLeft: '36px', borderRadius: '999px' }}
+                style={{ ...inputStyle, width: '100%', paddingLeft: '36px', borderRadius: '999px' }}
               />
             </div>
             <button onClick={() => setShowForm(!showForm)} className="btn-animated soft-press" style={{

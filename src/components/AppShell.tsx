@@ -25,28 +25,29 @@ export function AppShell({ title, actions, children }: { title?: string; actions
       <Sidebar />
       <div className="min-w-0 flex-1">
         <header
-          className="sticky top-0 z-20 flex items-center justify-between px-6 py-4"
+          className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 py-3 pl-16 pr-4 md:gap-3 md:py-4 md:pl-6 md:pr-6"
           style={{ background: 'var(--header)', borderBottom: '1px solid var(--line)' }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => router.push('/doctor/dashboard')}
               aria-label="Bosh sahifaga qaytish"
-              className="btn-animated flex items-center justify-center rounded-lg border"
+              className="btn-animated flex shrink-0 items-center justify-center rounded-lg border"
               style={{ width: 36, height: 36, background: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink-soft)' }}
             >
               🏠
             </button>
-            {title && <h1 className="m-0 text-lg font-bold">{title}</h1>}
+            {title && <h1 className="m-0 truncate text-base font-bold md:text-lg">{title}</h1>}
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 md:gap-2.5">
             {isAdmin && (
               <button
                 onClick={() => router.push('/admin/dashboard')}
-                className="btn-animated rounded-lg border px-4 py-2 text-sm"
+                className="btn-animated rounded-lg border px-3 py-2 text-sm md:px-4"
                 style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
               >
-                🛠️ Admin paneli
+                <span className="md:hidden">🛠️</span>
+                <span className="hidden md:inline">🛠️ Admin paneli</span>
               </button>
             )}
             {actions}

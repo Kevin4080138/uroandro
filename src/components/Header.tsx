@@ -11,13 +11,13 @@ export function Header({
 
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between px-8 py-4"
+      className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8 sm:py-4"
       style={{ background: 'var(--header)', borderBottom: '1px solid var(--line)' }}
     >
-      <h1 className="m-0 text-xl font-bold" style={{ color: 'var(--ink)' }}>
+      <h1 className="m-0 shrink-0 text-lg font-bold sm:text-xl" style={{ color: 'var(--ink)' }}>
         Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
       </h1>
-      <div className="flex items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
         {actions}
         <button
           onClick={toggle}
@@ -30,7 +30,7 @@ export function Header({
         {backHref && (
           <button
             onClick={() => router.push(backHref)}
-            className="btn-animated rounded-lg border px-4 py-2 text-sm"
+            className="btn-animated rounded-lg border px-3 py-2 text-sm sm:px-4"
             style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
           >
             ← {backLabel}
