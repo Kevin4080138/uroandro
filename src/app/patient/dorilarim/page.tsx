@@ -8,6 +8,14 @@ import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi } from '@/lib/doriEs
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 import { HaftalikIntizom } from '@/components/HaftalikIntizom'
 
+const HAFTA_KUNLARI = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
+const OYLAR = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr']
+
+function bugungiSanaMatni() {
+  const d = new Date()
+  return `${HAFTA_KUNLARI[d.getDay()]}, ${d.getDate()}-${OYLAR[d.getMonth()]}`
+}
+
 type Retsept = {
   id: string
   nomi: string
@@ -19,6 +27,7 @@ type Retsept = {
   faol: boolean
   davom_sorovi_yuborilgan: boolean
 }
+type Doza = { retsept: Retsept; vaqt: string; tartibi: number; qabulQilingan: boolean }
 
 export default function DorilarimPage() {
   const router = useRouter()
@@ -27,6 +36,7 @@ export default function DorilarimPage() {
   const [retseptlar, setRetseptlar] = useState<Retsept[]>([])
   const [qabullar, setQabullar] = useState<Record<string, true>>({}) // key: `${retsept_id}_${vaqt_tartibi}`
   const [loading, setLoading] = useState(true)
+  const [belgilanmoqda, setBelgilanmoqda] = useState<string | null>(null)
   const [pushHolati, setPushHolati] = useState<'qollab-bolmaydi' | 'ruxsat-berilmagan' | 'rad-etilgan' | 'yoqilgan' | 'tekshirilmoqda'>('tekshirilmoqda')
   const [pushSaving, setPushSaving] = useState(false)
   const [pushXato, setPushXato] = useState<string | null>(null)
@@ -80,14 +90,32 @@ export default function DorilarimPage() {
   const faolRetseptlar = useMemo(() => retseptlar.filter((r) => faolKunMi(r.boshlanish_sanasi, r.muddat_kun)), [retseptlar])
   const tugaganRetseptlar = useMemo(() => retseptlar.filter((r) => !faolKunMi(r.boshlanish_sanasi, r.muddat_kun)), [retseptlar])
 
-  const belgila = async (retseptId: string, vaqtTartibi: number) => {
+  // Bugungi barcha dozalarni bitta ro'yxatga yig'ib, vaqti bo'yicha tartiblash
+  const bugungiDozalar = useMemo(() => {
+    const royxat: Doza[] = []
+    for (const r of faolRetseptlar) {
+      vaqtJadvali(r.kuniga_marta).forEach((vaqt, vi) => {
+        const tartibi = vi + 1
+        royxat.push({ retsept: r, vaqt, tartibi, qabulQilingan: !!qabullar[`${r.id}_${tartibi}`] })
+      })
+    }
+    royxat.sort((a, b) => a.vaqt.localeCompare(b.vaqt))
+    return royxat
+  }, [faolRetseptlar, qabullar])
+
+  const ichilmagan = bugungiDozalar.filter((d) => !d.qabulQilingan)
+  const ichilgan = bugungiDozalar.filter((d) => d.qabulQilingan)
+
+  const belgila = async (d: Doza) => {
     if (!userId) return
-    const kalit = `${retseptId}_${vaqtTartibi}`
+    const kalit = `${d.retsept.id}_${d.tartibi}`
     if (qabullar[kalit]) return
+    setBelgilanmoqda(kalit)
     setQabullar((q) => ({ ...q, [kalit]: true }))
     await supabase.from('dori_qabullari').insert({
-      retsept_id: retseptId, bemor_user_id: userId, sana: bugun, vaqt_tartibi: vaqtTartibi,
+      retsept_id: d.retsept.id, bemor_user_id: userId, sana: bugun, vaqt_tartibi: d.tartibi,
     })
+    setBelgilanmoqda(null)
   }
 
   const sorovYubor = async (retseptId: string) => {
@@ -95,20 +123,16 @@ export default function DorilarimPage() {
     await supabase.rpc('dori_davom_sorovi', { retsept_id: retseptId })
   }
 
-  const jamiDozalarBugun = faolRetseptlar.reduce((s, r) => s + r.kuniga_marta, 0)
-  const qabulQilinganBugun = faolRetseptlar.reduce((s, r) => {
-    let count = 0
-    for (let v = 1; v <= r.kuniga_marta; v++) if (qabullar[`${r.id}_${v}`]) count++
-    return s + count
-  }, 0)
+  const jamiDozalarBugun = bugungiDozalar.length
+  const qabulQilinganBugun = ichilgan.length
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[700px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>💊 Dorilarim</h2>
-        <p className="rise" style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
-          Shifokoringiz yozgan retseptlar va bugungi qabul eslatmalari.
+        <h2 className="rise" style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 800 }}>💊 Dorilarim</h2>
+        <p className="rise" style={{ margin: '0 0 20px', color: 'var(--accent)', fontSize: '13.5px', fontWeight: 700, animationDelay: '.03s' }}>
+          📅 Bugun — {bugungiSanaMatni()}
         </p>
 
         {pushHolati !== 'tekshirilmoqda' && pushHolati !== 'qollab-bolmaydi' && (
@@ -149,7 +173,7 @@ export default function DorilarimPage() {
 
         {!loading && <HaftalikIntizom />}
 
-        {!loading && faolRetseptlar.length > 0 && (
+        {!loading && jamiDozalarBugun > 0 && (
           <div className="rise" style={{
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
             padding: '16px 20px', marginBottom: '22px', animationDelay: '.08s',
@@ -177,64 +201,111 @@ export default function DorilarimPage() {
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Bugungi reja — ichilmagan va ichilgan deb guruhlangan */}
+            {jamiDozalarBugun > 0 && (
+              <div style={{ marginBottom: '28px' }}>
+                <h3 style={{ fontSize: '13px', color: 'var(--danger)', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  ⏳ Hali ichilmagan ({ichilmagan.length})
+                </h3>
+                {ichilmagan.length === 0 ? (
+                  <p style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 700, margin: '0 0 18px' }}>✅ Bugungi barcha dozalar qabul qilindi!</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+                    {ichilmagan.map((d) => {
+                      const kalit = `${d.retsept.id}_${d.tartibi}`
+                      return (
+                        <div key={kalit} className="rise" style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '12px 16px',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                            <span style={{
+                              fontSize: '13px', fontWeight: 800, color: 'var(--accent)', background: 'var(--accent-soft)',
+                              borderRadius: '8px', padding: '4px 9px', flexShrink: 0,
+                            }}>
+                              {d.vaqt}
+                            </span>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontSize: '14px', fontWeight: 700 }}>{d.retsept.nomi}</div>
+                              {d.retsept.dozasi && <div style={{ fontSize: '12px', color: 'var(--muted)' }}>{d.retsept.dozasi}</div>}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => belgila(d)}
+                            disabled={belgilanmoqda === kalit}
+                            className="soft-press"
+                            style={{
+                              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
+                              padding: '8px 16px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, flexShrink: 0,
+                            }}
+                          >
+                            {belgilanmoqda === kalit ? '...' : '✓ Ichdim'}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {ichilgan.length > 0 && (
+                  <>
+                    <h3 style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      ✅ Ichilgan ({ichilgan.length})
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {ichilgan.map((d) => (
+                        <div key={`${d.retsept.id}_${d.tartibi}`} style={{
+                          display: 'flex', alignItems: 'center', gap: '12px',
+                          background: 'var(--surface-2)', borderRadius: '10px', padding: '9px 14px', opacity: 0.7,
+                        }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', flexShrink: 0 }}>{d.vaqt}</span>
+                          <span style={{ fontSize: '13px', textDecoration: 'line-through' }}>{d.retsept.nomi}</span>
+                          <span style={{ marginLeft: 'auto', color: 'var(--good)', fontWeight: 800, fontSize: '13px' }}>✓</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Dorilar haqida umumiy ma'lumot (faqat ma'lumot, harakat bugungi reja orqali) */}
+            <h3 style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em', marginBottom: '10px' }}>
+              Faol retseptlar
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {faolRetseptlar.map((r, i) => {
-                const vaqtlar = vaqtJadvali(r.kuniga_marta)
                 const qolgan = qolganKunlar(r.boshlanish_sanasi, r.muddat_kun)
                 return (
                   <div key={r.id} className="rise" style={{
                     animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-                    background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '18px 22px',
+                    background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '14px 18px',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{r.nomi}</h3>
-                        {r.dozasi && <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--ink-soft)' }}>{r.dozasi}</p>}
+                        <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 700 }}>{r.nomi}</h4>
+                        {r.dozasi && <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: 'var(--ink-soft)' }}>{r.dozasi}</p>}
                       </div>
                       <span style={{
-                        fontSize: '11px', color: 'var(--accent)', background: 'var(--accent-soft)', borderRadius: '999px',
+                        fontSize: '10.5px', color: 'var(--accent)', background: 'var(--accent-soft)', borderRadius: '999px',
                         padding: '3px 10px', fontWeight: 700, whiteSpace: 'nowrap',
                       }}>
                         {qolgan} kun qoldi
                       </span>
                     </div>
-                    {r.izoh && <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>📝 {r.izoh}</p>}
-                    <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
-                      📅 {r.boshlanish_sanasi} — {tugashSanasi(r.boshlanish_sanasi, r.muddat_kun)}
+                    {r.izoh && <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>📝 {r.izoh}</p>}
+                    <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--muted)' }}>
+                      📅 {r.boshlanish_sanasi} — {tugashSanasi(r.boshlanish_sanasi, r.muddat_kun)} · kuniga {r.kuniga_marta} marta
                     </p>
 
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
-                      {vaqtlar.map((vaqt, vi) => {
-                        const tartibRaqami = vi + 1
-                        const qabulQilingan = !!qabullar[`${r.id}_${tartibRaqami}`]
-                        return (
-                          <button
-                            key={vaqt}
-                            onClick={() => belgila(r.id, tartibRaqami)}
-                            disabled={qabulQilingan}
-                            className="soft-press"
-                            style={{
-                              border: qabulQilingan ? 'none' : '1px solid var(--line)',
-                              background: qabulQilingan ? 'var(--good)' : 'var(--surface-2)',
-                              color: qabulQilingan ? 'white' : 'var(--ink-soft)',
-                              borderRadius: '10px', padding: '8px 14px', fontSize: '13px', fontWeight: 700,
-                              cursor: qabulQilingan ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                            }}
-                          >
-                            {qabulQilingan ? '✓' : '🕒'} {vaqt}
-                          </button>
-                        )
-                      })}
-                    </div>
-
                     {qolgan <= 1 && (
-                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--line)' }}>
+                      <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--line)' }}>
                         {r.davom_sorovi_yuborilgan ? (
                           <span style={{ fontSize: '12px', color: 'var(--good)', fontWeight: 700 }}>✓ Davom ettirish so&apos;rovi yuborildi</span>
                         ) : (
                           <button onClick={() => sorovYubor(r.id)} className="soft-press" style={{
                             background: 'var(--warn)', color: 'white', border: 'none', borderRadius: '999px',
-                            padding: '7px 16px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700,
+                            padding: '6px 14px', cursor: 'pointer', fontSize: '12px', fontWeight: 700,
                           }}>
                             🔄 {qolgan === 0 ? 'Kurs tugadi' : 'Kurs ertaga tugaydi'} — davom ettirishni so&apos;rash
                           </button>
