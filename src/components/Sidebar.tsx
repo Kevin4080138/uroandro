@@ -14,6 +14,7 @@ const NAV = [
   { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
   { href: '/doctor/qollanmalar', icon: '🌐', label: "Qo'llanmalar" },
   { href: '/doctor/bemor-bolimi', icon: '👁️', label: 'Bemor bo\'limi' },
+  { href: '/doctor/talaba-bolimi', icon: '🎓', label: 'Talaba bo\'limi' },
 ]
 
 function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
