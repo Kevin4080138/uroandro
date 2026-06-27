@@ -218,7 +218,21 @@ function VideoBolimi({ linklar }: { linklar: string[] }) {
   )
 }
 
+function fayKengaytmasiniOl(url: string) {
+  const tozaUrl = url.split('?')[0]
+  return tozaUrl.split('.').pop()?.toLowerCase() ?? ''
+}
+
+function ViewerUrlOl(url: string) {
+  const kengaytma = fayKengaytmasiniOl(url)
+  if (kengaytma === 'pdf') return url
+  // PPT/PPTX (va boshqa Office formatlari) — Microsoft Office Online ko'rgazmasi orqali ichkarida ochiladi
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
+}
+
 function YuklabOlishBolimi({ konspektUrl, prezentatsiyaUrl }: { konspektUrl?: string; prezentatsiyaUrl?: string }) {
+  const [ochilgan, setOchilgan] = useState<{ url: string; nom: string } | null>(null)
+
   const fayllar = [
     konspektUrl && { url: konspektUrl, nom: 'Konspekt (PDF)', icon: '📄' },
     prezentatsiyaUrl && { url: prezentatsiyaUrl, nom: 'Prezentatsiya', icon: '📊' },
@@ -227,22 +241,51 @@ function YuklabOlishBolimi({ konspektUrl, prezentatsiyaUrl }: { konspektUrl?: st
   if (fayllar.length === 0) {
     return <BoshUlash matn="Yuklab olinadigan materiallar tez orada qo'shiladi." />
   }
+
+  if (ochilgan) {
+    return (
+      <div className="rise">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <button onClick={() => setOchilgan(null)} className="soft-press" style={{
+            background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
+            padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+          }}>
+            ← Ortga
+          </button>
+          <a href={ochilgan.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>
+            Yangi oynada ochish ↗
+          </a>
+        </div>
+        <iframe
+          src={ViewerUrlOl(ochilgan.url)}
+          title={ochilgan.nom}
+          style={{ width: '100%', height: '75vh', border: '1px solid var(--line)', borderRadius: '14px', background: 'white' }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {fayllar.map((f, i) => (
-        <a key={f.url} href={f.url} target="_blank" rel="noopener noreferrer" className="rise lift" style={{
-          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-          display: 'flex', alignItems: 'center', gap: '14px',
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-          padding: '16px 20px', textDecoration: 'none', color: 'var(--ink)',
-        }}>
+        <button
+          key={f.url}
+          onClick={() => setOchilgan(f)}
+          className="rise lift"
+          style={{
+            animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+            display: 'flex', alignItems: 'center', gap: '14px', width: '100%',
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+            padding: '16px 20px', color: 'var(--ink)', cursor: 'pointer', textAlign: 'left',
+          }}
+        >
           <span style={{
             width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
           }}>{f.icon}</span>
           <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{f.nom}</span>
-          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Yuklab olish ↓</span>
-        </a>
+          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Ochish →</span>
+        </button>
       ))}
     </div>
   )
