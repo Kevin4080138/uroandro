@@ -49,7 +49,7 @@ export const DARSLAR: Dars[] = [
     slug: 'bph-luts',
     sarlavha: "Benign prostata giperplaziyasi (BPH) va pastki siydik yo'llari simptomlari",
     kategoriya: 'Prostata',
-    bosqich: "o'rta",
+    bosqich: 'qiyin',
     qisqa: "BPH nima, qanday simptomlar beradi, qanday tashxislanadi va bosqichma-bosqich qanday davolanadi.",
     daqiqa: 9,
     bolimlar: [
@@ -125,7 +125,7 @@ export const DARSLAR: Dars[] = [
     slug: 'prostatit-cpps',
     sarlavha: "Surunkali prostatit va kichik chanoq og'rig'i sindromi (CP/CPPS)",
     kategoriya: 'Prostata',
-    bosqich: "o'rta",
+    bosqich: 'qiyin',
     qisqa: "Prostatit turlari, NIH klassifikatsiyasi, tashxis va davolash yondashuvi.",
     daqiqa: 7,
     bolimlar: [
@@ -275,7 +275,7 @@ export const DARSLAR: Dars[] = [
     slug: 'erektil-disfunksiya',
     sarlavha: 'Erektil disfunksiya: sabablari, baholash va davolash',
     kategoriya: 'Andrologiya',
-    bosqich: "o'rta",
+    bosqich: 'qiyin',
     qisqa: "Erektsiya fiziologiyasi, ED sabablari klassifikatsiyasi va bosqichma-bosqich davolash algoritmi.",
     daqiqa: 7,
     bolimlar: [
@@ -1321,7 +1321,156 @@ export const DARSLAR: Dars[] = [
       },
     ],
   },
+
+  // ============================================================
+  // 🟡 MEDIUM (2-bosqich) — Kengaytirilgan urologiya
+  // (skelet — mazmuni keyinroq to'ldiriladi)
+  // ============================================================
+
+  // I. Kirish va diagnostika
+  m('urologik-anamnez-fizik-tekshiruv', "Urologik anamnez yig'ish va fizik tekshiruv tartibi", 'Kirish va diagnostika'),
+  m('siydik-ushlanish-kolika-anuriya-farqlari', "Sindromlar: o'tkir/surunkali siydik ushlanishi, buyrak kolikasi, anuriya — farqlari", 'Kirish va diagnostika'),
+  m('siydik-tahlili-posev-biomarkerlar', 'Siydik tahlili, posev va biokimyoviy markerlar (PSA, kreatinin, GFR)', 'Kirish va diagnostika'),
+  m('tasvirlash-usullarini-tanlash', 'Tasvirlash usullarini tanlash: UTT, KT, MRT, radioizotop tekshiruvlar', 'Kirish va diagnostika'),
+  m('gematuriyani-baholash-algoritmi', 'Gematuriyani baholash algoritmi (mikro- va makrogematuriya)', 'Kirish va diagnostika'),
+
+  // II. Anatomiya va fiziologiya
+  m('buyrak-fiziologiyasi-qon-aylanishi', 'Buyrak fiziologiyasi: qon aylanishi, filtratsiya, gormonal funksiya', 'Anatomiya va fiziologiya'),
+  m('qovuq-uretra-urodinamikasi', "Siydik pufagi va uretra urodinamikasi (saqlash-bo'shatish sikli)", 'Anatomiya va fiziologiya'),
+  m('prostata-urug-moyak-fiziologiyasi', "Prostata, urug' pufakchasi va moyak fiziologiyasi", 'Anatomiya va fiziologiya'),
+  m('ayol-kichik-chanoq-anatomiyasi', "Ayol kichik chanog'i anatomiyasi (urologik nuqtai nazardan)", 'Anatomiya va fiziologiya'),
+  m('siydik-tanosil-embriologiyasi', 'Siydik-tanosil tizimi embriologiyasi (asosiy bosqichlar)', 'Anatomiya va fiziologiya'),
+  m('tugma-anomaliyalar-tasniflash', "Tug'ma rivojlanish anomaliyalari: tasniflash va klinik ahamiyat", 'Anatomiya va fiziologiya'),
+
+  // III. Yallig'lanish va infeksion kasalliklar
+  m('sistit-asoratlanmagan-asoratlangan', "Asoratlanmagan va asoratlangan sistit — farqlash va davolash", "Yallig'lanish va infeksion kasalliklar"),
+  m('pielonefrit-asoratlanmagan-asoratlangan', "Asoratlanmagan va asoratlangan pielonefrit — farqlash va davolash", "Yallig'lanish va infeksion kasalliklar"),
+  m('gonokokkli-uretrit-protokol', 'Gonokokkli uretrit — tashxis va davolash protokoli', "Yallig'lanish va infeksion kasalliklar"),
+  m('nogonokokkli-noinfeksion-uretritlar', 'Nogonokokkli va noinfeksion uretritlar', "Yallig'lanish va infeksion kasalliklar"),
+  m('surunkali-prostatit-nih-tasnifi', 'Surunkali prostatit va prostatit sindromlari (NIH tasnifi)', "Yallig'lanish va infeksion kasalliklar"),
+  m('interstitsial-sistit-ogriq-sindromi', "Interstitsial sistit / siydik pufagi og'riq sindromi", "Yallig'lanish va infeksion kasalliklar"),
+  m('urogenital-tuberkulez', 'Urogenital tuberkulez — asosiy klinik belgilar', "Yallig'lanish va infeksion kasalliklar"),
+
+  // IV. Buyrak va siydik yo'llari kasalliklari
+  m('siydik-tosh-etiologiya-metabolik', "Siydik tosh kasalligi — etiologiya, metabolik tekshiruv, konservativ davolash", "Buyrak va siydik yo'llari kasalliklari"),
+  m('siydik-tosh-zamonaviy-davolash', 'Siydik tosh kasalligi — zamonaviy davolash usullari (ESWL, URS, PNL)', "Buyrak va siydik yo'llari kasalliklari"),
+  m('gidronefrotik-transformatsiya', 'Gidronefrotik transformatsiya — bosqichlari va sabablari', "Buyrak va siydik yo'llari kasalliklari"),
+  m('nefroptoz-klinikasi', 'Nefroptoz — klinikasi va davolash yondashuvlari', "Buyrak va siydik yo'llari kasalliklari"),
+  m('sistoureteral-reflyuks-tasniflash', 'Sistoureteral reflyuks — tasniflash va davolash', "Buyrak va siydik yo'llari kasalliklari"),
+  m('siydik-tutolmaslik-diagnostika-prinsiplari', 'Siydik tutolmaslik turlari — stress, urgent, aralash — diagnostika prinsiplari', "Buyrak va siydik yo'llari kasalliklari"),
+  m('nefrogen-arterial-gipertenziya', 'Nefrogen arterial gipertenziya — asosiy mexanizm', "Buyrak va siydik yo'llari kasalliklari"),
+
+  // V. Prostata va erkak jinsiy a'zolari
+  m('bph-diagnostika-nostatsionar-davolash', 'Prostata adenomasi (BPH) — diagnostika va nostatsionar davolash', "Prostata va erkak jinsiy a'zolari"),
+  m('asoratlanmagan-prostatit-davolash', 'Asoratlanmagan prostatit — davolash prinsiplari', "Prostata va erkak jinsiy a'zolari"),
+  m('fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari va sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari"),
+  m('kriptorxizm-operativ-davolash', 'Kriptorxizm — operativ davolash muddatlari va usullari', "Prostata va erkak jinsiy a'zolari"),
+  m('varikotsele-klinik-bosqichlari', "Varikotsele — klinik bosqichlari va davolash ko'rsatmalari", "Prostata va erkak jinsiy a'zolari"),
+  m('gidrotsele-spermatotsele-differensial', 'Gidrotsele, spermatotsele — differensial tashxis', "Prostata va erkak jinsiy a'zolari"),
+  m('otkir-orxoepididimit-diagnostika', "O'tkir orxoepididimit — diagnostika va davolash", "Prostata va erkak jinsiy a'zolari"),
+
+  // VI. Shoshilinch urologiya
+  m('otkir-siydik-ushlanishi-birinchi-yordam', "O'tkir siydik ushlanishi — sabablari va birinchi yordam", 'Shoshilinch urologiya'),
+  m('moyak-burilishi-shoshilinch-jarrohlik', "O'tkir moyak burilishi — diagnostika va shoshilinch jarrohlik zarurati", 'Shoshilinch urologiya'),
+  m('siydik-tanosil-shikastlanishlari', 'Siydik-tanosil tizimi shikastlanishlari — umumiy tasniflash', 'Shoshilinch urologiya'),
+
+  // VII. Reproduktiv va seksual salomatlik
+  m('erkaklar-erektil-disfunksiyasi-m', 'Erkaklar erektil disfunksiyasi — sabablari va birinchi qator davolash', 'Reproduktiv va seksual salomatlik'),
+  m('erkaklar-bepushtligi-tekshiruv', 'Erkaklar bepushtligi — asosiy tekshiruv yo\'nalishlari (spermogramma)', 'Reproduktiv va seksual salomatlik'),
+
+  // ============================================================
+  // 🔴 HARD (3-bosqich) — Campbell-Walsh asosida to'liq kurs
+  // (skelet — mazmuni keyinroq qism-qism to'ldiriladi)
+  // ============================================================
+
+  // I BOB. Kirish va asoslar
+  h('h-urologiyaga-kirish', 'Urologiyaga kirish — fanning predmeti va vazifalari', 'Kirish va asoslar'),
+  h('h-semiotika-sindromlar-simptomlar', 'Urologik kasalliklarning semiotikasi, sindromlar va simptomlar', 'Kirish va asoslar'),
+  h('h-laborator-tekshirish-usullari', 'Laborator tekshirish usullari', 'Kirish va asoslar'),
+  h('h-instrumental-tekshiruv-usullari', 'Zamonaviy instrumental tekshiruv usullari (UTT, rentgen, KT, MRT, radioizotop, endoskopiya)', 'Kirish va asoslar'),
+  h('h-gematuriyani-baholash', 'Gematuriyani baholash', 'Kirish va asoslar'),
+
+  // II BOB. Anatomiya, fiziologiya va embriologiya
+  h('h-buyrak-anatomiya-fiziologiya', 'Buyrak normal anatomiyasi va fiziologiyasi', 'Anatomiya, fiziologiya va embriologiya'),
+  h('h-ureter-qovuq-uretra-anatomiya', "Siydik nayi (ureter), siydik pufagi va tashqi siydik chiqaruv nayi (uretra) anatomiyasi va fiziologiyasi", 'Anatomiya, fiziologiya va embriologiya'),
+  h('h-erkak-jinsiy-azolari-tuzilishi', "Erkak tashqi va ichki jinsiy a'zolari tuzilishi (prostata, urug' pufakchasi, moyak, qovuq teri)", 'Anatomiya, fiziologiya va embriologiya'),
+  h('h-ayol-kichik-chanoq-anatomiyasi', "Ayol tashqi va ichki jinsiy a'zolari tuzilishi (kichik chanoq anatomiyasi)", 'Anatomiya, fiziologiya va embriologiya'),
+  h('h-siydik-tanosil-embriologiyasi', "Siydik-tanosil a'zolari embriologiyasi", 'Anatomiya, fiziologiya va embriologiya'),
+  h('h-tugma-rivojlanish-anomaliyalari', "A'zolarning tug'ma rivojlanish anomaliyalari (renal, ureteral, genital)", 'Anatomiya, fiziologiya va embriologiya'),
+
+  // III BOB. Yallig'lanish va infeksion kasalliklar
+  h('h-pielonefrit-asoratlanmagan-asoratlangan', 'Asoratlanmagan va asoratlangan pielonefrit', "Yallig'lanish va infeksion kasalliklar"),
+  h('h-sistit-asoratlanmagan-asoratlangan', 'Asoratlanmagan va asoratlangan sistit', "Yallig'lanish va infeksion kasalliklar"),
+  h('h-gonokokkli-uretrit-gonoreya', 'Gonokokkli uretrit — gonoreya, tashxis va davolash', "Yallig'lanish va infeksion kasalliklar"),
+  h('h-nogonokokkli-noinfeksion-uretritlar', 'Nogonokokkli va noinfeksion uretritlar', "Yallig'lanish va infeksion kasalliklar"),
+  h('h-spesifik-nospesifik-yallirlanish-tuberkulez', "Siydik-tanosil a'zolarining boshqa spesifik (jinsiy yo'l bilan yuqadigan) va nospesifik yallig'lanish kasalliklari — jumladan urogenital tuberkulez va parazitar infeksiyalar", "Yallig'lanish va infeksion kasalliklar"),
+
+  // IV BOB. Buyrak va siydik yo'llari kasalliklari
+  h('h-siydik-tosh-kasalligi-toliq', 'Siydik tosh kasalligi — etiologiya, patogenez, klinika, davolash', "Buyrak va siydik yo'llari kasalliklari"),
+  h('h-gidronefrotik-transformatsiya', 'Gidronefrotik transformatsiya (yuqori siydik yo\'llari obstruksiyasi)', "Buyrak va siydik yo'llari kasalliklari"),
+  h('h-nefroptoz', 'Nefroptoz', "Buyrak va siydik yo'llari kasalliklari"),
+  h('h-sistoureteral-reflyuks-kasalligi', 'Sistoureteral reflyuks kasalligi', "Buyrak va siydik yo'llari kasalliklari"),
+  h('h-siydik-tutolmaslik-prinsiplari', 'Siydik tutolmaslik turlari, diagnostikasi va davolash prinsiplari', "Buyrak va siydik yo'llari kasalliklari"),
+  h('h-nefrogen-arterial-gipertenziya', 'Nefrogen arterial gipertenziya', "Buyrak va siydik yo'llari kasalliklari"),
+
+  // V BOB. Prostata va erkak jinsiy a'zolari kasalliklari
+  h('h-bph-adenoma-toliq', 'Prostata bezining xavfsiz giperplaziyasi (adenoma) — etiologiya, klinika, davolash', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-asoratlanmagan-prostatit', 'Asoratlanmagan prostatit', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-surunkali-prostatit-asoratlari', 'Surunkali prostatit va uning asoratlari', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari, davolash usullari, sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-kriptorxizm-operativ-davolash', 'Kriptorxizm va uning operativ davolash', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-varikotsele-kasalligi', 'Varikotsele kasalligi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-gidrotsele-spermatotsele', 'Gidrotsele, spermatotsele', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-otkir-yorgoq-sindromi', "O'tkir yorg'oq sindromi — o'tkir orxoepididimit, diagnostika, davolash va asoratlari (o'tkir moyak burilishi bilan differensial tashxis)", "Prostata va erkak jinsiy a'zolari kasalliklari"),
+
+  // VI BOB. Onkourologiya
+  h('h-qovuq-osmalari', "Siydik pufagi o'smalari (yallig'lanmagan va invaziv shakllari)", 'Onkourologiya'),
+  h('h-yuqori-siydik-yollari-uroteliy-osmalari', "Yuqori siydik yo'llari uroteliy o'smalari", 'Onkourologiya'),
+  h('h-buyrak-hujayrali-rak', "Buyrak hujayrali rak (benign va malign o'smalar)", 'Onkourologiya'),
+  h('h-adrenal-kasalliklar-osmalari', 'Buyrak usti bezi (adrenal) kasalliklari va o\'smalari', 'Onkourologiya'),
+  h('h-prostata-raki-diagnostika', 'Prostata raki — epidemiologiya, diagnostika, stadiyalash', 'Onkourologiya'),
+  h('h-prostata-raki-davolash', 'Prostata raki davolash strategiyalari (operatsiya, nurli terapiya, faol kuzatuv)', 'Onkourologiya'),
+  h('h-moyak-osmalari', "Moyak o'smalari", 'Onkourologiya'),
+  h('h-penis-uretra-osmalari', "Penis va uretra o'smalari", 'Onkourologiya'),
+
+  // VII BOB. Shoshilinch urologiya (o'tkir holatlar)
+  h('h-otkir-siydik-ushlanishi', "O'tkir siydik ushlanishi", "Shoshilinch urologiya (o'tkir holatlar)"),
+  h('h-otkir-moyak-burilishi-differensial', "O'tkir moyak burilishi (torsiya) — o'tkir yorg'oq sindromidan differensiatsiya", "Shoshilinch urologiya (o'tkir holatlar)"),
+  h('h-siydik-tanosil-shikastlanishlari-travma', "Siydik-tanosil tizimi shikastlanishlari (buyrak, siydik pufagi, uretra, jinsiy a'zolar travmasi)", "Shoshilinch urologiya (o'tkir holatlar)"),
+  h('h-otkir-pielonefrit-urosepsis', "O'tkir pielonefrit/urosepsis", "Shoshilinch urologiya (o'tkir holatlar)"),
+  h('h-parafimoz-priapizm-shoshilinch', 'Parafimoz, priapizm — shoshilinch holatlar', "Shoshilinch urologiya (o'tkir holatlar)"),
+
+  // VIII BOB. Reproduktiv va seksual salomatlik
+  h('h-erkaklar-erektil-disfunksiyasi-toliq', 'Erkaklar erektil disfunksiyasi — fiziologiya, patofiziologiya, diagnostika, davolash', 'Reproduktiv va seksual salomatlik'),
+  h('h-priapizm', 'Priapizm', 'Reproduktiv va seksual salomatlik'),
+  h('h-erkaklar-bepushtligi-art', 'Erkaklar bepushtligi va yordamchi reproduktiv texnologiyalar', 'Reproduktiv va seksual salomatlik'),
+  h('h-peyroni-kasalligi', 'Peyroni kasalligi', 'Reproduktiv va seksual salomatlik'),
+  h('h-orgazm-ejakulatsiya-buzilishlari', 'Erkaklar orgazm va ejakulatsiya buzilishlari', 'Reproduktiv va seksual salomatlik'),
+  h('h-androgen-yetishmovchiligi', 'Androgen yetishmovchiligi va erkaklar salomatligi (testosteron, metabolik sindrom)', 'Reproduktiv va seksual salomatlik'),
 ]
+
+// Skelet darslar uchun yordamchilar — mazmuni keyinroq qism-qism to'ldiriladi.
+function skelet(slug: string, sarlavha: string, kategoriya: string, bosqich: Bosqich): Dars {
+  return {
+    slug,
+    sarlavha,
+    kategoriya,
+    bosqich,
+    qisqa: "Mazmuni tez orada to'ldiriladi.",
+    daqiqa: 5,
+    bolimlar: [{ sarlavha: 'Tez orada', matn: ["Bu dars mazmuni hozircha tayyorlanmoqda."] }],
+    manbalar: [],
+    test: [],
+  }
+}
+
+function m(slug: string, sarlavha: string, kategoriya: string): Dars {
+  return skelet(slug, sarlavha, kategoriya, "o'rta")
+}
+
+function h(slug: string, sarlavha: string, kategoriya: string): Dars {
+  return skelet(slug, sarlavha, kategoriya, 'qiyin')
+}
 
 export function darsTop(slug: string) {
   return DARSLAR.find((d) => d.slug === slug)
