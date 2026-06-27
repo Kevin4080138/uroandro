@@ -36,8 +36,7 @@ export default function AdminDarslarPage() {
 
   const royxat = useMemo(() => {
     const q = qidiruv.trim().toLowerCase()
-    const filtrlangan = q ? DARSLAR.filter((d) => d.sarlavha.toLowerCase().includes(q)) : DARSLAR
-    return filtrlangan.slice(0, 50)
+    return q ? DARSLAR.filter((d) => d.sarlavha.toLowerCase().includes(q)) : DARSLAR
   }, [qidiruv])
 
   const tanla = async (slug: string) => {
