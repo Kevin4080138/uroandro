@@ -8,18 +8,63 @@ import { darsTop, shuffleVaTanla, type TestSavoli, type UsmleSavoli } from '@/li
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat'
 
+// `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
+// o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
+type DarsTarkibi = {
+  nazariya_html: string | null
+  video_linklar: string[] | null
+  konspekt_url: string | null
+  prezentatsiya_url: string | null
+  savollar_banki: TestSavoli[] | null
+  usmle_savollar: UsmleSavoli[] | null
+  nazorat_savollar: TestSavoli[] | null
+  nazorat_savol_soni: number | null
+  nazorat_vaqt_daqiqa: number | null
+  sertifikat_otish_foizi: number | null
+}
+
+function useDarsTarkibi(slug: string) {
+  const supabase = createClient()
+  const [tarkib, setTarkib] = useState<DarsTarkibi | null>(null)
+  const [yuklandi, setYuklandi] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('dars_tarkibi')
+      .select('*')
+      .eq('dars_slug', slug)
+      .maybeSingle()
+      .then(({ data }) => {
+        // Jadval hali yaratilmagan/qator topilmagan bo'lsa ham sahifa buzilmasin — tarkibsiz qoladi.
+        setTarkib((data as DarsTarkibi) ?? null)
+        setYuklandi(true)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug])
+
+  return { tarkib, yuklandi }
+}
+
 export default function DarsDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const dars = darsTop(slug)
+  const { tarkib, yuklandi } = useDarsTarkibi(slug)
 
-  const amaliyBank = dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
-  const usmleBank = dars?.usmleSavollar ?? []
-  const nazoratBank = dars?.nazoratSavollar ?? []
+  const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
+  const videoLinklar = tarkib?.video_linklar ?? dars?.videoLinklar ?? []
+  const konspektUrl = tarkib?.konspekt_url ?? dars?.konspektUrl
+  const prezentatsiyaUrl = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
+  const amaliyBank = tarkib?.savollar_banki?.length ? tarkib.savollar_banki : dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
+  const usmleBank = tarkib?.usmle_savollar ?? dars?.usmleSavollar ?? []
+  const nazoratBank = tarkib?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
+  const nazoratSavolSoni = tarkib?.nazorat_savol_soni ?? dars?.nazoratSavolSoni ?? 20
+  const nazoratVaqtDaqiqa = tarkib?.nazorat_vaqt_daqiqa ?? dars?.nazoratVaqtDaqiqa ?? 15
+  const sertifikatOtishFoizi = tarkib?.sertifikat_otish_foizi ?? dars?.sertifikatOtishFoizi ?? 70
 
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
-    video: !!dars?.videoLinklar?.length,
-    yuklab: !!(dars?.konspektUrl || dars?.prezentatsiyaUrl),
+    video: videoLinklar.length > 0,
+    yuklab: !!(konspektUrl || prezentatsiyaUrl),
     amaliy: amaliyBank.length > 0,
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
@@ -78,9 +123,10 @@ export default function DarsDetailPage() {
           ))}
         </div>
 
-        {tab === 'nazariya' && <NazariyaBolimi dars={dars} />}
-        {tab === 'video' && <VideoBolimi linklar={dars.videoLinklar ?? []} />}
-        {tab === 'yuklab' && <YuklabOlishBolimi konspektUrl={dars.konspektUrl} prezentatsiyaUrl={dars.prezentatsiyaUrl} />}
+        {tab === 'nazariya' && !yuklandi && <BoshUlash matn="Yuklanmoqda..." />}
+        {tab === 'nazariya' && yuklandi && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
+        {tab === 'video' && <VideoBolimi linklar={videoLinklar} />}
+        {tab === 'yuklab' && <YuklabOlishBolimi konspektUrl={konspektUrl} prezentatsiyaUrl={prezentatsiyaUrl} />}
         {tab === 'amaliy' && (
           <AmaliyTestBolimi
             darsSlug={dars.slug}
@@ -100,9 +146,9 @@ export default function DarsDetailPage() {
             darsSlug={dars.slug}
             darsNomi={dars.sarlavha}
             bank={nazoratBank}
-            savolSoni={dars.nazoratSavolSoni ?? 20}
-            vaqtDaqiqa={dars.nazoratVaqtDaqiqa ?? 15}
-            otishFoizi={dars.sertifikatOtishFoizi ?? 70}
+            savolSoni={nazoratSavolSoni}
+            vaqtDaqiqa={nazoratVaqtDaqiqa}
+            otishFoizi={sertifikatOtishFoizi}
           />
         )}
       </div>
@@ -110,9 +156,9 @@ export default function DarsDetailPage() {
   )
 }
 
-function NazariyaBolimi({ dars }: { dars: NonNullable<ReturnType<typeof darsTop>> }) {
-  if (dars.nazariyaHtml) {
-    return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: dars.nazariyaHtml }} />
+function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<typeof darsTop>>; nazariyaHtml?: string | null }) {
+  if (nazariyaHtml) {
+    return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: nazariyaHtml }} />
   }
 
   return (
