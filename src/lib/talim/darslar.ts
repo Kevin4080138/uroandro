@@ -10,10 +10,13 @@ export type DarsBolimi = {
   matn: string[] // har bir elementi alohida paragraf
 }
 
+export type Bosqich = 'oson' | "o'rta" | 'qiyin'
+
 export type Dars = {
   slug: string
   sarlavha: string
   kategoriya: string
+  bosqich: Bosqich
   qisqa: string
   daqiqa: number
   bolimlar: DarsBolimi[]
@@ -21,13 +24,32 @@ export type Dars = {
   test: TestSavoli[]
 }
 
-export const DARS_KATEGORIYALARI = ['Hammasi', 'Prostata', 'Andrologiya', 'Urolitiaz', 'Onkourologiya'] as const
+export const BOSQICHLAR: { id: Bosqich; nom: string; emoji: string; tavsif: string }[] = [
+  { id: 'oson', nom: 'EASY — Asoslar', emoji: '🟢', tavsif: "Umumiy urologiya asoslari" },
+  { id: "o'rta", nom: "O'RTA — Klinik chuqurlik", emoji: '🟡', tavsif: 'Aniq kasalliklar bo\'yicha chuqur klinik bilim' },
+  { id: 'qiyin', nom: 'QIYIN — Murakkab holatlar', emoji: '🔴', tavsif: "Murakkab va kam uchraydigan holatlar" },
+]
+
+export const DARS_KATEGORIYALARI = [
+  'Hammasi',
+  'Kirish va semiotika',
+  'Anatomiya va fiziologiya',
+  "Yallig'lanish kasalliklari",
+  "Buyrak va siydik yo'llari",
+  "Prostata va erkak jinsiy a'zolari",
+  'Shoshilinch holatlar',
+  'Prostata',
+  'Andrologiya',
+  'Urolitiaz',
+  'Onkourologiya',
+] as const
 
 export const DARSLAR: Dars[] = [
   {
     slug: 'bph-luts',
     sarlavha: "Benign prostata giperplaziyasi (BPH) va pastki siydik yo'llari simptomlari",
     kategoriya: 'Prostata',
+    bosqich: "o'rta",
     qisqa: "BPH nima, qanday simptomlar beradi, qanday tashxislanadi va bosqichma-bosqich qanday davolanadi.",
     daqiqa: 9,
     bolimlar: [
@@ -103,6 +125,7 @@ export const DARSLAR: Dars[] = [
     slug: 'prostatit-cpps',
     sarlavha: "Surunkali prostatit va kichik chanoq og'rig'i sindromi (CP/CPPS)",
     kategoriya: 'Prostata',
+    bosqich: "o'rta",
     qisqa: "Prostatit turlari, NIH klassifikatsiyasi, tashxis va davolash yondashuvi.",
     daqiqa: 7,
     bolimlar: [
@@ -177,6 +200,7 @@ export const DARSLAR: Dars[] = [
     slug: 'varikotsele-infertility',
     sarlavha: 'Varikotsele va erkak bepushtligi',
     kategoriya: 'Andrologiya',
+    bosqich: 'qiyin',
     qisqa: "Varikotsele patofiziologiyasi, darajalash, spermogrammaga ta'siri va jarrohlik usullari.",
     daqiqa: 8,
     bolimlar: [
@@ -251,6 +275,7 @@ export const DARSLAR: Dars[] = [
     slug: 'erektil-disfunksiya',
     sarlavha: 'Erektil disfunksiya: sabablari, baholash va davolash',
     kategoriya: 'Andrologiya',
+    bosqich: "o'rta",
     qisqa: "Erektsiya fiziologiyasi, ED sabablari klassifikatsiyasi va bosqichma-bosqich davolash algoritmi.",
     daqiqa: 7,
     bolimlar: [
@@ -328,6 +353,7 @@ export const DARSLAR: Dars[] = [
     slug: 'urolitiaz',
     sarlavha: "Siydik yo'li toshlari (urolitiaz): patogenez, tashxis va davolash",
     kategoriya: 'Urolitiaz',
+    bosqich: 'qiyin',
     qisqa: "Tosh turlari, klinik ko'rinish, STONE skori va zamonaviy davolash usullari (ESWL, URS, PCNL).",
     daqiqa: 8,
     bolimlar: [
@@ -404,6 +430,7 @@ export const DARSLAR: Dars[] = [
     slug: 'prostata-saraton-asoslari',
     sarlavha: 'Prostata saratoni: erta aniqlash va asosiy davolash strategiyasi',
     kategoriya: 'Onkourologiya',
+    bosqich: 'qiyin',
     qisqa: "PSA skrining, biopsiya ko'rsatmalari, Gleason tasnifi va xavf guruhlariga asoslangan davolash.",
     daqiqa: 8,
     bolimlar: [
@@ -471,6 +498,826 @@ export const DARSLAR: Dars[] = [
         variantlar: ['Faqat vitaminlar', "Uzoq muddatli androgen deprivatsiya terapiyasi (ADT)", "Faqat fizioterapiya", 'Hech narsa qo\'shilmaydi'],
         togri: 1,
         izoh: "Yuqori xavfli holatlarda nurli terapiya bilan birga uzoq muddatli ADT qo'llanilishi natijalarni sezilarli yaxshilaydi.",
+      },
+    ],
+  },
+
+  // ============================================================
+  // 🟢 EASY (1-bosqich) — Umumiy urologiya asoslari
+  // ============================================================
+
+  // I. Kirish va semiotika
+  {
+    slug: 'urologiya-predmeti',
+    sarlavha: 'Urologiyaning predmeti va asosiy tushunchalari',
+    kategoriya: 'Kirish va semiotika',
+    bosqich: 'oson',
+    qisqa: "Urologiya nimani o'rganadi va uning ichki yo'nalishlari haqida umumiy tushuncha.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Urologiya nima?',
+        matn: [
+          "Urologiya — buyrak, siydik yo'llari (siydik naychalari, siydik pufagi, uretra) kasalliklarini, shuningdek erkaklarda qo'shimcha ravishda jinsiy-tanosil a'zolari (prostata, moyak, urug' yo'llari) kasalliklarini o'rganadigan va davolaydigan tibbiyot sohasi. Ayollarda urolog faqat siydik chiqarish tizimi bilan shug'ullanadi, erkaklarda esa jinsiy-tanosil tizimi ham uning vakolat doirasiga kiradi.",
+          "Urologiya ichida bir necha tor yo'nalish mavjud: andrologiya (erkak reproduktiv salomatligi), onkourologiya (siydik-tanosil a'zolari saratoni), pediatrik urologiya (bolalar), funksional urologiya (siydik tutolmaslik va qovuq faoliyati buzilishi) va endourologiya (kam invaziv, endoskopik usullar).",
+        ],
+      },
+    ],
+    manbalar: ['Campbell-Walsh Urology, 12th ed. — Kirish bobi', 'EAU Guidelines — Umumiy kirish'],
+    test: [
+      {
+        savol: "Urologiya asosan qaysi tizim kasalliklarini o'rganadi?",
+        variantlar: ['Yurak-qon tomir tizimi', 'Siydik-tanosil tizimi', 'Nafas olish tizimi', 'Ovqat hazm qilish tizimi'],
+        togri: 1,
+        izoh: "Urologiya siydik chiqarish tizimi (buyrak, siydik yo'llari) va erkaklarda qo'shimcha ravishda jinsiy-tanosil a'zolari bilan shug'ullanadi.",
+      },
+      {
+        savol: "Andrologiya urologiyaning qaysi yo'nalishi hisoblanadi?",
+        variantlar: ['Bolalar urologiyasi', 'Erkak reproduktiv salomatligi', 'Saraton kasalliklari', 'Siydik tutolmaslik'],
+        togri: 1,
+        izoh: "Andrologiya — erkak reproduktiv va jinsiy salomatligini o'rganadigan urologiyaning tor yo'nalishi.",
+      },
+      {
+        savol: 'Ayollarda urolog asosan nima bilan shug\'ullanadi?',
+        variantlar: ['Faqat siydik chiqarish tizimi bilan', "Jinsiy a'zolar bilan ham", 'Faqat buyrak bilan', 'Hech narsa bilan'],
+        togri: 0,
+        izoh: "Ayollarda urologiyaning vakolat doirasi faqat siydik chiqarish tizimi (buyrak, siydik yo'llari, qovuq) bilan chegaralanadi.",
+      },
+    ],
+  },
+  {
+    slug: 'urologik-simptomlar',
+    sarlavha: 'Asosiy urologik simptomlar: dizuriya, gematuriya, og\'riq, siydik ushlanishi',
+    kategoriya: 'Kirish va semiotika',
+    bosqich: 'oson',
+    qisqa: "Urologiyada eng ko'p uchraydigan to'rt asosiy shikoyat turi va ularning ma'nosi.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy simptomlar',
+        matn: [
+          "Dizuriya — siyish vaqtidagi og'riq yoki noxush yonish hissi, ko'pincha siydik yo'li infeksiyasi (sistit, uretrit) belgisi. Gematuriya — siydikda qon bo'lishi: ko'z bilan ko'rinadigan (makrogematuriya) yoki faqat laborator tahlilda aniqlanadigan (mikrogematuriya) bo'lishi mumkin va sababi har doim aniqlanishi shart, chunki bu o'sma belgisi ham bo'lishi mumkin.",
+          "Urologik og'riq odatda bel/yon qorin sohasida (buyrak/siydik yo'li toshlari), kichik chanoqda (prostata, qovuq) yoki moyakda joylashadi. Siydik ushlanishi — qovuqda to'plangan siydikni mustaqil chiqara olmaslik holati; o'tkir (to'satdan boshlanadi, juda og'riqli, shoshilinch yordam talab qiladi) va surunkali (asta-sekin rivojlanadi, qovuq doimo to'lib turadi) turlarga bo'linadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines — Urologik simptomlarni baholash', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Gematuriya nima?',
+        variantlar: ['Siyishda og\'riq', 'Siydikda qon bo\'lishi', 'Siydik hajmining ko\'payishi', 'Siydik rangining sariq bo\'lishi'],
+        togri: 1,
+        izoh: "Gematuriya — siydikda qizil qon hujayralari (eritrotsitlar) borligini bildiradi.",
+      },
+      {
+        savol: 'Makro- va mikrogematuriya orasidagi farq nimada?',
+        variantlar: ["Makro — ko'z bilan ko'rinadi, mikro — faqat tahlilda aniqlanadi", "Ular orasida farq yo'q", 'Mikrogematuriya har doim xavfliroq', 'Makrogematuriya faqat erkaklarda uchraydi'],
+        togri: 0,
+        izoh: "Makrogematuriya ko'z bilan ko'rinadigan qonli siydikni, mikrogematuriya esa faqat mikroskopik tahlilda aniqlanadigan eritrotsitlarni bildiradi.",
+      },
+      {
+        savol: "O'tkir siydik ushlanishi qanday holat?",
+        variantlar: ['Asta-sekin rivojlanadi va og\'riqsiz kechadi', "To'satdan boshlanadi, juda og'riqli va shoshilinch yordam talab qiladi", 'Faqat ayollarda uchraydi', 'Davolanishi shart emas'],
+        togri: 1,
+        izoh: "O'tkir siydik ushlanishi to'satdan boshlanadi, kuchli og'riq va qovuqning to'lib-toshishi bilan kechadi — bu shoshilinch urologik holat.",
+      },
+    ],
+  },
+  {
+    slug: 'siydik-tahlili-asoslari',
+    sarlavha: 'Umumiy siydik tahlili va asosiy laborator ko\'rsatkichlar',
+    kategoriya: 'Kirish va semiotika',
+    bosqich: 'oson',
+    qisqa: "Umumiy siydik tahlilidagi asosiy ko'rsatkichlar va ularning klinik ahamiyati.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy ko\'rsatkichlar',
+        matn: [
+          "Umumiy siydik tahlili urologiyada eng arzon va informativ birinchi tekshiruv hisoblanadi. Leykotsitlar (oqsil hujayralar) ko'pligi infeksiya/yallig'lanishni, eritrotsitlar (qon hujayralari) borligi gematuriyani, oqsil (protein) borligi buyrak filtratsiyasi buzilishini, nitritlar bakterial infeksiyani ko'rsatishi mumkin.",
+          "Siydikning solishtirma og'irligi (zichligi) buyrakning siydikni quyuqlashtirish qobiliyatini, pH darajasi esa metabolik holat va tosh turini bashorat qilishda yordam beradi (masalan, doimiy ishqoriy pH struvit toshiga moyillikni ko'rsatadi). Glyukoza va keton tanachalari diabetni aniqlashda qo'shimcha ma'lumot beradi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines — Laborator diagnostika', "Klinik laboratoriya tahlillari qo'llanmasi"],
+    test: [
+      {
+        savol: 'Siydikda leykotsitlar ko\'pligi nimani ko\'rsatadi?',
+        variantlar: ['Diabetni', "Infeksiya/yallig'lanishni", 'Buyrak toshini', "Qon bosimi o'zgarishini"],
+        togri: 1,
+        izoh: "Leykotsituriya (siydikda leykotsitlar ko'pligi) odatda siydik yo'li infeksiyasi yoki yallig'lanish belgisi.",
+      },
+      {
+        savol: 'Siydikda nitrit aniqlanishi nimani bildiradi?',
+        variantlar: ['Diabetni', "Bakterial infeksiya ehtimolini", "Buyrak yetishmovchiligini", 'Dehidratatsiyani'],
+        togri: 1,
+        izoh: "Ba'zi bakteriyalar nitratni nitritga aylantiradi — bu test bakterial siydik yo'li infeksiyasini taxmin qilishda foydalanadi.",
+      },
+      {
+        savol: 'Doimiy ishqoriy (yuqori) siydik pH qaysi tosh turiga moyillikni ko\'rsatishi mumkin?',
+        variantlar: ['Sistin toshi', 'Siydik kislotasi toshi', 'Struvit toshi', 'Kalsiy oksalat toshi'],
+        togri: 2,
+        izoh: "Ishqoriy siydik muhiti urea-parchalovchi bakteriyalar (Proteus) bilan bog'liq struvit toshlari uchun qulay sharoit yaratadi.",
+      },
+    ],
+  },
+  {
+    slug: 'utt-asosiy-tekshiruv',
+    sarlavha: "UTT (ultratovush) — urologiyada asosiy tekshiruv usuli",
+    kategoriya: 'Kirish va semiotika',
+    bosqich: 'oson',
+    qisqa: "Urologiyada UTT nima uchun birinchi tanlovdagi tekshiruv usuli hisoblanadi.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. UTT nima uchun muhim?',
+        matn: [
+          "Ultratovush tekshiruvi (UTT) — radiatsiyasiz, arzon va keng tarqalgan tasviriy diagnostika usuli, shu sababli urologiyada ko'pchilik holatlarda birinchi qatorda qo'llaniladi. U buyrak hajmi va tuzilishini, siydik to'planishi (gidronefroz) borligini, qovuqdagi qoldiq siydik miqdorini, prostata hajmini va moyak/uruğ tizimchasi patologiyalarini (Doppler rejimida qon oqimini) baholash imkonini beradi.",
+          "UTT cheklovlari ham bor: kichik toshlarni, ayniqsa siydik yo'lining pastki qismidagi toshlarni har doim ham aniqlay olmaydi, va natija ko'p jihatdan tekshiruvchi shifokorning tajribasiga bog'liq (operator-dependent usul). Shu sabab shubhali holatlarda KT yoki MRT bilan qo'shimcha tasdiqlash talab qilinadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines — Tasviriy diagnostika', 'Campbell-Walsh Urology, 12th ed. — Imaging bobi'],
+    test: [
+      {
+        savol: 'UTT urologiyada birinchi tanlov bo\'lishining asosiy sababi nima?',
+        variantlar: ['Eng aniq usul bo\'lgani uchun', "Radiatsiyasiz, arzon va keng tarqalganligi uchun", "Faqat shoshilinch holatlarda ishlatiladi", 'Faqat bolalarda qo\'llaniladi'],
+        togri: 1,
+        izoh: "UTT radiatsiya bermaydi, arzon va deyarli har qayerda mavjud, shu sababli birinchi qatordagi tekshiruv hisoblanadi.",
+      },
+      {
+        savol: 'UTT yordamida nimalarni baholash mumkin emas to\'g\'ridan-to\'g\'ri ishonchli?',
+        variantlar: ['Buyrak hajmini', 'Gidronefrozni', 'Prostata hajmini', 'Siydik yo\'lining pastki qismidagi kichik toshlarni har doim'],
+        togri: 3,
+        izoh: "UTT kichik, ayniqsa pastki siydik yo'lidagi toshlarni har doim aniqlay olmaydi, bunday holatlarda KT ko'proq ishonchli.",
+      },
+      {
+        savol: 'UTT natijasi nimaga ko\'proq bog\'liq bo\'lishi tufayli "operator-dependent" deyiladi?',
+        variantlar: ['Qurilma narxiga', "Tekshiruvchi shifokorning tajribasiga", 'Bemorning yoshiga', 'Kun vaqtiga'],
+        togri: 1,
+        izoh: "UTT natijasi sezilarli darajada tekshiruvni o'tkazayotgan shifokorning malakasi va tajribasiga bog'liq.",
+      },
+    ],
+  },
+
+  // II. Anatomiya va fiziologiya (umumiy)
+  {
+    slug: 'buyrak-siydik-yollari-anatomiyasi',
+    sarlavha: "Buyrak va siydik yo'llarining umumiy anatomiyasi",
+    kategoriya: 'Anatomiya va fiziologiya',
+    bosqich: 'oson',
+    qisqa: "Buyrak, siydik naychalari va ularning asosiy vazifalari haqida umumiy tushuncha.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy tuzilish',
+        matn: [
+          "Inson ikkita buyrakka ega, ular qorin orti bo'shlig'ida (retroperitoneal), umurtqa pog'onasining ikki tomonida joylashgan. Buyrakning asosiy funksional birligi nefron bo'lib, har bir buyrakda taxminan 1 million nefron bor; ular qonni filtrlab siydik hosil qiladi va suv-tuz muvozanatini, qon bosimini, qonning kislota-ishqor balansini boshqarishda ishtirok etadi.",
+          "Buyrakda hosil bo'lgan siydik siydik naychalari (uretrlar) orqali qovuqga oqib tushadi. Har bir siydik naychasi peristaltik (to'lqinsimon) qisqarishlar yordamida siydikni faol harakatga keltiradi — bu sof gravitatsiyaga emas, aktiv mushak qisqarishiga asoslangan jarayon.",
+        ],
+      },
+    ],
+    manbalar: ['Gray\'s Anatomy for Students', 'Campbell-Walsh Urology, 12th ed. — Anatomiya bobi'],
+    test: [
+      {
+        savol: 'Buyrakning asosiy funksional birligi nima deb ataladi?',
+        variantlar: ['Glomerula', 'Nefron', 'Kortikal birlik', 'Pelvis'],
+        togri: 1,
+        izoh: "Nefron — buyrakning qon filtratsiyasi va siydik hosil qilishni amalga oshiruvchi asosiy funksional birligi.",
+      },
+      {
+        savol: 'Siydik buyrakdan qovuqgacha qanday harakatlanadi?',
+        variantlar: ['Faqat gravitatsiya tufayli', "Siydik naychalarining peristaltik qisqarishi orqali", "Qovuqning so'rib olishi orqali", 'U umuman harakat qilmaydi'],
+        togri: 1,
+        izoh: "Siydik naychalari to'lqinsimon (peristaltik) mushak qisqarishlari orqali siydikni faol ravishda qovuq tomon harakatlantiradi.",
+      },
+      {
+        savol: 'Buyraklar tananing qaysi qismida joylashgan?',
+        variantlar: ["Ko'krak qafasi ichida", "Qorin orti bo'shlig'ida (retroperitoneal)", "Kichik chanoqda", 'Qorin bo\'shlig\'i ichida (intraperitoneal)'],
+        togri: 1,
+        izoh: "Buyraklar qorin pardasi orqasida, retroperitoneal joyda, umurtqa pog'onasining ikki tomonida joylashgan.",
+      },
+    ],
+  },
+  {
+    slug: 'qovuq-uretra-tuzilishi',
+    sarlavha: "Siydik pufagi va uretra — tuzilishi va vazifasi",
+    kategoriya: 'Anatomiya va fiziologiya',
+    bosqich: 'oson',
+    qisqa: "Qovuq va uretraning asosiy vazifalari va erkak-ayol uretrasi orasidagi farq.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Qovuq va uretra',
+        matn: [
+          "Siydik pufagi (qovuq) — siydikni vaqtincha to'plab turuvchi, mushak devoriga (detruzor mushagi) ega rezervuar a'zo. Qovuq bo'shashganda siydik to'planadi, qisqarganda esa siydik chiqarish (mikturatsiya) sodir bo'ladi — bu jarayon markaziy va periferik nerv tizimi tomonidan boshqariladi.",
+          "Uretra — qovuqdan tashqariga siydik chiqaruvchi naycha. Erkak uretrasi (taxminan 18-20 sm) ancha uzun bo'lib, prostata orqali o'tadi, ayol uretrasi esa qisqaroq (taxminan 4 sm) — shu sababli ayollarda siydik yo'li infeksiyalari ancha tez-tez uchraydi, chunki bakteriyalar qovuqgacha qisqa masofani osonroq bosib o'tadi.",
+        ],
+      },
+    ],
+    manbalar: ["Gray's Anatomy for Students", 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Qovuqning siydikni chiqarish uchun qisqaruvchi asosiy mushagi qanday nomlanadi?',
+        variantlar: ['Sfinkter', 'Detruzor', 'Levator', 'Kremaster'],
+        togri: 1,
+        izoh: "Detruzor mushagi qovuq devorida joylashgan va qisqarganda siydik chiqarishni ta'minlaydi.",
+      },
+      {
+        savol: 'Ayollarda siydik yo\'li infeksiyasi erkaklarga nisbatan nima uchun tez-tez uchraydi?',
+        variantlar: ["Ayol uretrasi ancha qisqa bo'lgani uchun", "Ayollarda prostata yo'qligi uchun", 'Ayollarda buyrak kichikroq', 'Bu noto\'g\'ri ma\'lumot'],
+        togri: 0,
+        izoh: "Ayol uretrasi ancha qisqa (~4 sm) bo'lgani uchun bakteriyalar qovuqgacha tezroq yetib boradi.",
+      },
+      {
+        savol: 'Erkak uretrasi qaysi a\'zo orqali o\'tadi?',
+        variantlar: ['Moyak', 'Prostata', 'Buyrak', 'Siydik naychasi'],
+        togri: 1,
+        izoh: "Erkak uretrasi prostata bezi ichidan o'tadi, shu sabab BPH kabi prostata kattalashishi uretrani siqib siyishni qiyinlashtirishi mumkin.",
+      },
+    ],
+  },
+  {
+    slug: 'erkak-jinsiy-azolari-tuzilishi',
+    sarlavha: "Erkak jinsiy a'zolari — umumiy tuzilishi (prostata, moyak, urug' pufakchasi)",
+    kategoriya: 'Anatomiya va fiziologiya',
+    bosqich: 'oson',
+    qisqa: "Erkak reproduktiv a'zolarining asosiy tuzilishi va vazifalari.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy a\'zolar',
+        matn: [
+          "Moyaklar (testislar) — yorg'oqda joylashgan, ikkita asosiy vazifani bajaradigan a'zo: spermatozoidlar ishlab chiqish (spermatogenez) va testosteron gormonini ishlab chiqarish. Moyaklarning tanadan tashqarida, yorg'oqda joylashishi sababi — spermatogenez uchun tana haroratidan 2-4°C past harorat talab qilinishi.",
+          "Urug' pufakchalari prostata orqasida joylashgan va sperma suyuqligining katta qismini (fruktoza va boshqa moddalar bilan boyitilgan) ishlab chiqaradi. Prostata bezi qovuq tagida, uretrani o'rab turgan holda joylashgan — u ham sperma suyuqligiga qo'shimcha komponent (prostata sekretsiyasi, sperma harakatchanligini qo'llab-quvvatlovchi fermentlar) ishlab chiqaradi.",
+        ],
+      },
+    ],
+    manbalar: ["Gray's Anatomy for Students", 'Campbell-Walsh Urology, 12th ed. — Erkak reproduktiv anatomiya'],
+    test: [
+      {
+        savol: 'Moyaklar nima uchun yorg\'oqda, tanadan tashqarida joylashgan?',
+        variantlar: ['Bu shunchaki tasodif', "Spermatogenez uchun pastroq harorat talab qilinadi", "Bu testosteron ishlab chiqarishni kamaytiradi", 'Faqat estetik sabab'],
+        togri: 1,
+        izoh: "Spermatogenez uchun tana haroratidan 2-4°C past harorat zarur, shu sababli moyaklar yorg'oqda joylashgan.",
+      },
+      {
+        savol: 'Urug\' pufakchalari qayerda joylashgan?',
+        variantlar: ["Moyak ichida", 'Prostata orqasida', "Qovuq ichida", 'Buyrakda'],
+        togri: 1,
+        izoh: "Urug' pufakchalari prostata orqasida joylashgan va sperma suyuqligining katta qismini ishlab chiqaradi.",
+      },
+      {
+        savol: 'Moyaklarning ikkita asosiy vazifasi qaysilar?',
+        variantlar: ['Siydik filtratsiyasi va saqlash', 'Spermatogenez va testosteron ishlab chiqarish', "Sperma harakatini ta'minlash va qon filtratsiyasi", 'Faqat gormon saqlash'],
+        togri: 1,
+        izoh: "Moyaklar spermatozoidlar ishlab chiqarish (spermatogenez) va testosteron gormonini ishlab chiqarish bilan shug'ullanadi.",
+      },
+    ],
+  },
+  {
+    slug: 'siydik-tanosil-tugma-anomaliyalar',
+    sarlavha: "Siydik-tanosil a'zolarining tug'ma anomaliyalari haqida umumiy tushuncha",
+    kategoriya: 'Anatomiya va fiziologiya',
+    bosqich: 'oson',
+    qisqa: "Eng ko'p uchraydigan tug'ma siydik-tanosil anomaliyalari haqida umumiy ma'lumot.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Umumiy tushuncha',
+        matn: [
+          "Siydik-tanosil tizimi embrional rivojlanish davomida murakkab jarayonlardan o'tadi, shu sabab bu tizimda tug'ma anomaliyalar nisbatan ko'p uchraydi. Eng ko'p uchraydiganlari: kriptorxizm (moyakning yorg'oqqa tushmasligi), gipospadiya (uretra teshigining noto'g'ri, pastroq joyda ochilishi), buyrakning duplikatsiyasi yoki agenezi (rivojlanmasligi) va vezikoureteral reflyuks (siydikning qovuqdan buyrakka qarab teskari oqishi).",
+          "Bu anomaliyalarning ko'pchiligi homiladorlik davridagi UTT skriningida yoki tug'ilgandan keyingi birinchi tekshiruvlarda aniqlanadi. Erta aniqlash va kuzatuv muhim, chunki ba'zilari (masalan, davolanmagan vezikoureteral reflyuks) buyrak funksiyasiga uzoq muddatli zarar yetkazishi mumkin.",
+        ],
+      },
+    ],
+    manbalar: ['EAU/ESPU Guidelines on Paediatric Urology', 'Campbell-Walsh Urology, 12th ed. — Pediatrik urologiya bobi'],
+    test: [
+      {
+        savol: 'Kriptorxizm nima?',
+        variantlar: ["Uretra teshigining noto'g'ri joyda ochilishi", "Moyakning yorg'oqqa tushmasligi", "Buyrakning ikkilanishi", 'Qovuq devorining yupqalashishi'],
+        togri: 1,
+        izoh: "Kriptorxizm — bir yoki ikki moyakning yorg'oqqa to'liq tushmasligi holati.",
+      },
+      {
+        savol: 'Gipospadiya nimani bildiradi?',
+        variantlar: ["Moyakning tushmasligini", 'Uretra teshigining odatdagidan pastroq joyda ochilishini', 'Buyrak yetishmovchiligini', 'Qovuq kattalashishini'],
+        togri: 1,
+        izoh: "Gipospadiya — uretra tashqi teshigining penis uchida emas, pastroq qismida ochiladigan tug'ma anomaliya.",
+      },
+      {
+        savol: 'Vezikoureteral reflyuks nimani anglatadi?',
+        variantlar: ['Siydikning buyrakdan qovuqga normal oqishini', 'Siydikning qovuqdan buyrakka teskari oqishini', "Moyakning burilishini", "Prostata kattalashishini"],
+        togri: 1,
+        izoh: "Vezikoureteral reflyuks — siydikning normal yo'nalishga qarama-qarshi, qovuqdan buyrak tomon teskari oqishi, davolanmasa buyrak funksiyasiga zarar yetkazishi mumkin.",
+      },
+    ],
+  },
+
+  // III. Yallig'lanish kasalliklari
+  {
+    slug: 'sistit-asoslari',
+    sarlavha: "Sistit (siydik pufagi yallig'lanishi) — asosiy belgilar va davolash",
+    kategoriya: "Yallig'lanish kasalliklari",
+    bosqich: 'oson',
+    qisqa: "Sistitning asosiy belgilari, sabablari va birinchi qatordagi davolash yondashuvi.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Belgilari va sababi',
+        matn: [
+          "Sistit — siydik pufagining ko'pincha bakterial infeksiya (eng ko'p E. coli) tufayli kelib chiqadigan yallig'lanishi. Asosiy belgilar: tez-tez siyish ehtiyoji, dizuriya (siyishda og'riq/yonish), kichik chanoq sohasidagi noqulaylik va ba'zan siydikning loyqalanishi yoki yoqimsiz hidi. Yuqori harorat odatda bo'lmaydi — agar harorat ko'tarilsa, bu infeksiya yuqoriga (buyrakka) tarqalganidan dalolat berishi mumkin.",
+          "Sistit ayollarda qisqa uretra tufayli ancha ko'p uchraydi. Tashxis odatda klinik belgilar va umumiy siydik tahlili (leykotsituriya, ba'zan bakteriuriya) asosida qo'yiladi. Asoratsiz sistit qisqa muddatli (3-5 kunlik) antibiotikoterapiya bilan davolanadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urological Infections', 'IDSA Guidelines for UTI'],
+    test: [
+      {
+        savol: 'Sistitning eng ko\'p uchraydigan qo\'zg\'atuvchisi qaysi?',
+        variantlar: ['Stafilokokk', 'E. coli', 'Streptokokk', 'Klebsiella (kamroq, lekin E.coli birinchi o\'rinda)'],
+        togri: 1,
+        izoh: "E. coli sistitning eng ko'p uchraydigan qo'zg'atuvchisi hisoblanadi.",
+      },
+      {
+        savol: 'Sistitda yuqori harorat (isitma) bo\'lishi nimadan dalolat berishi mumkin?',
+        variantlar: ["Bu sistitning oddiy belgisi", "Infeksiya buyrakka tarqalganidan", 'Bu allergik reaksiya', "Hech nimadan, e'tibor berilmasligi mumkin"],
+        togri: 1,
+        izoh: "Oddiy asoratsiz sistitda yuqori harorat bo'lmaydi — uning paydo bo'lishi infeksiya yuqori siydik yo'llariga (pielonefrit) tarqalganini ko'rsatishi mumkin.",
+      },
+      {
+        savol: 'Asoratsiz sistit uchun odatdagi antibiotikoterapiya davomiyligi qancha?',
+        variantlar: ['1 kun', '3-5 kun', '4-6 hafta', '6 oy'],
+        togri: 1,
+        izoh: "Asoratsiz, oddiy sistit qisqa muddatli (odatda 3-5 kunlik) antibiotikoterapiya bilan muvaffaqiyatli davolanadi.",
+      },
+    ],
+  },
+  {
+    slug: 'pielonefrit-asoslari',
+    sarlavha: 'Pielonefrit — asosiy belgilar va davolash',
+    kategoriya: "Yallig'lanish kasalliklari",
+    bosqich: 'oson',
+    qisqa: "Pielonefritning sistitdan farqi, belgilari va davolash yondashuvi.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Belgilari va davolash',
+        matn: [
+          "Pielonefrit — buyrak to'qimasi va kosachasining bakterial infeksiyasi, ko'pincha pastki siydik yo'li infeksiyasining yuqoriga tarqalishi natijasida kelib chiqadi. Sistitdan farqli, pielonefritda yuqori harorat (isitma), titroq, bel/yon qorin og'rig'i va umumiy holatning yomonlashishi (ko'ngil aynishi, qusish) kuzatiladi.",
+          "Tashxis klinik belgilar, umumiy siydik tahlili (leykotsituriya, bakteriuriya) va siydik ekmasi (qaysi bakteriya va qaysi antibiotikka sezgir ekanini aniqlash uchun) asosida qo'yiladi. Asoratsiz pielonefrit odatda og'izdan ichiladigan antibiotik bilan 7-14 kun davomida davolanadi, og'ir holatlarda (yuqori isitma, qusish, septik holat xavfi) stasionarda venaga yuboriladigan antibiotik talab qilinadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urological Infections', 'IDSA Guidelines for Pyelonephritis'],
+    test: [
+      {
+        savol: 'Pielonefritni sistitdan farqlovchi asosiy belgi qaysi?',
+        variantlar: ['Tez-tez siyish', 'Yuqori harorat va bel/yon qorin og\'rig\'i', "Siydik rangi o'zgarishi", "Siyishda yengil noqulaylik"],
+        togri: 1,
+        izoh: "Pielonefritda yuqori harorat, titroq va bel/yon qorin og'rig'i kuzatiladi — bular oddiy sistitda odatda bo'lmaydi.",
+      },
+      {
+        savol: 'Pielonefrit tashxisida qo\'shimcha ravishda nima qilish maqsadga muvofiq?',
+        variantlar: ['Faqat umumiy qon tahlili', 'Siydik ekmasi (antibiotikka sezgirlikni aniqlash uchun)', 'Faqat rentgen', "Hech qanday qo'shimcha tahlil kerak emas"],
+        togri: 1,
+        izoh: "Siydik ekmasi qaysi bakteriya sabab bo'lganini va qaysi antibiotikka sezgir ekanini aniqlashtirib, to'g'ri davolashni tanlashga yordam beradi.",
+      },
+      {
+        savol: 'Og\'ir pielonefrit (yuqori isitma, qusish, septik xavf) qanday davolanadi?',
+        variantlar: ['Faqat uyda kuzatuv', "Stasionarda venaga yuboriladigan antibiotik bilan", 'Faqat og\'riqsizlantiruvchi bilan', 'Darhol jarrohlik bilan'],
+        togri: 1,
+        izoh: "Og'ir holatlarda bemorni stasionarga yotqizib venaga yuboriladigan (intravenoz) antibiotikoterapiya boshlash zarur.",
+      },
+    ],
+  },
+  {
+    slug: 'uretrit-asoslari',
+    sarlavha: "Uretrit (gonokokkli va nogonokokkli) — umumiy tushuncha",
+    kategoriya: "Yallig'lanish kasalliklari",
+    bosqich: 'oson',
+    qisqa: "Uretritning ikki asosiy turi va ularning klinik farqlari.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Turlari va farqlari',
+        matn: [
+          "Uretrit — uretra (siydik chiqarish naychasi)ning yallig'lanishi, asosan jinsiy yo'l bilan yuqadigan infeksiya natijasida kelib chiqadi. Ikki asosiy turga bo'linadi: gonokokkli uretrit (Neisseria gonorrhoeae qo'zg'atadi, odatda yorqin sariq-yashil, ko'p ajralma va kuchli dizuriya bilan kechadi) va nogonokokkli uretrit (eng ko'p Chlamydia trachomatis qo'zg'atadi, belgilari yengilroq yoki simptomsiz kechishi mumkin).",
+          "Ikki turini farqlash uchun uretral surtma yoki siydik namunasida PCR (molekulyar) tahlil qo'llaniladi. Davolash qo'zg'atuvchiga qarab tanlanadi (gonokokkli uretrit uchun seftriakson, xlamidial uretrit uchun azitromisin yoki doksiklin), va jinsiy hamrohni ham bir vaqtda davolash qaytalanishning oldini olish uchun muhim.",
+        ],
+      },
+    ],
+    manbalar: ['CDC STI Treatment Guidelines', 'EAU Guidelines on Urological Infections'],
+    test: [
+      {
+        savol: 'Gonokokkli uretritni qaysi qo\'zg\'atuvchi keltirib chiqaradi?',
+        variantlar: ['Chlamydia trachomatis', 'Neisseria gonorrhoeae', 'E. coli', 'Candida'],
+        togri: 1,
+        izoh: "Gonokokkli uretrit Neisseria gonorrhoeae bakteriyasi tomonidan qo'zg'atiladi.",
+      },
+      {
+        savol: 'Nogonokokkli uretritning eng ko\'p uchraydigan qo\'zg\'atuvchisi qaysi?',
+        variantlar: ['Neisseria gonorrhoeae', 'Chlamydia trachomatis', 'Staphylococcus aureus', 'Proteus mirabilis'],
+        togri: 1,
+        izoh: "Chlamydia trachomatis nogonokokkli uretritning eng ko'p tarqalgan sababi hisoblanadi.",
+      },
+      {
+        savol: 'Uretrit davolashda jinsiy hamrohni ham davolash nima uchun muhim?',
+        variantlar: ["Bu shart emas", "Qaytalanishning oldini olish uchun", 'Faqat qonun talabi', 'Hech qanday ahamiyati yo\'q'],
+        togri: 1,
+        izoh: "Jinsiy yo'l bilan yuqadigan infeksiyalarda hamrohni ham davolamasdan, qayta yuqish (re-infeksiya) xavfi yuqori bo'ladi.",
+      },
+    ],
+  },
+  {
+    slug: 'prostatit-umumiy-tasniflash',
+    sarlavha: "Prostatit — umumiy tasniflash va belgilar",
+    kategoriya: "Yallig'lanish kasalliklari",
+    bosqich: 'oson',
+    qisqa: "Prostatitning to'rt asosiy turi haqida umumiy, kirish darajasidagi tushuncha.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Umumiy tasniflash',
+        matn: [
+          "Prostatit — prostata bezining yallig'lanishi, va u bir xil kasallik emas, balki to'rt xil klinik holatni o'z ichiga oladi: o'tkir bakterial prostatit (kuchli infeksiya, yuqori harorat bilan kechadi), surunkali bakterial prostatit (qaytalanuvchi infeksiya), surunkali prostatit/kichik chanoq og'rig'i sindromi (eng ko'p uchraydigan tur, bakteriya aniqlanmaydi) va asimptomatik yallig'lanuvchi prostatit (simptomsiz, tasodifan aniqlanadi).",
+          "O'tkir bakterial prostatit shoshilinch e'tibor talab qiladi: yuqori harorat, titroq, kichik chanoq og'rig'i va siyish qiyinlashishi bilan namoyon bo'ladi, antibiotikoterapiya kechiktirilmasligi kerak. Boshqa turlari ko'pincha asta-sekin rivojlanadi va surunkali kechadi.",
+        ],
+      },
+    ],
+    manbalar: ['NIH Chronic Prostatitis Classification', 'EAU Guidelines on Urological Infections'],
+    test: [
+      {
+        savol: 'Prostatitning necha asosiy turi mavjud?',
+        variantlar: ['Ikki', 'Uch', "To'rt", 'Olti'],
+        togri: 2,
+        izoh: "NIH tasnifi bo'yicha prostatitning to'rt asosiy turi mavjud: o'tkir bakterial, surunkali bakterial, surunkali/CPPS va asimptomatik yallig'lanuvchi.",
+      },
+      {
+        savol: 'Qaysi prostatit turi shoshilinch e\'tibor talab qiladi?',
+        variantlar: ["Asimptomatik yallig'lanuvchi", "O'tkir bakterial prostatit", 'Surunkali CPPS', 'Hech biri'],
+        togri: 1,
+        izoh: "O'tkir bakterial prostatit yuqori harorat va og'ir umumiy holat bilan kechadi, darhol antibiotikoterapiya talab qiladi.",
+      },
+      {
+        savol: 'Prostatitning eng ko\'p uchraydigan turi qaysi?',
+        variantlar: ["O'tkir bakterial", 'Surunkali bakterial', "Surunkali prostatit/kichik chanoq og'rig'i sindromi (CPPS)", 'Asimptomatik yallig\'lanuvchi'],
+        togri: 2,
+        izoh: "CPPS (III tur) prostatit hollarining katta qismini tashkil qiladi va bunda bakteriya aniqlanmaydi.",
+      },
+    ],
+  },
+  {
+    slug: 'orxoepididimit-asoslari',
+    sarlavha: "Orxoepididimit (moyak-quyma yallig'lanishi) — asosiy belgilar",
+    kategoriya: "Yallig'lanish kasalliklari",
+    bosqich: 'oson',
+    qisqa: "Orxoepididimitning sabablari, belgilari va torsiyadan farqlash zarurati.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Sabab va belgilar',
+        matn: [
+          "Orxoepididimit — moyak (orxit) va quyma (epididimit) ning birgalikdagi yallig'lanishi, ko'pincha quymadan boshlanib moyakka tarqaladi. Yosh, jinsiy faol erkaklarda sabab ko'pincha jinsiy yo'l bilan yuqadigan infeksiyalar (xlamidiya, gonokokk), katta yoshdagi erkaklarda esa ko'pincha siydik yo'li infeksiyasi bilan bog'liq bakteriyalar (E. coli) bo'ladi.",
+          "Asosiy belgilar: yorg'oqda asta-sekin kuchayuvchi og'riq va shish, terining qizarishi, ba'zan yuqori harorat. Bu juda muhim — orxoepididimitni o'tkir moyak burilishi (torsiya)dan farqlash zarur, chunki torsiya bir necha soat ichida jarrohlik aralashuvni talab qiladigan shoshilinch holat, orxoepididimit esa asta-sekin rivojlanadi va antibiotik bilan davolanadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urological Infections', 'CDC STI Treatment Guidelines'],
+    test: [
+      {
+        savol: 'Yosh, jinsiy faol erkaklarda orxoepididimitning ko\'p uchraydigan sababi qaysi?',
+        variantlar: ['E. coli', "Jinsiy yo'l bilan yuqadigan infeksiyalar (xlamidiya, gonokokk)", "Buyrak toshi", "Diabet"],
+        togri: 1,
+        izoh: "Yosh, jinsiy faol erkaklarda orxoepididimit ko'pincha jinsiy yo'l bilan yuqadigan infeksiyalar tufayli kelib chiqadi.",
+      },
+      {
+        savol: 'Orxoepididimitni qaysi shoshilinch holatdan farqlash juda muhim?',
+        variantlar: ["Pielonefritdan", "O'tkir moyak burilishi (torsiya)dan", 'Sistitdan', "BPH'dan"],
+        togri: 1,
+        izoh: "Torsiya soatlar ichida jarrohlikni talab qiladigan shoshilinch holat, shu sabab uni orxoepididimitdan to'g'ri farqlash juda muhim.",
+      },
+      {
+        savol: 'Orxoepididimitda og\'riqning rivojlanish xarakteri qanday?',
+        variantlar: ["To'satdan, soniyalar ichida boshlanadi", "Asta-sekin, soatlar-kunlar davomida kuchayadi", "Hech qachon og'riq bo'lmaydi", "Faqat tunda paydo bo'ladi"],
+        togri: 1,
+        izoh: "Orxoepididimitda og'riq odatda asta-sekin kuchayib boradi — bu torsiyaning to'satdan boshlanishidan farqli xususiyat.",
+      },
+    ],
+  },
+
+  // IV. Buyrak va siydik yo'llari kasalliklari
+  {
+    slug: 'siydik-tosh-kasalligi-asoslari',
+    sarlavha: 'Siydik tosh kasalligi — asosiy tushunchalar va klinika',
+    kategoriya: "Buyrak va siydik yo'llari",
+    bosqich: 'oson',
+    qisqa: "Siydik toshlari nima uchun hosil bo'ladi va asosiy klinik ko'rinishi qanday.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy tushunchalar',
+        matn: [
+          "Siydik tosh kasalligi (urolitiaz) — buyrak yoki siydik yo'llarida mineral va tuz cho'kindilaridan tosh hosil bo'lishi. Bunga moyillik tug'diruvchi asosiy omillar: yetarli suyuqlik iste'mol qilmaslik, ovqatlanish xususiyatlari (yuqori tuz/oqsil), metabolik buzilishlar va oilaviy moyillik. Eng ko'p uchraydigan tosh turi — kalsiy oksalat.",
+          "Klassik klinik ko'rinish — renal kolika: to'satdan boshlangan, juda kuchli, to'lqinsimon bel/yon qorin og'rig'i, ko'ngil aynishi bilan birga, bemor tinch joy topa olmaydi. Kichik toshlar (taxminan 5-6 mm gacha) ko'pincha o'z-o'zidan chiqib ketishi mumkin, katta toshlar esa maxsus davolashni talab qiladi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urolithiasis', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Siydik toshlarining eng ko\'p uchraydigan turi qaysi?',
+        variantlar: ['Struvit', 'Sistin', 'Kalsiy oksalat', 'Siydik kislotasi'],
+        togri: 2,
+        izoh: "Kalsiy oksalat toshlari urolitiaz hollarining katta qismini tashkil qiladi.",
+      },
+      {
+        savol: 'Renal kolikaning klassik xususiyati nima?',
+        variantlar: ["Bemor harakatsiz yotadi", "To'lqinsimon, juda kuchli bel/yon qorin og'rig'i, bemor tinch joy topa olmaydi", "Og'riq doim past harorat bilan kechadi", "Og'riq faqat tunda bo'ladi"],
+        togri: 1,
+        izoh: "Renal kolikada bemor doimiy harakatda bo'lib qulay holat topa olmaydi — bu uni boshqa qorin og'riqlaridan ajratuvchi xususiyat.",
+      },
+      {
+        savol: 'Qanday hajmdagi toshlar ko\'pincha o\'z-o\'zidan chiqib ketishi mumkin?',
+        variantlar: ['1-2 sm', "5-6 mm gacha", '3-4 sm', "Hajm ahamiyatsiz"],
+        togri: 1,
+        izoh: "Kichik (taxminan 5-6 mm gacha) toshlar ko'pincha spontan ravishda chiqib ketadi, kattaroqlari maxsus davolashni talab qiladi.",
+      },
+    ],
+  },
+  {
+    slug: 'gidronefroz-asoslari',
+    sarlavha: 'Gidronefroz — nima va nima uchun yuzaga keladi',
+    kategoriya: "Buyrak va siydik yo'llari",
+    bosqich: 'oson',
+    qisqa: "Gidronefrozning sabablari va nima uchun u xavfli bo'lishi mumkinligi.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Sabablari va ahamiyati',
+        matn: [
+          "Gidronefroz — siydik oqimining biror joyda to'siq (obstruksiya) tufayli to'xtab qolishi natijasida buyrak kosachalarining kengayishi (siydik bilan to'lib-toshishi). Sabablari turlicha bo'lishi mumkin: siydik toshi, siydik yo'lining tug'ma torayishi, prostata kattalashishi (BPH) tufayli siydik chiqishining qiyinlashishi, yoki o'sma siydik yo'lini siqib qo'yishi.",
+          "Gidronefroz o'zi alohida kasallik emas, balki boshqa muammoning natijasi (belgisi) hisoblanadi. Agar to'siq uzoq vaqt davomida bartaraf etilmasa, buyrak to'qimasiga doimiy zarar yetishi va buyrak funksiyasi pasayishi mumkin — shu sabab sababini aniqlash va vaqtida bartaraf etish muhim.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urolithiasis', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Gidronefroz nima?',
+        variantlar: ["Buyrak to'qimasining saraton kasalligi", "Siydik oqimi to'sig'i tufayli buyrak kosachalarining kengayishi", 'Qovuq yallig\'lanishi', 'Prostata kattalashishi'],
+        togri: 1,
+        izoh: "Gidronefroz siydik oqimidagi to'siq natijasida buyrak kosachalarining siydik bilan to'lib kengayishi holati.",
+      },
+      {
+        savol: 'Gidronefroz mustaqil kasallikmi yoki boshqa muammoning natijasimi?',
+        variantlar: ['Mustaqil kasallik', 'Boshqa muammo (to\'siq)ning natijasi/belgisi', "Faqat irsiy holat", "Faqat infeksiya natijasi"],
+        togri: 1,
+        izoh: "Gidronefroz alohida kasallik emas, balki siydik oqimini to'sib qo'yuvchi boshqa sabab (tosh, BPH, o'sma)ning natijasi hisoblanadi.",
+      },
+      {
+        savol: 'Davolanmagan, uzoq davom etgan gidronefroz nimaga olib kelishi mumkin?',
+        variantlar: ['Hech qanday oqibatga', "Buyrak to'qimasiga zarar va funksiya pasayishiga", "Faqat vaqtinchalik noqulaylikka", "Faqat tashqi ko'rinish o'zgarishiga"],
+        togri: 1,
+        izoh: "Uzoq davom etgan to'siq buyrak to'qimasiga bosim o'tkazib, doimiy shikastlanish va funksiya pasayishiga olib kelishi mumkin.",
+      },
+    ],
+  },
+  {
+    slug: 'siydik-tutolmaslik-turlari',
+    sarlavha: 'Siydik tutolmaslik — asosiy turlari',
+    kategoriya: "Buyrak va siydik yo'llari",
+    bosqich: 'oson',
+    qisqa: "Siydik tutolmaslikning asosiy turlari va ularning sabablari.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy turlari',
+        matn: [
+          "Siydik tutolmaslik — siydikni mustaqil nazorat qila olmaslik holati, va u bir xil emas, bir necha turga bo'linadi. Stress tipi tutolmaslik — kuchanish, yo'tal, kulish, og'irlik ko'tarish kabi qorin ichi bosimi oshganda siydikning ozgina chiqib ketishi (ko'pincha tug'ruq qilgan ayollarda tos tubi mushaklari zaiflashganda uchraydi).",
+          "Urgent (shoshilinch) tipi tutolmaslik — to'satdan, kuchli siyish ehtiyoji paydo bo'lib, tuvaletga yetib bormay siydik chiqib ketishi (qovuq giperfaolligi bilan bog'liq). Aralash tipi — ikkisining kombinatsiyasi. Toshib chiqish (overflow) tipi tutolmaslik esa qovuq to'liq bo'shamasligi natijasida (masalan, BPH tufayli) siydikning tomchilab chiqishi bilan kechadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Urinary Incontinence', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Stress tipi siydik tutolmaslik qachon yuzaga keladi?',
+        variantlar: ["Tinch holatda, sababsiz", "Kuchanish, yo'tal yoki kulish vaqtida", "Faqat tunda", "Faqat infeksiya paytida"],
+        togri: 1,
+        izoh: "Stress tipi tutolmaslikda qorin ichi bosimi oshganda (yo'tal, kuchanish, kulish) siydik ozgina chiqib ketadi.",
+      },
+      {
+        savol: 'Urgent tipi siydik tutolmaslik nima bilan bog\'liq?',
+        variantlar: ['Tos tubi mushaklari zaifligi bilan', "Qovuq giperfaolligi bilan", 'Buyrak toshi bilan', 'Prostata saratoni bilan'],
+        togri: 1,
+        izoh: "Urgent tipi tutolmaslik qovuqning giperfaol (haddan tashqari faol) qisqarishi natijasida to'satdan kuchli siyish ehtiyoji bilan kechadi.",
+      },
+      {
+        savol: 'Toshib chiqish (overflow) tipi tutolmaslik odatda nima sababli yuzaga keladi?',
+        variantlar: ["Qovuqning to'liq bo'shamasligi (masalan, BPH tufayli)", "Faqat yosh omili", "Faqat ayollarda uchraydi", "Faqat infeksiya tufayli"],
+        togri: 0,
+        izoh: "Overflow tipi tutolmaslik qovuq to'liq bo'shamay, doimo to'lib turishi (masalan, BPH siydik chiqishini to'sganda) natijasida siydikning tomchilab chiqishi bilan bog'liq.",
+      },
+    ],
+  },
+
+  // V. Prostata va erkak jinsiy a'zolari
+  {
+    slug: 'prostata-adenomasi-asosiy-belgilar',
+    sarlavha: 'Prostata adenomasi (BPH) — asosiy belgilar',
+    kategoriya: "Prostata va erkak jinsiy a'zolari",
+    bosqich: 'oson',
+    qisqa: "BPHning yosh bilan bog'liqligi va asosiy siyish simptomlari haqida kirish darajasidagi tushuncha.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Asosiy tushuncha',
+        matn: [
+          "Prostata adenomasi (BPH — benign prostata giperplaziyasi) — prostata bezining saratonsiz (benign) kattalashishi, yosh ulg'aygan erkaklarda juda keng tarqalgan fiziologik jarayon hisoblanadi. Kattalashgan prostata uretrani (siydik chiqarish naychasini) siqib, siyishni qiyinlashtiradi.",
+          "Asosiy belgilar ikki guruhga bo'linadi: siyishni boshlashda qiyinlanish, oqim kuchsizligi, to'liq bo'shamaslik hissi (bo'shatish simptomlari) va tez-tez siyish, tungi siyish, to'satdan kuchli siyish ehtiyoji (saqlanish simptomlari). BPH saraton bilan bog'liq emas, ammo simptomlari hayot sifatiga sezilarli ta'sir qilishi mumkin.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Non-neurogenic Male LUTS', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'BPH nima?',
+        variantlar: ['Prostata saratoni', "Prostataning saratonsiz kattalashishi", "Moyak yallig'lanishi", "Qovuq toshi"],
+        togri: 1,
+        izoh: "BPH — prostata bezining benign (saratonsiz) kattalashishi, yosh bilan bog'liq tabiiy jarayon.",
+      },
+      {
+        savol: 'BPH siyishga qanday ta\'sir qiladi?',
+        variantlar: ["Hech qanday ta'sir qilmaydi", "Uretrani siqib siyishni qiyinlashtiradi", "Siydik hosil bo'lishini to'xtatadi", "Faqat tungi vaqtga ta'sir qiladi"],
+        togri: 1,
+        izoh: "Kattalashgan prostata uretrani siqib siyish kanalini toraytiradi, bu esa siyishni qiyinlashtiradi.",
+      },
+      {
+        savol: 'BPH saraton bilan bog\'liqmi?',
+        variantlar: ["Ha, doimo", "Yo'q, u saratonsiz jarayon", "Faqat yosh erkaklarda bog'liq", "Faqat o'tkir holatda bog'liq"],
+        togri: 1,
+        izoh: "BPH benign (saratonsiz) jarayon bo'lib, prostata saratoni bilan to'g'ridan-to'g'ri bog'liq emas.",
+      },
+    ],
+  },
+  {
+    slug: 'fimoz-parafimoz-asoslari',
+    sarlavha: "Fimoz va parafimoz — nima va qanday yordam kerak",
+    kategoriya: "Prostata va erkak jinsiy a'zolari",
+    bosqich: 'oson',
+    qisqa: "Fimoz va parafimoz orasidagi farq va parafimozning shoshilinch xususiyati.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Farqi va yordam',
+        matn: [
+          "Fimoz — qovuq (prepusiy, penis terisi)ning glansdan (penis boshi ustidan) orqaga tortib bo'lmaslik holati. Yosh bolalarda bu fiziologik holat bo'lib, ko'pincha vaqt o'tishi bilan o'z-o'zidan tuzaladi; kattalarda esa surunkali yallig'lanish, infeksiya yoki yara to'qimasi tufayli yuzaga kelishi mumkin va ba'zan davolanishi (krem yoki jarrohlik — sirkumsiziya) talab qilinadi.",
+          "Parafimoz — bundan farqli, shoshilinch holat: orqaga tortilgan qovuq terisi qaytarib qo'yilmasligi natijasida glansning qon aylanishi buziladi (qisilib qoladi). Bu shish, og'riq va to'qima nekrozi xavfi bilan kechadi, shu sabab darhol tibbiy yordam (manual qaytarish yoki jarrohlik) talab qiladigan shoshilinch urologik holat hisoblanadi.",
+        ],
+      },
+    ],
+    manbalar: ['EAU/ESPU Guidelines on Paediatric Urology', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Fimoz nima?',
+        variantlar: ["Qovuq terisini glansdan orqaga tortib bo'lmaslik", "Orqaga tortilgan terini qaytarib bo'lmaslik", "Moyak shishishi", "Prostata kattalashishi"],
+        togri: 0,
+        izoh: "Fimoz — penis terisi (prepusiy)ni glans ustidan orqaga tortib bo'lmaslik holati.",
+      },
+      {
+        savol: 'Parafimoz nima uchun shoshilinch holat hisoblanadi?',
+        variantlar: ["Chunki u og'riqsiz kechadi", "Glansning qon aylanishi buzilib, to'qima zararlanishi xavfi bor", "Chunki u faqat bolalarda uchraydi", "Chunki u hech qachon davolanmaydi"],
+        togri: 1,
+        izoh: "Parafimozda qisilib qolgan teri glansning qon aylanishini buzadi, bu shish, og'riq va nekroz (to'qima o'limi) xavfini keltirib chiqaradi.",
+      },
+      {
+        savol: 'Yosh bolalardagi fimoz odatda qanday hal bo\'ladi?',
+        variantlar: ["Faqat jarrohlik bilan", "Ko'pincha vaqt o'tishi bilan o'z-o'zidan", "Hech qachon hal bo'lmaydi", "Faqat antibiotik bilan"],
+        togri: 1,
+        izoh: "Bolalardagi fimoz odatda fiziologik holat bo'lib, yosh o'tishi bilan ko'pincha o'z-o'zidan tuzaladi.",
+      },
+    ],
+  },
+  {
+    slug: 'varikotsele-gidrotsele-farqi',
+    sarlavha: "Varikotsele va gidrotsele — asosiy farqlari",
+    kategoriya: "Prostata va erkak jinsiy a'zolari",
+    bosqich: 'oson',
+    qisqa: "Varikotsele va gidrotsele orasidagi asosiy farqlarni tushunish uchun kirish darajasidagi dars.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Farqlari',
+        matn: [
+          "Varikotsele — yorg'oqdagi pampiniform venoz pleksusning patologik kengayishi (venalarning varikoz tarzda kengayishi), ko'pincha chap tomonda uchraydi. U palpatsiyada \"chuvalchang to'plami\" hissini beradi va kuchanganda (Valsalva) yanada bo'rtib chiqadi; uzoq muddatda spermatogenezga salbiy ta'sir qilib, erkak bepushtligiga olib kelishi mumkin.",
+          "Gidrotsele — bundan farqli, moyak atrofidagi parda (tunica vaginalis) ichida suyuqlik to'planishi natijasida yuzaga keladi va yumshoq, suyuqlikka o'xshash, yorug'lik o'tkazadigan (transilluminatsiya musbat) shish ko'rinishida bo'ladi. Gidrotsele odatda og'riqsiz va bepushtlik bilan bog'liq emas, lekin katta hajmga yetganda noqulaylik tufayli jarrohlik talab qilinishi mumkin.",
+        ],
+      },
+    ],
+    manbalar: ['EAU Guidelines on Sexual and Reproductive Health', 'Campbell-Walsh Urology, 12th ed.'],
+    test: [
+      {
+        savol: 'Varikotsele nima?',
+        variantlar: ["Moyak atrofida suyuqlik to'planishi", "Pampiniform venoz pleksusning patologik kengayishi", "Prostata kattalashishi", "Uretra torayishi"],
+        togri: 1,
+        izoh: "Varikotsele — yorg'oqdagi venalarning (pampiniform pleksus) varikoz tarzda kengayishi.",
+      },
+      {
+        savol: 'Gidrotselening tipik xususiyati nima?',
+        variantlar: ["Qattiq va og'riqli", "Yumshoq, yorug'lik o'tkazadigan (transilluminatsiya musbat) shish", "Faqat kuchanishda paydo bo'ladi", "Faqat bepushtlik bilan bog'liq"],
+        togri: 1,
+        izoh: "Gidrotsele suyuqlik to'plami bo'lgani uchun yorug'lik nurini o'tkazadi (transilluminatsiya musbat) — bu uni boshqa shishlardan ajratuvchi muhim klinik belgi.",
+      },
+      {
+        savol: 'Qaysi holat ko\'proq erkak bepushtligi bilan bog\'liq?',
+        variantlar: ['Gidrotsele', 'Varikotsele', "Ikkisi ham bir xil darajada", "Hech biri bog'liq emas"],
+        togri: 1,
+        izoh: "Varikotsele spermatogenezga salbiy ta'sir qilib, erkak bepushtligining ma'lum bir qismida sababchi bo'lishi mumkin; gidrotsele esa odatda fertillik bilan bog'liq emas.",
+      },
+    ],
+  },
+  {
+    slug: 'kriptorxizm-asoslari',
+    sarlavha: 'Kriptorxizm — nima va nega muhim',
+    kategoriya: "Prostata va erkak jinsiy a'zolari",
+    bosqich: 'oson',
+    qisqa: "Kriptorxizmning ahamiyati va nima uchun erta davolash zarur.",
+    daqiqa: 4,
+    bolimlar: [
+      {
+        sarlavha: '1. Nima va nega muhim?',
+        matn: [
+          "Kriptorxizm — bir yoki ikki moyakning tug'ilishdan oldin yorg'oqqa to'liq tushmasligi holati, eng ko'p uchraydigan erkak tug'ma anomaliyalaridan biri. Chaqaloqlarning ma'lum qismida moyak hayotning birinchi oyларида o'z-o'zidan yorg'oqga tushishi mumkin, ammo 6 oylikdan keyin ham tushmagan bo'lsa, bu spontan tushish ehtimoli juda past bo'ladi.",
+          "Kriptorxizm muhim, chunki yorg'oqdan tashqarida (qorin bo'shlig'ida yoki chov kanalida) qolgan moyak yuqori harorat ta'sirida bo'ladi — bu uzoq muddatda spermatogenezga zarar yetkazishi va kelajakda bepushtlik xavfini oshirishi, shuningdek moyak saratoni xavfini sezilarli darajada oshirishi mumkin. Shu sabab erta tashxis va zarur bo'lsa jarrohlik (orxidopeksiya, odatda 1-2 yoshgacha) muhim ahamiyatga ega.",
+        ],
+      },
+    ],
+    manbalar: ['EAU/ESPU Guidelines on Paediatric Urology', 'AUA Guideline on Cryptorchidism'],
+    test: [
+      {
+        savol: 'Kriptorxizm nima?',
+        variantlar: ["Moyak shishishi", "Moyakning yorg'oqqa to'liq tushmasligi", "Moyak burilishi", "Moyak yallig'lanishi"],
+        togri: 1,
+        izoh: "Kriptorxizm — bir yoki ikki moyakning tug'ma ravishda yorg'oqqa to'liq tushmasligi.",
+      },
+      {
+        savol: 'Davolanmagan kriptorxizm nima uchun xavfli?',
+        variantlar: ["Hech qanday xavf yo'q", "Bepushtlik va moyak saratoni xavfini oshiradi", "Faqat estetik muammo", "Faqat siyish muammosi keltirib chiqaradi"],
+        togri: 1,
+        izoh: "Yorg'oqdan tashqaridagi yuqori harorat spermatogenezga zarar yetkazadi va moyak saratoni xavfini sezilarli oshiradi.",
+      },
+      {
+        savol: 'Kriptorxizm uchun jarrohlik (orxidopeksiya) odatda qaysi yoshgacha tavsiya etiladi?',
+        variantlar: ['1-2 yoshgacha', '10 yoshgacha', '18 yoshgacha', "Jarrohlik hech qachon kerak emas"],
+        togri: 0,
+        izoh: "Spontan tushish ehtimoli past bo'lganda, orxidopeksiya odatda 1-2 yoshgacha amalga oshirilishi tavsiya etiladi, bu spermatogenez va saraton xavfini kamaytirish uchun muhim.",
+      },
+    ],
+  },
+
+  // VI. Shoshilinch holatlar (umumiy tushuncha)
+  {
+    slug: 'moyak-torsiyasi-asoslari',
+    sarlavha: "O'tkir moyak burilishi (torsiya) va o'tkir yorg'oq sindromi — shoshilinch belgilar",
+    kategoriya: 'Shoshilinch holatlar',
+    bosqich: 'oson',
+    qisqa: "Moyak torsiyasini nima uchun soatlar ichida aniqlash va davolash hayotiy ahamiyatga ega.",
+    daqiqa: 5,
+    bolimlar: [
+      {
+        sarlavha: "1. Nima va nega shoshilinch?",
+        matn: [
+          "Moyak burilishi (torsiya) — moyak uruğ tizimchasi (qon tomirlari va naychalarni o'z ichiga olgan tizimcha) atrofida burilib, qon oqimini to'sib qo'yishi natijasida yuzaga keladigan o'tkir holat. Bu \"o'tkir yorg'oq sindromi\" deb ataluvchi belgilar guruhining eng xavfli sababi hisoblanadi (boshqa sabablar — orxoepididimit, appendiks testis burilishi va boshqalar).",
+          "Belgilari: to'satdan, juda kuchli, bir tomonlama yorg'oq og'rig'i (ko'pincha ko'ngil aynishi/qusish bilan birga), moyakning shishishi va yuqoriga ko'tarilishi. Torsiya tashxisi klinik belgilar va zarur bo'lsa Doppler UTT (qon oqimi yo'qligini ko'rsatadi) bilan tasdiqlanadi, ammo klinik shubha kuchli bo'lsa, tekshiruvni kutmasdan darhol jarrohlikka yo'naltirish kerak.",
+        ],
+      },
+      {
+        sarlavha: "2. Nima uchun vaqt hal qiluvchi omil?",
+        matn: [
+          "Moyakning qon ta'minoti to'liq to'siq holatida bo'lganda, to'qima zararlanishi (nekroz) tezda boshlanadi — birinchi 6 soat ichida jarrohlik qilinsa moyakni saqlab qolish ehtimoli juda yuqori, 12-24 soatdan keyin esa bu ehtimol keskin pasayadi. Shu sabab o'tkir yorg'oq og'rig'i bo'lgan har qanday bemorni shoshilinch tartibda urologga yo'naltirish hayotiy (aniqrog'i, a'zoni saqlab qolish nuqtai nazaridan) ahamiyatga ega.",
+        ],
+      },
+    ],
+    manbalar: ['EAU/ESPU Guidelines on Paediatric Urology', 'AUA Guideline on Acute Scrotum'],
+    test: [
+      {
+        savol: 'Moyak torsiyasi nima?',
+        variantlar: ["Moyakning yallig'lanishi", "Uruğ tizimchasining burilib qon oqimini to'sib qo'yishi", "Moyak atrofida suyuqlik to'planishi", "Prostata kattalashishi"],
+        togri: 1,
+        izoh: "Torsiya — uruğ tizimchasining o'z o'qi atrofida burilib qon ta'minotini to'sib qo'yishi natijasida yuzaga keladigan o'tkir holat.",
+      },
+      {
+        savol: "O'tkir yorg'oq og'rig'ida tashxis kutilmasdan nima qilinishi kerak?",
+        variantlar: ["Faqat og'riqsizlantiruvchi berish", "Klinik shubha kuchli bo'lsa, darhol jarrohlikka yo'naltirish", "Bir necha kun kuzatish", "Faqat antibiotik berish"],
+        togri: 1,
+        izoh: "Torsiyada vaqt juda muhim bo'lgani uchun, klinik shubha kuchli bo'lsa, qo'shimcha tekshiruvni kutmasdan shoshilinch jarrohlikka yo'naltirish kerak.",
+      },
+      {
+        savol: "Moyakni saqlab qolish ehtimoli qaysi vaqt oralig'ida eng yuqori bo'ladi?",
+        variantlar: ["Birinchi 6 soat ichida", '24-48 soatdan keyin', '1 haftadan keyin', "Vaqt ahamiyatsiz"],
+        togri: 0,
+        izoh: "Birinchi 6 soat ichida jarrohlik qilinsa moyakni saqlab qolish ehtimoli juda yuqori bo'ladi, vaqt o'tishi bilan bu ehtimol keskin pasayadi.",
       },
     ],
   },

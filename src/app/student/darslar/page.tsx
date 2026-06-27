@@ -1,22 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
-import { DARSLAR, DARS_KATEGORIYALARI } from '@/lib/talim/darslar'
+import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 
 const KATEGORIYA_RANGI: Record<string, string> = {
   Prostata: 'linear-gradient(135deg, #2563eb, #0891b2)',
   Andrologiya: 'linear-gradient(135deg, #7c3aed, #c026d3)',
   Urolitiaz: 'linear-gradient(135deg, #57534e, #a8a29e)',
   Onkourologiya: 'linear-gradient(135deg, #dc2626, #f97316)',
+  'Kirish va semiotika': 'linear-gradient(135deg, #16a34a, #65a30d)',
+  'Anatomiya va fiziologiya': 'linear-gradient(135deg, #0d9488, #06b6d4)',
+  "Yallig'lanish kasalliklari": 'linear-gradient(135deg, #ea580c, #f59e0b)',
+  "Buyrak va siydik yo'llari": 'linear-gradient(135deg, #57534e, #a8a29e)',
+  "Prostata va erkak jinsiy a'zolari": 'linear-gradient(135deg, #2563eb, #0891b2)',
+  'Shoshilinch holatlar': 'linear-gradient(135deg, #dc2626, #f97316)',
 }
 
 export default function DarslarPage() {
   const router = useRouter()
+  const [bosqich, setBosqich] = useState<Bosqich>('oson')
   const [filtr, setFiltr] = useState<string>('Hammasi')
 
-  const royxat = filtr === 'Hammasi' ? DARSLAR : DARSLAR.filter((d) => d.kategoriya === filtr)
+  const bosqichDarslari = useMemo(() => DARSLAR.filter((d) => d.bosqich === bosqich), [bosqich])
+  const kategoriyalar = useMemo(
+    () => ['Hammasi', ...Array.from(new Set(bosqichDarslari.map((d) => d.kategoriya)))],
+    [bosqichDarslari]
+  )
+
+  const royxat = filtr === 'Hammasi' ? bosqichDarslari : bosqichDarslari.filter((d) => d.kategoriya === filtr)
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
@@ -30,8 +43,28 @@ export default function DarslarPage() {
           </p>
         </div>
 
+        <div className="rise" style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          {BOSQICHLAR.map((b) => (
+            <button
+              key={b.id}
+              onClick={() => { setBosqich(b.id); setFiltr('Hammasi') }}
+              className="soft-press"
+              title={b.tavsif}
+              style={{
+                background: bosqich === b.id ? 'var(--accent)' : 'var(--surface-2)',
+                color: bosqich === b.id ? 'white' : 'var(--ink-soft)',
+                border: bosqich === b.id ? 'none' : '1px solid var(--line)',
+                borderRadius: '12px', padding: '10px 18px', fontSize: '13.5px', fontWeight: 700,
+                cursor: 'pointer', transition: 'all .18s ease', whiteSpace: 'nowrap',
+              }}
+            >
+              {b.emoji} {b.nom}
+            </button>
+          ))}
+        </div>
+
         <div className="rise" style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap', animationDelay: '.05s' }}>
-          {DARS_KATEGORIYALARI.map((kat) => (
+          {kategoriyalar.map((kat) => (
             <button
               key={kat}
               onClick={() => setFiltr(kat)}
