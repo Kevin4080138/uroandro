@@ -53,11 +53,17 @@ export default function AdminDarslarPage() {
     setYuklanmoqda(false)
   }
 
-  const faylUrlOl = async (fayl: File, papka: string): Promise<string> => {
-    const yol = `dars-tarkibi/${tanlanganSlug}/${papka}-${crypto.randomUUID()}_${fayl.name}`
-    const { error } = await supabase.storage.from('kutubxona').upload(yol, fayl)
+  // Fayl yo'li (URL emas!) saqlanadi — bucket yopiq, ko'rish vaqtida vaqtinchalik havola generatsiya qilinadi.
+  const faylYoliniOl = async (fayl: File, papka: string): Promise<string> => {
+    const yol = `${tanlanganSlug}/${papka}-${crypto.randomUUID()}_${fayl.name}`
+    const { error } = await supabase.storage.from('dars-materiallari').upload(yol, fayl)
     if (error) throw error
-    return supabase.storage.from('kutubxona').getPublicUrl(yol).data.publicUrl
+    return yol
+  }
+
+  const koʻrishUchunOch = async (yol: string) => {
+    const { data, error } = await supabase.storage.from('dars-materiallari').createSignedUrl(yol, 300)
+    if (!error && data) window.open(data.signedUrl, '_blank')
   }
 
   const saqla = async () => {
@@ -66,8 +72,8 @@ export default function AdminDarslarPage() {
     setXabar(null)
     try {
       const videoLinklar = videoLinklarMatn.split('\n').map((s) => s.trim()).filter(Boolean)
-      const konspektUrl = konspektFayl ? await faylUrlOl(konspektFayl, 'konspekt') : tarkib?.konspekt_url ?? null
-      const prezentatsiyaUrl = prezentatsiyaFayl ? await faylUrlOl(prezentatsiyaFayl, 'prezentatsiya') : tarkib?.prezentatsiya_url ?? null
+      const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt') : tarkib?.konspekt_url ?? null
+      const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya') : tarkib?.prezentatsiya_url ?? null
 
       const { error } = await supabase.from('dars_tarkibi').upsert(
         { dars_slug: tanlanganSlug, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
@@ -149,7 +155,10 @@ export default function AdminDarslarPage() {
                 <label style={labelStyle}>Konspekt (PDF)</label>
                 {tarkib?.konspekt_url && (
                   <p style={{ margin: '0 0 8px 0', fontSize: '12.5px' }}>
-                    Hozirgi: <a href={tarkib.konspekt_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>faylni ko&apos;rish ↗</a>
+                    Hozirgi fayl bor —{' '}
+                    <button onClick={() => koʻrishUchunOch(tarkib.konspekt_url!)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', cursor: 'pointer', fontSize: '12.5px' }}>
+                      ko&apos;rish ↗
+                    </button>
                   </p>
                 )}
                 <input ref={konspektInput} type="file" accept="application/pdf" onChange={(e) => setKonspektFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
@@ -159,7 +168,10 @@ export default function AdminDarslarPage() {
                 <label style={labelStyle}>Prezentatsiya (PDF/PPTX)</label>
                 {tarkib?.prezentatsiya_url && (
                   <p style={{ margin: '0 0 8px 0', fontSize: '12.5px' }}>
-                    Hozirgi: <a href={tarkib.prezentatsiya_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>faylni ko&apos;rish ↗</a>
+                    Hozirgi fayl bor —{' '}
+                    <button onClick={() => koʻrishUchunOch(tarkib.prezentatsiya_url!)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', cursor: 'pointer', fontSize: '12.5px' }}>
+                      ko&apos;rish ↗
+                    </button>
                   </p>
                 )}
                 <input ref={prezentatsiyaInput} type="file" accept="application/pdf,.ppt,.pptx" onChange={(e) => setPrezentatsiyaFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />

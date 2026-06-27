@@ -52,8 +52,9 @@ export default function DarsDetailPage() {
 
   const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
   const videoLinklar = tarkib?.video_linklar ?? dars?.videoLinklar ?? []
-  const konspektUrl = tarkib?.konspekt_url ?? dars?.konspektUrl
-  const prezentatsiyaUrl = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
+  // Bular endi public URL emas — 'dars-materiallari' (yopiq bucket) ichidagi fayl yo'li.
+  const konspektYoli = tarkib?.konspekt_url ?? dars?.konspektUrl
+  const prezentatsiyaYoli = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
   const amaliyBank = tarkib?.savollar_banki?.length ? tarkib.savollar_banki : dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
   const usmleBank = tarkib?.usmle_savollar ?? dars?.usmleSavollar ?? []
   const nazoratBank = tarkib?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
@@ -64,7 +65,7 @@ export default function DarsDetailPage() {
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
     video: videoLinklar.length > 0,
-    yuklab: !!(konspektUrl || prezentatsiyaUrl),
+    yuklab: !!(konspektYoli || prezentatsiyaYoli),
     amaliy: amaliyBank.length > 0,
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
@@ -126,7 +127,7 @@ export default function DarsDetailPage() {
         {tab === 'nazariya' && !yuklandi && <BoshUlash matn="Yuklanmoqda..." />}
         {tab === 'nazariya' && yuklandi && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
         {tab === 'video' && <VideoBolimi linklar={videoLinklar} />}
-        {tab === 'yuklab' && <YuklabOlishBolimi konspektUrl={konspektUrl} prezentatsiyaUrl={prezentatsiyaUrl} />}
+        {tab === 'yuklab' && <YuklabOlishBolimi konspektYoli={konspektYoli} prezentatsiyaYoli={prezentatsiyaYoli} />}
         {tab === 'amaliy' && (
           <AmaliyTestBolimi
             darsSlug={dars.slug}
@@ -218,46 +219,51 @@ function VideoBolimi({ linklar }: { linklar: string[] }) {
   )
 }
 
-function fayKengaytmasiniOl(url: string) {
-  const tozaUrl = url.split('?')[0]
-  return tozaUrl.split('.').pop()?.toLowerCase() ?? ''
+function fayKengaytmasiniOl(yol: string) {
+  return yol.split('.').pop()?.toLowerCase() ?? ''
 }
 
-function ViewerUrlOl(url: string) {
-  const kengaytma = fayKengaytmasiniOl(url)
-  if (kengaytma === 'pdf') return url
+function ViewerUrlOl(signedUrl: string, asliyYol: string) {
+  const kengaytma = fayKengaytmasiniOl(asliyYol)
+  if (kengaytma === 'pdf') return `${signedUrl}#toolbar=0&navpanes=0`
   // PPT/PPTX (va boshqa Office formatlari) — Microsoft Office Online ko'rgazmasi orqali ichkarida ochiladi
-  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(signedUrl)}`
 }
 
-function YuklabOlishBolimi({ konspektUrl, prezentatsiyaUrl }: { konspektUrl?: string; prezentatsiyaUrl?: string }) {
-  const [ochilgan, setOchilgan] = useState<{ url: string; nom: string } | null>(null)
+function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?: string | null; prezentatsiyaYoli?: string | null }) {
+  const supabase = createClient()
+  const [ochilgan, setOchilgan] = useState<{ signedUrl: string; asliyYol: string; nom: string } | null>(null)
+  const [ochilmoqda, setOchilmoqda] = useState(false)
 
   const fayllar = [
-    konspektUrl && { url: konspektUrl, nom: 'Konspekt (PDF)', icon: '📄' },
-    prezentatsiyaUrl && { url: prezentatsiyaUrl, nom: 'Prezentatsiya', icon: '📊' },
-  ].filter(Boolean) as { url: string; nom: string; icon: string }[]
+    konspektYoli && { yol: konspektYoli, nom: 'Konspekt (PDF)', icon: '📄' },
+    prezentatsiyaYoli && { yol: prezentatsiyaYoli, nom: 'Prezentatsiya', icon: '📊' },
+  ].filter(Boolean) as { yol: string; nom: string; icon: string }[]
 
   if (fayllar.length === 0) {
     return <BoshUlash matn="Yuklab olinadigan materiallar tez orada qo'shiladi." />
   }
 
+  const ochish = async (f: { yol: string; nom: string }) => {
+    setOchilmoqda(true)
+    // Vaqtinchalik (5 daqiqalik) havola — bucket yopiq, doimiy/ulashiladigan link berilmaydi.
+    const { data, error } = await supabase.storage.from('dars-materiallari').createSignedUrl(f.yol, 300)
+    setOchilmoqda(false)
+    if (!error && data) setOchilgan({ signedUrl: data.signedUrl, asliyYol: f.yol, nom: f.nom })
+  }
+
   if (ochilgan) {
     return (
-      <div className="rise">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <button onClick={() => setOchilgan(null)} className="soft-press" style={{
-            background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
-            padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
-          }}>
-            ← Ortga
-          </button>
-          <a href={ochilgan.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>
-            Yangi oynada ochish ↗
-          </a>
-        </div>
+      <div className="rise" onContextMenu={(e) => e.preventDefault()}>
+        <button onClick={() => setOchilgan(null)} className="soft-press" style={{
+          background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
+          padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+          marginBottom: '10px',
+        }}>
+          ← Ortga
+        </button>
         <iframe
-          src={ViewerUrlOl(ochilgan.url)}
+          src={ViewerUrlOl(ochilgan.signedUrl, ochilgan.asliyYol)}
           title={ochilgan.nom}
           style={{ width: '100%', height: '75vh', border: '1px solid var(--line)', borderRadius: '14px', background: 'white' }}
         />
@@ -269,14 +275,15 @@ function YuklabOlishBolimi({ konspektUrl, prezentatsiyaUrl }: { konspektUrl?: st
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {fayllar.map((f, i) => (
         <button
-          key={f.url}
-          onClick={() => setOchilgan(f)}
+          key={f.yol}
+          onClick={() => ochish(f)}
+          disabled={ochilmoqda}
           className="rise lift"
           style={{
             animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
             display: 'flex', alignItems: 'center', gap: '14px', width: '100%',
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-            padding: '16px 20px', color: 'var(--ink)', cursor: 'pointer', textAlign: 'left',
+            padding: '16px 20px', color: 'var(--ink)', cursor: ochilmoqda ? 'wait' : 'pointer', textAlign: 'left',
           }}
         >
           <span style={{
