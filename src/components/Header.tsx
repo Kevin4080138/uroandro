@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
+import { ProfileMenu } from './ProfileMenu'
 
 export function Header({
   backHref, backLabel = 'Bosh sahifa', actions,
@@ -16,7 +17,7 @@ export function Header({
     >
       <h1 className="m-0 flex shrink-0 items-center gap-2 text-lg font-bold sm:text-xl" style={{ color: 'var(--ink)' }}>
         <img src="/urosfera-logo.png" alt="Urosfera" className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
-        Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
+        <span>Uro<span style={{ color: 'var(--accent)' }}>sfera</span></span>
       </h1>
       <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
         {actions}
@@ -28,6 +29,7 @@ export function Header({
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+        <ProfileMenu />
         {backHref && (
           <button
             onClick={() => router.push(backHref)}

@@ -35,11 +35,6 @@ export default function StudentDashboard() {
     getProfile()
   }, [])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth/login')
-  }
-
   if (!profile) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
@@ -65,13 +60,7 @@ export default function StudentDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
 
-      <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} actions={
-        <button onClick={handleLogout} className="btn-animated rounded-lg border px-4 py-2 text-sm" style={{
-          background: 'var(--surface-2)', color: 'var(--danger)', borderColor: 'var(--line)',
-        }}>
-          Chiqish
-        </button>
-      } />
+      <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
       {/* Content */}
       <div style={{ padding: '32px' }}>

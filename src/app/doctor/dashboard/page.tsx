@@ -26,11 +26,6 @@ export default function DoctorDashboard() {
     getProfile()
   }, [])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth/login')
-  }
-
   if (!profile) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
@@ -38,18 +33,7 @@ export default function DoctorDashboard() {
   )
 
   return (
-    <AppShell
-      title={`👨‍⚕️ ${profile.full_name}`}
-      actions={
-        <button
-          onClick={handleLogout}
-          className="btn-animated rounded-lg border px-4 py-2 text-sm"
-          style={{ background: 'var(--surface-2)', color: 'var(--danger)', borderColor: 'var(--line)' }}
-        >
-          Chiqish
-        </button>
-      }
-    >
+    <AppShell title={`👨‍⚕️ ${profile.full_name}`}>
       <div className="px-8 py-8">
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
         <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>

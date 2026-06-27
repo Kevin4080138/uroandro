@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { useTheme } from './ThemeProvider'
 import { createClient } from '@/lib/supabase'
+import { ProfileMenu } from './ProfileMenu'
 
 export function AppShell({ title, actions, children }: { title?: string; actions?: React.ReactNode; children: React.ReactNode }) {
   const router = useRouter()
@@ -59,6 +60,7 @@ export function AppShell({ title, actions, children }: { title?: string; actions
             >
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
+            <ProfileMenu />
           </div>
         </header>
 
