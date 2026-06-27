@@ -13,8 +13,13 @@ const NAV = [
   { href: '/doctor/calculators', icon: '🧮', label: 'Kalkulatorlar' },
   { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
   { href: '/doctor/qollanmalar', icon: '🌐', label: "Qo'llanmalar" },
+]
+
+// Boshqa rollarga "nazar solish" uchun statik ko'rinish sahifalari — qolgan bo'limlardan
+// ajratib, kichikroq va xira ko'rinishda chiqariladi
+const NAV_NAZAR = [
   { href: '/doctor/bemor-bolimi', icon: '👁️', label: 'Bemor bo\'limi' },
-  { href: '/doctor/talaba-bolimi', icon: '🎓', label: 'Talaba bo\'limi' },
+  { href: '/doctor/talaba-bolimi', icon: '👁️', label: 'Talaba bo\'limi' },
 ]
 
 function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
@@ -48,6 +53,44 @@ function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
               {!collapsed && badge > 0 && (
                 <span style={{ minWidth: '20px', height: '20px', background: 'var(--danger)', color: '#fff', borderRadius: '999px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>{badge}</span>
               )}
+            </Link>
+            {collapsed && (
+              <span
+                className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                style={{ background: 'var(--ink)', color: 'var(--bg)', zIndex: 60, boxShadow: '0 4px 14px rgba(0,0,0,.25)' }}
+              >
+                {item.label}
+              </span>
+            )}
+          </div>
+        )
+      })}
+
+      {/* Nazar solish — boshqa rollarning statik ko'rinishi, ajratib, kichikroq/xira chiqariladi */}
+      {!collapsed && (
+        <div style={{ margin: '10px 4px 2px', fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 700, borderTop: '1px solid var(--line)', paddingTop: '10px' }}>
+          Nazar solish
+        </div>
+      )}
+      {collapsed && <div style={{ margin: '6px 8px', borderTop: '1px solid var(--line)' }} />}
+      {NAV_NAZAR.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(item.href)
+        return (
+          <div key={item.href} className="group relative">
+            <Link
+              href={item.href}
+              onClick={onNavigate}
+              className="nav-link flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs"
+              style={{
+                background: active ? 'var(--surface-2)' : 'transparent',
+                color: active ? 'var(--ink-soft)' : 'var(--muted)',
+                fontWeight: 500,
+                opacity: 0.8,
+                justifyContent: collapsed ? 'center' : 'flex-start',
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{item.icon}</span>
+              {!collapsed && <span style={{ flex: 1 }}>{item.label}</span>}
             </Link>
             {collapsed && (
               <span

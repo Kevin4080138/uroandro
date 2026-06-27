@@ -53,8 +53,12 @@ export default function StudentDashboard() {
     { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
-    { icon: '🧑‍🤝‍🧑', title: 'Bemor bo\'limi', desc: "Bemor ilovasi qanday tuzilgan (tanishish uchun)", c: 'var(--accent-2)', href: '/student/bemor-bolimi' },
-    { icon: '👨‍⚕️', title: 'Shifokor bo\'limi', desc: "Shifokor ilovasi qanday tuzilgan (tanishish uchun)", c: 'var(--accent-2)', href: '/student/shifokor-bolimi' },
+  ]
+
+  // Boshqa rollarga nazar solish — asosiy bo'limlardan ajratib, kichikroq ko'rinishda chiqariladi
+  const NAZAR_KARTALAR = [
+    { icon: '🧑‍🤝‍🧑', title: 'Bemor bo\'limi', desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
+    { icon: '👨‍⚕️', title: 'Shifokor bo\'limi', desc: 'Tanishish uchun', href: '/student/shifokor-bolimi' },
   ]
 
   return (
@@ -93,7 +97,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
           {KARTALAR.map((item, i) => (
             <div
               key={item.title}
@@ -104,6 +108,31 @@ export default function StudentDashboard() {
               <div className="dash-icon">{item.icon}</div>
               <h3 className="dash-title">{item.title}</h3>
               <p className="dash-desc">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Nazar solish — boshqa rollar qanday tuzilganini ko'rib chiqish, ajratilgan va kichikroq */}
+        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 700, margin: '0 0 10px' }}>
+          👁️ Nazar solish
+        </p>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '32px' }}>
+          {NAZAR_KARTALAR.map((item, i) => (
+            <div
+              key={item.title}
+              onClick={() => router.push(item.href)}
+              className="rise soft-press"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
+                padding: '10px 16px', opacity: 0.85, animationDelay: `${0.15 + i * 0.05}s`,
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>{item.icon}</span>
+              <div>
+                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--ink-soft)' }}>{item.title}</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.desc}</div>
+              </div>
             </div>
           ))}
         </div>

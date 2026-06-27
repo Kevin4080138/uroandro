@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
-import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi } from '@/lib/doriEslatma'
+import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi, vaqtKelmadiMi } from '@/lib/doriEslatma'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 import { HaftalikIntizom } from '@/components/HaftalikIntizom'
 
@@ -106,10 +106,21 @@ export default function DorilarimPage() {
   const ichilmagan = bugungiDozalar.filter((d) => !d.qabulQilingan)
   const ichilgan = bugungiDozalar.filter((d) => d.qabulQilingan)
 
+  // Bir vaqtda ichiladigan dorilarni bitta guruhga (katakka) yig'amiz
+  const ichilmaganGuruhlar = useMemo(() => {
+    const xarita = new Map<string, Doza[]>()
+    for (const d of ichilmagan) {
+      if (!xarita.has(d.vaqt)) xarita.set(d.vaqt, [])
+      xarita.get(d.vaqt)!.push(d)
+    }
+    return Array.from(xarita.entries()).map(([vaqt, dozalar]) => ({ vaqt, dozalar }))
+  }, [ichilmagan])
+
   const belgila = async (d: Doza) => {
     if (!userId) return
     const kalit = `${d.retsept.id}_${d.tartibi}`
     if (qabullar[kalit]) return
+    if (vaqtKelmadiMi(d.vaqt)) { alert(`Bu doza vaqti hali kelmadi (${d.vaqt}). Vaqti kelganda belgilashingiz mumkin.`); return }
     setBelgilanmoqda(kalit)
     setQabullar((q) => ({ ...q, [kalit]: true }))
     await supabase.from('dori_qabullari').insert({
@@ -210,37 +221,59 @@ export default function DorilarimPage() {
                 {ichilmagan.length === 0 ? (
                   <p style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 700, margin: '0 0 18px' }}>✅ Bugungi barcha dozalar qabul qilindi!</p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
-                    {ichilmagan.map((d) => {
-                      const kalit = `${d.retsept.id}_${d.tartibi}`
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+                    {ichilmaganGuruhlar.map((g) => {
+                      const kelmadi = vaqtKelmadiMi(g.vaqt)
                       return (
-                        <div key={kalit} className="rise" style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
-                          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '12px 16px',
+                        <div key={g.vaqt} className="rise" style={{
+                          background: 'var(--surface)', border: `1px solid ${kelmadi ? 'var(--line)' : 'var(--accent)'}`,
+                          borderRadius: '14px', padding: '12px 16px', opacity: kelmadi ? 0.75 : 1,
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                             <span style={{
-                              fontSize: '13px', fontWeight: 800, color: 'var(--accent)', background: 'var(--accent-soft)',
-                              borderRadius: '8px', padding: '4px 9px', flexShrink: 0,
+                              fontSize: '13px', fontWeight: 800, color: kelmadi ? 'var(--muted)' : 'var(--accent)',
+                              background: kelmadi ? 'var(--surface-2)' : 'var(--accent-soft)',
+                              borderRadius: '8px', padding: '4px 9px',
                             }}>
-                              {d.vaqt}
+                              {g.vaqt}
                             </span>
-                            <div style={{ minWidth: 0 }}>
-                              <div style={{ fontSize: '14px', fontWeight: 700 }}>{d.retsept.nomi}</div>
-                              {d.retsept.dozasi && <div style={{ fontSize: '12px', color: 'var(--muted)' }}>{d.retsept.dozasi}</div>}
-                            </div>
+                            {kelmadi && (
+                              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>⏰ Vaqti hali kelmadi</span>
+                            )}
+                            {g.dozalar.length > 1 && (
+                              <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: 'auto' }}>{g.dozalar.length} ta dori</span>
+                            )}
                           </div>
-                          <button
-                            onClick={() => belgila(d)}
-                            disabled={belgilanmoqda === kalit}
-                            className="soft-press"
-                            style={{
-                              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
-                              padding: '8px 16px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, flexShrink: 0,
-                            }}
-                          >
-                            {belgilanmoqda === kalit ? '...' : '✓ Ichdim'}
-                          </button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {g.dozalar.map((d) => {
+                              const kalit = `${d.retsept.id}_${d.tartibi}`
+                              return (
+                                <div key={kalit} style={{
+                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+                                  background: 'var(--surface-2)', borderRadius: '10px', padding: '8px 12px',
+                                }}>
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{d.retsept.nomi}</div>
+                                    {d.retsept.dozasi && <div style={{ fontSize: '11.5px', color: 'var(--muted)' }}>{d.retsept.dozasi}</div>}
+                                  </div>
+                                  <button
+                                    onClick={() => belgila(d)}
+                                    disabled={belgilanmoqda === kalit || kelmadi}
+                                    title={kelmadi ? `Vaqti ${g.vaqt}da keladi` : undefined}
+                                    className="soft-press"
+                                    style={{
+                                      background: kelmadi ? 'var(--surface)' : 'var(--accent)',
+                                      color: kelmadi ? 'var(--muted)' : 'white',
+                                      border: kelmadi ? '1px solid var(--line)' : 'none', borderRadius: '999px',
+                                      padding: '7px 14px', cursor: kelmadi ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 700, flexShrink: 0,
+                                    }}
+                                  >
+                                    {belgilanmoqda === kalit ? '...' : kelmadi ? '🔒' : '✓ Ichdim'}
+                                  </button>
+                                </div>
+                              )
+                            })}
+                          </div>
                         </div>
                       )
                     })}

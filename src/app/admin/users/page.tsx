@@ -31,6 +31,7 @@ export default function AdminUsersPage() {
   const [xato, setXato] = useState<string | null>(null)
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
+  const [emailXato, setEmailXato] = useState<string | null>(null)
 
   const load = async () => {
     const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
@@ -38,9 +39,12 @@ export default function AdminUsersPage() {
     setLoading(false)
 
     const res = await fetch('/api/admin/foydalanuvchilar')
+    const json = await res.json()
     if (res.ok) {
-      const json = await res.json()
       setEmaillar(json.emaillar ?? {})
+      setEmailXato(null)
+    } else {
+      setEmailXato(json.error ?? "Email'larni yuklab bo'lmadi")
     }
   }
 
@@ -121,6 +125,15 @@ export default function AdminUsersPage() {
             style={{ background: 'var(--surface-2)', color: 'var(--ink)', borderColor: 'var(--line)', maxWidth: '320px', width: '100%' }}
           />
         </div>
+
+        {emailXato && (
+          <div style={{
+            background: 'rgba(220,38,38,.08)', border: '1px solid var(--danger)', borderRadius: '10px',
+            padding: '12px 16px', marginBottom: '16px', fontSize: '12.5px', color: 'var(--danger)',
+          }}>
+            ⚠️ Email manzillarni yuklab bo&apos;lmadi: {emailXato}. Vercel&apos;da <code>SUPABASE_SERVICE_ROLE_KEY</code> sozlanganini tekshiring.
+          </div>
+        )}
 
         {loading ? (
           <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>

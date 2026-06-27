@@ -43,6 +43,14 @@ export function faolKunMiSana(boshlanishSanasi: string, muddatKun: number, sanaS
   return sana >= boshlanish && sana < tugash
 }
 
+// Berilgan "HH:MM" vaqti hali kelmaganmi (hozirgi soatdan keyinmi)
+export function vaqtKelmadiMi(vaqt: string): boolean {
+  const [soat, daqiqa] = vaqt.split(':').map(Number)
+  const hozir = new Date()
+  const hozirgiDaqiqa = hozir.getHours() * 60 + hozir.getMinutes()
+  return soat * 60 + daqiqa > hozirgiDaqiqa
+}
+
 export function qolganKunlar(boshlanishSanasi: string, muddatKun: number): number {
   const boshlanish = new Date(boshlanishSanasi)
   const tugash = new Date(boshlanish)

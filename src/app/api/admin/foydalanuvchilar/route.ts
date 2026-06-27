@@ -15,7 +15,8 @@ export async function GET() {
   let sahifa = 1
   while (true) {
     const { data, error } = await admin.auth.admin.listUsers({ page: sahifa, perPage: 1000 })
-    if (error || !data) break
+    if (error) return NextResponse.json({ error: `Admin API xatosi: ${error.message}` }, { status: 500 })
+    if (!data) break
     for (const u of data.users) emaillar[u.id] = u.email ?? ''
     if (data.users.length < 1000) break
     sahifa++
