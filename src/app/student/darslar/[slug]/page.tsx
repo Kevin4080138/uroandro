@@ -111,6 +111,10 @@ export default function DarsDetailPage() {
 }
 
 function NazariyaBolimi({ dars }: { dars: NonNullable<ReturnType<typeof darsTop>> }) {
+  if (dars.nazariyaHtml) {
+    return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: dars.nazariyaHtml }} />
+  }
+
   return (
     <>
       {dars.bolimlar.map((b, i) => (
