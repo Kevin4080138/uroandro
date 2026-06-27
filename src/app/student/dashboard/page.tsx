@@ -52,6 +52,7 @@ export default function StudentDashboard() {
   const KARTALAR = [
     { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
+    { icon: '🏆', title: 'Reyting', desc: 'Faollik bo\'yicha talabalar reytingi', c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
   ]
 

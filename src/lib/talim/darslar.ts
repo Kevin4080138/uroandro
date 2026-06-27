@@ -10,6 +10,10 @@ export type DarsBolimi = {
   matn: string[] // har bir elementi alohida paragraf
 }
 
+export type UsmleSavoli = TestSavoli & {
+  vinyetka?: string // klinik holat matni (bemor yoshi, shikoyati, tekshiruv natijalari)
+}
+
 export type Bosqich = 'oson' | "o'rta" | 'qiyin'
 
 export type Dars = {
@@ -21,7 +25,18 @@ export type Dars = {
   daqiqa: number
   bolimlar: DarsBolimi[]
   manbalar: string[]
-  test: TestSavoli[]
+  test: TestSavoli[] // eski darslar uchun — to'g'ridan-to'g'ri ko'rsatiladigan qisqa test
+
+  // Quyidagilar ixtiyoriy — to'liq jihozlangan darslar (masalan HARD bosqich) uchun
+  videoLinklar?: string[]
+  konspektUrl?: string
+  prezentatsiyaUrl?: string
+  savollarBanki?: TestSavoli[] // 100talik bank — amaliy testda shu yerdan random 20 tasi tanlanadi
+  usmleSavollar?: UsmleSavoli[]
+  nazoratSavollar?: TestSavoli[]
+  nazoratSavolSoni?: number // nazoratda nechta savol so'raladi (default 20)
+  nazoratVaqtDaqiqa?: number // nazorat uchun vaqt chegarasi (default 15)
+  sertifikatOtishFoizi?: number // shu foizdan yuqori bo'lsa sertifikatga loyiq (default 70)
 }
 
 export const BOSQICHLAR: { id: Bosqich; nom: string; emoji: string; tavsif: string }[] = [
@@ -1419,7 +1434,30 @@ export const DARSLAR: Dars[] = [
   h('h-surunkali-prostatit-asoratlari', 'Surunkali prostatit va uning asoratlari', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari, davolash usullari, sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-kriptorxizm-operativ-davolash', 'Kriptorxizm va uning operativ davolash', "Prostata va erkak jinsiy a'zolari kasalliklari"),
-  h('h-varikotsele-kasalligi', 'Varikotsele kasalligi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+
+  // Pilot dars — to'liq jihozlangan tarkib (video, konspekt, amaliy/USMLE/nazorat test bo'limlari).
+  // Hozircha bo'limlarning skeleti tayyor, mazmuni keyinroq qism-qism to'ldiriladi.
+  {
+    slug: 'h-varikotsele-kasalligi',
+    sarlavha: 'Varikotsele kasalligi',
+    kategoriya: "Prostata va erkak jinsiy a'zolari kasalliklari",
+    bosqich: 'qiyin',
+    qisqa: "To'liq jihozlangan pilot dars: nazariya, video, konspekt, amaliy/USMLE/nazorat test bo'limlari bilan.",
+    daqiqa: 5,
+    bolimlar: [{ sarlavha: 'Tez orada', matn: ["Bu dars mazmuni hozircha tayyorlanmoqda."] }],
+    manbalar: [],
+    test: [],
+    videoLinklar: [],
+    konspektUrl: undefined,
+    prezentatsiyaUrl: undefined,
+    savollarBanki: [],
+    usmleSavollar: [],
+    nazoratSavollar: [],
+    nazoratSavolSoni: 20,
+    nazoratVaqtDaqiqa: 15,
+    sertifikatOtishFoizi: 70,
+  },
+
   h('h-gidrotsele-spermatotsele', 'Gidrotsele, spermatotsele', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-otkir-yorgoq-sindromi', "O'tkir yorg'oq sindromi — o'tkir orxoepididimit, diagnostika, davolash va asoratlari (o'tkir moyak burilishi bilan differensial tashxis)", "Prostata va erkak jinsiy a'zolari kasalliklari"),
 
@@ -1474,4 +1512,14 @@ function h(slug: string, sarlavha: string, kategoriya: string): Dars {
 
 export function darsTop(slug: string) {
   return DARSLAR.find((d) => d.slug === slug)
+}
+
+// Berilgan savol bankidan tasodifiy `soni` tadanini (aralashtirib) tanlab beradi.
+export function shuffleVaTanla<T>(bank: T[], soni: number): T[] {
+  const nusxa = [...bank]
+  for (let i = nusxa.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[nusxa[i], nusxa[j]] = [nusxa[j], nusxa[i]]
+  }
+  return nusxa.slice(0, soni)
 }

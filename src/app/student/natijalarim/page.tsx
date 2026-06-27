@@ -20,6 +20,7 @@ export default function NatijalarimPage() {
         .from('talim_natijalari')
         .select('*')
         .eq('student_id', user.id)
+        .neq('turi', 'nazorat')
         .order('created_at', { ascending: false })
       setNatijalar(data ?? [])
       setLoading(false)

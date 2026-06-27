@@ -1,27 +1,39 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
-import { darsTop } from '@/lib/talim/darslar'
+import { darsTop, shuffleVaTanla, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
+
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat'
 
 export default function DarsDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const router = useRouter()
-  const supabase = createClient()
   const dars = darsTop(slug)
 
-  const [testBoshlandi, setTestBoshlandi] = useState(false)
-  const [javoblar, setJavoblar] = useState<(number | null)[]>(dars ? Array(dars.test.length).fill(null) : [])
-  const [topshirildi, setTopshirildi] = useState(false)
-  const [saqlanmoqda, setSaqlanmoqda] = useState(false)
+  const amaliyBank = dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
+  const usmleBank = dars?.usmleSavollar ?? []
+  const nazoratBank = dars?.nazoratSavollar ?? []
 
-  const tuldi = javoblar.every((v) => v !== null)
-  const togriSon = useMemo(() => {
-    if (!dars) return 0
-    return javoblar.reduce((s: number, v, i) => s + (v === dars.test[i].togri ? 1 : 0), 0)
-  }, [javoblar, dars])
+  const tabMavjud: Record<Tab, boolean> = {
+    nazariya: true,
+    video: !!dars?.videoLinklar?.length,
+    yuklab: !!(dars?.konspektUrl || dars?.prezentatsiyaUrl),
+    amaliy: amaliyBank.length > 0,
+    usmle: usmleBank.length > 0,
+    nazorat: nazoratBank.length > 0,
+  }
+  const TAB_NOMI: Record<Tab, string> = {
+    nazariya: '📖 Nazariya',
+    video: '🎥 Video',
+    yuklab: '📎 Yuklab olish',
+    amaliy: '✅ Amaliy test',
+    usmle: '🏅 USMLE',
+    nazorat: '🔒 Nazorat',
+  }
+
+  const [tab, setTab] = useState<Tab>('nazariya')
 
   if (!dars) {
     return (
@@ -34,178 +46,522 @@ export default function DarsDetailPage() {
     )
   }
 
-  const javobBer = (i: number, val: number) => {
-    if (topshirildi) return
-    setJavoblar((arr) => arr.map((v, j) => (j === i ? val : v)))
-  }
-
-  const topshir = async () => {
-    setTopshirildi(true)
-    setSaqlanmoqda(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      await supabase.from('talim_natijalari').insert({
-        student_id: user.id,
-        dars_slug: dars.slug,
-        dars_nomi: dars.sarlavha,
-        togri_son: togriSon,
-        jami_savol: dars.test.length,
-        foiz: Math.round((togriSon / dars.test.length) * 100),
-      })
-    }
-    setSaqlanmoqda(false)
-  }
-
-  const qaytaUrinish = () => {
-    setJavoblar(Array(dars.test.length).fill(null))
-    setTopshirildi(false)
-  }
-
-  const foiz = Math.round((togriSon / dars.test.length) * 100)
-  const natijaRang = foiz >= 80 ? '#16a34a' : foiz >= 60 ? '#d97706' : '#dc2626'
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/student/darslar" backLabel="Darslar" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #2563eb, #0891b2)', color: 'white',
-          borderRadius: '18px', padding: '26px 28px', marginBottom: '24px',
+          borderRadius: '18px', padding: '26px 28px', marginBottom: '20px',
         }}>
           <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '.04em' }}>{dars.kategoriya}</span>
           <h1 style={{ margin: '6px 0 0', fontSize: '22px', fontWeight: 800, lineHeight: 1.3 }}>{dars.sarlavha}</h1>
-          <p style={{ margin: '10px 0 0', fontSize: '13.5px', opacity: 0.92 }}>⏱ {dars.daqiqa} daqiqa o&apos;qish · {dars.test.length} savollik test</p>
+          <p style={{ margin: '10px 0 0', fontSize: '13.5px', opacity: 0.92 }}>⏱ {dars.daqiqa} daqiqa o&apos;qish</p>
         </div>
 
-        {!testBoshlandi ? (
-          <>
-            {dars.bolimlar.map((b, i) => (
-              <div key={i} className="rise" style={{
-                animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-                padding: '20px 24px', marginBottom: '14px',
-              }}>
-                <h3 style={{ margin: '0 0 10px', fontSize: '15px', fontWeight: 800, color: 'var(--accent)' }}>{b.sarlavha}</h3>
-                {b.matn.map((p, pi) => (
-                  <p key={pi} style={{ margin: pi === 0 ? 0 : '10px 0 0', fontSize: '14px', lineHeight: 1.7, color: 'var(--ink-soft)' }}>{p}</p>
-                ))}
-              </div>
-            ))}
-
-            <div className="rise" style={{
-              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-              padding: '18px 22px', marginBottom: '20px',
-            }}>
-              <h3 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Manbalar</h3>
-              <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {dars.manbalar.map((m) => (
-                  <li key={m} style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>{m}</li>
-                ))}
-              </ul>
-            </div>
-
+        <div className="rise" style={{ display: 'flex', gap: '8px', marginBottom: '22px', flexWrap: 'wrap' }}>
+          {(Object.keys(TAB_NOMI) as Tab[]).filter((t) => tabMavjud[t]).map((t) => (
             <button
-              onClick={() => setTestBoshlandi(true)}
-              className="btn-animated soft-press"
+              key={t}
+              onClick={() => setTab(t)}
+              className="soft-press"
               style={{
-                width: '100%', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
-                padding: '16px', fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+                background: tab === t ? 'var(--accent)' : 'var(--surface-2)',
+                color: tab === t ? 'white' : 'var(--ink-soft)',
+                border: tab === t ? 'none' : '1px solid var(--line)',
+                borderRadius: '10px', padding: '9px 16px', fontSize: '13px', fontWeight: 700,
+                cursor: 'pointer', transition: 'all .18s ease', whiteSpace: 'nowrap',
               }}
             >
-              ✓ Darsni o&apos;qib bo&apos;ldim — Testni boshlash →
+              {TAB_NOMI[t]}
             </button>
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {dars.test.map((s, i) => (
-                <div key={i} className="rise" style={{
-                  animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-                  background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px',
-                }}>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{
-                      width: '24px', height: '24px', borderRadius: '7px', background: 'var(--accent-soft)', color: 'var(--accent)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, flexShrink: 0,
-                    }}>{i + 1}</span>
-                    <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, lineHeight: 1.4 }}>{s.savol}</p>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '34px' }}>
-                    {s.variantlar.map((v, vi) => {
-                      const tanlandi = javoblar[i] === vi
-                      const togriJavob = topshirildi && vi === s.togri
-                      const notogriTanlandi = topshirildi && tanlandi && vi !== s.togri
-                      return (
-                        <button
-                          key={v}
-                          onClick={() => javobBer(i, vi)}
-                          disabled={topshirildi}
-                          style={{
-                            textAlign: 'left',
-                            border: togriJavob ? '1px solid #16a34a' : notogriTanlandi ? '1px solid #dc2626' : tanlandi ? '1px solid var(--accent)' : '1px solid var(--line)',
-                            background: togriJavob ? '#16a34a1a' : notogriTanlandi ? '#dc26261a' : tanlandi ? 'var(--accent-soft)' : 'var(--surface-2)',
-                            color: 'var(--ink)',
-                            borderRadius: '10px', padding: '9px 14px', fontSize: '13px', fontWeight: 600,
-                            cursor: topshirildi ? 'default' : 'pointer',
-                          }}
-                        >
-                          {v} {togriJavob && ' ✓'} {notogriTanlandi && ' ✗'}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {topshirildi && (
-                    <p style={{
-                      margin: '10px 0 0 34px', fontSize: '12.5px', color: 'var(--ink-soft)',
-                      background: 'var(--surface-2)', borderRadius: '8px', padding: '8px 12px', lineHeight: 1.5,
-                    }}>
-                      💡 {s.izoh}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+          ))}
+        </div>
 
-            {!topshirildi ? (
-              <button
-                onClick={topshir}
-                disabled={!tuldi || saqlanmoqda}
-                className="btn-animated soft-press"
-                style={{
-                  width: '100%', marginTop: '20px', background: tuldi ? 'var(--accent)' : 'var(--surface-2)',
-                  color: tuldi ? 'white' : 'var(--muted)', border: 'none', borderRadius: '12px',
-                  padding: '16px', fontSize: '15px', fontWeight: 700, cursor: tuldi ? 'pointer' : 'not-allowed',
-                }}
-              >
-                Javoblarni topshirish
-              </button>
-            ) : (
-              <div className="rise" style={{
-                marginTop: '20px', background: 'var(--surface)', border: `2px solid ${natijaRang}33`, borderRadius: '16px',
-                padding: '24px', textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em' }}>Natijangiz</div>
-                <div style={{ fontSize: '40px', fontWeight: 800, color: natijaRang, margin: '4px 0' }}>{togriSon} / {dars.test.length}</div>
-                <div style={{ fontSize: '15px', fontWeight: 700, color: natijaRang }}>{foiz}% to&apos;g&apos;ri</div>
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '18px', flexWrap: 'wrap' }}>
-                  <button onClick={qaytaUrinish} className="soft-press" style={{
-                    background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
-                    padding: '10px 18px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
-                  }}>
-                    ↺ Qayta urinish
-                  </button>
-                  <button onClick={() => router.push('/student/darslar')} className="soft-press" style={{
-                    background: 'var(--accent)', border: 'none', borderRadius: '10px', color: 'white',
-                    padding: '10px 18px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                  }}>
-                    Boshqa dars →
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
+        {tab === 'nazariya' && <NazariyaBolimi dars={dars} />}
+        {tab === 'video' && <VideoBolimi linklar={dars.videoLinklar ?? []} />}
+        {tab === 'yuklab' && <YuklabOlishBolimi konspektUrl={dars.konspektUrl} prezentatsiyaUrl={dars.prezentatsiyaUrl} />}
+        {tab === 'amaliy' && (
+          <AmaliyTestBolimi
+            darsSlug={dars.slug}
+            darsNomi={dars.sarlavha}
+            bank={amaliyBank}
+          />
+        )}
+        {tab === 'usmle' && (
+          <UsmleTestBolimi
+            darsSlug={dars.slug}
+            darsNomi={dars.sarlavha}
+            bank={usmleBank}
+          />
+        )}
+        {tab === 'nazorat' && (
+          <NazoratTestBolimi
+            darsSlug={dars.slug}
+            darsNomi={dars.sarlavha}
+            bank={nazoratBank}
+            savolSoni={dars.nazoratSavolSoni ?? 20}
+            vaqtDaqiqa={dars.nazoratVaqtDaqiqa ?? 15}
+            otishFoizi={dars.sertifikatOtishFoizi ?? 70}
+          />
         )}
       </div>
     </div>
+  )
+}
+
+function NazariyaBolimi({ dars }: { dars: NonNullable<ReturnType<typeof darsTop>> }) {
+  return (
+    <>
+      {dars.bolimlar.map((b, i) => (
+        <div key={i} className="rise" style={{
+          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+          padding: '20px 24px', marginBottom: '14px',
+        }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: '15px', fontWeight: 800, color: 'var(--accent)' }}>{b.sarlavha}</h3>
+          {b.matn.map((p, pi) => (
+            <p key={pi} style={{ margin: pi === 0 ? 0 : '10px 0 0', fontSize: '14px', lineHeight: 1.7, color: 'var(--ink-soft)' }}>{p}</p>
+          ))}
+        </div>
+      ))}
+
+      {dars.manbalar.length > 0 && (
+        <div className="rise" style={{
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+          padding: '18px 22px',
+        }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Manbalar</h3>
+          <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {dars.manbalar.map((m) => (
+              <li key={m} style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>{m}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  )
+}
+
+function VideoBolimi({ linklar }: { linklar: string[] }) {
+  if (linklar.length === 0) {
+    return <BoshUlash matn="Video darslik tez orada qo'shiladi." />
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {linklar.map((url, i) => (
+        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rise lift" style={{
+          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+          display: 'flex', alignItems: 'center', gap: '14px',
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+          padding: '16px 20px', textDecoration: 'none', color: 'var(--ink)',
+        }}>
+          <span style={{
+            width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+          }}>▶️</span>
+          <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{i + 1}-video darslik</span>
+          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Ko&apos;rish ↗</span>
+        </a>
+      ))}
+    </div>
+  )
+}
+
+function YuklabOlishBolimi({ konspektUrl, prezentatsiyaUrl }: { konspektUrl?: string; prezentatsiyaUrl?: string }) {
+  const fayllar = [
+    konspektUrl && { url: konspektUrl, nom: 'Konspekt (PDF)', icon: '📄' },
+    prezentatsiyaUrl && { url: prezentatsiyaUrl, nom: 'Prezentatsiya', icon: '📊' },
+  ].filter(Boolean) as { url: string; nom: string; icon: string }[]
+
+  if (fayllar.length === 0) {
+    return <BoshUlash matn="Yuklab olinadigan materiallar tez orada qo'shiladi." />
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {fayllar.map((f, i) => (
+        <a key={f.url} href={f.url} target="_blank" rel="noopener noreferrer" className="rise lift" style={{
+          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+          display: 'flex', alignItems: 'center', gap: '14px',
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+          padding: '16px 20px', textDecoration: 'none', color: 'var(--ink)',
+        }}>
+          <span style={{
+            width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+          }}>{f.icon}</span>
+          <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{f.nom}</span>
+          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Yuklab olish ↓</span>
+        </a>
+      ))}
+    </div>
+  )
+}
+
+function BoshUlash({ matn }: { matn: string }) {
+  return (
+    <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
+      <div style={{ fontSize: '36px', marginBottom: '10px' }}>🛠️</div>
+      <p style={{ margin: 0 }}>{matn}</p>
+    </div>
+  )
+}
+
+// ============================================================
+// Umumiy test mexanizmi — amaliy/USMLE/nazorat shu komponent ustida quriladi
+// ============================================================
+
+type TestNatija = { togriSon: number; jami: number }
+
+function TestBlok({
+  savollar,
+  izohKorsat,
+  vaqtDaqiqa,
+  qaytaUrinishKorinsin,
+  boshlashSarlavha,
+  boshlashTugma,
+  onTopshirish,
+}: {
+  savollar: (TestSavoli | UsmleSavoli)[]
+  izohKorsat: boolean
+  vaqtDaqiqa?: number
+  qaytaUrinishKorinsin: boolean
+  boshlashSarlavha: React.ReactNode
+  boshlashTugma: string
+  onTopshirish: (natija: TestNatija) => void | Promise<void>
+}) {
+  const [boshlandi, setBoshlandi] = useState(false)
+  const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(savollar.length).fill(null))
+  const [topshirildi, setTopshirildi] = useState(false)
+  const [qoldiSoniya, setQoldiSoniya] = useState(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
+
+  const tuldi = javoblar.every((v) => v !== null)
+  const togriSon = useMemo(
+    () => javoblar.reduce((s: number, v, i) => s + (v === savollar[i].togri ? 1 : 0), 0),
+    [javoblar, savollar]
+  )
+
+  useEffect(() => {
+    if (!boshlandi || topshirildi || !vaqtDaqiqa) return
+    const interval = setInterval(() => {
+      setQoldiSoniya((s) => {
+        if (s <= 1) {
+          clearInterval(interval)
+          setTopshirildi(true)
+          onTopshirish({ togriSon, jami: savollar.length })
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [boshlandi, topshirildi, vaqtDaqiqa, togriSon, savollar.length, onTopshirish])
+
+  const javobBer = (i: number, val: number) => {
+    if (topshirildi) return
+    setJavoblar((arr) => arr.map((v, j) => (j === i ? val : v)))
+  }
+
+  const topshir = () => {
+    setTopshirildi(true)
+    onTopshirish({ togriSon, jami: savollar.length })
+  }
+
+  const qaytaUrinish = () => {
+    setJavoblar(Array(savollar.length).fill(null))
+    setTopshirildi(false)
+    setQoldiSoniya(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
+    setBoshlandi(false)
+  }
+
+  if (savollar.length === 0) {
+    return <BoshUlash matn="Bu bo'lim savollari tez orada qo'shiladi." />
+  }
+
+  if (!boshlandi) {
+    return (
+      <div className="rise" style={{
+        background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+        padding: '26px 28px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.6, marginBottom: '18px' }}>{boshlashSarlavha}</div>
+        <button onClick={() => setBoshlandi(true)} className="btn-animated soft-press" style={{
+          background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
+          padding: '14px 26px', fontSize: '14.5px', fontWeight: 700, cursor: 'pointer',
+        }}>
+          {boshlashTugma}
+        </button>
+      </div>
+    )
+  }
+
+  const foiz = Math.round((togriSon / savollar.length) * 100)
+  const natijaRang = foiz >= 80 ? '#16a34a' : foiz >= 60 ? '#d97706' : '#dc2626'
+  const daqiqa = Math.floor(qoldiSoniya / 60)
+  const soniya = qoldiSoniya % 60
+
+  return (
+    <>
+      {vaqtDaqiqa && !topshirildi && (
+        <div className="rise" style={{
+          marginBottom: '16px', textAlign: 'center', fontSize: '15px', fontWeight: 800,
+          color: qoldiSoniya <= 60 ? '#dc2626' : 'var(--ink)',
+        }}>
+          ⏱ Qolgan vaqt: {daqiqa}:{soniya.toString().padStart(2, '0')}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {savollar.map((s, i) => {
+          const vinyetka = (s as UsmleSavoli).vinyetka
+          return (
+            <div key={i} className="rise" style={{
+              animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px',
+            }}>
+              {vinyetka && (
+                <p style={{
+                  margin: '0 0 12px', fontSize: '13px', fontStyle: 'italic', color: 'var(--ink-soft)',
+                  background: 'var(--surface-2)', borderRadius: '8px', padding: '10px 12px', lineHeight: 1.6,
+                }}>
+                  {vinyetka}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                <span style={{
+                  width: '24px', height: '24px', borderRadius: '7px', background: 'var(--accent-soft)', color: 'var(--accent)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, flexShrink: 0,
+                }}>{i + 1}</span>
+                <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, lineHeight: 1.4 }}>{s.savol}</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '34px' }}>
+                {s.variantlar.map((v, vi) => {
+                  const tanlandi = javoblar[i] === vi
+                  const togriJavob = izohKorsat && topshirildi && vi === s.togri
+                  const notogriTanlandi = izohKorsat && topshirildi && tanlandi && vi !== s.togri
+                  return (
+                    <button
+                      key={v}
+                      onClick={() => javobBer(i, vi)}
+                      disabled={topshirildi}
+                      style={{
+                        textAlign: 'left',
+                        border: togriJavob ? '1px solid #16a34a' : notogriTanlandi ? '1px solid #dc2626' : tanlandi ? '1px solid var(--accent)' : '1px solid var(--line)',
+                        background: togriJavob ? '#16a34a1a' : notogriTanlandi ? '#dc26261a' : tanlandi ? 'var(--accent-soft)' : 'var(--surface-2)',
+                        color: 'var(--ink)',
+                        borderRadius: '10px', padding: '9px 14px', fontSize: '13px', fontWeight: 600,
+                        cursor: topshirildi ? 'default' : 'pointer',
+                      }}
+                    >
+                      {v} {togriJavob && ' ✓'} {notogriTanlandi && ' ✗'}
+                    </button>
+                  )
+                })}
+              </div>
+              {izohKorsat && topshirildi && (
+                <p style={{
+                  margin: '10px 0 0 34px', fontSize: '12.5px', color: 'var(--ink-soft)',
+                  background: 'var(--surface-2)', borderRadius: '8px', padding: '8px 12px', lineHeight: 1.5,
+                }}>
+                  💡 {s.izoh}
+                </p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {!topshirildi ? (
+        <button
+          onClick={topshir}
+          disabled={!tuldi}
+          className="btn-animated soft-press"
+          style={{
+            width: '100%', marginTop: '20px', background: tuldi ? 'var(--accent)' : 'var(--surface-2)',
+            color: tuldi ? 'white' : 'var(--muted)', border: 'none', borderRadius: '12px',
+            padding: '16px', fontSize: '15px', fontWeight: 700, cursor: tuldi ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Javoblarni topshirish
+        </button>
+      ) : (
+        <div className="rise" style={{
+          marginTop: '20px', background: 'var(--surface)', border: `2px solid ${natijaRang}33`, borderRadius: '16px',
+          padding: '24px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em' }}>Natijangiz</div>
+          <div style={{ fontSize: '40px', fontWeight: 800, color: natijaRang, margin: '4px 0' }}>{togriSon} / {savollar.length}</div>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: natijaRang }}>{foiz}% to&apos;g&apos;ri</div>
+          {qaytaUrinishKorinsin && (
+            <button onClick={qaytaUrinish} className="soft-press" style={{
+              marginTop: '18px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
+              padding: '10px 18px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+            }}>
+              ↺ Qayta urinish
+            </button>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+function AmaliyTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: TestSavoli[] }) {
+  const supabase = createClient()
+  const savollar = useMemo(() => shuffleVaTanla(bank, Math.min(20, bank.length)), [bank])
+
+  const saqla = async ({ togriSon, jami }: TestNatija) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('talim_natijalari').insert({
+      student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
+      togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'amaliy',
+    })
+  }
+
+  if (savollar.length === 0) return <BoshUlash matn="Savollar yuklanmoqda..." />
+
+  return (
+    <TestBlok
+      key={savollar.map((s) => s.savol).join('|')}
+      savollar={savollar}
+      izohKorsat
+      qaytaUrinishKorinsin
+      boshlashSarlavha={<>Bankdan tasodifiy <strong>{savollar.length} ta</strong> savol tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
+      boshlashTugma="Testni boshlash →"
+      onTopshirish={saqla}
+    />
+  )
+}
+
+function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: UsmleSavoli[] }) {
+  const supabase = createClient()
+  const savollar = useMemo(() => shuffleVaTanla(bank, bank.length), [bank])
+
+  const saqla = async ({ togriSon, jami }: TestNatija) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('talim_natijalari').insert({
+      student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
+      togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'usmle',
+    })
+  }
+
+  if (savollar.length === 0) return <BoshUlash matn="Savollar yuklanmoqda..." />
+
+  return (
+    <TestBlok
+      key={savollar.map((s) => s.savol).join('|')}
+      savollar={savollar}
+      izohKorsat
+      qaytaUrinishKorinsin
+      boshlashSarlavha={<>USMLE uslubidagi <strong>{savollar.length} ta</strong> klinik vinyetka savoli. Xohlagancha qayta urinishingiz mumkin.</>}
+      boshlashTugma="USMLE testni boshlash →"
+      onTopshirish={saqla}
+    />
+  )
+}
+
+function NazoratTestBolimi({
+  darsSlug, darsNomi, bank, savolSoni, vaqtDaqiqa, otishFoizi,
+}: {
+  darsSlug: string; darsNomi: string; bank: TestSavoli[]; savolSoni: number; vaqtDaqiqa: number; otishFoizi: number
+}) {
+  const supabase = createClient()
+  const [yuklanmoqda, setYuklanmoqda] = useState(true)
+  const [avvalgiNatija, setAvvalgiNatija] = useState<{ togri_son: number; jami_savol: number; foiz: number; created_at: string } | null>(null)
+  const [savollar, setSavollar] = useState<TestSavoli[]>([])
+  const [yakunlandi, setYakunlandi] = useState<TestNatija | null>(null)
+
+  useEffect(() => {
+    const tekshir = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setYuklanmoqda(false); return }
+      const { data } = await supabase
+        .from('talim_natijalari')
+        .select('togri_son, jami_savol, foiz, created_at')
+        .eq('student_id', user.id)
+        .eq('dars_slug', darsSlug)
+        .eq('turi', 'nazorat')
+        .maybeSingle()
+      setAvvalgiNatija(data ?? null)
+      setSavollar(shuffleVaTanla(bank, Math.min(savolSoni, bank.length)))
+      setYuklanmoqda(false)
+    }
+    tekshir()
+  }, [darsSlug, bank, savolSoni])
+
+  const saqla = async ({ togriSon, jami }: TestNatija) => {
+    setYakunlandi({ togriSon, jami })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('talim_natijalari').insert({
+      student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
+      togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'nazorat',
+    })
+  }
+
+  if (yuklanmoqda) return <BoshUlash matn="Yuklanmoqda..." />
+  if (bank.length === 0) return <BoshUlash matn="Nazorat testi savollari tez orada qo'shiladi." />
+
+  if (avvalgiNatija) {
+    const otdi = avvalgiNatija.foiz >= otishFoizi
+    return (
+      <div className="rise" style={{
+        background: 'var(--surface)', border: `2px solid ${otdi ? '#16a34a' : '#dc2626'}33`, borderRadius: '16px',
+        padding: '26px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          Siz bu nazorat testini allaqachon topshirgansiz
+        </div>
+        <div style={{ fontSize: '36px', fontWeight: 800, margin: '8px 0', color: otdi ? '#16a34a' : '#dc2626' }}>
+          {avvalgiNatija.togri_son} / {avvalgiNatija.jami_savol} ({avvalgiNatija.foiz}%)
+        </div>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--ink-soft)' }}>
+          {new Date(avvalgiNatija.created_at).toLocaleString('uz-UZ')}
+        </p>
+        <p style={{ margin: '14px 0 0', fontSize: '13.5px', fontWeight: 700, color: otdi ? '#16a34a' : '#dc2626' }}>
+          {otdi ? `✓ Sertifikat olish chegarasi (${otishFoizi}%) bajarildi.` : `Sertifikat chegarasi (${otishFoizi}%) bajarilmadi.`}
+        </p>
+      </div>
+    )
+  }
+
+  if (yakunlandi) {
+    const foiz = Math.round((yakunlandi.togriSon / yakunlandi.jami) * 100)
+    const otdi = foiz >= otishFoizi
+    return (
+      <div className="rise" style={{
+        background: 'var(--surface)', border: `2px solid ${otdi ? '#16a34a' : '#dc2626'}33`, borderRadius: '16px',
+        padding: '26px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>Yakuniy natija</div>
+        <div style={{ fontSize: '40px', fontWeight: 800, margin: '8px 0', color: otdi ? '#16a34a' : '#dc2626' }}>
+          {yakunlandi.togriSon} / {yakunlandi.jami} ({foiz}%)
+        </div>
+        <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: otdi ? '#16a34a' : '#dc2626' }}>
+          {otdi ? `🏅 Tabriklaymiz! Sertifikat olish huquqiga ega bo'ldingiz.` : `Sertifikat chegarasi (${otishFoizi}%) bajarilmadi — qaytadan urinish admin/shifokor orqali rasmiylashtiriladi.`}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <TestBlok
+      savollar={savollar}
+      izohKorsat={false}
+      vaqtDaqiqa={vaqtDaqiqa}
+      qaytaUrinishKorinsin={false}
+      boshlashSarlavha={
+        <>
+          Bu — <strong>yakkama-yakka, yopiq</strong> nazorat testi: <strong>{savollar.length} savol</strong>,{' '}
+          <strong>{vaqtDaqiqa} daqiqa</strong>, hech qanday materialdan foydalanish mumkin emas, javoblar darhol
+          ko&apos;rsatilmaydi va faqat <strong>bitta marta</strong> urinish huquqi beriladi. {otishFoizi}% va undan
+          yuqori natija sertifikat olish huquqini beradi.
+        </>
+      }
+      boshlashTugma="Nazorat testini boshlash"
+      onTopshirish={saqla}
+    />
   )
 }
