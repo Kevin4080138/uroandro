@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
+import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 const KATEGORIYA_RANGI: Record<string, string> = {
   Prostata: 'linear-gradient(135deg, #2563eb, #0891b2)',
@@ -22,6 +23,7 @@ export default function DarslarPage() {
   const router = useRouter()
   const [bosqich, setBosqich] = useState<Bosqich>('oson')
   const [filtr, setFiltr] = useState<string>('Hammasi')
+  const { egami, yuklandi } = useMeningObunalarim()
 
   const bosqichDarslari = useMemo(() => DARSLAR.filter((d) => d.bosqich === bosqich), [bosqich])
   const kategoriyalar = useMemo(
@@ -58,7 +60,7 @@ export default function DarslarPage() {
                 cursor: 'pointer', transition: 'all .18s ease', whiteSpace: 'nowrap',
               }}
             >
-              {b.emoji} {b.nom}
+              {b.emoji} {b.nom} {yuklandi && !egami(b.id) && '🔒'}
             </button>
           ))}
         </div>
@@ -103,7 +105,10 @@ export default function DarslarPage() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{d.sarlavha}</h3>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                    {yuklandi && !egami(d.bosqich) && <span title="Sotib olinmagan">🔒 </span>}
+                    {d.sarlavha}
+                  </h3>
                   <span style={{ fontSize: '11px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>⏱ {d.daqiqa} daqiqa</span>
                 </div>
                 <p style={{ margin: '6px 0 8px', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{d.qisqa}</p>

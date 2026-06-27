@@ -74,9 +74,11 @@ export default function AdminDarslarPage() {
       const videoLinklar = videoLinklarMatn.split('\n').map((s) => s.trim()).filter(Boolean)
       const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt') : tarkib?.konspekt_url ?? null
       const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya') : tarkib?.prezentatsiya_url ?? null
+      // bosqich — obuna/RLS tekshiruvi shuni o'qiydi, shu sababli darslar.ts'dagi qiymat bilan avtomatik sinxronlanadi.
+      const bosqich = DARSLAR.find((d) => d.slug === tanlanganSlug)?.bosqich ?? null
 
       const { error } = await supabase.from('dars_tarkibi').upsert(
-        { dars_slug: tanlanganSlug, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
+        { dars_slug: tanlanganSlug, bosqich, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
         { onConflict: 'dars_slug' }
       )
       if (error) throw error

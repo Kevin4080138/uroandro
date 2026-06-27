@@ -13,6 +13,12 @@ const ROLLAR = [
   { value: 'admin', label: '🛠️ Admin' },
 ]
 
+const BOSQICH_PILLLAR: { id: "oson" | "o'rta" | 'qiyin'; emoji: string }[] = [
+  { id: 'oson', emoji: '🟢' },
+  { id: "o'rta", emoji: '🟡' },
+  { id: 'qiyin', emoji: '🔴' },
+]
+
 const inputStyle = {
   background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '8px', padding: '7px 10px', fontSize: '12.5px', outline: 'none', width: '100%', boxSizing: 'border-box' as const,
@@ -32,10 +38,17 @@ export default function AdminUsersPage() {
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
   const [emailXato, setEmailXato] = useState<string | null>(null)
+  const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
 
   const load = async () => {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
-    setUsers((data as Profile[]) ?? [])
+    const [{ data: profillar }, { data: obunaQatorlari }] = await Promise.all([
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('obunalar').select('student_id, bosqich').eq('faol', true),
+    ])
+    setUsers((profillar as Profile[]) ?? [])
+    const om: Record<string, Set<string>> = {}
+    for (const o of obunaQatorlari ?? []) (om[o.student_id] ??= new Set()).add(o.bosqich)
+    setObunalar(om)
     setLoading(false)
 
     const res = await fetch('/api/admin/foydalanuvchilar')
@@ -49,6 +62,21 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  const obunaniAlmashtir = async (studentId: string, bosqich: string) => {
+    const egami = obunalar[studentId]?.has(bosqich) ?? false
+    setObunalar((prev) => {
+      const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
+      if (egami) yangi[studentId].delete(bosqich)
+      else yangi[studentId].add(bosqich)
+      return yangi
+    })
+    if (egami) {
+      await supabase.from('obunalar').delete().eq('student_id', studentId).eq('bosqich', bosqich)
+    } else {
+      await supabase.from('obunalar').upsert({ student_id: studentId, bosqich, faol: true }, { onConflict: 'student_id,bosqich' })
+    }
+  }
 
   const changeRole = async (id: string, role: string) => {
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)))
@@ -142,7 +170,7 @@ export default function AdminUsersPage() {
             <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: 'var(--surface-2)', textAlign: 'left' }}>
-                  {['Ism', 'Login (telefon/email)', 'Rol', 'Holat', "Ro'yxatdan o'tgan", ''].map((h) => (
+                  {['Ism', 'Login (telefon/email)', 'Rol', 'Holat', 'Obuna', "Ro'yxatdan o'tgan", ''].map((h) => (
                     <th key={h} style={{ padding: '12px 16px', color: 'var(--muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -154,7 +182,8 @@ export default function AdminUsersPage() {
                     tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                     tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
                     tahrirParol={tahrirParol} setTahrirParol={setTahrirParol}
-                    tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato} />
+                    tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato}
+                    obunalar={obunalar[u.id] ?? new Set()} obunaniAlmashtir={obunaniAlmashtir} />
                 ))}
               </tbody>
             </table>
@@ -180,7 +209,8 @@ export default function AdminUsersPage() {
                         tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                         tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
                         tahrirParol={tahrirParol} setTahrirParol={setTahrirParol}
-                        tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato} />
+                        tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato}
+                        obunalar={obunalar[u.id] ?? new Set()} obunaniAlmashtir={obunaniAlmashtir} />
                     ))}
                   </tbody>
                 </table>
@@ -196,7 +226,7 @@ export default function AdminUsersPage() {
 function FoydalanuvchiQatori({
   u, emaillar, changeRole, toggleFaol, toggleArxiv, foydalanuvchiniOchir, ochirilmoqda,
   tahrirId, tahrirniOch, setTahrirId, tahrirLogin, setTahrirLogin, tahrirParol, setTahrirParol,
-  tahrirniSaqla, saqlanmoqda, xato,
+  tahrirniSaqla, saqlanmoqda, xato, obunalar, obunaniAlmashtir,
 }: {
   u: Profile; emaillar: Record<string, string>
   changeRole: (id: string, role: string) => void
@@ -212,6 +242,8 @@ function FoydalanuvchiQatori({
   tahrirniSaqla: (u: Profile) => void
   saqlanmoqda: boolean
   xato: string | null
+  obunalar: Set<string>
+  obunaniAlmashtir: (studentId: string, bosqich: string) => void
 }) {
   return (
     <React.Fragment>
@@ -241,6 +273,33 @@ function FoydalanuvchiQatori({
           >
             {u.faol ? 'Faol' : 'Bloklangan'}
           </button>
+        </td>
+        <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+          {u.role !== 'student' ? (
+            <span style={{ color: 'var(--muted)' }}>—</span>
+          ) : (
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {BOSQICH_PILLLAR.map((b) => {
+                const ega = obunalar.has(b.id)
+                return (
+                  <button
+                    key={b.id}
+                    onClick={() => obunaniAlmashtir(u.id, b.id)}
+                    title={`${b.id}${ega ? ' — sotib olingan' : ' — sotib olinmagan'}`}
+                    className="soft-press"
+                    style={{
+                      border: ega ? '1px solid var(--good)' : '1px solid var(--line)',
+                      background: ega ? 'rgba(5,150,105,.12)' : 'var(--surface-2)',
+                      borderRadius: '6px', padding: '3px 7px', fontSize: '12px', cursor: 'pointer',
+                      opacity: ega ? 1 : 0.45,
+                    }}
+                  >
+                    {b.emoji}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </td>
         <td style={{ padding: '12px 16px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{new Date(u.created_at).toLocaleDateString()}</td>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
@@ -281,7 +340,7 @@ function FoydalanuvchiQatori({
       </tr>
       {tahrirId === u.id && (
         <tr style={{ borderTop: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-          <td colSpan={6} style={{ padding: '14px 16px' }}>
+          <td colSpan={7} style={{ padding: '14px 16px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div style={{ flex: '1 1 200px' }}>
                 <label style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>
