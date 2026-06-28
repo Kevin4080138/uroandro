@@ -16,8 +16,8 @@ const ROL_NOMI: Record<string, string> = {
 const BANDLAR = [
   { icon: 'ℹ️', label: 'Biz haqimizda', href: '/student/profil/biz-haqimizda' },
   { icon: '💬', label: 'Izoh (feedback)', href: '/student/profil/feedback' },
-  { icon: '📩', label: 'Adminga yozish', href: 'https://t.me/', tashqi: true },
-  { icon: '📞', label: "Qo'ng'iroq qilish", href: 'tel:+998000000000', tashqi: true },
+  { icon: '📩', label: 'Adminga yozish', href: 'https://t.me/urolog_arabboyev', tashqi: true },
+  { icon: '📞', label: "Qo'ng'iroq qilish", href: 'tel:+998904080138', tashqi: true },
   { icon: '📖', label: "Yo'riqnoma", href: '/student/profil/yoriqnoma' },
   { icon: '📄', label: 'Ommaviy oferta', href: '/student/profil/oferta' },
 ]

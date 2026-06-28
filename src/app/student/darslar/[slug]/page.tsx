@@ -109,7 +109,7 @@ export default function DarsDetailPage() {
             <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)' }}>
               Bu dars <strong>{bosqichMa?.emoji} {bosqichMa?.nom}</strong> bosqichiga tegishli — uni ko&apos;rish uchun shu bosqichni sotib olishingiz kerak.
             </p>
-            <a href="https://t.me/" target="_blank" rel="noopener noreferrer" className="btn-animated soft-press" style={{
+            <a href="https://t.me/urolog_arabboyev" target="_blank" rel="noopener noreferrer" className="btn-animated soft-press" style={{
               display: 'inline-block', background: 'var(--accent)', color: 'white', textDecoration: 'none',
               borderRadius: '12px', padding: '12px 26px', fontSize: '14px', fontWeight: 700,
             }}>
