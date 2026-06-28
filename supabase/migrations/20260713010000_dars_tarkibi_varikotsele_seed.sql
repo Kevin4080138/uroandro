@@ -51,7 +51,7 @@ VALUES (
     <p>
       Tarixan varikoselening og'irlik darajasini baholashda bir nechta tasniflash tizimlari
       qo'llanilgan, biroq hozirgi kunda eng ko'p qabul qilingan klinik tasniflash quyidagicha
-      (Dubin va Amelar, 1970 asosida):
+      (Dubin va Amelar, 1970-yil tasnifi asosida):
     </p>
 
     <div class="table-wrap">
@@ -68,7 +68,7 @@ VALUES (
           <tr>
             <td><strong>Subklinik</strong></td>
             <td>Palpatsiya qilinmaydi, ko'rinmaydi</td>
-            <td>Faqat instrumental tekshiruvda (Dopler UTT) aniqlanadi</td>
+            <td>Faqat instrumental tekshiruvda (Doppler UTT) aniqlanadi</td>
           </tr>
           <tr>
             <td><strong>I daraja</strong></td>
@@ -99,7 +99,7 @@ VALUES (
     <h3>Lokalizatsiya bo'yicha tasniflash</h3>
     <ul>
       <li><strong>Chap tomonlama (90%)</strong> — eng ko'p uchraydigan shakl, anatomik sabablarga bog'liq.</li>
-      <li><strong>Ikki tomonlama</strong> — diagnostik usulga qarab 80% gachagi hollarda aniqlanishi mumkin (kontakt termografiya, Dopler, venografiya).</li>
+      <li><strong>Ikki tomonlama</strong> — diagnostik usulga qarab 80%gacha bo'lgan hollarda aniqlanishi mumkin (kontakt termografiya, Doppler, venografiya).</li>
       <li><strong>O'ng tomonlama izolyatsiyalangan</strong> — juda kam uchraydi; agar aniqlansa, ayniqsa keskin boshlangan bo'lsa, <strong>retroperitoneal patologiya (masalan, buyrak o'smasi)</strong>ni inkor etish zarur.</li>
     </ul>
   </section>
@@ -186,7 +186,7 @@ VALUES (
 
     <h3>4. Boshqa mexanizmlar</h3>
     <ul>
-      <li>Spermatozoidlarda anevuploidiyaga moyillik;</li>
+      <li>Spermatozoidlarda aneuploidiyaga moyillik;</li>
       <li>Hujayra ichi metabolik va ion almashinuvining buzilishi;</li>
       <li>Apoptozga aloqador mikroRNK darajasining oshishi (seminal suyuqlikda).</li>
     </ul>
@@ -214,8 +214,8 @@ VALUES (
     <h3>Asosiy shikoyatlar va topilmalar</h3>
     <ul>
       <li><strong>Bezovtalanish yo'q (asimptomatik)</strong> — eng ko'p uchraydigan variant.</li>
-      <li><strong>Mosjonkada og'riq yoki noqulaylik</strong> — tortuvchi, og'riluvchi xususiyatga ega, uzoq tik turish yoki jismoniy zo'riqishdan keyin kuchayadi, yotgan holatda kamayadi.</li>
-      <li><strong>Mosjonkada "tuguncha" yoki shishish</strong> — og'ir darajalarda ko'zga ko'rinadigan venalar to'plami ("qurt to'plami" — <span class="en-term">"bag of worms"</span> ko'rinishi).</li>
+      <li><strong>Moshonkada og'riq yoki noqulaylik</strong> — tortuvchi, og'riluvchi xususiyatga ega, uzoq tik turish yoki jismoniy zo'riqishdan keyin kuchayadi, yotgan holatda kamayadi.</li>
+      <li><strong>Moshonkada "tuguncha" yoki shishish</strong> — og'ir darajalarda ko'zga ko'rinadigan venalar to'plami ("qurt to'plami" — <span class="en-term">"bag of worms"</span> ko'rinishi).</li>
       <li><strong>Infertillik</strong> — erkaklar reproduktologiya bo'limiga murojaat qilishning eng ko'p sababi.</li>
       <li><strong>Urug' bezi hajmining kichrayishi</strong> — uzoq muddatli varikoseleda, ayniqsa o'smirlik davrida boshlangan bo'lsa, ipsilateral testis atrofiyasi kuzatilishi mumkin.</li>
     </ul>
@@ -228,7 +228,7 @@ VALUES (
     <ul>
       <li>Urug' tizimchasi yuzasi ko'zdan kuzatiladi — kengaygan, varikoz venalar ko'rinishi mumkin;</li>
       <li>Palpatsiya qo'l bilan, avval tinch holatda, keyin <strong>Valsalva sinamasi</strong> (zo'riqib nafas tutish) bilan o'tkaziladi;</li>
-      <li>Ikkala mosjonka taqqoslanadi, urug' bezi hajmi orkidometr yordamida baholanadi.</li>
+      <li>Ikkala moshonka taqqoslanadi, urug' bezi hajmi orkidometr yordamida baholanadi.</li>
     </ul>
 
     <div class="callout callout--note">
@@ -250,7 +250,7 @@ VALUES (
     </p>
 
     <h3>5.2. Instrumental diagnostika</h3>
-    <h4>Mosjonka Doppler ultratovush tekshiruvi (Scrotal Doppler US)</h4>
+    <h4>Moshonka Doppler ultratovush tekshiruvi (Scrotal Doppler US)</h4>
     <p>
       Yuqori chastotali datchiklar (7.5–10 MHz) yordamida o'tkaziladi. Quyidagi holatlarda
       ko'rsatma hisoblanadi:
@@ -280,19 +280,19 @@ VALUES (
     <p>Varikoseleli erkak infertillik bilan murojaat qilganda standart tekshiruv kompleksiga quyidagilar kiradi:</p>
     <ul>
       <li><strong>Spermogramma (semen analizi)</strong> — konsentratsiya, harakatchanlik, morfologiya baholanadi;</li>
-      <li><strong>Endokrin tekshiruv</strong> — serum testosteron darajasi (odatda 280–300 ng/dL dan past bo'lsa gipoandrogenizm haqida gap boradi);</li>
+      <li><strong>Endokrin tekshiruv</strong> — serum testosteron darajasi (odatda 280–300 ng/dL dan past bo'lsa androgen yetishmovchiligi haqida gap boradi);</li>
       <li><strong>Genomik tekshiruv</strong> — kerak bo'lganda (masalan, og'ir oligo-/azoospermiyada).</li>
     </ul>
 
     <h3>5.4. Differensial diagnostika</h3>
     <div class="table-wrap">
       <table>
-        <caption>3-jadval. Mosjonka tuguncha-shishlarining differensial diagnostikasi</caption>
+        <caption>3-jadval. Moshonka tuguncha-shishlarining differensial diagnostikasi</caption>
         <thead><tr><th>Holat</th><th>Asosiy farqlovchi belgi</th></tr></thead>
         <tbody>
           <tr><td><strong>Gidrosele</strong></td><td>Transilluminatsiya pozitiv, suyuqlik to'planishi, venalar tugunchasi yo'q</td></tr>
           <tr><td><strong>Spermatosele</strong></td><td>Epididim ustida joylashgan, alohida kista, Valsalvaga bog'liq emas</td></tr>
-          <tr><td><strong>Chov churrasi (ingvinal gerniya)</strong></td><td>Chov kanali bo'ylab joylashgan, ko'pincha qaytariladi (reduktabel)</td></tr>
+          <tr><td><strong>Chov churrasi (ingvinal gerniya)</strong></td><td>Chov kanali bo'ylab joylashgan, ko'pincha qo'l bilan joyiga qaytariladigan (reduktabel)</td></tr>
           <tr><td><strong>Urug' tizimchasi lipomasi</strong></td><td>Zich, Valsalvada o'lchami o'zgarmaydi</td></tr>
           <tr><td><strong>Buyrak o'smasi (ayniqsa o'ng tomonlama varikoseleda)</strong></td><td>Keskin boshlanish, yoshi katta bemor, qorin/bel sohasida qo'shimcha topilmalar</td></tr>
         </tbody>
@@ -336,7 +336,7 @@ VALUES (
     <h4>Ko'rsatmalar (jarrohlik uchun)</h4>
     <ol class="steps">
       <li><strong>Klinik (palpatsiya bilan aniqlanadigan) varikosele</strong> + patologik spermogramma ko'rsatkichlari + er-xotinning bola ko'rishga intilishi.</li>
-      <li><strong>Mosjonkada og'riq yoki noqulaylik</strong> — konservativ chora-tadbirlarga javob bermaydigan.</li>
+      <li><strong>Moshonkada og'riq yoki noqulaylik</strong> — konservativ chora-tadbirlarga javob bermaydigan.</li>
       <li><strong>O'smirlarda</strong> — progressiv urug' bezi hajmi kichrayishi yoki ikkala tomon o'rtasida sezilarli farq (asimmetriya) mavjud bo'lganda.</li>
       <li><strong>Androgen yetishmovchiligi</strong> (yosh bog'liq past testosteron) bilan birga keladigan klinik varikosele — tanlangan holatlarda.</li>
     </ol>
@@ -407,7 +407,7 @@ VALUES (
       <li><strong>2-bosqich — Davolash zarurligini aniqlash.</strong> Subklinik yoki asimptomatik, normal fertillik — kuzatuv. Klinik varikosele + patologik spermogramma/og'riq/androgen yetishmovchiligi — jarrohlikka yo'naltirish.</li>
       <li><strong>3-bosqich — Usulni tanlash.</strong> Hozirgi oltin standart — <strong>mikroxirurgik subingvinal/ingvinal varikoselektomiya</strong> (eng past qaytalanish va gidrosele ko'rsatkichlari tufayli).</li>
       <li><strong>4-bosqich — Operatsiya.</strong> Mikroskop yoki katta kattalashtiruvchi linzalar (loupe) yordamida urug' bezi arteriyasi, limfa tomirlari va vas deferens saqlanadi; barcha kengaygan ichki urug' venalari bog'lanadi.</li>
-      <li><strong>5-bosqich — Operatsiyadan keyingi davr.</strong> Og'riqsizlantirish (asosan parasetamol/ibuprofen), mosjonka tayanchi, sovuq qo'yish; jinsiy aloqa — 1 hafta, yengil jismoniy yuklama — 2 hafta, to'liq faollik — 4 hafta ichida tiklanadi.</li>
+      <li><strong>5-bosqich — Operatsiyadan keyingi davr.</strong> Og'riqsizlantirish (asosan parasetamol/ibuprofen), moshonka tayanchi, sovuq qo'yish; jinsiy aloqa — 1 hafta, yengil jismoniy yuklama — 2 hafta, to'liq faollik — 4 hafta ichida tiklanadi.</li>
       <li><strong>6-bosqich — Kuzatuv.</strong> 3–6 oydan keyin spermogramma nazorati; qaytalanishni aniqlash uchun klinik tekshiruv va kerak bo'lsa Doppler UTT.</li>
     </ol>
 
@@ -433,7 +433,7 @@ VALUES (
           <tr>
             <td><strong>Gidrosele</strong></td>
             <td>Limfa tomirlarining bog'lanishi (limfostaz)</td>
-            <td>Mikroxirurgik usulda 0%, klassik usullarda 3–33% (o'rtacha ~7%)</td>
+            <td>Mikroxirurgik usulda 0%, klassik usullarda 3–30% (o'rtacha ~7%)</td>
           </tr>
           <tr>
             <td><strong>Urug' bezi arteriyasi shikastlanishi</strong></td>
