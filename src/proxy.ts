@@ -40,7 +40,7 @@ export async function proxy(request: NextRequest) {
   const isHome = pathname === '/'
 
   if (!user) {
-    if (isProtected || isHome) {
+    if (isProtected) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
     return response
