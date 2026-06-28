@@ -360,6 +360,7 @@ function TestBlok({
   izohKorsat,
   vaqtDaqiqa,
   qaytaUrinishKorinsin,
+  qattiqRejim,
   boshlashSarlavha,
   boshlashTugma,
   onTopshirish,
@@ -368,6 +369,7 @@ function TestBlok({
   izohKorsat: boolean
   vaqtDaqiqa?: number
   qaytaUrinishKorinsin: boolean
+  qattiqRejim?: boolean
   boshlashSarlavha: React.ReactNode
   boshlashTugma: string
   onTopshirish: (natija: TestNatija) => void | Promise<void>
@@ -376,6 +378,8 @@ function TestBlok({
   const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(savollar.length).fill(null))
   const [topshirildi, setTopshirildi] = useState(false)
   const [qoldiSoniya, setQoldiSoniya] = useState(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
+  const [buzilishSoni, setBuzilishSoni] = useState(0)
+  const [buzilishSababliYakunlandi, setBuzilishSababliYakunlandi] = useState(false)
 
   const tuldi = javoblar.every((v) => v !== null)
   const togriSon = useMemo(
@@ -409,11 +413,56 @@ function TestBlok({
     onTopshirish({ togriSon, jami: savollar.length })
   }
 
+  // Qattiq rejim — fullscreen majburlash va oyna/tab almashtirishni aniqlash.
+  // Brauzer OS darajasida boshqa ilovaga o'tishni "bloklay" olmaydi, shu sabab
+  // aniqlab, 1-marta ogohlantirib, 2-marta avtomatik yakunlaymiz.
+  useEffect(() => {
+    if (!qattiqRejim || !boshlandi || topshirildi) return
+
+    const buzilish = () => {
+      setBuzilishSoni((prev) => {
+        const yangi = prev + 1
+        if (yangi >= 2) {
+          setBuzilishSababliYakunlandi(true)
+          setTopshirildi(true)
+          onTopshirish({ togriSon, jami: savollar.length })
+        }
+        return yangi
+      })
+    }
+
+    const korinishOzgardi = () => { if (document.hidden) buzilish() }
+    const fullscreenOzgardi = () => { if (!document.fullscreenElement) buzilish() }
+
+    document.addEventListener('visibilitychange', korinishOzgardi)
+    document.addEventListener('fullscreenchange', fullscreenOzgardi)
+    return () => {
+      document.removeEventListener('visibilitychange', korinishOzgardi)
+      document.removeEventListener('fullscreenchange', fullscreenOzgardi)
+    }
+  }, [qattiqRejim, boshlandi, topshirildi, togriSon, savollar.length, onTopshirish])
+
+  // Test tugagach (yoki sahifadan chiqilganda) fullscreen rejimidan chiqamiz.
+  useEffect(() => {
+    if (qattiqRejim && topshirildi && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+    }
+  }, [qattiqRejim, topshirildi])
+
+  const boshla = () => {
+    setBoshlandi(true)
+    if (qattiqRejim) {
+      document.documentElement.requestFullscreen?.().catch(() => {})
+    }
+  }
+
   const qaytaUrinish = () => {
     setJavoblar(Array(savollar.length).fill(null))
     setTopshirildi(false)
     setQoldiSoniya(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
     setBoshlandi(false)
+    setBuzilishSoni(0)
+    setBuzilishSababliYakunlandi(false)
   }
 
   if (savollar.length === 0) {
@@ -427,7 +476,7 @@ function TestBlok({
         padding: '26px 28px', textAlign: 'center',
       }}>
         <div style={{ fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.6, marginBottom: '18px' }}>{boshlashSarlavha}</div>
-        <button onClick={() => setBoshlandi(true)} className="btn-animated soft-press" style={{
+        <button onClick={boshla} className="btn-animated soft-press" style={{
           background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
           padding: '14px 26px', fontSize: '14.5px', fontWeight: 700, cursor: 'pointer',
         }}>
@@ -450,6 +499,16 @@ function TestBlok({
           color: qoldiSoniya <= 60 ? '#dc2626' : 'var(--ink)',
         }}>
           ⏱ Qolgan vaqt: {daqiqa}:{soniya.toString().padStart(2, '0')}
+        </div>
+      )}
+
+      {qattiqRejim && buzilishSoni === 1 && !topshirildi && (
+        <div className="rise" style={{
+          marginBottom: '16px', background: '#fff4e0', border: '1px solid #f5c069', borderRadius: '12px',
+          padding: '12px 16px', fontSize: '13px', fontWeight: 700, color: '#a86200', textAlign: 'center',
+        }}>
+          ⚠️ Diqqat! Siz testdan chiqib ketdingiz (oyna/tab almashtirildi yoki fullscreendan chiqildi).
+          Yana takrorlansa, test avtomatik yakunlanadi.
         </div>
       )}
 
@@ -546,6 +605,11 @@ function TestBlok({
           marginTop: '20px', background: 'var(--surface)', border: `2px solid ${natijaRang}33`, borderRadius: '16px',
           padding: '24px', textAlign: 'center',
         }}>
+          {buzilishSababliYakunlandi && (
+            <p style={{ margin: '0 0 12px', fontSize: '12.5px', fontWeight: 700, color: '#dc2626' }}>
+              ⚠️ Test qoidabuzarlik (oyna/tab almashtirish) tufayli avtomatik yakunlandi.
+            </p>
+          )}
           <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em' }}>Natijangiz</div>
           <div style={{ fontSize: '40px', fontWeight: 800, color: natijaRang, margin: '4px 0' }}>{togriSon} / {savollar.length}</div>
           <div style={{ fontSize: '15px', fontWeight: 700, color: natijaRang }}>{foiz}% to&apos;g&apos;ri</div>
@@ -715,12 +779,17 @@ function NazoratTestBolimi({
       izohKorsat={false}
       vaqtDaqiqa={vaqtDaqiqa}
       qaytaUrinishKorinsin={false}
+      qattiqRejim
       boshlashSarlavha={
         <>
           Bu — <strong>yakkama-yakka, yopiq</strong> nazorat testi: <strong>{savollar.length} savol</strong>,{' '}
           <strong>{vaqtDaqiqa} daqiqa</strong>, hech qanday materialdan foydalanish mumkin emas, javoblar darhol
           ko&apos;rsatilmaydi va faqat <strong>bitta marta</strong> urinish huquqi beriladi. {otishFoizi}% va undan
           yuqori natija sertifikat olish huquqini beradi.
+          <br /><br />
+          🖥️ Test boshlanganda <strong>to&apos;liq ekran (fullscreen)</strong> rejimi yoqiladi. Boshqa tab/oynaga
+          o&apos;tsangiz yoki fullscreendan chiqsangiz — <strong>1-marta ogohlantirilasiz</strong>, qaytarilsa{' '}
+          <strong>test avtomatik yakunlanadi</strong>.
         </>
       }
       boshlashTugma="Nazorat testini boshlash"
