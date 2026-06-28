@@ -6,23 +6,56 @@ import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { DARSLAR } from '@/lib/talim/darslar'
 
+type SertifikatHolati = {
+  darsSlug: string; darsNomi: string; engYaxshiFoiz: number; otishFoizi: number; otdimi: boolean; sana: string
+}
+
 export default function NatijalarimPage() {
   const router = useRouter()
   const supabase = createClient()
   const [natijalar, setNatijalar] = useState<any[]>([])
+  const [sertifikatlar, setSertifikatlar] = useState<SertifikatHolati[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-      const { data } = await supabase
-        .from('talim_natijalari')
-        .select('*')
-        .eq('student_id', user.id)
-        .neq('turi', 'nazorat')
-        .order('created_at', { ascending: false })
+      const [{ data }, { data: nazoratlar }] = await Promise.all([
+        supabase
+          .from('talim_natijalari')
+          .select('*')
+          .eq('student_id', user.id)
+          .neq('turi', 'nazorat')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('talim_natijalari')
+          .select('dars_slug, dars_nomi, foiz, created_at')
+          .eq('student_id', user.id)
+          .eq('turi', 'nazorat')
+          .order('created_at', { ascending: false }),
+      ])
       setNatijalar(data ?? [])
+
+      const darsSlugs = Array.from(new Set((nazoratlar ?? []).map((n) => n.dars_slug)))
+      const { data: tarkiblar } = darsSlugs.length
+        ? await supabase.from('dars_tarkibi').select('dars_slug, sertifikat_otish_foizi').in('dars_slug', darsSlugs)
+        : { data: [] }
+      const otishMap: Record<string, number> = {}
+      for (const t of tarkiblar ?? []) otishMap[t.dars_slug] = t.sertifikat_otish_foizi ?? 70
+
+      const engYaxshilar: Record<string, SertifikatHolati> = {}
+      for (const n of nazoratlar ?? []) {
+        const mavjud = engYaxshilar[n.dars_slug]
+        if (!mavjud || n.foiz > mavjud.engYaxshiFoiz) {
+          const otishFoizi = otishMap[n.dars_slug] ?? 70
+          engYaxshilar[n.dars_slug] = {
+            darsSlug: n.dars_slug, darsNomi: n.dars_nomi, engYaxshiFoiz: n.foiz,
+            otishFoizi, otdimi: n.foiz >= otishFoizi, sana: n.created_at,
+          }
+        }
+      }
+      setSertifikatlar(Object.values(engYaxshilar))
       setLoading(false)
     }
     load()
@@ -63,6 +96,43 @@ export default function NatijalarimPage() {
             </div>
           ))}
         </div>
+
+        {/* Sertifikatlar */}
+        {sertifikatlar.length > 0 && (
+          <div className="rise" style={{ marginBottom: '24px', animationDelay: '.08s' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🏅 Sertifikatlar</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {sertifikatlar.map((s) => (
+                <div key={s.darsSlug} className="rise" style={{
+                  background: 'var(--surface)', border: `1px solid ${s.otdimi ? 'var(--good)' : 'var(--line)'}`,
+                  borderRadius: '14px', padding: '16px 20px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <strong style={{ fontSize: '14px' }}>{s.darsNomi}</strong>
+                    {s.otdimi ? (
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--good)' }}>🏆 Sertifikat olindi</span>
+                    ) : (
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--warn)' }}>
+                        Yana {Math.max(0, s.otishFoizi - s.engYaxshiFoiz)}% kerak
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', borderRadius: '999px', transition: 'width .3s ease',
+                      background: s.otdimi ? 'var(--good)' : 'var(--accent)',
+                      width: `${Math.min(100, Math.round((s.engYaxshiFoiz / s.otishFoizi) * 100))}%`,
+                    }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--muted)' }}>
+                    <span>Eng yaxshi natija: {s.engYaxshiFoiz}%</span>
+                    <span>O&apos;tish chegarasi: {s.otishFoizi}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>

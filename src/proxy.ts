@@ -37,9 +37,10 @@ export async function proxy(request: NextRequest) {
 
   const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
   const isAuthPage = pathname.startsWith('/auth')
+  const isHome = pathname === '/'
 
   if (!user) {
-    if (isProtected) {
+    if (isProtected || isHome) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
     return response
@@ -53,7 +54,7 @@ export async function proxy(request: NextRequest) {
 
   const home = profile?.role ? roleHome[profile.role] : null
 
-  if (isAuthPage && home) {
+  if ((isAuthPage || isHome) && home) {
     return NextResponse.redirect(new URL(home, request.url))
   }
 

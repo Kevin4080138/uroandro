@@ -18,10 +18,10 @@ export default function FeedbackPage() {
     setYuborilmoqda(true)
     setXato(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login'); return }
+    if (!user) { setYuborilmoqda(false); router.push('/auth/login'); return }
     const { error } = await supabase.from('fikrlar').insert({ student_id: user.id, matn: matn.trim() })
     setYuborilmoqda(false)
-    if (error) { setXato("Yuborib bo'lmadi, qaytadan urinib ko'ring."); return }
+    if (error) { setXato(`Yuborib bo'lmadi: ${error.message}`); return }
     setYuborildi(true)
     setMatn('')
   }

@@ -326,3 +326,24 @@ h1, h2, h3, h4 {
   .maqola-html .callout { padding: 14px 14px 14px 42px; }
   .maqola-html .callout::before { left: 12px; top: 14px; }
 }
+
+/* ============================================================
+   Matn belgilash/nusxalashni butun ilova bo'yicha o'chirish —
+   uzun bosishda "Copy" menyusi/belgisi chiqmasligi uchun.
+   Forma maydonlari (input/textarea/contenteditable) bundan mustasno —
+   ularda yozish va matn belgilash odatdagidek ishlaydi.
+   ============================================================ */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
