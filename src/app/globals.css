@@ -208,6 +208,15 @@ h1, h2, h3, h4 {
   --m-acc: #4db8d4;
   --m-text: #1a2535;
   --m-bdr: #d0dde9;
+  /* Tema (kunduzi/tungi)dan mustaqil — manba tarkib doim oq "qog'oz" fonida
+     o'qiladi, aks holda tungi rejimda qora fonda qora matn ko'rinmay qoladi. */
+  background: var(--m-white);
+  color: var(--m-text);
+  border-radius: 16px;
+  padding: 24px;
+}
+@media (max-width: 600px) {
+  .maqola-html { padding: 16px; border-radius: 12px; }
 }
 .maqola-html .article-hero {
   background: linear-gradient(135deg, var(--m-navy) 0%, #123a66 100%);
