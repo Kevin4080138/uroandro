@@ -437,7 +437,7 @@ export default function PatientCardPage() {
             <div style={{ minWidth: 0 }}>
               <h2 style={{ margin: '0 0 6px 0', fontSize: '21px', fontWeight: 700 }}>{bemor.fio}</h2>
               <p style={{ margin: 0, color: 'var(--muted)', fontSize: '12.5px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {(bemor.passport_seria || bemor.passport_raqam) && <span>🪪 {[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ')}</span>}
+                {bemor.namuna && <span style={{ color: 'var(--accent)', fontWeight: 600 }}>✨ Namuna</span>}
                 {bemor.tugilgan_sana && <span>🎂 {bemor.tugilgan_sana}</span>}
                 {bemor.telefon && <span>📞 {bemor.telefon}</span>}
               </p>

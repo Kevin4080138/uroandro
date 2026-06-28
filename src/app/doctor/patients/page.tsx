@@ -20,7 +20,7 @@ const inputStyle = {
 
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
 
-const emptyForm = { familiya: '', ism: '', otasi: '', passport_seria: '', passport_raqam: '', tugilgan_sana: '', telefon: '', viloyat: '', tuman: '', manzil_qolgan: '' }
+const emptyForm = { familiya: '', ism: '', otasi: '', tugilgan_sana: '', telefon: '', viloyat: '', tuman: '', manzil_qolgan: '' }
 
 export default function PatientsRegistryPage() {
   const [bemorlar, setBemorlar] = useState<any[]>([])
@@ -54,8 +54,6 @@ export default function PatientsRegistryPage() {
       familiya: form.familiya.trim() || null,
       ism: form.ism.trim() || null,
       otasi: form.otasi.trim() || null,
-      passport_seria: form.passport_seria.toUpperCase(),
-      passport_raqam: form.passport_raqam,
       tugilgan_sana: form.tugilgan_sana || null,
       telefon: form.telefon,
       manzil,
@@ -71,7 +69,7 @@ export default function PatientsRegistryPage() {
   }
 
   const filtered = bemorlar.filter((b) =>
-    `${b.fio} №${b.raqam ?? ''} ${b.passport_seria ?? ''}${b.passport_raqam ?? ''} ${b.telefon ?? ''}`
+    `${b.fio} №${b.raqam ?? ''} ${b.telefon ?? ''}`
       .toLowerCase()
       .includes(qidiruv.toLowerCase().replace('№', ''))
   )
@@ -124,21 +122,6 @@ export default function PatientsRegistryPage() {
               <div>
                 <label style={labelStyle}>Otasining ismi</label>
                 <input style={inputStyle} value={form.otasi} onChange={set('otasi')} placeholder="Akmal o'g'li" />
-              </div>
-              <div>
-                <label style={labelStyle}>Pasport</label>
-                <input
-                  style={{ ...inputStyle, textTransform: 'uppercase' }}
-                  value={`${form.passport_seria}${form.passport_raqam ? ' ' + form.passport_raqam : ''}`}
-                  onChange={(e) => {
-                    const raw = e.target.value.toUpperCase()
-                    const harflar = (raw.match(/^[A-Z]{0,2}/)?.[0]) || ''
-                    const qolgan = raw.slice(harflar.length).replace(/[^0-9]/g, '')
-                    setForm((f) => ({ ...f, passport_seria: harflar, passport_raqam: qolgan }))
-                  }}
-                  placeholder="AB 1234567"
-                  maxLength={10}
-                />
               </div>
               <div>
                 <label style={labelStyle}>Tug&apos;ilgan sana</label>
@@ -201,10 +184,10 @@ export default function PatientsRegistryPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '15px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {b.raqam && <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--accent)', background: 'var(--accent-soft)', borderRadius: '6px', padding: '1px 7px', fontWeight: 700 }}>№{b.raqam}</span>}
+                    {b.namuna && <span style={{ fontSize: '12px', color: 'var(--accent-2)', fontWeight: 700 }}>✨ Namuna</span>}
                     {b.fio}
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    {(b.passport_seria || b.passport_raqam) && <span>🪪 {[b.passport_seria, b.passport_raqam].filter(Boolean).join(' ')}</span>}
                     {b.telefon && <span>📞 {b.telefon}</span>}
                     {b.tugilgan_sana && <span>🎂 {b.tugilgan_sana}</span>}
                   </div>

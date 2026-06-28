@@ -73,7 +73,6 @@ export default function PrintTashrifPage() {
 
         <h3 style={{ fontSize: '14px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '8px' }}>Bemor ma&apos;lumotlari</h3>
         <div style={row}><span style={label}>F.I.O.</span><span>{bemor.fio}</span></div>
-        <div style={row}><span style={label}>Pasport</span><span>{[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ') || '—'}</span></div>
         <div style={row}><span style={label}>Tug&apos;ilgan sana</span><span>{bemor.tugilgan_sana ?? '—'}</span></div>
         <div style={row}><span style={label}>Telefon</span><span>{bemor.telefon ?? '—'}</span></div>
 

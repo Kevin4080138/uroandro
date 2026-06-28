@@ -104,9 +104,6 @@ export default function PrintReferralPage() {
               <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
                 {yosh != null && <span>{yosh} yosh</span>}
                 {bemor.tugilgan_sana && <span>🎂 {bemor.tugilgan_sana}</span>}
-                {(bemor.passport_seria || bemor.passport_raqam) && (
-                  <span>🪪 {[bemor.passport_seria, bemor.passport_raqam].filter(Boolean).join(' ')}</span>
-                )}
               </div>
             </div>
           </div>
