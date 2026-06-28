@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
 import { telefonToEmail } from '@/lib/patientAuth'
-import Hero from '@/components/Hero'
+import Hero, { MobileHero } from '@/components/Hero'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'staff' | 'patient'>('staff')
@@ -65,10 +65,12 @@ export default function LoginPage() {
       <div style={{
         flex: 1,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px'
       }}>
+      <MobileHero />
       <div style={{
         width: '100%',
         maxWidth: '420px',

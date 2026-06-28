@@ -51,3 +51,25 @@ export default function Hero() {
     </div>
   )
 }
+
+export function MobileHero() {
+  return (
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={fadeUp}
+      transition={{ duration: 0.4 }}
+      className="mb-5 flex flex-col items-center text-center lg:hidden"
+    >
+      <span
+        className="mb-3 w-fit rounded-full border px-3 py-1 text-xs font-medium"
+        style={{ borderColor: 'var(--line)', color: 'var(--accent)', background: 'var(--accent-soft)' }}
+      >
+        Urologiya va Andrologiya platformasi
+      </span>
+      <h1 className="text-2xl font-extrabold leading-tight" style={{ color: 'var(--ink)' }}>
+        Sog&apos;ligingiz <span style={{ color: 'var(--accent)' }}>professional</span> nazoratda
+      </h1>
+    </motion.div>
+  )
+}
