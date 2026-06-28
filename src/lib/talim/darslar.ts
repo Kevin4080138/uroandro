@@ -64,6 +64,50 @@ export function bosqichYolidanTop(yol: string): Bosqich | null {
   return topilgan ? topilgan[0] : null
 }
 
+// Har bir bosqich ichida mavzular "umumiy/kirishdan murakkabga" tartibda ko'rinishi uchun
+// kategoriyalarning to'g'ri ketma-ketligi (kodda yozilish tartibi har doim mos kelmaydi,
+// masalan eski darslar fayl boshida joylashgan bo'lishi mumkin).
+export const BOSQICH_KATEGORIYA_TARTIBI: Record<Bosqich, string[]> = {
+  oson: [
+    'Kirish va semiotika',
+    'Anatomiya va fiziologiya',
+    "Yallig'lanish kasalliklari",
+    "Buyrak va siydik yo'llari",
+    "Prostata va erkak jinsiy a'zolari",
+    'Shoshilinch holatlar',
+  ],
+  "o'rta": [
+    'Kirish va diagnostika',
+    'Anatomiya va fiziologiya',
+    "Yallig'lanish va infeksion kasalliklar",
+    "Buyrak va siydik yo'llari kasalliklari",
+    "Prostata va erkak jinsiy a'zolari",
+    'Shoshilinch urologiya',
+    'Reproduktiv va seksual salomatlik',
+  ],
+  qiyin: [
+    'Kirish va asoslar',
+    'Anatomiya, fiziologiya va embriologiya',
+    "Yallig'lanish va infeksion kasalliklar",
+    "Buyrak va siydik yo'llari kasalliklari",
+    "Prostata va erkak jinsiy a'zolari kasalliklari",
+    'Onkourologiya',
+    "Shoshilinch urologiya (o'tkir holatlar)",
+    'Reproduktiv va seksual salomatlik',
+  ],
+}
+
+// Darslarni bosqich ichidagi to'g'ri bob tartibida saralaydi (kategoriya bo'yicha),
+// bir xil kategoriya ichida esa asl (kodda yozilgan) tartib saqlanadi.
+export function bosqichBoyichaTartibla(darslar: Dars[], bosqich: Bosqich): Dars[] {
+  const tartib = BOSQICH_KATEGORIYA_TARTIBI[bosqich]
+  return [...darslar].sort((a, b) => {
+    const ai = tartib.indexOf(a.kategoriya)
+    const bi = tartib.indexOf(b.kategoriya)
+    return (ai === -1 ? tartib.length : ai) - (bi === -1 ? tartib.length : bi)
+  })
+}
+
 export const DARS_KATEGORIYALARI = [
   'Hammasi',
   'Kirish va semiotika',

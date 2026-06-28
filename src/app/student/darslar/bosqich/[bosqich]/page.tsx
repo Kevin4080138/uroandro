@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { DARSLAR, BOSQICHLAR, bosqichYolidanTop } from '@/lib/talim/darslar'
+import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 const KATEGORIYA_RANGI: Record<string, string> = {
@@ -28,7 +28,10 @@ export default function BosqichDarslariPage() {
   const { egami, yuklandi } = useMeningObunalarim()
 
   const bosqichMa = BOSQICHLAR.find((b) => b.id === bosqich)
-  const bosqichDarslari = useMemo(() => DARSLAR.filter((d) => d.bosqich === bosqich), [bosqich])
+  const bosqichDarslari = useMemo(
+    () => (bosqich ? bosqichBoyichaTartibla(DARSLAR.filter((d) => d.bosqich === bosqich), bosqich) : []),
+    [bosqich]
+  )
   const kategoriyalar = useMemo(
     () => ['Hammasi', ...Array.from(new Set(bosqichDarslari.map((d) => d.kategoriya)))],
     [bosqichDarslari]
