@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
@@ -34,7 +35,7 @@ export default function DarslarPage() {
   const royxat = filtr === 'Hammasi' ? bosqichDarslari : bosqichDarslari.filter((d) => d.kategoriya === filtr)
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[980px] px-8 py-8">
         <div className="rise" style={{ marginBottom: '22px' }}>
@@ -126,6 +127,7 @@ export default function DarslarPage() {
           ))}
         </div>
       </div>
+      <BottomNav />
     </div>
   )
 }

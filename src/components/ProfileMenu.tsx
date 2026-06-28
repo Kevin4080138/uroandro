@@ -75,6 +75,18 @@ export function ProfileMenu() {
               {ROL_NOMI[profile.role] ?? profile.role}
             </p>
           </div>
+          {profile.role === 'student' && (
+            <button
+              onClick={() => { setOchiq(false); router.push('/student/profil') }}
+              className="soft-press"
+              style={{
+                width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--ink)', fontSize: '13px', fontWeight: 600, padding: '8px 4px', borderRadius: '8px',
+              }}
+            >
+              👤 Mening profilim
+            </button>
+          )}
           <button
             onClick={chiqish}
             className="soft-press"

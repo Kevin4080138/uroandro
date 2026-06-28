@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR } from '@/lib/talim/darslar'
 
 export default function StudentDashboard() {
@@ -58,7 +59,7 @@ export default function StudentDashboard() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
 
       <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
@@ -127,6 +128,7 @@ export default function StudentDashboard() {
           ))}
         </div>
       </div>
+      <BottomNav />
     </div>
   )
 }

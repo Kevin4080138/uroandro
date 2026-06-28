@@ -75,7 +75,7 @@ export default function DarsDetailPage() {
   const TAB_NOMI: Record<Tab, string> = {
     nazariya: '📖 Nazariya',
     video: '🎥 Video',
-    yuklab: '📎 Yuklab olish',
+    yuklab: '📂 Materiallar',
     amaliy: '✅ Amaliy test',
     usmle: '🏅 USMLE',
     nazorat: '🔒 Nazorat',
@@ -263,6 +263,7 @@ function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?:
   const supabase = createClient()
   const [ochilgan, setOchilgan] = useState<{ signedUrl: string; asliyYol: string; nom: string } | null>(null)
   const [ochilmoqda, setOchilmoqda] = useState(false)
+  const [xato, setXato] = useState<string | null>(null)
 
   const fayllar = [
     konspektYoli && { yol: konspektYoli, nom: 'Konspekt (PDF)', icon: '📄' },
@@ -275,22 +276,31 @@ function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?:
 
   const ochish = async (f: { yol: string; nom: string }) => {
     setOchilmoqda(true)
+    setXato(null)
     // Vaqtinchalik (5 daqiqalik) havola — bucket yopiq, doimiy/ulashiladigan link berilmaydi.
     const { data, error } = await supabase.storage.from('dars-materiallari').createSignedUrl(f.yol, 300)
     setOchilmoqda(false)
-    if (!error && data) setOchilgan({ signedUrl: data.signedUrl, asliyYol: f.yol, nom: f.nom })
+    if (error) { setXato(`Faylni ochib bo'lmadi: ${error.message}`); return }
+    if (data) setOchilgan({ signedUrl: data.signedUrl, asliyYol: f.yol, nom: f.nom })
   }
 
   if (ochilgan) {
+    const ppt = fayKengaytmasiniOl(ochilgan.asliyYol) !== 'pdf'
     return (
       <div className="rise" onContextMenu={(e) => e.preventDefault()}>
-        <button onClick={() => setOchilgan(null)} className="soft-press" style={{
-          background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
-          padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
-          marginBottom: '10px',
-        }}>
-          ← Ortga
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '10px', flexWrap: 'wrap' }}>
+          <button onClick={() => setOchilgan(null)} className="soft-press" style={{
+            background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px',
+            padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+          }}>
+            ← Ortga
+          </button>
+          {ppt && (
+            <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
+              Ko&apos;rinmasa, bir necha soniya kuting yoki qaytadan oching.
+            </span>
+          )}
+        </div>
         <iframe
           src={ViewerUrlOl(ochilgan.signedUrl, ochilgan.asliyYol)}
           title={ochilgan.nom}
@@ -320,9 +330,12 @@ function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?:
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
           }}>{f.icon}</span>
           <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{f.nom}</span>
-          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Ochish →</span>
+          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>{ochilmoqda ? 'Ochilmoqda...' : 'Ochish →'}</span>
         </button>
       ))}
+      {xato && (
+        <p style={{ color: 'var(--danger)', fontSize: '12.5px', margin: 0 }}>{xato}</p>
+      )}
     </div>
   )
 }

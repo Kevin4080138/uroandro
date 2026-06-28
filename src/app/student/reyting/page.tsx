@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { BottomNav } from '@/components/BottomNav'
 import { createClient } from '@/lib/supabase'
 
 type ReytingQatori = { studentId: string; ism: string; urinishSoni: number; ortachaFoiz: number }
@@ -55,7 +56,7 @@ export default function ReytingPage() {
   const MEDAL = ['🥇', '🥈', '🥉']
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
         <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>🏆 Reyting</h2>
@@ -98,6 +99,7 @@ export default function ReytingPage() {
           </div>
         )}
       </div>
+      <BottomNav />
     </div>
   )
 }
