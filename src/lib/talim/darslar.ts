@@ -1515,3 +1515,15 @@ export function shuffleVaTanla<T>(bank: T[], soni: number): T[] {
   }
   return nusxa.slice(0, soni)
 }
+
+// Savol javob variantlarini (va to'g'ri javob indeksini mos holda) aralashtiradi —
+// bazada qanday tartibda saqlangani har bir talaba/urinish uchun ahamiyatsiz bo'lib qoladi,
+// shu bilan javob pozitsiyasi bo'yicha taxmin qilish imkoniyati yo'qoladi.
+export function variantlarniAralashtir<T extends TestSavoli>(savol: T): T {
+  const juftlar = savol.variantlar.map((matn, i) => ({ matn, togriMi: i === savol.togri }))
+  for (let i = juftlar.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[juftlar[i], juftlar[j]] = [juftlar[j], juftlar[i]]
+  }
+  return { ...savol, variantlar: juftlar.map((j) => j.matn), togri: juftlar.findIndex((j) => j.togriMi) }
+}

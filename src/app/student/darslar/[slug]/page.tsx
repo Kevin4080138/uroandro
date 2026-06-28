@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
-import { darsTop, shuffleVaTanla, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
+import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat'
@@ -453,6 +453,21 @@ function TestBlok({
         </div>
       )}
 
+      {!topshirildi && (
+        <div className="rise" style={{ marginBottom: '18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)', marginBottom: '6px', fontWeight: 600 }}>
+            <span>Javob berilgan: {javoblar.filter((v) => v !== null).length}/{savollar.length}</span>
+            <span>{Math.round((javoblar.filter((v) => v !== null).length / savollar.length) * 100)}%</span>
+          </div>
+          <div style={{ height: '6px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: '999px', background: 'var(--accent)', transition: 'width .25s ease',
+              width: `${(javoblar.filter((v) => v !== null).length / savollar.length) * 100}%`,
+            }} />
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {savollar.map((s, i) => {
           const vinyetka = (s as UsmleSavoli).vinyetka
@@ -550,7 +565,10 @@ function TestBlok({
 
 function AmaliyTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: TestSavoli[] }) {
   const supabase = createClient()
-  const savollar = useMemo(() => shuffleVaTanla(bank, Math.min(20, bank.length)), [bank])
+  const savollar = useMemo(
+    () => shuffleVaTanla(bank, Math.min(20, bank.length)).map(variantlarniAralashtir),
+    [bank]
+  )
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -578,7 +596,10 @@ function AmaliyTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; dars
 
 function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: UsmleSavoli[] }) {
   const supabase = createClient()
-  const savollar = useMemo(() => shuffleVaTanla(bank, Math.min(5, bank.length)), [bank])
+  const savollar = useMemo(
+    () => shuffleVaTanla(bank, Math.min(5, bank.length)).map(variantlarniAralashtir),
+    [bank]
+  )
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -627,7 +648,7 @@ function NazoratTestBolimi({
         .eq('turi', 'nazorat')
         .maybeSingle()
       setAvvalgiNatija(data ?? null)
-      setSavollar(shuffleVaTanla(bank, Math.min(savolSoni, bank.length)))
+      setSavollar(shuffleVaTanla(bank, Math.min(savolSoni, bank.length)).map(variantlarniAralashtir))
       setYuklanmoqda(false)
     }
     tekshir()
