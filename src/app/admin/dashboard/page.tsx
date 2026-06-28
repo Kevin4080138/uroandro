@@ -53,6 +53,7 @@ export default function AdminDashboard() {
             { icon: '📚', title: 'Darslar tarkibi', desc: 'Video, konspekt, prezentatsiya fayllari', href: '/admin/darslar', c: 'var(--warn)' },
             { icon: '💬', title: 'Fikrlar', desc: 'Talabalardan kelgan izohlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
             { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi', href: '/admin/statistika', c: 'var(--good)' },
+            { icon: '🛡️', title: 'Audit log', desc: "Admin amallari tarixi", href: '/admin/audit', c: 'var(--danger)' },
           ].map((item, i) => (
             <div key={item.title} onClick={() => item.href && router.push(item.href)}
               className={`dash-card rise ${item.href ? '' : 'dash-soon'}`}

@@ -32,5 +32,12 @@ export async function PATCH(req: Request) {
     await admin.from('profiles').update({ email }).eq('id', userId)
   }
 
+  await admin.from('admin_audit_log').insert({
+    admin_id: user.id,
+    amal: 'foydalanuvchi_tahrirlash',
+    maqsad_user_id: userId,
+    tafsilot: { email: email || undefined, telefon: telefon || undefined, parol_ozgartirildi: !!parol },
+  })
+
   return NextResponse.json({ ok: true })
 }

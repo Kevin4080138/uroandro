@@ -15,9 +15,18 @@ export async function POST(req: Request) {
   if (userId === user.id) return NextResponse.json({ error: "O'zingizni o'chira olmaysiz" }, { status: 400 })
 
   const admin = createAdminClient()
+  const { data: maqsadProfil } = await admin.from('profiles').select('full_name, role, email, telefon').eq('id', userId).single()
+
   await admin.from('profiles').delete().eq('id', userId)
   const { error } = await admin.auth.admin.deleteUser(userId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await admin.from('admin_audit_log').insert({
+    admin_id: user.id,
+    amal: "foydalanuvchi_ochirish",
+    maqsad_user_id: userId,
+    tafsilot: maqsadProfil ?? null,
+  })
 
   return NextResponse.json({ ok: true })
 }
