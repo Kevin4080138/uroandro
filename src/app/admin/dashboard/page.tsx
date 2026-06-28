@@ -51,6 +51,7 @@ export default function AdminDashboard() {
             { icon: '👥', title: 'Foydalanuvchilar', desc: 'Talaba, bemor, shifokorlarni boshqarish', href: '/admin/users', c: 'var(--accent)' },
             { icon: '📝', title: 'Kontent', desc: 'Protokol va kutubxona materiallarini boshqarish', href: '/admin/content', c: 'var(--accent-2)' },
             { icon: '📚', title: 'Darslar tarkibi', desc: 'Video, konspekt, prezentatsiya fayllari', href: '/admin/darslar', c: 'var(--warn)' },
+            { icon: '💬', title: 'Fikrlar', desc: 'Talabalardan kelgan izohlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
             { icon: '📈', title: 'Statistika', desc: 'Platforma faolligi', href: '/admin/statistika', c: 'var(--good)' },
           ].map((item, i) => (
             <div key={item.title} onClick={() => item.href && router.push(item.href)}
