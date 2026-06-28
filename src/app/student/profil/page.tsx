@@ -28,6 +28,9 @@ export default function ProfilPage() {
   const { theme, toggle } = useTheme()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [ochirilmoqda, setOchirilmoqda] = useState(false)
+  const [parolModal, setParolModal] = useState(false)
+  const [parol, setParol] = useState('')
+  const [parolXato, setParolXato] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -43,14 +46,25 @@ export default function ProfilPage() {
     router.push('/auth/login')
   }
 
-  const hisobniOchir = async () => {
+  const hisobniOchir = () => {
     if (!confirm("Hisobingizni BUTUNLAY o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi va barcha ma'lumotlaringiz (natijalar, obunalar) yo'qoladi.")) return
-    if (!confirm("Tasdiqlash uchun yana bir bor bosing — bu so'nggi ogohlantirish.")) return
+    setParol('')
+    setParolXato('')
+    setParolModal(true)
+  }
+
+  const tasdiqlabOchir = async () => {
+    if (!parol) { setParolXato('Parolni kiriting'); return }
     setOchirilmoqda(true)
-    const res = await fetch('/api/hisobni-ochirish', { method: 'POST' })
+    setParolXato('')
+    const res = await fetch('/api/hisobni-ochirish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: parol }),
+    })
     if (!res.ok) {
       const j = await res.json().catch(() => ({}))
-      alert(j.error ?? "Hisobni o'chirib bo'lmadi")
+      setParolXato(j.error ?? "Hisobni o'chirib bo'lmadi")
       setOchirilmoqda(false)
       return
     }
@@ -158,6 +172,59 @@ export default function ProfilPage() {
           </button>
         </div>
       </div>
+
+      {parolModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100,
+        }}>
+          <div style={{
+            width: '100%', maxWidth: '380px', background: 'var(--surface)', borderRadius: '16px',
+            padding: '24px', border: '1px solid var(--line)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '17px', color: 'var(--ink)' }}>Parolni tasdiqlang</h3>
+            <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--muted)' }}>
+              Hisobni o&apos;chirish irreversible amal — davom etish uchun joriy parolingizni kiriting.
+            </p>
+            <input
+              type="password"
+              value={parol}
+              onChange={(e) => setParol(e.target.value)}
+              placeholder="Joriy parol"
+              autoFocus
+              style={{
+                width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
+                borderRadius: '10px', padding: '12px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            {parolXato && <p style={{ color: 'var(--danger)', fontSize: '13px', margin: '8px 0 0' }}>{parolXato}</p>}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+              <button
+                onClick={() => setParolModal(false)}
+                disabled={ochirilmoqda}
+                style={{
+                  flex: 1, background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
+                  borderRadius: '10px', padding: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={tasdiqlabOchir}
+                disabled={ochirilmoqda}
+                style={{
+                  flex: 1, background: 'var(--danger)', color: 'white', border: 'none',
+                  borderRadius: '10px', padding: '12px', fontSize: '14px', fontWeight: 600,
+                  cursor: ochirilmoqda ? 'wait' : 'pointer', opacity: ochirilmoqda ? .7 : 1,
+                }}
+              >
+                {ochirilmoqda ? "O'chirilmoqda..." : "Hisobni o'chirish"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   )
