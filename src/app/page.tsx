@@ -52,7 +52,7 @@ export default function LandingPage() {
             className="text-4xl font-extrabold leading-tight sm:text-6xl"
             style={{ color: 'var(--ink)' }}
           >
-            Uro<span style={{ color: 'var(--accent)' }}>sfera</span> bilan o&apos;qing va ishlang
+            Uro<span style={{ color: 'var(--accent)' }}>sfera</span>{' '}bilan o&apos;qing va ishlang
           </motion.h1>
 
           <motion.p
