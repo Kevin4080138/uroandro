@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
 import { telefonToEmail } from '@/lib/patientAuth'
+import Hero from '@/components/Hero'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'staff' | 'patient'>('staff')
@@ -59,14 +60,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'var(--bg)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '16px'
-    }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex' }}>
+      <Hero />
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px'
+      }}>
       <div style={{
         width: '100%',
         maxWidth: '420px',
@@ -213,6 +215,7 @@ export default function LoginPage() {
             </a>
           </p>
         </div>
+      </div>
       </div>
     </div>
   )
