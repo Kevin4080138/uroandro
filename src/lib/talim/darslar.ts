@@ -46,6 +46,14 @@ export const BOSQICHLAR: { id: Bosqich; nom: string; emoji: string; tavsif: stri
   { id: 'qiyin', nom: 'QIYIN — Murakkab holatlar', emoji: '🔴', tavsif: "Murakkab va kam uchraydigan holatlar" },
 ]
 
+// URL'da apostrof noqulay bo'lgani uchun (o'rta), bosqichlar uchun alohida yo'l-nom moslamasi.
+export const BOSQICH_YOLI: Record<Bosqich, string> = { oson: 'oson', "o'rta": 'orta', qiyin: 'qiyin' }
+
+export function bosqichYolidanTop(yol: string): Bosqich | null {
+  const topilgan = (Object.entries(BOSQICH_YOLI) as [Bosqich, string][]).find(([, v]) => v === yol)
+  return topilgan ? topilgan[0] : null
+}
+
 export const DARS_KATEGORIYALARI = [
   'Hammasi',
   'Kirish va semiotika',

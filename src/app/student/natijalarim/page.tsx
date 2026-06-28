@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
-import { DARSLAR } from '@/lib/talim/darslar'
+import { DARSLAR, BOSQICHLAR } from '@/lib/talim/darslar'
 
 type SertifikatHolati = {
   darsSlug: string; darsNomi: string; engYaxshiFoiz: number; otishFoizi: number; otdimi: boolean; sana: string
@@ -61,6 +61,15 @@ export default function NatijalarimPage() {
     load()
   }, [])
 
+  const bosqichSertifikatlari = useMemo(() => {
+    const otganSlugSet = new Set(sertifikatlar.filter((s) => s.otdimi).map((s) => s.darsSlug))
+    return BOSQICHLAR.map((b) => {
+      const darslar = DARSLAR.filter((d) => d.bosqich === b.id)
+      const otganSoni = darslar.filter((d) => otganSlugSet.has(d.slug)).length
+      return { ...b, jami: darslar.length, otgan: otganSoni, olindi: darslar.length > 0 && otganSoni === darslar.length }
+    })
+  }, [sertifikatlar])
+
   const statistika = useMemo(() => {
     const yakunlanganSlug = new Set(natijalar.map((n) => n.dars_slug))
     const ortachaFoiz = natijalar.length ? Math.round(natijalar.reduce((s, n) => s + n.foiz, 0) / natijalar.length) : 0
@@ -97,10 +106,41 @@ export default function NatijalarimPage() {
           ))}
         </div>
 
-        {/* Sertifikatlar */}
+        {/* Bosqich sertifikatlari (umumiy) */}
+        <div className="rise" style={{ marginBottom: '24px', animationDelay: '.06s' }}>
+          <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🎓 Bosqich sertifikatlari</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {bosqichSertifikatlari.map((b) => (
+              <div key={b.id} className="rise" style={{
+                background: 'var(--surface)', border: `1px solid ${b.olindi ? 'var(--good)' : 'var(--line)'}`,
+                borderRadius: '14px', padding: '16px 20px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '14px' }}>{b.emoji} {b.nom}</strong>
+                  {b.olindi ? (
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--good)' }}>🏆 Sertifikat olindi</span>
+                  ) : (
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--warn)' }}>
+                      {b.otgan}/{b.jami} mavzu bajarildi
+                    </span>
+                  )}
+                </div>
+                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', borderRadius: '999px', transition: 'width .3s ease',
+                    background: b.olindi ? 'var(--good)' : 'var(--accent)',
+                    width: `${b.jami ? Math.round((b.otgan / b.jami) * 100) : 0}%`,
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mavzu bo'yicha sertifikat tafsilotlari */}
         {sertifikatlar.length > 0 && (
           <div className="rise" style={{ marginBottom: '24px', animationDelay: '.08s' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🏅 Sertifikatlar</h3>
+            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🏅 Mavzu sertifikatlari (tafsilot)</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {sertifikatlar.map((s) => (
                 <div key={s.darsSlug} className="rise" style={{
