@@ -98,7 +98,11 @@ export default function BosqichDarslariPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
-                    {yuklandi && !egami(d.bosqich) && <span title="Sotib olinmagan">🔒 </span>}
+                    {d.bepulNamuna ? (
+                      <span title="Bepul namuna" style={{ fontSize: '11px', color: 'var(--good)', fontWeight: 800 }}>🎁 BEPUL </span>
+                    ) : (
+                      yuklandi && !egami(d.bosqich) && <span title="Sotib olinmagan">🔒 </span>
+                    )}
                     {d.sarlavha}
                   </h3>
                   <span style={{ fontSize: '11px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>⏱ {d.daqiqa} daqiqa</span>

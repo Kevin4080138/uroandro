@@ -94,7 +94,7 @@ export default function DarsDetailPage() {
     )
   }
 
-  if (obunaYuklandi && !egami(dars.bosqich)) {
+  if (!dars.bepulNamuna && obunaYuklandi && !egami(dars.bosqich)) {
     const bosqichMa = BOSQICHLAR.find((b) => b.id === dars.bosqich)
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
@@ -129,7 +129,17 @@ export default function DarsDetailPage() {
           background: 'linear-gradient(135deg, #2563eb, #0891b2)', color: 'white',
           borderRadius: '18px', padding: '26px 28px', marginBottom: '20px',
         }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '.04em' }}>{dars.kategoriya}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '.04em' }}>{dars.kategoriya}</span>
+            {dars.bepulNamuna && (
+              <span style={{
+                fontSize: '10.5px', fontWeight: 800, background: 'rgba(255,255,255,.22)', borderRadius: '999px',
+                padding: '2px 10px', letterSpacing: '.02em',
+              }}>
+                🎁 BEPUL NAMUNA
+              </span>
+            )}
+          </div>
           <h1 style={{ margin: '6px 0 0', fontSize: '22px', fontWeight: 800, lineHeight: 1.3 }}>{dars.sarlavha}</h1>
           <p style={{ margin: '10px 0 0', fontSize: '13.5px', opacity: 0.92 }}>⏱ {dars.daqiqa} daqiqa o&apos;qish</p>
         </div>

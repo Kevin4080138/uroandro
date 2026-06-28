@@ -21,10 +21,24 @@ export default function DarslarPage() {
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
         <div className="rise" style={{ marginBottom: '24px' }}>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>📖 Darslar</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>📖 Darslar</h2>
+            <button
+              onClick={() => router.push('/student/profil/yoriqnoma')}
+              className="soft-press"
+              style={{
+                background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)',
+                borderRadius: '999px', padding: '7px 16px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ❓ Qanday o&apos;zlashtirish kerak?
+            </button>
+          </div>
           <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: '13.5px' }}>
             Avval bosqichni tanlang — har biri alohida obuna va o&apos;z sertifikatiga ega.
-            Jami <strong style={{ color: 'var(--ink)' }}>{DARSLAR.length}</strong> ta dars.
+            Jami <strong style={{ color: 'var(--ink)' }}>{DARSLAR.length}</strong> ta dars,
+            har bosqichdan bir nechtasi <strong style={{ color: 'var(--good)' }}>🎁 bepul</strong> sinab ko&apos;rish uchun ochiq.
           </p>
         </div>
 

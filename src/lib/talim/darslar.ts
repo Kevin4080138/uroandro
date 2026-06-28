@@ -38,12 +38,22 @@ export type Dars = {
   nazoratSavolSoni?: number // nazoratda nechta savol so'raladi (default 20)
   nazoratVaqtDaqiqa?: number // nazorat uchun vaqt chegarasi (default 15)
   sertifikatOtishFoizi?: number // shu foizdan yuqori bo'lsa sertifikatga loyiq (default 70)
+  bepulNamuna?: boolean // obunasiz ham to'liq ko'rish mumkin — bosqichni "sinab ko'rish" uchun
 }
 
 export const BOSQICHLAR: { id: Bosqich; nom: string; emoji: string; tavsif: string }[] = [
-  { id: 'oson', nom: 'EASY — Asoslar', emoji: '🟢', tavsif: "Umumiy urologiya asoslari" },
-  { id: "o'rta", nom: "O'RTA — Klinik chuqurlik", emoji: '🟡', tavsif: 'Aniq kasalliklar bo\'yicha chuqur klinik bilim' },
-  { id: 'qiyin', nom: 'QIYIN — Murakkab holatlar', emoji: '🔴', tavsif: "Murakkab va kam uchraydigan holatlar" },
+  {
+    id: 'oson', nom: 'EASY — Asoslar', emoji: '🟢',
+    tavsif: "Urologiyani endi boshlagan talabalar uchun — asosiy tushunchalar va dastlabki bilimlar",
+  },
+  {
+    id: "o'rta", nom: "O'RTA — Klinik chuqurlik", emoji: '🟡',
+    tavsif: "Amaliyotda tez-tez uchraydigan kasalliklar bo'yicha chuqur klinik bilim",
+  },
+  {
+    id: 'qiyin', nom: 'QIYIN — Murakkab holatlar', emoji: '🔴',
+    tavsif: "Campbell-Walsh darajasida — barcha kasalliklarni chuqur qamrab oluvchi to'liq kurs",
+  },
 ]
 
 // URL'da apostrof noqulay bo'lgani uchun (o'rta), bosqichlar uchun alohida yo'l-nom moslamasi.
@@ -536,6 +546,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: 'Urologiyaning predmeti va asosiy tushunchalari',
     kategoriya: 'Kirish va semiotika',
     bosqich: 'oson',
+    bepulNamuna: true,
     qisqa: "Urologiya nimani o'rganadi va uning ichki yo'nalishlari haqida umumiy tushuncha.",
     daqiqa: 4,
     bolimlar: [
@@ -1152,6 +1163,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: 'Prostata adenomasi (BPH) — asosiy belgilar',
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
+    bepulNamuna: true,
     qisqa: "BPHning yosh bilan bog'liqligi va asosiy siyish simptomlari haqida kirish darajasidagi tushuncha.",
     daqiqa: 4,
     bolimlar: [
@@ -1385,11 +1397,11 @@ export const DARSLAR: Dars[] = [
   m('nefrogen-arterial-gipertenziya', 'Nefrogen arterial gipertenziya — asosiy mexanizm', "Buyrak va siydik yo'llari kasalliklari"),
 
   // V. Prostata va erkak jinsiy a'zolari
-  m('bph-diagnostika-nostatsionar-davolash', 'Prostata adenomasi (BPH) — diagnostika va nostatsionar davolash', "Prostata va erkak jinsiy a'zolari"),
+  m('bph-diagnostika-nostatsionar-davolash', 'Prostata adenomasi (BPH) — diagnostika va nostatsionar davolash', "Prostata va erkak jinsiy a'zolari", true),
   m('asoratlanmagan-prostatit-davolash', 'Asoratlanmagan prostatit — davolash prinsiplari', "Prostata va erkak jinsiy a'zolari"),
   m('fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari va sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari"),
   m('kriptorxizm-operativ-davolash', 'Kriptorxizm — operativ davolash muddatlari va usullari', "Prostata va erkak jinsiy a'zolari"),
-  m('varikotsele-klinik-bosqichlari', "Varikotsele — klinik bosqichlari va davolash ko'rsatmalari", "Prostata va erkak jinsiy a'zolari"),
+  m('varikotsele-klinik-bosqichlari', "Varikotsele — klinik bosqichlari va davolash ko'rsatmalari", "Prostata va erkak jinsiy a'zolari", true),
   m('gidrotsele-spermatotsele-differensial', 'Gidrotsele, spermatotsele — differensial tashxis', "Prostata va erkak jinsiy a'zolari"),
   m('otkir-orxoepididimit-diagnostika', "O'tkir orxoepididimit — diagnostika va davolash", "Prostata va erkak jinsiy a'zolari"),
 
@@ -1438,7 +1450,7 @@ export const DARSLAR: Dars[] = [
   h('h-nefrogen-arterial-gipertenziya', 'Nefrogen arterial gipertenziya', "Buyrak va siydik yo'llari kasalliklari"),
 
   // V BOB. Prostata va erkak jinsiy a'zolari kasalliklari
-  h('h-bph-adenoma-toliq', 'Prostata bezining xavfsiz giperplaziyasi (adenoma) — etiologiya, klinika, davolash', "Prostata va erkak jinsiy a'zolari kasalliklari"),
+  h('h-bph-adenoma-toliq', 'Prostata bezining xavfsiz giperplaziyasi (adenoma) — etiologiya, klinika, davolash', "Prostata va erkak jinsiy a'zolari kasalliklari", true),
   h('h-asoratlanmagan-prostatit', 'Asoratlanmagan prostatit', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-surunkali-prostatit-asoratlari', 'Surunkali prostatit va uning asoratlari', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari, davolash usullari, sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
@@ -1451,6 +1463,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: 'Varikotsele kasalligi',
     kategoriya: "Prostata va erkak jinsiy a'zolari kasalliklari",
     bosqich: 'qiyin',
+    bepulNamuna: true,
     qisqa: "To'liq jihozlangan pilot dars: nazariya, video, konspekt, amaliy/USMLE/nazorat test bo'limlari bilan. Tarkib endi `dars_tarkibi` jadvalida saqlanadi.",
     daqiqa: 5,
     bolimlar: [],
@@ -1488,7 +1501,7 @@ export const DARSLAR: Dars[] = [
 ]
 
 // Skelet darslar uchun yordamchilar — mazmuni keyinroq qism-qism to'ldiriladi.
-function skelet(slug: string, sarlavha: string, kategoriya: string, bosqich: Bosqich): Dars {
+function skelet(slug: string, sarlavha: string, kategoriya: string, bosqich: Bosqich, bepulNamuna = false): Dars {
   return {
     slug,
     sarlavha,
@@ -1499,15 +1512,16 @@ function skelet(slug: string, sarlavha: string, kategoriya: string, bosqich: Bos
     bolimlar: [{ sarlavha: 'Tez orada', matn: ["Bu dars mazmuni hozircha tayyorlanmoqda."] }],
     manbalar: [],
     test: [],
+    bepulNamuna,
   }
 }
 
-function m(slug: string, sarlavha: string, kategoriya: string): Dars {
-  return skelet(slug, sarlavha, kategoriya, "o'rta")
+function m(slug: string, sarlavha: string, kategoriya: string, bepulNamuna = false): Dars {
+  return skelet(slug, sarlavha, kategoriya, "o'rta", bepulNamuna)
 }
 
-function h(slug: string, sarlavha: string, kategoriya: string): Dars {
-  return skelet(slug, sarlavha, kategoriya, 'qiyin')
+function h(slug: string, sarlavha: string, kategoriya: string, bepulNamuna = false): Dars {
+  return skelet(slug, sarlavha, kategoriya, 'qiyin', bepulNamuna)
 }
 
 export function darsTop(slug: string) {
