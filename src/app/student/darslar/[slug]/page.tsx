@@ -565,7 +565,7 @@ function AmaliyTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; dars
 
 function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: UsmleSavoli[] }) {
   const supabase = createClient()
-  const savollar = useMemo(() => shuffleVaTanla(bank, bank.length), [bank])
+  const savollar = useMemo(() => shuffleVaTanla(bank, Math.min(5, bank.length)), [bank])
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -584,7 +584,7 @@ function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsN
       savollar={savollar}
       izohKorsat
       qaytaUrinishKorinsin
-      boshlashSarlavha={<>USMLE uslubidagi <strong>{savollar.length} ta</strong> klinik vinyetka savoli. Xohlagancha qayta urinishingiz mumkin.</>}
+      boshlashSarlavha={<>USMLE uslubidagi bankdan tasodifiy <strong>{savollar.length} ta</strong> klinik vinyetka savoli tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
       boshlashTugma="USMLE testni boshlash →"
       onTopshirish={saqla}
     />
