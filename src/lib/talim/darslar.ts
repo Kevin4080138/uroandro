@@ -82,8 +82,9 @@ export const DARSLAR: Dars[] = [
   {
     slug: 'bph-luts',
     sarlavha: "Benign prostata giperplaziyasi (BPH) va pastki siydik yo'llari simptomlari",
-    kategoriya: 'Prostata',
+    kategoriya: "Prostata va erkak jinsiy a'zolari kasalliklari",
     bosqich: 'qiyin',
+    bepulNamuna: true,
     qisqa: "BPH nima, qanday simptomlar beradi, qanday tashxislanadi va bosqichma-bosqich qanday davolanadi.",
     daqiqa: 9,
     bolimlar: [
@@ -158,7 +159,7 @@ export const DARSLAR: Dars[] = [
   {
     slug: 'prostatit-cpps',
     sarlavha: "Surunkali prostatit va kichik chanoq og'rig'i sindromi (CP/CPPS)",
-    kategoriya: 'Prostata',
+    kategoriya: "Prostata va erkak jinsiy a'zolari kasalliklari",
     bosqich: 'qiyin',
     qisqa: "Prostatit turlari, NIH klassifikatsiyasi, tashxis va davolash yondashuvi.",
     daqiqa: 7,
@@ -231,84 +232,9 @@ export const DARSLAR: Dars[] = [
     ],
   },
   {
-    slug: 'varikotsele-infertility',
-    sarlavha: 'Varikotsele va erkak bepushtligi',
-    kategoriya: 'Andrologiya',
-    bosqich: 'qiyin',
-    qisqa: "Varikotsele patofiziologiyasi, darajalash, spermogrammaga ta'siri va jarrohlik usullari.",
-    daqiqa: 8,
-    bolimlar: [
-      {
-        sarlavha: '1. Patofiziologiya',
-        matn: [
-          "Varikotsele — pampiniform venoz pleksusning patologik kengayishi va burama tarzda cho'zilishi. Chap tomonda ancha ko'p uchraydi (taxminan 85-90% hollarda), chunki chap uruğ venasi chap buyrak venasiga to'g'ri burchak ostida quyiladi, bu esa venoz oqimga ko'proq qarshilik va gidrostatik bosim yaratadi; o'ng uruğ venasi esa to'g'ridan-to'g'ri pastki kovak venaga ingichka burchak ostida quyiladi.",
-          "Venoz qon turg'unligi mahalliy harorat oshishi, oksidlanish stressi va gipoksiyaga olib keladi — bularning barchasi spermatogenezga salbiy ta'sir ko'rsatadi.",
-        ],
-      },
-      {
-        sarlavha: '2. Klinik darajalash (Dubin-Amelar)',
-        matn: [
-          "0-daraja (subklinik): palpatsiyada aniqlanmaydi, faqat USI/Doppler orqali topiladi. I-daraja: faqat Valsalva sinamasi (kuchanish) vaqtida palpatsiya qilinadi. II-daraja: Valsalva sinamasisiz ham palpatsiya qilinadi, lekin ko'rinmaydi. III-daraja: ko'z bilan ko'rinadi va aniq palpatsiya qilinadi.",
-          "USI/Doppler tekshiruvida uruğ tizimchasi venalarining diametri ≥3 mm va Valsalva bilan reflyuks (qonning teskari oqimi) aniqlanishi varikotsele uchun tipik hisoblanadi.",
-        ],
-      },
-      {
-        sarlavha: "3. Spermogrammaga ta'siri",
-        matn: [
-          "Varikotsele klassik tarzda OAT-sindromga (Oligo-Astheno-Teratozoospermia) olib kelishi mumkin — sperma konsentratsiyasi, harakatchanligi va morfologiyasining barchasi pasayadi. Bu o'zgarishlar WHO 2021 (6-nashr) me'zonlari bo'yicha baholanadi.",
-          "Shuni ta'kidlash kerakki, varikotsele bo'lgan har bir erkakda bepushtlik kelib chiqmaydi — taxminan 35-40% erkak bepushtligi holatlarida varikotsele aniqlanadi, lekin umumiy erkak populyatsiyasida varikotsele uchrashi taxminan 15% ni tashkil qiladi.",
-        ],
-      },
-      {
-        sarlavha: '4. Davolash ko\'rsatkichlari va usullari',
-        matn: [
-          "Jarrohlik davolashga asosiy ko'rsatkichlar: klinik aniqlanadigan (I-III daraja) varikotsele + patologik spermogramma + bepushtlik (≥1 yil himoyalanmagan jinsiy aloqa) + ayolda fertillik muammosi aniqlanmagan yoki davolanadigan bo'lishi. Og'riq sindromi yoki progressiv moyak gipotrofiyasi (ayniqsa o'smirlarda) ham mustaqil ko'rsatma bo'lishi mumkin.",
-          "Asosiy usullar: mikrojarrohlik subinguinal varikotselektomiya (Marmar usuli — eng yuqori samaradorlik va eng kam qaytalanish ko'rsatkichi bilan oltin standart hisoblanadi), laparoskopik varikotselektomiya, Palomo va Ivanissevich (retroperitoneal) usullari, skleroterapiya/embolizatsiya (minimal invaziv, lekin qaytalanish darajasi yuqoriroq).",
-        ],
-      },
-    ],
-    manbalar: [
-      'EAU Guidelines on Sexual and Reproductive Health — Male Infertility (2024)',
-      'WHO Laboratory Manual for the Examination of Human Semen, 6th ed. (2021)',
-      'Dubin L, Amelar RD. Fertil Steril. (1970) — klinik darajalash',
-    ],
-    test: [
-      {
-        savol: "Varikotsele nima uchun ko'pincha chap tomonda uchraydi?",
-        variantlar: ['Chap moyak kattaroq bo\'ladi', "Chap uruğ venasi chap buyrak venasiga to'g'ri burchak ostida quyiladi", "O'ng tomonda venalar yo'q", 'Bu tasodifiy holat'],
-        togri: 1,
-        izoh: "Chap uruğ venasining chap buyrak venasiga to'g'ri burchak ostida quyilishi venoz qarshilikni oshiradi, shu sabab chap tomon ustunlik qiladi.",
-      },
-      {
-        savol: "Dubin-Amelar bo'yicha qaysi daraja 'faqat Valsalva sinamasi vaqtida palpatsiya qilinadi' deb ta'riflanadi?",
-        variantlar: ['0-daraja', 'I-daraja', 'II-daraja', 'III-daraja'],
-        togri: 1,
-        izoh: "I-daraja — tinch holatda sezilmaydi, faqat Valsalva (kuchanish) sinamasi vaqtida palpatsiya qilinadi.",
-      },
-      {
-        savol: "OAT-sindromi qaysi uchta ko'rsatkichning pasayishini bildiradi?",
-        variantlar: ['Hajm, pH, rang', 'Konsentratsiya, harakatchanlik, morfologiya', 'Yosh, vazn, bo\'y', 'Libido, erektsiya, ejakulyatsiya'],
-        togri: 1,
-        izoh: 'OAT — Oligo (konsentratsiya past) - Astheno (harakatchanlik past) - Teratozoospermia (morfologiya buzilgan).',
-      },
-      {
-        savol: "Varikotsele jarrohlik usullari ichida 'oltin standart' deb hisoblanadigan usul qaysi?",
-        variantlar: ['Skleroterapiya', 'Ivanissevich usuli', 'Mikrojarrohlik subinguinal varikotselektomiya (Marmar)', 'Palomo usuli'],
-        togri: 2,
-        izoh: "Marmar usuli eng yuqori samaradorlik va eng past qaytalanish darajasi tufayli oltin standart hisoblanadi.",
-      },
-      {
-        savol: "USI/Doppler'da qaysi vena diametri varikotsele uchun tipik ko'rsatkich hisoblanadi?",
-        variantlar: ['≥3 mm reflyuks bilan', '≤1 mm', 'Faqat 10 mm dan katta', "Diametr ahamiyatsiz, faqat rang muhim"],
-        togri: 0,
-        izoh: "Uruğ tizimchasi venalarining diametri ≥3 mm bo'lib, Valsalva bilan reflyuks aniqlanishi varikotsele uchun tipik USI belgisi hisoblanadi.",
-      },
-    ],
-  },
-  {
     slug: 'erektil-disfunksiya',
     sarlavha: 'Erektil disfunksiya: sabablari, baholash va davolash',
-    kategoriya: 'Andrologiya',
+    kategoriya: 'Reproduktiv va seksual salomatlik',
     bosqich: 'qiyin',
     qisqa: "Erektsiya fiziologiyasi, ED sabablari klassifikatsiyasi va bosqichma-bosqich davolash algoritmi.",
     daqiqa: 7,
@@ -386,7 +312,7 @@ export const DARSLAR: Dars[] = [
   {
     slug: 'urolitiaz',
     sarlavha: "Siydik yo'li toshlari (urolitiaz): patogenez, tashxis va davolash",
-    kategoriya: 'Urolitiaz',
+    kategoriya: "Buyrak va siydik yo'llari kasalliklari",
     bosqich: 'qiyin',
     qisqa: "Tosh turlari, klinik ko'rinish, STONE skori va zamonaviy davolash usullari (ESWL, URS, PCNL).",
     daqiqa: 8,
@@ -1442,7 +1368,6 @@ export const DARSLAR: Dars[] = [
   h('h-spesifik-nospesifik-yallirlanish-tuberkulez', "Siydik-tanosil a'zolarining boshqa spesifik (jinsiy yo'l bilan yuqadigan) va nospesifik yallig'lanish kasalliklari — jumladan urogenital tuberkulez va parazitar infeksiyalar", "Yallig'lanish va infeksion kasalliklar"),
 
   // IV BOB. Buyrak va siydik yo'llari kasalliklari
-  h('h-siydik-tosh-kasalligi-toliq', 'Siydik tosh kasalligi — etiologiya, patogenez, klinika, davolash', "Buyrak va siydik yo'llari kasalliklari"),
   h('h-gidronefrotik-transformatsiya', 'Gidronefrotik transformatsiya (yuqori siydik yo\'llari obstruksiyasi)', "Buyrak va siydik yo'llari kasalliklari"),
   h('h-nefroptoz', 'Nefroptoz', "Buyrak va siydik yo'llari kasalliklari"),
   h('h-sistoureteral-reflyuks-kasalligi', 'Sistoureteral reflyuks kasalligi', "Buyrak va siydik yo'llari kasalliklari"),
@@ -1450,9 +1375,7 @@ export const DARSLAR: Dars[] = [
   h('h-nefrogen-arterial-gipertenziya', 'Nefrogen arterial gipertenziya', "Buyrak va siydik yo'llari kasalliklari"),
 
   // V BOB. Prostata va erkak jinsiy a'zolari kasalliklari
-  h('h-bph-adenoma-toliq', 'Prostata bezining xavfsiz giperplaziyasi (adenoma) — etiologiya, klinika, davolash', "Prostata va erkak jinsiy a'zolari kasalliklari", true),
   h('h-asoratlanmagan-prostatit', 'Asoratlanmagan prostatit', "Prostata va erkak jinsiy a'zolari kasalliklari"),
-  h('h-surunkali-prostatit-asoratlari', 'Surunkali prostatit va uning asoratlari', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-fimoz-parafimoz-sirkumsizio', 'Fimoz, parafimoz — asoratlari, davolash usullari, sirkumsizio texnikasi', "Prostata va erkak jinsiy a'zolari kasalliklari"),
   h('h-kriptorxizm-operativ-davolash', 'Kriptorxizm va uning operativ davolash', "Prostata va erkak jinsiy a'zolari kasalliklari"),
 
@@ -1479,8 +1402,6 @@ export const DARSLAR: Dars[] = [
   h('h-yuqori-siydik-yollari-uroteliy-osmalari', "Yuqori siydik yo'llari uroteliy o'smalari", 'Onkourologiya'),
   h('h-buyrak-hujayrali-rak', "Buyrak hujayrali rak (benign va malign o'smalar)", 'Onkourologiya'),
   h('h-adrenal-kasalliklar-osmalari', 'Buyrak usti bezi (adrenal) kasalliklari va o\'smalari', 'Onkourologiya'),
-  h('h-prostata-raki-diagnostika', 'Prostata raki — epidemiologiya, diagnostika, stadiyalash', 'Onkourologiya'),
-  h('h-prostata-raki-davolash', 'Prostata raki davolash strategiyalari (operatsiya, nurli terapiya, faol kuzatuv)', 'Onkourologiya'),
   h('h-moyak-osmalari', "Moyak o'smalari", 'Onkourologiya'),
   h('h-penis-uretra-osmalari', "Penis va uretra o'smalari", 'Onkourologiya'),
 
@@ -1492,7 +1413,6 @@ export const DARSLAR: Dars[] = [
   h('h-parafimoz-priapizm-shoshilinch', 'Parafimoz, priapizm — shoshilinch holatlar', "Shoshilinch urologiya (o'tkir holatlar)"),
 
   // VIII BOB. Reproduktiv va seksual salomatlik
-  h('h-erkaklar-erektil-disfunksiyasi-toliq', 'Erkaklar erektil disfunksiyasi — fiziologiya, patofiziologiya, diagnostika, davolash', 'Reproduktiv va seksual salomatlik'),
   h('h-priapizm', 'Priapizm', 'Reproduktiv va seksual salomatlik'),
   h('h-erkaklar-bepushtligi-art', 'Erkaklar bepushtligi va yordamchi reproduktiv texnologiyalar', 'Reproduktiv va seksual salomatlik'),
   h('h-peyroni-kasalligi', 'Peyroni kasalligi', 'Reproduktiv va seksual salomatlik'),
