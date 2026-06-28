@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
 import { telefonToEmail, telefonFormatTogri } from '@/lib/patientAuth'
+import Hero, { MobileHero } from '@/components/Hero'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -71,14 +72,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'var(--bg)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '16px'
-    }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex' }}>
+      <Hero />
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px'
+      }}>
+      <MobileHero />
       <div style={{
         width: '100%',
         maxWidth: '420px',
@@ -285,6 +289,7 @@ export default function RegisterPage() {
             </a>
           </p>
         </div>
+      </div>
       </div>
     </div>
   )
