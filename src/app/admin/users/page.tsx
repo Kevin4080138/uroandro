@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 
-type Profile = { id: string; full_name: string; role: string; telefon: string | null; faol: boolean; created_at: string; arxivlangan: boolean }
+type Profile = { id: string; full_name: string; role: string; telefon: string | null; email: string | null; faol: boolean; created_at: string; arxivlangan: boolean }
 
 const ROLLAR = [
   { value: 'student', label: '🎓 Talaba' },
@@ -27,7 +27,6 @@ const inputStyle = {
 export default function AdminUsersPage() {
   const supabase = createClient()
   const [users, setUsers] = useState<Profile[]>([])
-  const [emaillar, setEmaillar] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
   const [tahrirId, setTahrirId] = useState<string | null>(null)
@@ -37,7 +36,6 @@ export default function AdminUsersPage() {
   const [xato, setXato] = useState<string | null>(null)
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
-  const [emailXato, setEmailXato] = useState<string | null>(null)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
 
   const load = async () => {
@@ -50,32 +48,30 @@ export default function AdminUsersPage() {
     for (const o of obunaQatorlari ?? []) (om[o.student_id] ??= new Set()).add(o.bosqich)
     setObunalar(om)
     setLoading(false)
-
-    const res = await fetch('/api/admin/foydalanuvchilar')
-    const json = await res.json()
-    if (res.ok) {
-      setEmaillar(json.emaillar ?? {})
-      setEmailXato(null)
-    } else {
-      setEmailXato(json.error ?? "Email'larni yuklab bo'lmadi")
-    }
   }
 
   useEffect(() => { load() }, [])
 
-  const obunaniAlmashtir = async (studentId: string, bosqich: string) => {
-    const egami = obunalar[studentId]?.has(bosqich) ?? false
+  const obunaniBekorQil = async (studentId: string, bosqich: string) => {
     setObunalar((prev) => {
       const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
-      if (egami) yangi[studentId].delete(bosqich)
-      else yangi[studentId].add(bosqich)
+      yangi[studentId].delete(bosqich)
       return yangi
     })
-    if (egami) {
-      await supabase.from('obunalar').delete().eq('student_id', studentId).eq('bosqich', bosqich)
-    } else {
-      await supabase.from('obunalar').upsert({ student_id: studentId, bosqich, faol: true }, { onConflict: 'student_id,bosqich' })
-    }
+    await supabase.from('obunalar').delete().eq('student_id', studentId).eq('bosqich', bosqich)
+  }
+
+  const obunaBer = async (studentId: string, bosqich: string, oylar: number | null) => {
+    setObunalar((prev) => {
+      const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
+      yangi[studentId].add(bosqich)
+      return yangi
+    })
+    const tugashSanasi = oylar ? new Date(Date.now() + oylar * 30 * 24 * 60 * 60 * 1000).toISOString() : null
+    await supabase.from('obunalar').upsert(
+      { student_id: studentId, bosqich, faol: true, tugash_sanasi: tugashSanasi },
+      { onConflict: 'student_id,bosqich' }
+    )
   }
 
   const changeRole = async (id: string, role: string) => {
@@ -108,7 +104,7 @@ export default function AdminUsersPage() {
 
   const tahrirniOch = (u: Profile) => {
     setTahrirId(u.id)
-    setTahrirLogin(u.role === 'patient' ? (u.telefon ?? '') : (emaillar[u.id] ?? ''))
+    setTahrirLogin(u.role === 'patient' ? (u.telefon ?? '') : (u.email ?? ''))
     setTahrirParol('')
     setXato(null)
   }
@@ -154,15 +150,6 @@ export default function AdminUsersPage() {
           />
         </div>
 
-        {emailXato && (
-          <div style={{
-            background: 'rgba(220,38,38,.08)', border: '1px solid var(--danger)', borderRadius: '10px',
-            padding: '12px 16px', marginBottom: '16px', fontSize: '12.5px', color: 'var(--danger)',
-          }}>
-            ⚠️ Email manzillarni yuklab bo&apos;lmadi: {emailXato}. Vercel&apos;da <code>SUPABASE_SERVICE_ROLE_KEY</code> sozlanganini tekshiring.
-          </div>
-        )}
-
         {loading ? (
           <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
         ) : (
@@ -177,13 +164,13 @@ export default function AdminUsersPage() {
               </thead>
               <tbody>
                 {filtered.map((u) => (
-                  <FoydalanuvchiQatori key={u.id} u={u} emaillar={emaillar} changeRole={changeRole} toggleFaol={toggleFaol}
+                  <FoydalanuvchiQatori key={u.id} u={u} changeRole={changeRole} toggleFaol={toggleFaol}
                     toggleArxiv={toggleArxiv} foydalanuvchiniOchir={foydalanuvchiniOchir} ochirilmoqda={ochirilmoqda === u.id}
                     tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                     tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
                     tahrirParol={tahrirParol} setTahrirParol={setTahrirParol}
                     tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato}
-                    obunalar={obunalar[u.id] ?? new Set()} obunaniAlmashtir={obunaniAlmashtir} />
+                    obunalar={obunalar[u.id] ?? new Set()} obunaBer={obunaBer} obunaniBekorQil={obunaniBekorQil} />
                 ))}
               </tbody>
             </table>
@@ -204,13 +191,13 @@ export default function AdminUsersPage() {
                 <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <tbody>
                     {arxivlangan.map((u) => (
-                      <FoydalanuvchiQatori key={u.id} u={u} emaillar={emaillar} changeRole={changeRole} toggleFaol={toggleFaol}
+                      <FoydalanuvchiQatori key={u.id} u={u} changeRole={changeRole} toggleFaol={toggleFaol}
                         toggleArxiv={toggleArxiv} foydalanuvchiniOchir={foydalanuvchiniOchir} ochirilmoqda={ochirilmoqda === u.id}
                         tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                         tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
                         tahrirParol={tahrirParol} setTahrirParol={setTahrirParol}
                         tahrirniSaqla={tahrirniSaqla} saqlanmoqda={saqlanmoqda} xato={xato}
-                        obunalar={obunalar[u.id] ?? new Set()} obunaniAlmashtir={obunaniAlmashtir} />
+                        obunalar={obunalar[u.id] ?? new Set()} obunaBer={obunaBer} obunaniBekorQil={obunaniBekorQil} />
                     ))}
                   </tbody>
                 </table>
@@ -223,12 +210,19 @@ export default function AdminUsersPage() {
   )
 }
 
+const MUDDATLAR = [
+  { oylar: 1, nom: '1 oy' },
+  { oylar: 6, nom: '6 oy' },
+  { oylar: 12, nom: '12 oy' },
+  { oylar: null, nom: 'Muddatsiz' },
+]
+
 function FoydalanuvchiQatori({
-  u, emaillar, changeRole, toggleFaol, toggleArxiv, foydalanuvchiniOchir, ochirilmoqda,
+  u, changeRole, toggleFaol, toggleArxiv, foydalanuvchiniOchir, ochirilmoqda,
   tahrirId, tahrirniOch, setTahrirId, tahrirLogin, setTahrirLogin, tahrirParol, setTahrirParol,
-  tahrirniSaqla, saqlanmoqda, xato, obunalar, obunaniAlmashtir,
+  tahrirniSaqla, saqlanmoqda, xato, obunalar, obunaBer, obunaniBekorQil,
 }: {
-  u: Profile; emaillar: Record<string, string>
+  u: Profile
   changeRole: (id: string, role: string) => void
   toggleFaol: (u: Profile) => void
   toggleArxiv: (u: Profile) => void
@@ -243,14 +237,17 @@ function FoydalanuvchiQatori({
   saqlanmoqda: boolean
   xato: string | null
   obunalar: Set<string>
-  obunaniAlmashtir: (studentId: string, bosqich: string) => void
+  obunaBer: (studentId: string, bosqich: string, oylar: number | null) => void
+  obunaniBekorQil: (studentId: string, bosqich: string) => void
 }) {
+  const [muddatTanlovOchiq, setMuddatTanlovOchiq] = useState<string | null>(null)
+
   return (
     <React.Fragment>
       <tr className="row-hover" style={{ borderTop: '1px solid var(--line)' }}>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>{u.full_name ?? '—'}</td>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap', color: 'var(--ink-soft)', fontSize: '12px' }}>
-          {u.role === 'patient' ? (u.telefon ?? '—') : (emaillar[u.id] ?? '—')}
+          {u.role === 'patient' ? (u.telefon ?? '—') : (u.email ?? '—')}
         </td>
         <td style={{ padding: '12px 16px' }}>
           <select
@@ -274,7 +271,7 @@ function FoydalanuvchiQatori({
             {u.faol ? 'Faol' : 'Bloklangan'}
           </button>
         </td>
-        <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+        <td style={{ padding: '12px 16px', whiteSpace: 'nowrap', position: 'relative' }}>
           {u.role !== 'student' ? (
             <span style={{ color: 'var(--muted)' }}>—</span>
           ) : (
@@ -282,20 +279,42 @@ function FoydalanuvchiQatori({
               {BOSQICH_PILLLAR.map((b) => {
                 const ega = obunalar.has(b.id)
                 return (
-                  <button
-                    key={b.id}
-                    onClick={() => obunaniAlmashtir(u.id, b.id)}
-                    title={`${b.id}${ega ? ' — sotib olingan' : ' — sotib olinmagan'}`}
-                    className="soft-press"
-                    style={{
-                      border: ega ? '1px solid var(--good)' : '1px solid var(--line)',
-                      background: ega ? 'rgba(5,150,105,.12)' : 'var(--surface-2)',
-                      borderRadius: '6px', padding: '3px 7px', fontSize: '12px', cursor: 'pointer',
-                      opacity: ega ? 1 : 0.45,
-                    }}
-                  >
-                    {b.emoji}
-                  </button>
+                  <div key={b.id} style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => (ega ? obunaniBekorQil(u.id, b.id) : setMuddatTanlovOchiq(muddatTanlovOchiq === b.id ? null : b.id))}
+                      title={`${b.id}${ega ? ' — sotib olingan (bekor qilish uchun bosing)' : ' — sotib olinmagan (muddat tanlash uchun bosing)'}`}
+                      className="soft-press"
+                      style={{
+                        border: ega ? '1px solid var(--good)' : '1px solid var(--line)',
+                        background: ega ? 'rgba(5,150,105,.12)' : 'var(--surface-2)',
+                        borderRadius: '6px', padding: '3px 7px', fontSize: '12px', cursor: 'pointer',
+                        opacity: ega ? 1 : 0.45,
+                      }}
+                    >
+                      {b.emoji}
+                    </button>
+                    {muddatTanlovOchiq === b.id && (
+                      <div style={{
+                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 30,
+                        background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '10px',
+                        boxShadow: 'var(--shadow)', padding: '6px', display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '110px',
+                      }}>
+                        {MUDDATLAR.map((m) => (
+                          <button
+                            key={m.nom}
+                            onClick={() => { obunaBer(u.id, b.id, m.oylar); setMuddatTanlovOchiq(null) }}
+                            style={{
+                              background: 'none', border: 'none', textAlign: 'left', padding: '6px 8px', borderRadius: '6px',
+                              fontSize: '12px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer', whiteSpace: 'nowrap',
+                            }}
+                            className="row-hover"
+                          >
+                            {m.nom}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </div>

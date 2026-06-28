@@ -28,6 +28,9 @@ export async function PATCH(req: Request) {
   if (telefon) {
     await admin.from('profiles').update({ telefon }).eq('id', userId)
   }
+  if (email) {
+    await admin.from('profiles').update({ email }).eq('id', userId)
+  }
 
   return NextResponse.json({ ok: true })
 }
