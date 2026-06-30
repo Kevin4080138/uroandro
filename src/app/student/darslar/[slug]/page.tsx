@@ -78,8 +78,8 @@ export default function DarsDetailPage() {
     amaliy: amaliyBank.length > 0,
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
-    klinik: klinikHolatlar.length > 0,
-    flashcard: flashcardlar.length > 0,
+    klinik: true,
+    flashcard: true,
   }
   const TAB_NOMI: Record<Tab, string> = {
     nazariya: '📖 Nazariya',
@@ -747,6 +747,8 @@ function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsN
 }
 
 function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
+  if (kartalar.length === 0) return <BoshUlash matn="Flashcardlar tez orada qo'shiladi." />
+
   const [tartib, setTartib] = useState<number[]>(() => kartalar.map((_, i) => i).sort(() => Math.random() - 0.5))
   const [joriy, setJoriy] = useState(0)
   const [ochiq, setOchiq] = useState(false)
@@ -924,6 +926,10 @@ function KlinikHolatlarBolimi({ holatlar }: { holatlar: KlinikHolat[] }) {
         </button>
       </div>
     )
+  }
+
+  if (joriy === 'menu' && holatlar.length === 0) {
+    return <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
   }
 
   if (joriy === 'menu') {
