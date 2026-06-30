@@ -214,18 +214,32 @@ export function AdminSidebar() {
     )
   }
 
-  function Footer() {
+  function Footer({ c }: { c: boolean }) {
     return (
-      <div style={{ padding: '10px 14px', borderTop: '1px solid var(--line)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+      <div style={{
+        padding: c ? '10px 0' : '10px 14px',
+        borderTop: '1px solid var(--line)', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: c ? 'center' : 'flex-start', gap: 10,
+      }}>
+        <div title={c ? (adminNom || 'Admin') : undefined} style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
           {adminNom ? adminNom[0].toUpperCase() : 'A'}
         </div>
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{adminNom || 'Admin'}</div>
-          <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
-        </div>
-        <button onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
-          title="Chiqish" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 17, padding: 4, lineHeight: 1 }}>⇥</button>
+        <AnimatePresence>
+          {!c && (
+            <motion.div key="footer-text"
+              initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}
+              transition={{ duration: 0.16 }}
+              style={{ flex: 1, overflow: 'hidden' }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{adminNom || 'Admin'}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {!c && (
+          <button onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
+            title="Chiqish" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 17, padding: 4, lineHeight: 1 }}>⇥</button>
+        )}
       </div>
     )
   }
@@ -242,7 +256,7 @@ export function AdminSidebar() {
           <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 20, padding: 4, lineHeight: 1 }}>✕</button>
         </div>
         <NavContent collapsed={false} />
-        <Footer />
+        <Footer c={false} />
       </div>
     )
   }
@@ -349,7 +363,7 @@ export function AdminSidebar() {
         </button>
 
         <NavContent collapsed={collapsed} />
-        {!collapsed && <Footer />}
+        <Footer c={collapsed} />
       </motion.aside>
     </>
   )
