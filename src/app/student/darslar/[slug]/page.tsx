@@ -73,9 +73,9 @@ export default function DarsDetailPage() {
 
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
-    video: !!asosiyVideo || videoLinklar.length > 0,
-    yuklab: !!(konspektYoli || prezentatsiyaYoli),
-    amaliy: amaliyBank.length > 0,
+    video: true,
+    yuklab: true,
+    amaliy: true,
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
     klinik: true,
