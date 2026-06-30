@@ -1,91 +1,181 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-type NavItem = {
-  href: string
-  icon: string
-  label: string
-  tezOrada?: boolean
-}
-
-type NavGroup = {
-  id: string
-  icon: string
-  label: string
-  items: NavItem[]
-}
+type NavItem = { href: string; label: string; tezOrada?: boolean }
+type NavGroup = { id: string; svg: string; label: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   {
-    id: 'foydalanuvchilar',
-    icon: '👥',
-    label: 'Foydalanuvchilar',
+    id: 'foydalanuvchilar', label: 'Foydalanuvchilar',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     items: [
-      { href: '/admin/users', icon: '👤', label: "Ro'yxat va aktivatsiya" },
-      { href: '/admin/oquvchilar', icon: '🎓', label: "O'quvchilar reytingi", tezOrada: true },
-      { href: '/admin/oqituvchilar', icon: '👨‍🏫', label: "O'qituvchilar", tezOrada: true },
-      { href: '/admin/shifokorlar', icon: '👨‍⚕️', label: 'Shifokorlar tasdiqlash', tezOrada: true },
+      { href: '/admin/users', label: "Ro'yxat va aktivatsiya" },
+      { href: '/admin/oquvchilar', label: "O'quvchilar reytingi", tezOrada: true },
+      { href: '/admin/oqituvchilar', label: "O'qituvchilar", tezOrada: true },
+      { href: '/admin/shifokorlar', label: 'Shifokorlar tasdiqlash', tezOrada: true },
     ],
   },
   {
-    id: 'talim',
-    icon: '📚',
-    label: "Ta'lim",
+    id: 'talim', label: "Ta'lim",
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
     items: [
-      { href: '/admin/darslar', icon: '🎥', label: 'Darslar tarkibi' },
-      { href: '/admin/yonalishlari', icon: '🗂️', label: "Yo'nalishlari", tezOrada: true },
-      { href: '/admin/testbank', icon: '❓', label: 'Test banki', tezOrada: true },
-      { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar', tezOrada: true },
+      { href: '/admin/darslar', label: 'Darslar tarkibi' },
+      { href: '/admin/yonalishlari', label: "Yo'nalishlari", tezOrada: true },
+      { href: '/admin/testbank', label: 'Test banki', tezOrada: true },
+      { href: '/admin/sertifikatlar', label: 'Sertifikatlar', tezOrada: true },
     ],
   },
   {
-    id: 'savdo',
-    icon: '💰',
-    label: "To'lovlar & Savdo",
+    id: 'savdo', label: "To'lovlar & Savdo",
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
     items: [
-      { href: '/admin/tariflar', icon: '💎', label: 'Tariflar', tezOrada: true },
-      { href: '/admin/buyurtmalar', icon: '🛒', label: 'Buyurtmalar', tezOrada: true },
-      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar', tezOrada: true },
-      { href: '/admin/promokodlar', icon: '🎟️', label: 'Promokodlar', tezOrada: true },
+      { href: '/admin/tariflar', label: 'Tariflar', tezOrada: true },
+      { href: '/admin/buyurtmalar', label: 'Buyurtmalar', tezOrada: true },
+      { href: '/admin/obunalar', label: 'Obunalar', tezOrada: true },
+      { href: '/admin/promokodlar', label: 'Promokodlar', tezOrada: true },
     ],
   },
   {
-    id: 'kontent',
-    icon: '📄',
-    label: 'Kontent',
+    id: 'kontent', label: 'Kontent',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
     items: [
-      { href: '/admin/content', icon: '📋', label: 'Protokollar & Kutubxona' },
-      { href: '/admin/yangiliklar', icon: '📢', label: "E'lonlar", tezOrada: true },
-      { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar (FAQ)', tezOrada: true },
-      { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda', tezOrada: true },
+      { href: '/admin/content', label: 'Protokollar & Kutubxona' },
+      { href: '/admin/yangiliklar', label: "E'lonlar", tezOrada: true },
+      { href: '/admin/faq', label: 'Savol-Javoblar', tezOrada: true },
+      { href: '/admin/biz-haqimizda', label: 'Biz haqimizda', tezOrada: true },
     ],
   },
   {
-    id: 'muloqot',
-    icon: '💬',
-    label: 'Muloqot',
+    id: 'muloqot', label: 'Muloqot',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     items: [
-      { href: '/admin/fikrlar', icon: '💭', label: 'Fikrlar' },
-      { href: '/admin/push', icon: '🔔', label: 'Push bildirishnoma', tezOrada: true },
+      { href: '/admin/fikrlar', label: 'Fikrlar' },
+      { href: '/admin/push', label: 'Push bildirishnoma', tezOrada: true },
     ],
   },
   {
-    id: 'tahlil',
-    icon: '📈',
-    label: 'Tahlil',
+    id: 'tahlil', label: 'Tahlil',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
     items: [
-      { href: '/admin/statistika', icon: '📊', label: 'Statistika' },
-      { href: '/admin/audit', icon: '🛡️', label: 'Audit log' },
+      { href: '/admin/statistika', label: 'Statistika' },
+      { href: '/admin/audit', label: 'Audit log' },
     ],
   },
 ]
 
-function groupHasActive(group: NavGroup, pathname: string) {
-  return group.items.some((item) => pathname.startsWith(item.href))
+function SvgIcon({ svg, size = 18 }: { svg: string; size?: number }) {
+  return (
+    <span
+      style={{ width: size, height: size, display: 'inline-flex', flexShrink: 0 }}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  )
+}
+
+function DropdownGroup({
+  group, pathname, collapsed,
+}: {
+  group: NavGroup; pathname: string; collapsed: boolean
+}) {
+  const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
+  const [open, setOpen] = useState(hasActive)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number | 'auto'>(hasActive ? 'auto' : 0)
+
+  useEffect(() => {
+    if (collapsed) { setOpen(false); setHeight(0); return }
+  }, [collapsed])
+
+  const toggle = () => {
+    if (collapsed) return
+    const next = !open
+    setOpen(next)
+    if (next) {
+      setHeight(contentRef.current?.scrollHeight ?? 0)
+      setTimeout(() => setHeight('auto'), 260)
+    } else {
+      setHeight(contentRef.current?.scrollHeight ?? 0)
+      requestAnimationFrame(() => requestAnimationFrame(() => setHeight(0)))
+    }
+  }
+
+  return (
+    <div>
+      <button
+        onClick={toggle}
+        title={collapsed ? group.label : undefined}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center',
+          gap: 10, padding: collapsed ? '10px 0' : '9px 12px',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          background: hasActive && !open ? 'var(--accent-soft)' : 'transparent',
+          color: hasActive ? 'var(--accent)' : 'var(--ink-soft)',
+          fontWeight: hasActive ? 600 : 400,
+          border: 'none', borderRadius: 10, cursor: 'pointer',
+          fontSize: 13.5, transition: 'background .15s, color .15s',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SvgIcon svg={group.svg} />
+          {!collapsed && group.label}
+        </span>
+        {!collapsed && (
+          <svg
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+            style={{ width: 13, height: 13, flexShrink: 0, transition: 'transform .22s ease', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', color: 'var(--muted)' }}
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        )}
+      </button>
+
+      {!collapsed && (
+        <div
+          ref={contentRef}
+          style={{
+            overflow: 'hidden',
+            height: height === 'auto' ? 'auto' : height,
+            transition: 'height .24s cubic-bezier(.4,0,.2,1)',
+          }}
+        >
+          <div style={{ margin: '2px 0 4px 18px', borderLeft: '1.5px solid var(--line)', paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {group.items.map((item) => {
+              const active = !item.tezOrada && pathname.startsWith(item.href)
+              return item.tezOrada ? (
+                <div key={item.href} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '6px 10px', borderRadius: 8,
+                  fontSize: 12.5, color: 'var(--muted)', opacity: 0.65,
+                }}>
+                  <span>{item.label}</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, padding: '2px 7px',
+                    background: 'var(--line)', color: 'var(--muted)', borderRadius: 20,
+                  }}>Tez orada</span>
+                </div>
+              ) : (
+                <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    padding: '7px 10px', borderRadius: 8, fontSize: 12.5,
+                    background: active ? 'var(--accent-soft)' : 'transparent',
+                    color: active ? 'var(--accent)' : 'var(--ink-soft)',
+                    fontWeight: active ? 600 : 400,
+                    transition: 'background .15s, color .15s',
+                  }}>
+                    {item.label}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function AdminSidebar() {
@@ -95,19 +185,11 @@ export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const [adminNom, setAdminNom] = useState('')
 
   useEffect(() => {
     setMounted(true)
-    const saved = localStorage.getItem('admin-sidebar-collapsed')
-    if (saved) setCollapsed(saved === '1')
-
-    // Har bir guruhni avtomatik ochish — agar ichida aktiv link bo'lsa
-    const auto: Record<string, boolean> = {}
-    GROUPS.forEach((g) => { auto[g.id] = groupHasActive(g, pathname) })
-    setOpenGroups(auto)
-
+    setCollapsed(localStorage.getItem('admin-sidebar-collapsed') === '1')
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       supabase.from('profiles').select('full_name').eq('id', user.id).single()
@@ -122,160 +204,121 @@ export function AdminSidebar() {
     const next = !collapsed
     setCollapsed(next)
     localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0')
-    if (next) setOpenGroups({})
   }
 
-  const toggleGroup = (id: string) => {
-    if (collapsed) { setCollapsed(false); localStorage.setItem('admin-sidebar-collapsed', '0') }
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }))
-  }
+  const width = mounted ? (collapsed ? 64 : 248) : 248
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
-
-  const width = mounted ? (collapsed ? 64 : 240) : 240
-
-  function SidebarContent({ mobile = false }: { mobile?: boolean }) {
+  function Inner({ mobile = false }: { mobile?: boolean }) {
     const isCollapsed = mobile ? false : collapsed
     return (
-      <>
-        {/* Logo */}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Header */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: '14px 12px', borderBottom: '1px solid var(--line)', flexShrink: 0,
+          display: 'flex', alignItems: 'center',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          padding: '14px 12px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0,
         }}>
           {!isCollapsed && (
-            <Link href="/admin/dashboard" style={{ textDecoration: 'none', fontSize: '17px', fontWeight: 800, color: 'var(--ink)' }}>
+            <Link href="/admin/dashboard" style={{ textDecoration: 'none', fontWeight: 800, fontSize: 17, color: 'var(--ink)', letterSpacing: '-.3px' }}>
               Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
-              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 500, marginLeft: '6px' }}>Admin</span>
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
             </Link>
           )}
-          {!mobile && (
-            <button onClick={toggleCollapse} style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)',
-              fontSize: '16px', padding: '4px', borderRadius: '6px', lineHeight: 1,
-            }}>
-              {isCollapsed ? '☰' : '⮜'}
-            </button>
-          )}
-          {mobile && (
-            <button onClick={() => setMobileOpen(false)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)',
-              fontSize: '16px', padding: '4px', borderRadius: '6px', marginLeft: 'auto',
-            }}>✕</button>
-          )}
+          <button
+            onClick={mobile ? () => setMobileOpen(false) : toggleCollapse}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', padding: 6, borderRadius: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'color .15s',
+            }}
+          >
+            {mobile ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : isCollapsed ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
+                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            )}
+          </button>
         </div>
 
-        {/* Dashboard tugmasi */}
-        <div style={{ padding: '8px 8px 4px' }}>
+        {/* Nav */}
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Dashboard */}
           <Link href="/admin/dashboard" style={{ textDecoration: 'none' }}>
             <div style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              padding: isCollapsed ? '10px' : '10px 12px',
-              borderRadius: '10px', justifyContent: isCollapsed ? 'center' : 'flex-start',
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: isCollapsed ? '10px 0' : '9px 12px',
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              borderRadius: 10, fontSize: 13.5,
               background: pathname === '/admin/dashboard' ? 'var(--accent-soft)' : 'transparent',
               color: pathname === '/admin/dashboard' ? 'var(--accent)' : 'var(--ink-soft)',
-              fontWeight: pathname === '/admin/dashboard' ? 700 : 500,
-              fontSize: '14px', transition: 'background .15s',
-            }}>
-              <span style={{ fontSize: '18px' }}>🏠</span>
-              {!isCollapsed && <span>Dashboard</span>}
+              fontWeight: pathname === '/admin/dashboard' ? 600 : 400,
+              transition: 'background .15s, color .15s',
+            }}
+              title={isCollapsed ? 'Dashboard' : undefined}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 18, height: 18, flexShrink: 0 }}>
+                <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+              {!isCollapsed && 'Dashboard'}
             </div>
           </Link>
-        </div>
 
-        {/* Guruhlar */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {GROUPS.map((group) => {
-            const open = openGroups[group.id] ?? false
-            const hasActive = groupHasActive(group, pathname)
-            return (
-              <div key={group.id}>
-                {/* Guruh sarlavhasi */}
-                <button
-                  onClick={() => toggleGroup(group.id)}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center',
-                    gap: '10px', padding: isCollapsed ? '10px' : '9px 12px',
-                    justifyContent: isCollapsed ? 'center' : 'space-between',
-                    background: hasActive && !open ? 'var(--accent-soft)' : 'transparent',
-                    color: hasActive ? 'var(--accent)' : 'var(--ink-soft)',
-                    fontWeight: hasActive ? 700 : 500,
-                    border: 'none', borderRadius: '10px', cursor: 'pointer',
-                    fontSize: '14px', transition: 'background .15s',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '18px' }}>{group.icon}</span>
-                    {!isCollapsed && <span>{group.label}</span>}
-                  </div>
-                  {!isCollapsed && (
-                    <span style={{ fontSize: '11px', color: 'var(--muted)', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
-                  )}
-                </button>
+          {/* Separator */}
+          <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
 
-                {/* Dropdown items */}
-                {!isCollapsed && open && (
-                  <div style={{ marginLeft: '12px', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px', borderLeft: '2px solid var(--line)', paddingLeft: '12px' }}>
-                    {group.items.map((item) => (
-                      item.tezOrada ? (
-                        <div key={item.href} style={{
-                          display: 'flex', alignItems: 'center', gap: '8px',
-                          padding: '7px 10px', borderRadius: '8px',
-                          color: 'var(--muted)', fontSize: '13px', opacity: 0.6,
-                        }}>
-                          <span style={{ fontSize: '14px' }}>{item.icon}</span>
-                          <span style={{ flex: 1 }}>{item.label}</span>
-                          <span style={{ fontSize: '10px', background: 'var(--line)', padding: '2px 6px', borderRadius: '20px', fontWeight: 600, color: 'var(--muted)' }}>Tez orada</span>
-                        </div>
-                      ) : (
-                        <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-                          <div style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '7px 10px', borderRadius: '8px',
-                            background: isActive(item.href) ? 'var(--accent-soft)' : 'transparent',
-                            color: isActive(item.href) ? 'var(--accent)' : 'var(--ink-soft)',
-                            fontWeight: isActive(item.href) ? 700 : 400,
-                            fontSize: '13px', transition: 'background .15s',
-                          }}>
-                            <span style={{ fontSize: '14px' }}>{item.icon}</span>
-                            <span>{item.label}</span>
-                          </div>
-                        </Link>
-                      )
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          {GROUPS.map((group) => (
+            <DropdownGroup key={group.id} group={group} pathname={pathname} collapsed={isCollapsed} />
+          ))}
         </nav>
 
-        {/* Admin profil */}
-        {!isCollapsed && adminNom && (
+        {/* Footer — admin profil */}
+        {!isCollapsed && (
           <div style={{
-            padding: '12px 14px', borderTop: '1px solid var(--line)',
-            display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0,
+            padding: '10px 12px', borderTop: '1px solid var(--line)', flexShrink: 0,
+            display: 'flex', alignItems: 'center', gap: 10,
           }}>
             <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
+              width: 34, height: 34, borderRadius: '50%',
               background: 'var(--accent-soft)', color: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: '13px', flexShrink: 0,
+              fontWeight: 700, fontSize: 14, flexShrink: 0,
             }}>
-              {adminNom[0]?.toUpperCase()}
+              {adminNom ? adminNom[0].toUpperCase() : 'A'}
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{adminNom}</div>
-              <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Admin</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {adminNom || 'Admin'}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
             </div>
             <button
               onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '16px', padding: '4px' }}
               title="Chiqish"
-            >⇥</button>
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--muted)', padding: 6, borderRadius: 8,
+                display: 'flex', alignItems: 'center', transition: 'color .15s',
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 17, height: 17 }}>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
         )}
-      </>
+      </div>
     )
   }
 
@@ -283,51 +326,55 @@ export function AdminSidebar() {
     <>
       {/* Mobil hamburger */}
       <button
-        onClick={() => setMobileOpen(true)}
         className="md:hidden"
+        onClick={() => setMobileOpen(true)}
         style={{
           position: 'fixed', top: 12, left: 12, zIndex: 110,
           width: 40, height: 40, background: 'var(--surface)',
-          border: '1px solid var(--line)', borderRadius: '10px',
-          color: 'var(--ink)', fontSize: '18px', cursor: 'pointer',
+          border: '1px solid var(--line)', borderRadius: 10, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: 'var(--shadow)',
+          color: 'var(--ink)', boxShadow: 'var(--shadow)',
         }}
-      >☰</button>
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
+          <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
 
       {/* Mobil overlay */}
-      {mobileOpen && (
-        <div
-          className="md:hidden"
-          onClick={() => setMobileOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 100 }}
-        />
-      )}
+      <div
+        className="md:hidden"
+        onClick={() => setMobileOpen(false)}
+        style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 100,
+          opacity: mobileOpen ? 1 : 0, pointerEvents: mobileOpen ? 'auto' : 'none',
+          transition: 'opacity .22s ease',
+        }}
+      />
 
       {/* Mobil drawer */}
       <aside
         className="md:hidden"
         style={{
-          position: 'fixed', top: 0, left: 0, height: '100vh', width: 260,
+          position: 'fixed', top: 0, left: 0, height: '100vh', width: 260, zIndex: 101,
           background: 'var(--surface)', borderRight: '1px solid var(--line)',
-          zIndex: 101, display: 'flex', flexDirection: 'column',
           transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform .2s ease',
+          transition: 'transform .24s cubic-bezier(.4,0,.2,1)',
         }}
       >
-        <SidebarContent mobile />
+        <Inner mobile />
       </aside>
 
       {/* Desktop sidebar */}
       <aside
-        className="hidden md:flex"
+        className="hidden md:block"
         style={{
           width, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
           background: 'var(--surface)', borderRight: '1px solid var(--line)',
-          flexDirection: 'column', transition: 'width .2s ease', overflow: 'hidden', zIndex: 30,
+          transition: 'width .22s cubic-bezier(.4,0,.2,1)', overflow: 'hidden', zIndex: 30,
         }}
       >
-        <SidebarContent />
+        <Inner />
       </aside>
     </>
   )
