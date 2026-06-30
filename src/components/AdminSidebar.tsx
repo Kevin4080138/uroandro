@@ -62,17 +62,30 @@ const GROUPS: NavGroup[] = [
   },
 ]
 
-function DropdownGroup({ group, pathname }: { group: NavGroup; pathname: string }) {
+function DropdownGroup({
+  group, pathname, collapsed, onExpand,
+}: {
+  group: NavGroup; pathname: string; collapsed: boolean; onExpand: () => void
+}) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
   const [open, setOpen] = useState(hasActive)
+
+  useEffect(() => { if (collapsed) setOpen(false) }, [collapsed])
+
+  const toggle = () => {
+    if (collapsed) { onExpand(); setTimeout(() => setOpen(true), 220); return }
+    setOpen((v) => !v)
+  }
 
   return (
     <div>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
+        title={collapsed ? group.label : undefined}
         style={{
           width: '100%', display: 'flex', alignItems: 'center', gap: 12,
-          padding: '10px 14px', justifyContent: 'space-between',
+          padding: collapsed ? '10px 0' : '10px 14px',
+          justifyContent: collapsed ? 'center' : 'space-between',
           background: 'transparent',
           color: hasActive ? 'var(--accent)' : 'var(--ink)',
           fontWeight: hasActive ? 600 : 400,
@@ -81,20 +94,20 @@ function DropdownGroup({ group, pathname }: { group: NavGroup; pathname: string 
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20 }}>{group.icon}</span>
-          <span>{group.label}</span>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>{group.icon}</span>
+          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{group.label}</span>}
         </span>
-        <motion.span
-          animate={{ rotate: open ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ fontSize: 11, color: 'var(--muted)', display: 'inline-block' }}
-        >
-          ▶
-        </motion.span>
+        {!collapsed && (
+          <motion.span
+            animate={{ rotate: open ? 90 : 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ fontSize: 11, color: 'var(--muted)', display: 'inline-block', flexShrink: 0 }}
+          >▶</motion.span>
+        )}
       </button>
 
       <AnimatePresence initial={false}>
-        {open && (
+        {!collapsed && open && (
           <motion.div
             key="content"
             initial={{ height: 0, opacity: 0 }}
@@ -158,10 +171,14 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [collapsed, setCollapsed] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [adminNom, setAdminNom] = useState('')
 
   useEffect(() => {
+    setMounted(true)
+    setCollapsed(localStorage.getItem('admin-sidebar-collapsed') === '1')
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       supabase.from('profiles').select('full_name').eq('id', user.id).single()
@@ -172,13 +189,21 @@ export function AdminSidebar() {
 
   useEffect(() => { setMobileOpen(false) }, [pathname])
 
-  function Inner({ mobile = false }: { mobile?: boolean }) {
+  const toggleCollapse = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0')
+  }
+
+  const W = mounted ? (collapsed ? 64 : 260) : 260
+
+  // Drawer ichidagi kontent
+  function DrawerInner() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 14px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0, gap: 8,
+          padding: '14px 14px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0,
         }}>
           <Link href="/admin/dashboard" style={{
             textDecoration: 'none', fontWeight: 800, fontSize: 18,
@@ -189,84 +214,131 @@ export function AdminSidebar() {
           </Link>
           <button
             onClick={() => setMobileOpen(false)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 4, fontSize: 18, lineHeight: 1,
-              display: mobile ? 'flex' : 'none', alignItems: 'center',
-            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 20, padding: 4, lineHeight: 1 }}
           >✕</button>
         </div>
+        <NavContent collapsed={false} />
+        <SidebarFooter />
+      </div>
+    )
+  }
 
-        {/* Nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {/* Dashboard */}
-          <Link href="/admin/dashboard" style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '10px 14px', borderRadius: 10, fontSize: 14,
-              background: pathname === '/admin/dashboard' ? 'var(--accent-soft)' : 'transparent',
-              color: pathname === '/admin/dashboard' ? 'var(--accent)' : 'var(--ink)',
-              fontWeight: pathname === '/admin/dashboard' ? 700 : 400,
-              transition: 'background .15s',
-            }}>
-              <span style={{ fontSize: 20 }}>🏠</span>
-              Dashboard
-            </div>
-          </Link>
-
-          <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
-
-          {GROUPS.map((group) => (
-            <DropdownGroup key={group.id} group={group} pathname={pathname} />
-          ))}
-        </nav>
-
-        {/* Footer */}
+  // Desktop sidebar kontent
+  function DesktopInner() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{
-          padding: '10px 14px', borderTop: '1px solid var(--line)', flexShrink: 0,
-          display: 'flex', alignItems: 'center', gap: 10,
+          display: 'flex', alignItems: 'center', overflow: 'hidden',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          padding: '14px 10px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0, gap: 6,
         }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: '50%',
-            background: 'var(--accent-soft)', color: 'var(--accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: 14, flexShrink: 0,
-          }}>
-            {adminNom ? adminNom[0].toUpperCase() : 'A'}
-          </div>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {adminNom || 'Admin'}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
-          </div>
+          {!collapsed && (
+            <Link href="/admin/dashboard" style={{
+              textDecoration: 'none', fontWeight: 800, fontSize: 17,
+              color: 'var(--ink)', whiteSpace: 'nowrap', letterSpacing: '-0.3px', minWidth: 0,
+            }}>
+              Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500, marginLeft: 5 }}>Admin</span>
+            </Link>
+          )}
           <button
-            onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
-            title="Chiqish"
+            onClick={toggleCollapse}
+            title={collapsed ? 'Kengaytirish' : 'Toraytirish'}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 6, fontSize: 16, lineHeight: 1,
+              color: 'var(--muted)', padding: 6, borderRadius: 8, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, lineHeight: 1,
             }}
-          >⇥</button>
+          >
+            {collapsed ? '☰' : '‹'}
+          </button>
         </div>
+        <NavContent collapsed={collapsed} />
+        {!collapsed && <SidebarFooter />}
+      </div>
+    )
+  }
+
+  function NavContent({ collapsed: c }: { collapsed: boolean }) {
+    return (
+      <nav style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Link href="/admin/dashboard" style={{ textDecoration: 'none' }} title={c ? 'Dashboard' : undefined}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: c ? '10px 0' : '10px 14px',
+            justifyContent: c ? 'center' : 'flex-start',
+            borderRadius: 10, fontSize: 14,
+            background: pathname === '/admin/dashboard' ? 'var(--accent-soft)' : 'transparent',
+            color: pathname === '/admin/dashboard' ? 'var(--accent)' : 'var(--ink)',
+            fontWeight: pathname === '/admin/dashboard' ? 700 : 400,
+            transition: 'background .15s',
+          }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>🏠</span>
+            {!c && <span style={{ whiteSpace: 'nowrap' }}>Dashboard</span>}
+          </div>
+        </Link>
+
+        <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
+
+        {GROUPS.map((group) => (
+          <DropdownGroup
+            key={group.id}
+            group={group}
+            pathname={pathname}
+            collapsed={c}
+            onExpand={toggleCollapse}
+          />
+        ))}
+      </nav>
+    )
+  }
+
+  function SidebarFooter() {
+    return (
+      <div style={{
+        padding: '10px 14px', borderTop: '1px solid var(--line)', flexShrink: 0,
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: '50%',
+          background: 'var(--accent-soft)', color: 'var(--accent)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 700, fontSize: 14, flexShrink: 0,
+        }}>
+          {adminNom ? adminNom[0].toUpperCase() : 'A'}
+        </div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {adminNom || 'Admin'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
+        </div>
+        <button
+          onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
+          title="Chiqish"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 17, padding: 4, lineHeight: 1 }}
+        >⇥</button>
       </div>
     )
   }
 
   return (
     <>
-      {/* Mobil hamburger */}
-      <button
-        className="md:hidden"
-        onClick={() => setMobileOpen(true)}
-        style={{
-          position: 'fixed', top: 12, left: 12, zIndex: 110,
-          width: 40, height: 40, background: 'var(--surface)',
-          border: '1px solid var(--line)', borderRadius: 10, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--ink)', fontSize: 18, boxShadow: 'var(--shadow)',
-        }}
-      >☰</button>
+      {/* Mobil hamburger — drawer yopiq bo'lganda ko'rinadi */}
+      {!mobileOpen && (
+        <button
+          className="md:hidden"
+          onClick={() => setMobileOpen(true)}
+          style={{
+            position: 'fixed', top: 12, left: 12, zIndex: 110,
+            width: 40, height: 40, background: 'var(--surface)',
+            border: '1px solid var(--line)', borderRadius: 10, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--ink)', fontSize: 18, boxShadow: 'var(--shadow)',
+          }}
+        >☰</button>
+      )}
 
       {/* Mobil overlay */}
       <AnimatePresence>
@@ -295,21 +367,24 @@ export function AdminSidebar() {
               background: 'var(--surface)', borderRight: '1px solid var(--line)',
             }}
           >
-            <Inner mobile />
+            <DrawerInner />
           </motion.aside>
         )}
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside
+      <motion.aside
         className="hidden md:block"
+        animate={{ width: W }}
+        transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
         style={{
-          width: 260, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
-          background: 'var(--surface)', borderRight: '1px solid var(--line)', zIndex: 30,
+          flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
+          background: 'var(--surface)', borderRight: '1px solid var(--line)',
+          overflow: 'hidden', zIndex: 30,
         }}
       >
-        <Inner />
-      </aside>
+        <DesktopInner />
+      </motion.aside>
     </>
   )
 }
