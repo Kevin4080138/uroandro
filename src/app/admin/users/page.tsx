@@ -29,6 +29,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
+  const [rolFiltr, setRolFiltr] = useState('')
   const [tahrirId, setTahrirId] = useState<string | null>(null)
   const [tahrirLogin, setTahrirLogin] = useState('')
   const [tahrirParol, setTahrirParol] = useState('')
@@ -38,11 +39,14 @@ export default function AdminUsersPage() {
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
 
-  const load = async (q: string) => {
+  const load = async (q: string, rol: string) => {
     setLoading(true)
     let query = supabase.from('profiles').select('*').order('created_at', { ascending: false })
     if (q.trim()) {
       query = query.or(`full_name.ilike.%${q.trim()}%,telefon.ilike.%${q.trim()}%,email.ilike.%${q.trim()}%`)
+    }
+    if (rol) {
+      query = query.eq('role', rol)
     }
     const [{ data: profillar }, { data: obunaQatorlari }] = await Promise.all([
       query,
@@ -56,9 +60,9 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => load(qidiruv), 300)
+    const timer = setTimeout(() => load(qidiruv, rolFiltr), 300)
     return () => clearTimeout(timer)
-  }, [qidiruv])
+  }, [qidiruv, rolFiltr])
 
   const obunaniBekorQil = async (studentId: string, bosqich: string) => {
     setObunalar((prev) => {
@@ -133,7 +137,7 @@ export default function AdminUsersPage() {
     if (!res.ok) { setXato(json.error ?? 'Xatolik yuz berdi'); return }
 
     setTahrirId(null)
-    load(qidiruv)
+    load(qidiruv, rolFiltr)
   }
 
   const filtered = users.filter((u) => !u.arxivlangan)
@@ -144,15 +148,35 @@ export default function AdminUsersPage() {
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
 
       <div className="fade-in px-4 py-6 sm:px-8 sm:py-8">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: '24px' }}>Foydalanuvchilar</h2>
-          <input
-            placeholder="Ism, telefon yoki rol bo'yicha qidirish..."
-            value={qidiruv}
-            onChange={(e) => setQidiruv(e.target.value)}
-            className="rounded-lg border px-3.5 py-2.5 text-sm outline-none"
-            style={{ background: 'var(--surface-2)', color: 'var(--ink)', borderColor: 'var(--line)', maxWidth: '320px', width: '100%' }}
-          />
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '24px' }}>Foydalanuvchilar</h2>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              placeholder="Ism, telefon yoki email bo'yicha..."
+              value={qidiruv}
+              onChange={(e) => setQidiruv(e.target.value)}
+              className="rounded-lg border px-3.5 py-2.5 text-sm outline-none"
+              style={{ background: 'var(--surface-2)', color: 'var(--ink)', borderColor: 'var(--line)', maxWidth: '280px', width: '100%' }}
+            />
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {[{ value: '', label: 'Barchasi' }, ...ROLLAR].map((r) => (
+                <button
+                  key={r.value}
+                  onClick={() => setRolFiltr(r.value)}
+                  style={{
+                    border: `1px solid ${rolFiltr === r.value ? 'var(--accent)' : 'var(--line)'}`,
+                    background: rolFiltr === r.value ? 'var(--accent-soft)' : 'var(--surface-2)',
+                    color: rolFiltr === r.value ? 'var(--accent)' : 'var(--ink-soft)',
+                    borderRadius: '8px', padding: '6px 12px', fontSize: '12.5px',
+                    fontWeight: rolFiltr === r.value ? 700 : 400,
+                    cursor: 'pointer', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {r.label || 'Barchasi'}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {loading ? (

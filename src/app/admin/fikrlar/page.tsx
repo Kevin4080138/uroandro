@@ -30,6 +30,12 @@ export default function AdminFikrlarPage() {
     await supabase.from('fikrlar').update({ korildi: true }).eq('id', id)
   }
 
+  const ochir = async (id: string) => {
+    if (!confirm("Bu fikrni o'chirishni tasdiqlaysizmi?")) return
+    setFikrlar((prev) => prev.filter((x) => x.id !== id))
+    await supabase.from('fikrlar').delete().eq('id', id)
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
@@ -47,9 +53,18 @@ export default function AdminFikrlarPage() {
                 background: 'var(--surface)', border: `1px solid ${f.korildi ? 'var(--line)' : 'var(--accent)'}`,
                 borderRadius: '12px', padding: '16px 20px',
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '8px' }}>
-                  <strong style={{ fontSize: '14px' }}>{f.full_name}</strong>
-                  <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>{new Date(f.created_at).toLocaleString('uz-UZ')}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <strong style={{ fontSize: '14px' }}>{f.full_name}</strong>
+                    {f.korildi && <span style={{ fontSize: '11px', color: 'var(--muted)', background: 'var(--surface-2)', padding: '2px 7px', borderRadius: 6 }}>Ko'rildi</span>}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>{new Date(f.created_at).toLocaleString('uz-UZ')}</span>
+                    <button onClick={() => ochir(f.id)} title="O'chirish" style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--muted)', fontSize: '15px', padding: '2px 4px', lineHeight: 1,
+                    }}>🗑️</button>
+                  </div>
                 </div>
                 <p style={{ margin: '0 0 10px', fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{f.matn}</p>
                 {!f.korildi && (

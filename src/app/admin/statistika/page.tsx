@@ -25,6 +25,8 @@ type Recent = { full_name: string; role: string; created_at: string }
 export default function AdminStatistikaPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
+  const [yangilanmoqda, setYangilanmoqda] = useState(false)
+  const [oxirgiYangilanish, setOxirgiYangilanish] = useState<Date | null>(null)
   const [mounted, setMounted] = useState(false)
   const [roleCounts, setRoleCounts] = useState<Record<string, number>>({})
   const [bemorCount, setBemorCount] = useState(0)
@@ -32,36 +34,40 @@ export default function AdminStatistikaPage() {
   const [usulCounts, setUsulCounts] = useState<Record<string, number>>({})
   const [recent, setRecent] = useState<Recent[]>([])
 
-  useEffect(() => {
-    const load = async () => {
-      const [profiles, bemorlar, tashriflar, tadqiqot, recentUsers] = await Promise.all([
-        supabase.from('profiles').select('role'),
-        supabase.from('bemorlar').select('id', { count: 'exact', head: true }),
-        supabase.from('tashriflar').select('holat'),
-        supabase.from('varikotsele_tadqiqot').select('method'),
-        supabase.from('profiles').select('full_name, role, created_at').order('created_at', { ascending: false }).limit(6),
-      ])
+  const load = async (yangilash = false) => {
+    if (yangilash) setYangilanmoqda(true)
+    else setLoading(true)
 
-      const rc: Record<string, number> = {}
-      for (const p of profiles.data ?? []) rc[p.role] = (rc[p.role] ?? 0) + 1
-      setRoleCounts(rc)
+    const [profiles, bemorlar, tashriflar, tadqiqot, recentUsers] = await Promise.all([
+      supabase.from('profiles').select('role'),
+      supabase.from('bemorlar').select('id', { count: 'exact', head: true }),
+      supabase.from('tashriflar').select('holat'),
+      supabase.from('varikotsele_tadqiqot').select('method'),
+      supabase.from('profiles').select('full_name, role, created_at').order('created_at', { ascending: false }).limit(6),
+    ])
 
-      setBemorCount(bemorlar.count ?? 0)
+    const rc: Record<string, number> = {}
+    for (const p of profiles.data ?? []) rc[p.role] = (rc[p.role] ?? 0) + 1
+    setRoleCounts(rc)
 
-      const tc: Record<string, number> = {}
-      for (const t of tashriflar.data ?? []) tc[t.holat] = (tc[t.holat] ?? 0) + 1
-      setTashrifCounts(tc)
+    setBemorCount(bemorlar.count ?? 0)
 
-      const uc: Record<string, number> = {}
-      for (const u of tadqiqot.data ?? []) uc[u.method] = (uc[u.method] ?? 0) + 1
-      setUsulCounts(uc)
+    const tc: Record<string, number> = {}
+    for (const t of tashriflar.data ?? []) tc[t.holat] = (tc[t.holat] ?? 0) + 1
+    setTashrifCounts(tc)
 
-      setRecent((recentUsers.data as Recent[]) ?? [])
-      setLoading(false)
-      requestAnimationFrame(() => setMounted(true))
-    }
-    load()
-  }, [])
+    const uc: Record<string, number> = {}
+    for (const u of tadqiqot.data ?? []) uc[u.method] = (uc[u.method] ?? 0) + 1
+    setUsulCounts(uc)
+
+    setRecent((recentUsers.data as Recent[]) ?? [])
+    setOxirgiYangilanish(new Date())
+    setLoading(false)
+    setYangilanmoqda(false)
+    requestAnimationFrame(() => setMounted(true))
+  }
+
+  useEffect(() => { load() }, [])
 
   const totalUsers = Object.values(roleCounts).reduce((a, b) => a + b, 0)
   const totalTashrif = Object.values(tashrifCounts).reduce((a, b) => a + b, 0)
@@ -76,7 +82,30 @@ export default function AdminStatistikaPage() {
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
 
       <div className="fade-in mx-auto max-w-[1000px] px-8 py-8">
-        <h2 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>Statistik tahlil</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px', gap: '12px', flexWrap: 'wrap' }}>
+          <h2 style={{ margin: 0, fontSize: '24px' }}>Statistik tahlil</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {oxirgiYangilanish && (
+              <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
+                {oxirgiYangilanish.toLocaleTimeString('uz-UZ')} da yangilandi
+              </span>
+            )}
+            <button
+              onClick={() => load(true)}
+              disabled={yangilanmoqda}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: 'var(--surface)', border: '1px solid var(--line)',
+                borderRadius: '8px', padding: '6px 12px', fontSize: '12.5px',
+                color: 'var(--ink-soft)', cursor: yangilanmoqda ? 'not-allowed' : 'pointer',
+                opacity: yangilanmoqda ? 0.6 : 1,
+              }}
+            >
+              <span style={{ display: 'inline-block', animation: yangilanmoqda ? 'spin 1s linear infinite' : 'none' }}>↻</span>
+              {yangilanmoqda ? 'Yangilanmoqda...' : 'Yangilash'}
+            </button>
+          </div>
+        </div>
         <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '28px' }}>
           Platformaning umumiy faolligi va foydalanish ko&apos;rsatkichlari.
         </p>
