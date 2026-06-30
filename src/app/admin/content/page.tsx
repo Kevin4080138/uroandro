@@ -26,6 +26,7 @@ export default function AdminContentPage() {
   const [fayllar, setFayllar] = useState<Fayl[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [tahrirId, setTahrirId] = useState<string | null>(null)
   const [form, setForm] = useState(boshForm)
   const [saving, setSaving] = useState(false)
 
@@ -43,22 +44,37 @@ export default function AdminContentPage() {
 
   const set = (key: string) => (e: any) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
+  const tahrirOch = (p: Protokol) => {
+    setTahrirId(p.id)
+    setForm({
+      slug: p.slug, nom: p.nom, toifa: p.toifa, qisqa: p.qisqa,
+      korsatma: p.korsatma,
+      tashxis: p.tashxis.join('\n'),
+      davolash: p.davolash.join('\n'),
+      manba: p.manba ?? '',
+    })
+    setShowForm(true)
+  }
+
+  const formYop = () => { setShowForm(false); setTahrirId(null); setForm(boshForm) }
+
   const saveProtokol = async () => {
     if (!form.slug.trim() || !form.nom.trim()) return
     setSaving(true)
-    await supabase.from('protokollar').insert({
-      slug: form.slug.trim(),
-      nom: form.nom,
-      toifa: form.toifa || 'Boshqa',
-      qisqa: form.qisqa,
-      korsatma: form.korsatma,
+    const ma = {
+      slug: form.slug.trim(), nom: form.nom, toifa: form.toifa || 'Boshqa',
+      qisqa: form.qisqa, korsatma: form.korsatma,
       tashxis: form.tashxis.split('\n').map((s) => s.trim()).filter(Boolean),
       davolash: form.davolash.split('\n').map((s) => s.trim()).filter(Boolean),
       manba: form.manba || null,
-    })
+    }
+    if (tahrirId) {
+      await supabase.from('protokollar').update(ma).eq('id', tahrirId)
+    } else {
+      await supabase.from('protokollar').insert(ma)
+    }
     setSaving(false)
-    setForm(boshForm)
-    setShowForm(false)
+    formYop()
     load()
   }
 
@@ -103,9 +119,11 @@ export default function AdminContentPage() {
         ) : tab === 'protokollar' ? (
           <>
             <div style={{ marginBottom: '16px' }}>
-              <button onClick={() => setShowForm(!showForm)} className="btn-animated" style={{
-                background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
-                padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
+              <button onClick={() => showForm ? formYop() : setShowForm(true)} className="btn-animated" style={{
+                background: showForm ? 'var(--surface-2)' : 'var(--accent)',
+                color: showForm ? 'var(--ink-soft)' : 'white',
+                border: showForm ? '1px solid var(--line)' : 'none',
+                borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
               }}>
                 {showForm ? 'Bekor qilish' : '+ Yangi protokol'}
               </button>
@@ -113,6 +131,9 @@ export default function AdminContentPage() {
 
             {showForm && (
               <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
+                <h3 style={{ margin: '0 0 18px 0', fontSize: '15px', fontWeight: 700 }}>
+                  {tahrirId ? '✎ Protokolni tahrirlash' : '+ Yangi protokol qo\'shish'}
+                </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div>
                     <label style={labelStyle}>Slug (URL, masalan: prostatit)</label>
@@ -147,26 +168,40 @@ export default function AdminContentPage() {
                   <label style={labelStyle}>Manba (ixtiyoriy)</label>
                   <input style={inputStyle} value={form.manba} onChange={set('manba')} />
                 </div>
-                <button onClick={saveProtokol} disabled={saving} className="btn-animated" style={{
-                  marginTop: '16px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
-                  padding: '12px 24px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
-                }}>
-                  {saving ? 'Saqlanmoqda...' : 'Saqlash'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                  <button onClick={saveProtokol} disabled={saving} className="btn-animated" style={{
+                    background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
+                    padding: '12px 24px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
+                  }}>
+                    {saving ? 'Saqlanmoqda...' : (tahrirId ? 'Saqlash' : 'Qo\'shish')}
+                  </button>
+                  <button onClick={formYop} className="btn-animated" style={{
+                    background: 'none', color: 'var(--muted)', border: '1px solid var(--line)',
+                    borderRadius: '10px', padding: '12px 20px', cursor: 'pointer', fontSize: '14px',
+                  }}>Bekor qilish</button>
+                </div>
               </div>
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {protokollar.map((p) => (
                 <div key={p.id} style={{
-                  background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '10px',
-                  padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  background: tahrirId === p.id ? 'var(--accent-soft)' : 'var(--surface)',
+                  border: `1px solid ${tahrirId === p.id ? 'var(--accent)' : 'var(--line)'}`,
+                  borderRadius: '10px', padding: '14px 18px',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                   <div>
                     <strong style={{ fontSize: '14px' }}>{p.nom}</strong>
                     <span style={{ color: 'var(--muted)', fontSize: '12px', marginLeft: '8px' }}>{p.toifa} · /{p.slug}</span>
                   </div>
-                  <button onClick={() => delProtokol(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '16px' }}>🗑️</button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => tahrirId === p.id ? formYop() : tahrirOch(p)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: tahrirId === p.id ? 'var(--accent)' : 'var(--muted)', fontSize: '15px', padding: '2px 4px',
+                    }}>✎</button>
+                    <button onClick={() => delProtokol(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontSize: '16px' }}>🗑️</button>
+                  </div>
                 </div>
               ))}
             </div>
