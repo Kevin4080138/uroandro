@@ -26,7 +26,8 @@ const GROUPS: NavGroup[] = [
     label: 'Foydalanuvchilar',
     items: [
       { href: '/admin/users', icon: '👤', label: "Ro'yxat va aktivatsiya" },
-      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar', tezOrada: true },
+      { href: '/admin/oquvchilar', icon: '🎓', label: "O'quvchilar reytingi", tezOrada: true },
+      { href: '/admin/oqituvchilar', icon: '👨‍🏫', label: "O'qituvchilar", tezOrada: true },
       { href: '/admin/shifokorlar', icon: '👨‍⚕️', label: 'Shifokorlar tasdiqlash', tezOrada: true },
     ],
   },
@@ -36,8 +37,20 @@ const GROUPS: NavGroup[] = [
     label: "Ta'lim",
     items: [
       { href: '/admin/darslar', icon: '🎥', label: 'Darslar tarkibi' },
+      { href: '/admin/yonalishlari', icon: '🗂️', label: "Yo'nalishlari", tezOrada: true },
       { href: '/admin/testbank', icon: '❓', label: 'Test banki', tezOrada: true },
       { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar', tezOrada: true },
+    ],
+  },
+  {
+    id: 'savdo',
+    icon: '💰',
+    label: "To'lovlar & Savdo",
+    items: [
+      { href: '/admin/tariflar', icon: '💎', label: 'Tariflar', tezOrada: true },
+      { href: '/admin/buyurtmalar', icon: '🛒', label: 'Buyurtmalar', tezOrada: true },
+      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar', tezOrada: true },
+      { href: '/admin/promokodlar', icon: '🎟️', label: 'Promokodlar', tezOrada: true },
     ],
   },
   {
@@ -47,6 +60,8 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/content', icon: '📋', label: 'Protokollar & Kutubxona' },
       { href: '/admin/yangiliklar', icon: '📢', label: "E'lonlar", tezOrada: true },
+      { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar (FAQ)', tezOrada: true },
+      { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda', tezOrada: true },
     ],
   },
   {
