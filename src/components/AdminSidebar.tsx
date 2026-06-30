@@ -62,17 +62,15 @@ const GROUPS: NavGroup[] = [
   },
 ]
 
-function DropdownGroup({ group, pathname, collapsed, onExpand }: {
-  group: NavGroup; pathname: string; collapsed: boolean; onExpand: () => void
+function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand }: {
+  group: NavGroup; pathname: string; collapsed: boolean
+  open: boolean; onToggle: () => void; onExpand: () => void
 }) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => { if (collapsed) setOpen(false) }, [collapsed])
 
   const toggle = () => {
-    if (collapsed) { onExpand(); setTimeout(() => setOpen(true), 220); return }
-    setOpen((v) => !v)
+    if (collapsed) { onExpand(); setTimeout(() => onToggle(), 220); return }
+    onToggle()
   }
 
   return (
@@ -156,6 +154,9 @@ export function AdminSidebar() {
   const [mounted, setMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [adminNom, setAdminNom] = useState('')
+  const [openGroup, setOpenGroup] = useState<string | null>(null)
+
+  const toggleGroup = (id: string) => setOpenGroup((prev) => prev === id ? null : id)
 
   useEffect(() => {
     setMounted(true)
@@ -202,7 +203,12 @@ export function AdminSidebar() {
         </Link>
         <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
         {GROUPS.map((group) => (
-          <DropdownGroup key={group.id} group={group} pathname={pathname} collapsed={c} onExpand={toggleCollapse} />
+          <DropdownGroup
+            key={group.id} group={group} pathname={pathname} collapsed={c}
+            open={openGroup === group.id}
+            onToggle={() => toggleGroup(group.id)}
+            onExpand={toggleCollapse}
+          />
         ))}
       </nav>
     )
@@ -291,16 +297,32 @@ export function AdminSidebar() {
         }}
       >
         {/* Logo */}
-        <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
-          {!collapsed ? (
-            <Link href="/admin/dashboard" style={{ textDecoration: 'none', fontWeight: 800, fontSize: 18, color: 'var(--ink)', whiteSpace: 'nowrap', letterSpacing: '-0.3px', display: 'block' }}>
-              Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
-              <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
-            </Link>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center', fontSize: 22 }}>🔵</div>
-          )}
-        </div>
+        <Link href="/admin/dashboard" style={{ textDecoration: 'none', flexShrink: 0 }}>
+          <div style={{
+            padding: collapsed ? '12px 0' : '12px 14px',
+            borderBottom: '1px solid var(--line)',
+            display: 'flex', alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start', gap: 10,
+            transition: 'padding .22s',
+          }}>
+            <img src="/urosfera-logo.png" alt="Urosfera" style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0 }} />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.div
+                  key="logo-text"
+                  initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.18 }}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <span style={{ fontWeight: 800, fontSize: 18, color: 'var(--ink)', letterSpacing: '-0.3px' }}>
+                    Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500, marginLeft: 5, display: 'block', lineHeight: 1 }}>Admin</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </Link>
 
         {/* Collapse tugmasi — logo ostida, markazda */}
         <button
