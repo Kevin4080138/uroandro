@@ -7,8 +7,9 @@ import { createClient } from '@/lib/supabase'
 import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
+import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
 
-type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat' | 'klinik'
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat' | 'klinik' | 'flashcard'
 
 // `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
@@ -68,6 +69,7 @@ export default function DarsDetailPage() {
   const sertifikatOtishFoizi = tarkib?.sertifikat_otish_foizi ?? dars?.sertifikatOtishFoizi ?? 70
 
   const klinikHolatlar = klinikHolatlarOl(slug)
+  const flashcardlar = flashcardlarOl(slug)
 
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
@@ -77,6 +79,7 @@ export default function DarsDetailPage() {
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
     klinik: klinikHolatlar.length > 0,
+    flashcard: flashcardlar.length > 0,
   }
   const TAB_NOMI: Record<Tab, string> = {
     nazariya: '📖 Nazariya',
@@ -86,6 +89,7 @@ export default function DarsDetailPage() {
     usmle: '🏅 USMLE',
     nazorat: '🔒 Nazorat',
     klinik: '🏥 Klinik holat',
+    flashcard: '🃏 Flashcard',
   }
 
   const [tab, setTab] = useState<Tab>('nazariya')
@@ -199,6 +203,7 @@ export default function DarsDetailPage() {
           />
         )}
         {tab === 'klinik' && <KlinikHolatlarBolimi holatlar={klinikHolatlar} />}
+        {tab === 'flashcard' && <FlashcardBolimi kartalar={flashcardlar} />}
       </div>
     </div>
   )
@@ -738,6 +743,130 @@ function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsN
       boshlashTugma="USMLE testni boshlash →"
       onTopshirish={saqla}
     />
+  )
+}
+
+function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
+  const [tartib, setTartib] = useState<number[]>(() => kartalar.map((_, i) => i).sort(() => Math.random() - 0.5))
+  const [joriy, setJoriy] = useState(0)
+  const [ochiq, setOchiq] = useState(false)
+  const [bilganlar, setBilganlar] = useState<Set<number>>(new Set())
+  const [bilmaganlar, setBilmaganlar] = useState<Set<number>>(new Set())
+
+  const tartiblanganlar = tartib.map((i) => kartalar[i])
+  const joriyKarta = tartiblanganlar[joriy]
+  const jami = tartiblanganlar.length
+  const tugadi = joriy >= jami
+
+  const aralashtir = () => {
+    setTartib(kartalar.map((_, i) => i).sort(() => Math.random() - 0.5))
+    setJoriy(0); setOchiq(false); setBilganlar(new Set()); setBilmaganlar(new Set())
+  }
+
+  const bildi = () => {
+    if (!joriyKarta) return
+    setBilganlar((b) => new Set([...b, joriyKarta.id]))
+    setOchiq(false)
+    setTimeout(() => setJoriy((j) => j + 1), 100)
+  }
+
+  const bilmadi = () => {
+    if (!joriyKarta) return
+    setBilmaganlar((b) => new Set([...b, joriyKarta.id]))
+    setOchiq(false)
+    setTimeout(() => setJoriy((j) => j + 1), 100)
+  }
+
+  const qaytadan = () => {
+    setTartib(kartalar.map((_, i) => i).sort(() => Math.random() - 0.5))
+    setJoriy(0); setOchiq(false); setBilganlar(new Set()); setBilmaganlar(new Set())
+  }
+
+  if (tugadi) {
+    return (
+      <div className="rise" style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <div style={{ fontSize: '52px', marginBottom: '12px' }}>
+          {bilmaganlar.size === 0 ? '🎉' : bilganlar.size > bilmaganlar.size ? '👍' : '📚'}
+        </div>
+        <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 12px' }}>{jami} ta karta tugadi!</h3>
+        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#16a34a' }}>{bilganlar.size}</div>
+            <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Bildim</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#dc2626' }}>{bilmaganlar.size}</div>
+            <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Bilmadim</div>
+          </div>
+        </div>
+        <button onClick={qaytadan} style={{
+          background: 'var(--accent)', color: 'white', border: 'none',
+          borderRadius: '12px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+        }}>Qaytadan boshlash</button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div style={{ marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{joriy + 1} / {jami}</span>
+          <div style={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
+            <span style={{ color: '#16a34a', fontWeight: 700 }}>✅ {bilganlar.size}</span>
+            <span style={{ color: '#dc2626', fontWeight: 700 }}>❌ {bilmaganlar.size}</span>
+            <button onClick={aralashtir} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', fontSize: '12px', fontWeight: 600, padding: 0,
+            }}>🔀 Aralashtir</button>
+          </div>
+        </div>
+        <div style={{ height: '4px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', borderRadius: '999px', width: `${(joriy / jami) * 100}%`, background: 'var(--accent)', transition: 'width .3s' }} />
+        </div>
+      </div>
+
+      <div
+        onClick={() => setOchiq((o) => !o)}
+        className="rise"
+        style={{
+          cursor: 'pointer', minHeight: '200px',
+          background: ochiq ? 'var(--accent-soft, #eff6ff)' : 'var(--surface)',
+          border: `2px solid ${ochiq ? 'var(--accent)' : 'var(--line)'}`,
+          borderRadius: '18px', padding: '24px 22px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          position: 'relative', transition: 'all .2s ease',
+          userSelect: 'none', marginBottom: '12px',
+        }}
+      >
+        <div style={{ position: 'absolute', top: '12px', right: '14px', fontSize: '10.5px', color: 'var(--muted)', fontWeight: 600 }}>
+          {ochiq ? '🔵 Javob' : '⚪ Savol'} · {joriyKarta?.kategoriya}
+        </div>
+        {!ochiq ? (
+          <div>
+            <p style={{ fontSize: '16px', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>{joriyKarta?.old}</p>
+            <p style={{ fontSize: '11.5px', color: 'var(--muted)', margin: '10px 0 0' }}>👆 Bosing — javobni ko&apos;rish</p>
+          </div>
+        ) : (
+          <p style={{ fontSize: '14px', fontWeight: 500, margin: 0, lineHeight: 1.7, whiteSpace: 'pre-line' }}>{joriyKarta?.yangi}</p>
+        )}
+      </div>
+
+      {ochiq && (
+        <div className="rise" style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={bilmadi} style={{
+            flex: 1, background: '#dc262612', color: '#dc2626',
+            border: '1.5px solid #dc2626', borderRadius: '12px', padding: '12px',
+            fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+          }}>✗ Bilmadim</button>
+          <button onClick={bildi} style={{
+            flex: 1, background: '#16a34a12', color: '#16a34a',
+            border: '1.5px solid #16a34a', borderRadius: '12px', padding: '12px',
+            fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+          }}>✓ Bildim</button>
+        </div>
+      )}
+    </>
   )
 }
 
