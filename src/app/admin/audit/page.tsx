@@ -19,6 +19,42 @@ const AMAL_LABEL: Record<string, string> = {
   foydalanuvchi_ochirish: "🗑️ Foydalanuvchi o'chirildi",
   foydalanuvchi_tahrirlash: '✏️ Foydalanuvchi tahrirlandi',
   rol_ozgartirish: "🛠️ Rol o'zgartirildi",
+  faol_ozgartirish: '🔒 Holat o\'zgartirildi',
+  arxiv_ozgartirish: '🗄️ Arxivlash holati o\'zgartirildi',
+  obuna_berish: '💳 Obuna berildi',
+  obuna_bekor: '❌ Obuna bekor qilindi',
+}
+
+function TafsilotKo'rish({ amal, tafsilot }: { amal: string; tafsilot: any }) {
+  if (!tafsilot) return null
+
+  if (amal === 'rol_ozgartirish' && tafsilot.eski_rol && tafsilot.yangi_rol) {
+    return (
+      <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+        <span style={{ background: 'var(--surface-2)', padding: '2px 8px', borderRadius: 6 }}>{tafsilot.eski_rol}</span>
+        {' → '}
+        <span style={{ background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>{tafsilot.yangi_rol}</span>
+      </p>
+    )
+  }
+
+  if (amal === 'faol_ozgartirish' && tafsilot.faol !== undefined) {
+    return (
+      <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+        Yangi holat:{' '}
+        <span style={{ fontWeight: 600, color: tafsilot.faol ? 'var(--good)' : 'var(--danger)' }}>
+          {tafsilot.faol ? 'Faol' : 'Bloklangan'}
+        </span>
+      </p>
+    )
+  }
+
+  return (
+    <pre style={{
+      margin: '8px 0 0', fontSize: '11.5px', color: 'var(--muted)', background: 'var(--surface-2)',
+      borderRadius: '8px', padding: '8px 10px', overflowX: 'auto',
+    }}>{JSON.stringify(tafsilot, null, 2)}</pre>
+  )
 }
 
 export default function AdminAuditPage() {
@@ -77,18 +113,17 @@ export default function AdminAuditPage() {
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '14px 18px',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600 }}>{AMAL_LABEL[l.amal] ?? l.amal}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 600 }}>
+                    {AMAL_LABEL[l.amal] ?? (
+                      <span style={{ background: 'var(--surface-2)', color: 'var(--muted)', padding: '2px 8px', borderRadius: 6, fontSize: 12 }}>{l.amal}</span>
+                    )}
+                  </span>
                   <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{new Date(l.created_at).toLocaleString()}</span>
                 </div>
                 <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--ink-soft)' }}>
                   <strong>{l.admin_ism}</strong> tomonidan, <strong>{l.maqsad_ism}</strong> uchun
                 </p>
-                {l.tafsilot && (
-                  <pre style={{
-                    margin: '8px 0 0', fontSize: '12px', color: 'var(--muted)', background: 'var(--surface-2)',
-                    borderRadius: '8px', padding: '8px 10px', overflowX: 'auto',
-                  }}>{JSON.stringify(l.tafsilot, null, 2)}</pre>
-                )}
+                <TafsilotKo'rish amal={l.amal} tafsilot={l.tafsilot} />
               </div>
             ))}
           </div>
