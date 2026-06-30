@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import Link from 'next/link'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 type FaollikMa = {
   bugunKirganlar: number
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [faollik, setFaollik] = useState<FaollikMa | null>(null)
   const [recentUsers, setRecentUsers] = useState<Recent[]>([])
+  const [miniChart, setMiniChart] = useState<{ kun: string; soni: number }[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -36,14 +38,16 @@ export default function AdminDashboard() {
 
       const bugun = new Date(); bugun.setHours(0, 0, 0, 0)
       const hafta = new Date(); hafta.setDate(hafta.getDate() - 7); hafta.setHours(0, 0, 0, 0)
+      const yettikun = new Date(); yettikun.setDate(yettikun.getDate() - 6); yettikun.setHours(0, 0, 0, 0)
 
-      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes] = await Promise.all([
+      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', bugun.toISOString()),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', hafta.toISOString()),
         supabase.from('fikrlar').select('id', { count: 'exact', head: true }).eq('korildi', false),
         supabase.from('tashriflar').select('id', { count: 'exact', head: true }).eq('holat', 'yangi'),
         supabase.from('profiles').select('full_name, role, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('profiles').select('created_at').gte('created_at', yettikun.toISOString()),
       ])
 
       setProfile(profileRes.data)
@@ -54,6 +58,21 @@ export default function AdminDashboard() {
         yangiMurojaatlar: murojaatRes.count ?? 0,
       })
       setRecentUsers((recentRes.data as Recent[]) ?? [])
+
+      // Mini chart: 7 kunlik
+      const kunMap: Record<string, number> = {}
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
+        kunMap[d.toDateString()] = 0
+      }
+      for (const p of yettiKunRes.data ?? []) {
+        const d = new Date(p.created_at); d.setHours(0, 0, 0, 0)
+        if (kunMap[d.toDateString()] !== undefined) kunMap[d.toDateString()]++
+      }
+      setMiniChart(Object.entries(kunMap).map(([key, soni]) => ({
+        kun: new Date(key).toLocaleDateString('uz-UZ', { weekday: 'short' }),
+        soni,
+      })))
     }
     load()
   }, [])
@@ -121,6 +140,29 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Mini grafik */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0, fontWeight: 600 }}>7 kunlik yangi a'zolar</h3>
+              <Link href="/admin/statistika" style={{ fontSize: '12px', color: 'var(--accent)', textDecoration: 'none' }}>Batafsil →</Link>
+            </div>
+            <ResponsiveContainer width="100%" height={140}>
+              <AreaChart data={miniChart} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="miniGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                <XAxis dataKey="kun" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} formatter={(v: any) => [v, "Yangi a'zo"]} />
+                <Area type="monotone" dataKey="soni" stroke="#2563eb" fill="url(#miniGrad)" strokeWidth={2} dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
 
           {/* So'nggi ro'yxatdan o'tganlar */}
