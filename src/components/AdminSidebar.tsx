@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type NavItem = { href: string; label: string; tezOrada?: boolean }
 type NavGroup = { id: string; svg: string; label: string; items: NavItem[] }
@@ -31,7 +32,7 @@ const GROUPS: NavGroup[] = [
   },
   {
     id: 'savdo', label: "To'lovlar & Savdo",
-    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
     items: [
       { href: '/admin/tariflar', label: 'Tariflar', tezOrada: true },
       { href: '/admin/buyurtmalar', label: 'Buyurtmalar', tezOrada: true },
@@ -41,7 +42,7 @@ const GROUPS: NavGroup[] = [
   },
   {
     id: 'kontent', label: 'Kontent',
-    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
     items: [
       { href: '/admin/content', label: 'Protokollar & Kutubxona' },
       { href: '/admin/yangiliklar', label: "E'lonlar", tezOrada: true },
@@ -76,38 +77,23 @@ function SvgIcon({ svg, size = 18 }: { svg: string; size?: number }) {
   )
 }
 
-function DropdownGroup({
-  group, pathname, collapsed, onExpand,
-}: {
+function DropdownGroup({ group, pathname, collapsed, onExpand }: {
   group: NavGroup; pathname: string; collapsed: boolean; onExpand: () => void
 }) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
   const [open, setOpen] = useState(hasActive)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState<number | 'auto'>(hasActive ? 'auto' : 0)
 
   useEffect(() => {
-    if (collapsed) { setOpen(false); setHeight(0) }
+    if (collapsed) setOpen(false)
   }, [collapsed])
-
-  const expand = (nextOpen: boolean) => {
-    setOpen(nextOpen)
-    if (nextOpen) {
-      setHeight(contentRef.current?.scrollHeight ?? 0)
-      setTimeout(() => setHeight('auto'), 260)
-    } else {
-      setHeight(contentRef.current?.scrollHeight ?? 0)
-      requestAnimationFrame(() => requestAnimationFrame(() => setHeight(0)))
-    }
-  }
 
   const toggle = () => {
     if (collapsed) {
       onExpand()
-      setTimeout(() => expand(true), 240)
+      setTimeout(() => setOpen(true), 230)
       return
     }
-    expand(!open)
+    setOpen((v) => !v)
   }
 
   return (
@@ -128,59 +114,90 @@ function DropdownGroup({
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <SvgIcon svg={group.svg} />
-          {!collapsed && group.label}
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                key="label"
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }}
+                transition={{ duration: 0.18 }}
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                {group.label}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </span>
         {!collapsed && (
-          <svg
+          <motion.svg
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            style={{ width: 13, height: 13, flexShrink: 0, transition: 'transform .22s ease', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', color: 'var(--muted)' }}
+            style={{ width: 13, height: 13, flexShrink: 0, color: 'var(--muted)' }}
+            animate={{ rotate: open ? 90 : 0 }}
+            transition={{ duration: 0.2 }}
           >
             <polyline points="9 18 15 12 9 6" />
-          </svg>
+          </motion.svg>
         )}
       </button>
 
-      {!collapsed && (
-        <div
-          ref={contentRef}
-          style={{
-            overflow: 'hidden',
-            height: height === 'auto' ? 'auto' : height,
-            transition: 'height .24s cubic-bezier(.4,0,.2,1)',
-          }}
-        >
-          <div style={{ margin: '2px 0 4px 18px', borderLeft: '1.5px solid var(--line)', paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {group.items.map((item) => {
-              const active = !item.tezOrada && pathname.startsWith(item.href)
-              return item.tezOrada ? (
-                <div key={item.href} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '6px 10px', borderRadius: 8,
-                  fontSize: 12.5, color: 'var(--muted)', opacity: 0.65,
-                }}>
-                  <span>{item.label}</span>
-                  <span style={{
-                    fontSize: 10, fontWeight: 600, padding: '2px 7px',
-                    background: 'var(--line)', color: 'var(--muted)', borderRadius: 20,
-                  }}>Tez orada</span>
-                </div>
-              ) : (
-                <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    padding: '7px 10px', borderRadius: 8, fontSize: 12.5,
-                    background: active ? 'var(--accent-soft)' : 'transparent',
-                    color: active ? 'var(--accent)' : 'var(--ink-soft)',
-                    fontWeight: active ? 600 : 400,
-                    transition: 'background .15s, color .15s',
-                  }}>
-                    {item.label}
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {!collapsed && open && (
+          <motion.div
+            key="dropdown"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              margin: '2px 0 4px 18px',
+              borderLeft: '1.5px solid var(--line)',
+              paddingLeft: 12,
+              display: 'flex', flexDirection: 'column', gap: 2,
+            }}>
+              {group.items.map((item, i) => {
+                const active = !item.tezOrada && pathname.startsWith(item.href)
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.18 }}
+                  >
+                    {item.tezOrada ? (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '6px 10px', borderRadius: 8,
+                        fontSize: 12.5, color: 'var(--muted)', opacity: 0.6,
+                      }}>
+                        <span>{item.label}</span>
+                        <span style={{
+                          fontSize: 10, fontWeight: 600, padding: '2px 7px',
+                          background: 'var(--line)', color: 'var(--muted)', borderRadius: 20,
+                        }}>Tez orada</span>
+                      </div>
+                    ) : (
+                      <Link href={item.href} style={{ textDecoration: 'none' }}>
+                        <div style={{
+                          padding: '7px 10px', borderRadius: 8, fontSize: 12.5,
+                          background: active ? 'var(--accent-soft)' : 'transparent',
+                          color: active ? 'var(--accent)' : 'var(--ink-soft)',
+                          fontWeight: active ? 600 : 400,
+                          transition: 'background .15s',
+                        }}>
+                          {item.label}
+                        </div>
+                      </Link>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -213,7 +230,7 @@ export function AdminSidebar() {
     localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0')
   }
 
-  const width = mounted ? (collapsed ? 64 : 248) : 248
+  const W = mounted ? (collapsed ? 64 : 248) : 248
 
   function Inner({ mobile = false }: { mobile?: boolean }) {
     const isCollapsed = mobile ? false : collapsed
@@ -221,45 +238,61 @@ export function AdminSidebar() {
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         {/* Header */}
         <div style={{
-          display: 'flex', alignItems: 'center',
+          display: 'flex', alignItems: 'center', overflow: 'hidden',
           justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: '14px 12px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0,
+          padding: '14px 12px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0, gap: 8,
         }}>
-          {!isCollapsed && (
-            <Link href="/admin/dashboard" style={{ textDecoration: 'none', fontWeight: 800, fontSize: 17, color: 'var(--ink)', letterSpacing: '-.3px' }}>
-              Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
-              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
-            </Link>
-          )}
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                key="logo"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden', minWidth: 0 }}
+              >
+                <Link href="/admin/dashboard" style={{
+                  textDecoration: 'none', fontWeight: 800, fontSize: 17,
+                  color: 'var(--ink)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'baseline', gap: 0,
+                }}>
+                  <span>Uro</span>
+                  <span style={{ color: 'var(--accent)' }}>sfera</span>
+                  <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <button
             onClick={mobile ? () => setMobileOpen(false) : toggleCollapse}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 6, borderRadius: 8,
+              color: 'var(--muted)', padding: 6, borderRadius: 8, flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'color .15s',
             }}
           >
             {mobile ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            ) : isCollapsed ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
-                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
             ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>
+              <motion.svg
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                style={{ width: 18, height: 18 }}
+                animate={{ rotate: isCollapsed ? 180 : 0 }}
+                transition={{ duration: 0.22 }}
+              >
                 <polyline points="15 18 9 12 15 6" />
-              </svg>
+              </motion.svg>
             )}
           </button>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <nav style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Dashboard */}
-          <Link href="/admin/dashboard" style={{ textDecoration: 'none' }}>
+          <Link href="/admin/dashboard" style={{ textDecoration: 'none' }} title={isCollapsed ? 'Dashboard' : undefined}>
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: isCollapsed ? '10px 0' : '9px 12px',
@@ -268,63 +301,84 @@ export function AdminSidebar() {
               background: pathname === '/admin/dashboard' ? 'var(--accent-soft)' : 'transparent',
               color: pathname === '/admin/dashboard' ? 'var(--accent)' : 'var(--ink-soft)',
               fontWeight: pathname === '/admin/dashboard' ? 600 : 400,
-              transition: 'background .15s, color .15s',
-            }}
-              title={isCollapsed ? 'Dashboard' : undefined}
-            >
+              transition: 'background .15s',
+            }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 18, height: 18, flexShrink: 0 }}>
                 <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
                 <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
               </svg>
-              {!isCollapsed && 'Dashboard'}
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    key="dash-label"
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    Dashboard
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
           </Link>
 
-          {/* Separator */}
           <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
 
           {GROUPS.map((group) => (
-            <DropdownGroup key={group.id} group={group} pathname={pathname} collapsed={isCollapsed} onExpand={toggleCollapse} />
+            <DropdownGroup
+              key={group.id}
+              group={group}
+              pathname={pathname}
+              collapsed={isCollapsed}
+              onExpand={toggleCollapse}
+            />
           ))}
         </nav>
 
-        {/* Footer — admin profil */}
-        {!isCollapsed && (
-          <div style={{
-            padding: '10px 12px', borderTop: '1px solid var(--line)', flexShrink: 0,
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: '50%',
-              background: 'var(--accent-soft)', color: 'var(--accent)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: 14, flexShrink: 0,
-            }}>
-              {adminNom ? adminNom[0].toUpperCase() : 'A'}
-            </div>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {adminNom || 'Admin'}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
-            </div>
-            <button
-              onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
-              title="Chiqish"
+        {/* Footer */}
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              key="footer"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
               style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--muted)', padding: 6, borderRadius: 8,
-                display: 'flex', alignItems: 'center', transition: 'color .15s',
+                padding: '10px 12px', borderTop: '1px solid var(--line)', flexShrink: 0,
+                display: 'flex', alignItems: 'center', gap: 10,
               }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 17, height: 17 }}>
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-            </button>
-          </div>
-        )}
+              <div style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: 'var(--accent-soft)', color: 'var(--accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: 14, flexShrink: 0,
+              }}>
+                {adminNom ? adminNom[0].toUpperCase() : 'A'}
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {adminNom || 'Admin'}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--muted)' }}>Admin</div>
+              </div>
+              <button
+                onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
+                title="Chiqish"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--muted)', padding: 6, borderRadius: 8,
+                  display: 'flex', alignItems: 'center',
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 17, height: 17 }}>
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     )
   }
@@ -349,40 +403,50 @@ export function AdminSidebar() {
       </button>
 
       {/* Mobil overlay */}
-      <div
-        className="md:hidden"
-        onClick={() => setMobileOpen(false)}
-        style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 100,
-          opacity: mobileOpen ? 1 : 0, pointerEvents: mobileOpen ? 'auto' : 'none',
-          transition: 'opacity .22s ease',
-        }}
-      />
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            className="md:hidden"
+            key="overlay"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 100 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Mobil drawer */}
-      <aside
-        className="md:hidden"
-        style={{
-          position: 'fixed', top: 0, left: 0, height: '100vh', width: 260, zIndex: 101,
-          background: 'var(--surface)', borderRight: '1px solid var(--line)',
-          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform .24s cubic-bezier(.4,0,.2,1)',
-        }}
-      >
-        <Inner mobile />
-      </aside>
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            className="md:hidden"
+            key="drawer"
+            initial={{ x: -260 }} animate={{ x: 0 }} exit={{ x: -260 }}
+            transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              position: 'fixed', top: 0, left: 0, height: '100vh', width: 260, zIndex: 101,
+              background: 'var(--surface)', borderRight: '1px solid var(--line)',
+            }}
+          >
+            <Inner mobile />
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside
+      <motion.aside
         className="hidden md:block"
+        animate={{ width: W }}
+        transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
         style={{
-          width, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
+          flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
           background: 'var(--surface)', borderRight: '1px solid var(--line)',
-          transition: 'width .22s cubic-bezier(.4,0,.2,1)', overflow: 'hidden', zIndex: 30,
+          overflow: 'hidden', zIndex: 30,
         }}
       >
         <Inner />
-      </aside>
+      </motion.aside>
     </>
   )
 }
