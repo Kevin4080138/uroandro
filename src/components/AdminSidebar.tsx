@@ -77,9 +77,9 @@ function SvgIcon({ svg, size = 18 }: { svg: string; size?: number }) {
 }
 
 function DropdownGroup({
-  group, pathname, collapsed,
+  group, pathname, collapsed, onExpand,
 }: {
-  group: NavGroup; pathname: string; collapsed: boolean
+  group: NavGroup; pathname: string; collapsed: boolean; onExpand: () => void
 }) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
   const [open, setOpen] = useState(hasActive)
@@ -87,20 +87,27 @@ function DropdownGroup({
   const [height, setHeight] = useState<number | 'auto'>(hasActive ? 'auto' : 0)
 
   useEffect(() => {
-    if (collapsed) { setOpen(false); setHeight(0); return }
+    if (collapsed) { setOpen(false); setHeight(0) }
   }, [collapsed])
 
-  const toggle = () => {
-    if (collapsed) return
-    const next = !open
-    setOpen(next)
-    if (next) {
+  const expand = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    if (nextOpen) {
       setHeight(contentRef.current?.scrollHeight ?? 0)
       setTimeout(() => setHeight('auto'), 260)
     } else {
       setHeight(contentRef.current?.scrollHeight ?? 0)
       requestAnimationFrame(() => requestAnimationFrame(() => setHeight(0)))
     }
+  }
+
+  const toggle = () => {
+    if (collapsed) {
+      onExpand()
+      setTimeout(() => expand(true), 240)
+      return
+    }
+    expand(!open)
   }
 
   return (
@@ -277,7 +284,7 @@ export function AdminSidebar() {
           <div style={{ height: 1, background: 'var(--line)', margin: '6px 4px' }} />
 
           {GROUPS.map((group) => (
-            <DropdownGroup key={group.id} group={group} pathname={pathname} collapsed={isCollapsed} />
+            <DropdownGroup key={group.id} group={group} pathname={pathname} collapsed={isCollapsed} onExpand={toggleCollapse} />
           ))}
         </nav>
 
