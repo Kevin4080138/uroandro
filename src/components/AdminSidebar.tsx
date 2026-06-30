@@ -62,11 +62,13 @@ const GROUPS: NavGroup[] = [
   },
 ]
 
-function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand }: {
+function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand, badges = {} }: {
   group: NavGroup; pathname: string; collapsed: boolean
   open: boolean; onToggle: () => void; onExpand: () => void
+  badges?: Record<string, number>
 }) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
+  const groupBadge = group.items.reduce((sum, i) => sum + (badges[i.href] ?? 0), 0)
 
   const toggle = () => {
     if (collapsed) { onExpand(); setTimeout(() => onToggle(), 220); return }
@@ -85,13 +87,31 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand }:
         border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 14,
         transition: 'background .15s',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>{group.icon}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
+          <span style={{ fontSize: 20, flexShrink: 0, position: 'relative' }}>
+            {group.icon}
+            {collapsed && groupBadge > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -6, minWidth: 16, height: 16,
+                background: 'var(--danger)', color: '#fff', borderRadius: 10,
+                fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
+              }}>{groupBadge}</span>
+            )}
+          </span>
           {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{group.label}</span>}
         </span>
         {!collapsed && (
-          <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.2 }}
-            style={{ fontSize: 11, color: 'var(--muted)', display: 'inline-block', flexShrink: 0 }}>▶</motion.span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {groupBadge > 0 && (
+              <span style={{
+                minWidth: 18, height: 18, background: 'var(--danger)', color: '#fff',
+                borderRadius: 10, fontSize: 10, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+              }}>{groupBadge}</span>
+            )}
+            <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.2 }}
+              style={{ fontSize: 11, color: 'var(--muted)', display: 'inline-block' }}>▶</motion.span>
+          </span>
         )}
       </button>
 
@@ -131,7 +151,14 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand }:
                           transition: 'background .15s',
                         }}>
                           <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
-                          <span>{item.label}</span>
+                          <span style={{ flex: 1 }}>{item.label}</span>
+                          {(badges[item.href] ?? 0) > 0 && (
+                            <span style={{
+                              minWidth: 18, height: 18, background: 'var(--danger)', color: '#fff',
+                              borderRadius: 10, fontSize: 10, fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', flexShrink: 0,
+                            }}>{badges[item.href]}</span>
+                          )}
                         </div>
                       </Link>
                     )}
@@ -155,6 +182,7 @@ export function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [adminNom, setAdminNom] = useState('')
   const [openGroup, setOpenGroup] = useState<string | null>(null)
+  const [korilmaganFikrlar, setKorilmaganFikrlar] = useState(0)
 
   const toggleGroup = (id: string) => setOpenGroup((prev) => prev === id ? null : id)
 
@@ -166,6 +194,8 @@ export function AdminSidebar() {
       supabase.from('profiles').select('full_name').eq('id', user.id).single()
         .then(({ data }) => { if (data) setAdminNom(data.full_name ?? '') })
     })
+    supabase.from('fikrlar').select('id', { count: 'exact', head: true }).eq('korildi', false)
+      .then(({ count }) => setKorilmaganFikrlar(count ?? 0))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -208,6 +238,7 @@ export function AdminSidebar() {
             open={openGroup === group.id}
             onToggle={() => toggleGroup(group.id)}
             onExpand={toggleCollapse}
+            badges={{ '/admin/fikrlar': korilmaganFikrlar }}
           />
         ))}
       </nav>

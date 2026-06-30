@@ -30,6 +30,9 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
   const [rolFiltr, setRolFiltr] = useState('')
+  const [sahifa, setSahifa] = useState(0)
+  const [jami, setJami] = useState(0)
+  const SAHIFADA = 20
   const [tahrirId, setTahrirId] = useState<string | null>(null)
   const [tahrirLogin, setTahrirLogin] = useState('')
   const [tahrirParol, setTahrirParol] = useState('')
@@ -39,20 +42,17 @@ export default function AdminUsersPage() {
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
 
-  const load = async (q: string, rol: string) => {
+  const load = async (q: string, rol: string, s: number) => {
     setLoading(true)
-    let query = supabase.from('profiles').select('*').order('created_at', { ascending: false })
-    if (q.trim()) {
-      query = query.or(`full_name.ilike.%${q.trim()}%,telefon.ilike.%${q.trim()}%,email.ilike.%${q.trim()}%`)
-    }
-    if (rol) {
-      query = query.eq('role', rol)
-    }
-    const [{ data: profillar }, { data: obunaQatorlari }] = await Promise.all([
-      query,
+    let base = supabase.from('profiles').select('*', { count: 'exact' }).order('created_at', { ascending: false })
+    if (q.trim()) base = base.or(`full_name.ilike.%${q.trim()}%,telefon.ilike.%${q.trim()}%,email.ilike.%${q.trim()}%`)
+    if (rol) base = base.eq('role', rol)
+    const [{ data: profillar, count }, { data: obunaQatorlari }] = await Promise.all([
+      base.range(s * SAHIFADA, (s + 1) * SAHIFADA - 1),
       supabase.from('obunalar').select('student_id, bosqich').eq('faol', true),
     ])
     setUsers((profillar as Profile[]) ?? [])
+    setJami(count ?? 0)
     const om: Record<string, Set<string>> = {}
     for (const o of obunaQatorlari ?? []) (om[o.student_id] ??= new Set()).add(o.bosqich)
     setObunalar(om)
@@ -60,9 +60,15 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => load(qidiruv, rolFiltr), 300)
+    setSahifa(0)
+    const timer = setTimeout(() => load(qidiruv, rolFiltr, 0), 300)
     return () => clearTimeout(timer)
   }, [qidiruv, rolFiltr])
+
+  const sahifaOzgartir = (yangi: number) => {
+    setSahifa(yangi)
+    load(qidiruv, rolFiltr, yangi)
+  }
 
   const obunaniBekorQil = async (studentId: string, bosqich: string) => {
     setObunalar((prev) => {
@@ -137,7 +143,7 @@ export default function AdminUsersPage() {
     if (!res.ok) { setXato(json.error ?? 'Xatolik yuz berdi'); return }
 
     setTahrirId(null)
-    load(qidiruv, rolFiltr)
+    load(qidiruv, rolFiltr, sahifa)
   }
 
   const filtered = users.filter((u) => !u.arxivlangan)
@@ -206,6 +212,50 @@ export default function AdminUsersPage() {
             {filtered.length === 0 && <p style={{ color: 'var(--muted)', padding: '20px' }}>Hech kim topilmadi.</p>}
           </div>
         )}
+
+        {/* Pagination */}
+        {!loading && jami > SAHIFADA && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+              {sahifa * SAHIFADA + 1}–{Math.min((sahifa + 1) * SAHIFADA, jami)} / {jami} ta
+            </span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                onClick={() => sahifaOzgartir(sahifa - 1)}
+                disabled={sahifa === 0}
+                style={{
+                  border: '1px solid var(--line)', background: 'var(--surface)',
+                  color: sahifa === 0 ? 'var(--muted)' : 'var(--ink)',
+                  borderRadius: '8px', padding: '6px 14px', fontSize: '13px',
+                  cursor: sahifa === 0 ? 'not-allowed' : 'pointer', opacity: sahifa === 0 ? 0.5 : 1,
+                }}
+              >← Oldingi</button>
+              {Array.from({ length: Math.ceil(jami / SAHIFADA) }, (_, i) => i)
+                .filter((i) => Math.abs(i - sahifa) <= 2)
+                .map((i) => (
+                  <button key={i} onClick={() => sahifaOzgartir(i)} style={{
+                    border: `1px solid ${i === sahifa ? 'var(--accent)' : 'var(--line)'}`,
+                    background: i === sahifa ? 'var(--accent-soft)' : 'var(--surface)',
+                    color: i === sahifa ? 'var(--accent)' : 'var(--ink)',
+                    borderRadius: '8px', padding: '6px 12px', fontSize: '13px',
+                    fontWeight: i === sahifa ? 700 : 400, cursor: 'pointer',
+                  }}>{i + 1}</button>
+                ))}
+              <button
+                onClick={() => sahifaOzgartir(sahifa + 1)}
+                disabled={(sahifa + 1) * SAHIFADA >= jami}
+                style={{
+                  border: '1px solid var(--line)', background: 'var(--surface)',
+                  color: (sahifa + 1) * SAHIFADA >= jami ? 'var(--muted)' : 'var(--ink)',
+                  borderRadius: '8px', padding: '6px 14px', fontSize: '13px',
+                  cursor: (sahifa + 1) * SAHIFADA >= jami ? 'not-allowed' : 'pointer',
+                  opacity: (sahifa + 1) * SAHIFADA >= jami ? 0.5 : 1,
+                }}
+              >Keyingi →</button>
+            </div>
+          </div>
+        )}
+
 
         {!loading && arxivlangan.length > 0 && (
           <div style={{ marginTop: '20px' }}>
