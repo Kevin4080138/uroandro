@@ -38,9 +38,14 @@ export default function AdminUsersPage() {
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
 
-  const load = async () => {
+  const load = async (q: string) => {
+    setLoading(true)
+    let query = supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    if (q.trim()) {
+      query = query.or(`full_name.ilike.%${q.trim()}%,telefon.ilike.%${q.trim()}%,email.ilike.%${q.trim()}%`)
+    }
     const [{ data: profillar }, { data: obunaQatorlari }] = await Promise.all([
-      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      query,
       supabase.from('obunalar').select('student_id, bosqich').eq('faol', true),
     ])
     setUsers((profillar as Profile[]) ?? [])
@@ -50,7 +55,10 @@ export default function AdminUsersPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    const timer = setTimeout(() => load(qidiruv), 300)
+    return () => clearTimeout(timer)
+  }, [qidiruv])
 
   const obunaniBekorQil = async (studentId: string, bosqich: string) => {
     setObunalar((prev) => {
@@ -125,14 +133,11 @@ export default function AdminUsersPage() {
     if (!res.ok) { setXato(json.error ?? 'Xatolik yuz berdi'); return }
 
     setTahrirId(null)
-    load()
+    load(qidiruv)
   }
 
-  const mosKeluvchi = (u: Profile) =>
-    `${u.full_name} ${u.telefon ?? ''} ${u.role}`.toLowerCase().includes(qidiruv.toLowerCase())
-
-  const filtered = users.filter((u) => !u.arxivlangan && mosKeluvchi(u))
-  const arxivlangan = users.filter((u) => u.arxivlangan && mosKeluvchi(u))
+  const filtered = users.filter((u) => !u.arxivlangan)
+  const arxivlangan = users.filter((u) => u.arxivlangan)
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
