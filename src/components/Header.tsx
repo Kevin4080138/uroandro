@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 import { ProfileMenu } from './ProfileMenu'
 
@@ -8,7 +8,16 @@ export function Header({
   backHref, backLabel = 'Bosh sahifa', actions,
 }: { backHref?: string; backLabel?: string; actions?: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { theme, toggle } = useTheme()
+
+  const logoBosish = () => {
+    if (pathname.startsWith('/student')) router.push('/student/dashboard')
+    else if (pathname.startsWith('/doctor')) router.push('/doctor/dashboard')
+    else if (pathname.startsWith('/patient')) router.push('/patient/dashboard')
+    else if (pathname.startsWith('/admin')) router.push('/admin/dashboard')
+    else router.push('/')
+  }
 
   return (
     <header
@@ -17,7 +26,7 @@ export function Header({
     >
       <h1 className="m-0 flex shrink-0 items-center text-lg font-bold sm:text-xl" style={{ color: 'var(--ink)' }}>
         <button
-          onClick={() => router.push('/')}
+          onClick={logoBosish}
           aria-label="Bosh sahifaga o'tish"
           className="soft-press flex items-center gap-2 border-none bg-transparent p-0"
           style={{ color: 'inherit', cursor: 'pointer' }}
