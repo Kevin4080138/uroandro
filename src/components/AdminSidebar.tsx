@@ -180,7 +180,11 @@ export function AdminSidebar() {
 
   function NavContent({ collapsed: c }: { collapsed: boolean }) {
     return (
-      <nav style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav style={{
+        flex: 1, overflowY: 'auto', overflowX: 'hidden',
+        padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2,
+        scrollbarWidth: 'thin', scrollbarColor: 'var(--line) transparent',
+      }}>
         <Link href="/admin/dashboard" style={{ textDecoration: 'none' }} title={c ? 'Dashboard' : undefined}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 12,
@@ -276,49 +280,55 @@ export function AdminSidebar() {
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:block" style={{ position: 'relative', top: 0, height: '100vh', flexShrink: 0, zIndex: 30, alignSelf: 'flex-start', display: 'flex' }}>
       <motion.aside
+        className="hidden md:flex"
         animate={{ width: W }}
         transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-        style={{ height: '100vh', background: 'var(--surface)', borderRight: '1px solid var(--line)', overflow: 'hidden', position: 'relative' }}
+        style={{
+          flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
+          background: 'var(--surface)', borderRight: '1px solid var(--line)',
+          overflow: 'hidden', zIndex: 30, flexDirection: 'column',
+        }}
       >
-        {/* Logo — collapse tugmasisiz, to'liq joy egallaydi */}
-        <div style={{ padding: '14px 14px 13px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+        {/* Logo */}
+        <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
           {!collapsed ? (
             <Link href="/admin/dashboard" style={{ textDecoration: 'none', fontWeight: 800, fontSize: 18, color: 'var(--ink)', whiteSpace: 'nowrap', letterSpacing: '-0.3px', display: 'block' }}>
               Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
               <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
             </Link>
           ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <span style={{ fontSize: 22 }}>🔵</span>
-            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', fontSize: 22 }}>🔵</div>
           )}
         </div>
 
-        <NavContent collapsed={collapsed} />
-        {!collapsed && <Footer />}
-
-        {/* Collapse tab — sidebarning o'ng chekkasida suzib turadi */}
+        {/* Collapse tugmasi — logo ostida, markazda */}
         <button
           onClick={toggleCollapse}
           title={collapsed ? 'Kengaytirish' : 'Toraytirish'}
           style={{
-            position: 'absolute', top: '50%', right: -14,
-            transform: 'translateY(-50%)',
-            width: 28, height: 28, borderRadius: '50%',
-            background: 'var(--surface)', border: '1px solid var(--line)',
-            cursor: 'pointer', zIndex: 40,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, color: 'var(--muted)',
-            boxShadow: '0 2px 8px rgba(0,0,0,.12)',
+            width: '100%', padding: '5px 0', flexShrink: 0,
+            background: 'transparent', border: 'none',
+            borderBottom: '1px solid var(--line)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--muted)', fontSize: 12,
             transition: 'background .15s',
           }}
         >
-          {collapsed ? '›' : '‹'}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {collapsed ? (
+              <span style={{ fontSize: 16 }}>›</span>
+            ) : (
+              <>
+                <span style={{ fontSize: 11 }}>‹ Yopish</span>
+              </>
+            )}
+          </span>
         </button>
+
+        <NavContent collapsed={collapsed} />
+        {!collapsed && <Footer />}
       </motion.aside>
-      </div>
     </>
   )
 }
