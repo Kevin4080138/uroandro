@@ -68,7 +68,7 @@ function DropdownGroup({
   group: NavGroup; pathname: string; collapsed: boolean; onExpand: () => void
 }) {
   const hasActive = group.items.some((i) => !i.tezOrada && pathname.startsWith(i.href))
-  const [open, setOpen] = useState(hasActive)
+  const [open, setOpen] = useState(false)
 
   useEffect(() => { if (collapsed) setOpen(false) }, [collapsed])
 
@@ -133,13 +133,13 @@ function DropdownGroup({
                   >
                     {item.tezOrada ? (
                       <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        display: 'flex', alignItems: 'center', gap: 6,
                         padding: '6px 10px', borderRadius: 8, fontSize: 12.5,
                         color: 'var(--muted)', opacity: 0.65,
                       }}>
-                        <span>{item.label}</span>
+                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{item.label}</span>
                         <span style={{
-                          fontSize: 10, fontWeight: 600, padding: '2px 7px',
+                          fontSize: 10, fontWeight: 600, padding: '2px 7px', flexShrink: 0,
                           background: 'var(--line)', color: 'var(--muted)', borderRadius: 20,
                         }}>Tez orada</span>
                       </div>
