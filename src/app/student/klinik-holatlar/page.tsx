@@ -157,7 +157,7 @@ const HOLATLAR: Holat[] = [
   },
 ]
 
-type Holat_Soni = 'menu' | number
+type Holat_Soni = 'menu' | 'yakun' | number
 
 export default function KlinikHolatlarPage() {
   const [ko_rinish, setKo_rinish] = useState<Holat_Soni>('menu')
