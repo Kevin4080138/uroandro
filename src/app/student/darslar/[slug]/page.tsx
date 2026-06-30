@@ -6,8 +6,9 @@ import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
+import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 
-type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat'
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat' | 'klinik'
 
 // `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
@@ -66,6 +67,8 @@ export default function DarsDetailPage() {
   const nazoratVaqtDaqiqa = tarkib?.nazorat_vaqt_daqiqa ?? dars?.nazoratVaqtDaqiqa ?? 15
   const sertifikatOtishFoizi = tarkib?.sertifikat_otish_foizi ?? dars?.sertifikatOtishFoizi ?? 70
 
+  const klinikHolatlar = klinikHolatlarOl(slug)
+
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
     video: !!asosiyVideo || videoLinklar.length > 0,
@@ -73,6 +76,7 @@ export default function DarsDetailPage() {
     amaliy: amaliyBank.length > 0,
     usmle: usmleBank.length > 0,
     nazorat: nazoratBank.length > 0,
+    klinik: klinikHolatlar.length > 0,
   }
   const TAB_NOMI: Record<Tab, string> = {
     nazariya: '📖 Nazariya',
@@ -81,6 +85,7 @@ export default function DarsDetailPage() {
     amaliy: '✅ Amaliy test',
     usmle: '🏅 USMLE',
     nazorat: '🔒 Nazorat',
+    klinik: '🏥 Klinik holat',
   }
 
   const [tab, setTab] = useState<Tab>('nazariya')
@@ -193,6 +198,7 @@ export default function DarsDetailPage() {
             otishFoizi={sertifikatOtishFoizi}
           />
         )}
+        {tab === 'klinik' && <KlinikHolatlarBolimi holatlar={klinikHolatlar} />}
       </div>
     </div>
   )
@@ -732,6 +738,178 @@ function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsN
       boshlashTugma="USMLE testni boshlash →"
       onTopshirish={saqla}
     />
+  )
+}
+
+function KlinikHolatlarBolimi({ holatlar }: { holatlar: KlinikHolat[] }) {
+  const [joriy, setJoriy] = useState<number | 'menu' | 'yakun'>('menu')
+  const [qadam, setQadam] = useState(0)
+  const [tanlangan, setTanlangan] = useState<number | null>(null)
+  const [tekshirildi, setTekshirildi] = useState(false)
+  const [togrilar, setTogrilar] = useState(0)
+  const [yakunlangan, setYakunlangan] = useState<Set<number>>(new Set())
+
+  const holat = typeof joriy === 'number' ? holatlar[joriy] : null
+  const joriyQadam = holat?.qadamlar[qadam]
+
+  const boshla = (i: number) => {
+    setJoriy(i); setQadam(0); setTanlangan(null); setTekshirildi(false); setTogrilar(0)
+  }
+
+  const tekshir = () => {
+    if (tanlangan === null) return
+    setTekshirildi(true)
+    if (tanlangan === joriyQadam?.togri) setTogrilar((t) => t + 1)
+  }
+
+  const keyingi = () => {
+    if (!holat) return
+    if (qadam < holat.qadamlar.length - 1) {
+      setQadam((q) => q + 1); setTanlangan(null); setTekshirildi(false)
+    } else {
+      setYakunlangan((prev) => new Set([...prev, joriy as number]))
+      setJoriy('yakun')
+    }
+  }
+
+  if (joriy === 'yakun') {
+    return (
+      <div className="rise" style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <div style={{ fontSize: '52px', marginBottom: '12px' }}>
+          {togrilar === holat?.qadamlar.length ? '🎉' : '👍'}
+        </div>
+        <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px' }}>
+          {togrilar}/{holat?.qadamlar.length} to&apos;g&apos;ri
+        </h3>
+        {holat?.xulosa && (
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px 18px', margin: '16px 0', textAlign: 'left' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Klinik xulosa</div>
+            <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{holat.xulosa}</p>
+          </div>
+        )}
+        <button onClick={() => setJoriy('menu')} style={{
+          background: 'var(--accent)', color: 'white', border: 'none',
+          borderRadius: '12px', padding: '11px 22px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+        }}>
+          Ro&apos;yxatga qaytish
+        </button>
+      </div>
+    )
+  }
+
+  if (joriy === 'menu') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {holatlar.map((h, i) => (
+          <div key={h.id} onClick={() => boshla(i)} className="rise lift" style={{
+            background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? 'var(--good)' : 'var(--line)'}`,
+            borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.07}s`,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <span style={{ fontSize: '24px' }}>{h.emoji}</span>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{h.sarlavha}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{h.qadamlar.length} ta savol</div>
+                </div>
+              </div>
+              {yakunlangan.has(i) && <span style={{ fontSize: '18px' }}>✅</span>}
+            </div>
+            <div style={{ marginTop: '10px', fontSize: '13px', color: 'var(--ink-soft)', background: 'var(--surface-2)', borderRadius: '8px', padding: '8px 12px', lineHeight: 1.5 }}>
+              🧑 {h.bemor}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (!holat || !joriyQadam) return null
+
+  const progress = (qadam / holat.qadamlar.length) * 100
+
+  return (
+    <>
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)', marginBottom: '5px' }}>
+          <span>{holat.sarlavha}</span>
+          <span>{qadam + 1} / {holat.qadamlar.length}</span>
+        </div>
+        <div style={{ height: '5px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', borderRadius: '999px', width: `${progress}%`, background: 'var(--accent)', transition: 'width .3s' }} />
+        </div>
+      </div>
+
+      {qadam === 0 && (
+        <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>📋 Bemor historiyasi</div>
+          <p style={{ margin: '0 0 6px', fontSize: '13.5px', lineHeight: 1.6 }}><strong>Bemor:</strong> {holat.bemor}</p>
+          <p style={{ margin: '0 0 6px', fontSize: '13.5px', lineHeight: 1.6 }}><strong>Shikoyat:</strong> {holat.shikoyat}</p>
+          <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.6 }}><strong>Ko&apos;rik:</strong> {holat.tekshiruv}</p>
+        </div>
+      )}
+
+      <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px', marginBottom: '12px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700, marginBottom: '8px' }}>Savol {qadam + 1}</div>
+        <p style={{ fontSize: '14px', fontWeight: 600, margin: 0, lineHeight: 1.5 }}>{joriyQadam.savol}</p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginBottom: '14px' }}>
+        {joriyQadam.variantlar.map((v, i) => {
+          const togri = i === joriyQadam.togri
+          const tanlandi = tanlangan === i
+          let bg = 'var(--surface-2)', border = 'var(--line)'
+          if (tekshirildi) {
+            if (togri) { bg = '#16a34a18'; border = '#16a34a' }
+            else if (tanlandi) { bg = '#dc262618'; border = '#dc2626' }
+          } else if (tanlandi) { bg = 'var(--accent-soft)'; border = 'var(--accent)' }
+          return (
+            <button key={i} onClick={() => !tekshirildi && setTanlangan(i)} style={{
+              background: bg, border: `1.5px solid ${border}`, borderRadius: '10px',
+              padding: '11px 14px', textAlign: 'left', cursor: tekshirildi ? 'default' : 'pointer',
+              fontSize: '13.5px', color: 'var(--ink)', display: 'flex', gap: '8px', alignItems: 'center',
+            }}>
+              <span style={{ fontWeight: 700, color: tekshirildi && togri ? '#16a34a' : tekshirildi && tanlandi ? '#dc2626' : 'var(--muted)', minWidth: '16px' }}>
+                {tekshirildi ? (togri ? '✓' : tanlandi ? '✗' : String.fromCharCode(65 + i)) : String.fromCharCode(65 + i)}
+              </span>
+              {v}
+            </button>
+          )
+        })}
+      </div>
+
+      {tekshirildi && (
+        <div className="rise" style={{
+          background: tanlangan === joriyQadam.togri ? '#16a34a12' : '#dc262612',
+          border: `1px solid ${tanlangan === joriyQadam.togri ? '#16a34a' : '#dc2626'}`,
+          borderRadius: '10px', padding: '12px 14px', marginBottom: '12px',
+        }}>
+          <div style={{ fontSize: '11.5px', fontWeight: 700, color: tanlangan === joriyQadam.togri ? '#16a34a' : '#dc2626', marginBottom: '4px' }}>
+            {tanlangan === joriyQadam.togri ? '✓ To\'g\'ri!' : '✗ Noto\'g\'ri'}
+          </div>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{joriyQadam.izoh}</p>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <button onClick={() => setJoriy('menu')} style={{
+          background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)',
+          borderRadius: '10px', padding: '11px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+        }}>← Ortga</button>
+        {!tekshirildi ? (
+          <button onClick={tekshir} disabled={tanlangan === null} style={{
+            flex: 1, background: tanlangan !== null ? 'var(--accent)' : 'var(--surface-2)',
+            color: tanlangan !== null ? 'white' : 'var(--muted)', border: 'none',
+            borderRadius: '10px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: tanlangan !== null ? 'pointer' : 'not-allowed',
+          }}>Tekshirish</button>
+        ) : (
+          <button onClick={keyingi} style={{
+            flex: 1, background: 'var(--accent)', color: 'white', border: 'none',
+            borderRadius: '10px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+          }}>{qadam < holat.qadamlar.length - 1 ? 'Keyingi →' : 'Yakunlash ✓'}</button>
+        )}
+      </div>
+    </>
   )
 }
 
