@@ -25,7 +25,7 @@ const AMAL_LABEL: Record<string, string> = {
   obuna_bekor: '❌ Obuna bekor qilindi',
 }
 
-function TafsilotKo'rish({ amal, tafsilot }: { amal: string; tafsilot: any }) {
+function TafsilotKorish({ amal, tafsilot }: { amal: string; tafsilot: any }) {
   if (!tafsilot) return null
 
   if (amal === 'rol_ozgartirish' && tafsilot.eski_rol && tafsilot.yangi_rol) {
@@ -123,7 +123,7 @@ export default function AdminAuditPage() {
                 <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--ink-soft)' }}>
                   <strong>{l.admin_ism}</strong> tomonidan, <strong>{l.maqsad_ism}</strong> uchun
                 </p>
-                <TafsilotKo'rish amal={l.amal} tafsilot={l.tafsilot} />
+                <TafsilotKorish amal={l.amal} tafsilot={l.tafsilot} />
               </div>
             ))}
           </div>
