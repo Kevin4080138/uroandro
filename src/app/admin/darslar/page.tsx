@@ -7,6 +7,7 @@ import { DARSLAR } from '@/lib/talim/darslar'
 
 type DarsTarkibi = {
   dars_slug: string
+  asosiy_video_url: string | null
   video_linklar: string[] | null
   konspekt_url: string | null
   prezentatsiya_url: string | null
@@ -28,6 +29,7 @@ export default function AdminDarslarPage() {
   const [saqlanmoqda, setSaqlanmoqda] = useState(false)
   const [xabar, setXabar] = useState<string | null>(null)
 
+  const [asosiyVideoUrl, setAsosiyVideoUrl] = useState('')
   const [videoLinklarMatn, setVideoLinklarMatn] = useState('')
   const [konspektFayl, setKonspektFayl] = useState<File | null>(null)
   const [prezentatsiyaFayl, setPrezentatsiyaFayl] = useState<File | null>(null)
@@ -47,8 +49,9 @@ export default function AdminDarslarPage() {
     if (konspektInput.current) konspektInput.current.value = ''
     if (prezentatsiyaInput.current) prezentatsiyaInput.current.value = ''
     setYuklanmoqda(true)
-    const { data } = await supabase.from('dars_tarkibi').select('dars_slug, video_linklar, konspekt_url, prezentatsiya_url').eq('dars_slug', slug).maybeSingle()
+    const { data } = await supabase.from('dars_tarkibi').select('dars_slug, asosiy_video_url, video_linklar, konspekt_url, prezentatsiya_url').eq('dars_slug', slug).maybeSingle()
     setTarkib((data as DarsTarkibi) ?? null)
+    setAsosiyVideoUrl(data?.asosiy_video_url ?? '')
     setVideoLinklarMatn((data?.video_linklar ?? []).join('\n'))
     setYuklanmoqda(false)
   }
@@ -71,6 +74,7 @@ export default function AdminDarslarPage() {
     setSaqlanmoqda(true)
     setXabar(null)
     try {
+      const asosiyVideo = asosiyVideoUrl.trim() || null
       const videoLinklar = videoLinklarMatn.split('\n').map((s) => s.trim()).filter(Boolean)
       const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt') : tarkib?.konspekt_url ?? null
       const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya') : tarkib?.prezentatsiya_url ?? null
@@ -80,12 +84,12 @@ export default function AdminDarslarPage() {
       const bepulNamuna = darsMa?.bepulNamuna ?? false
 
       const { error } = await supabase.from('dars_tarkibi').upsert(
-        { dars_slug: tanlanganSlug, bosqich, bepul_namuna: bepulNamuna, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
+        { dars_slug: tanlanganSlug, bosqich, bepul_namuna: bepulNamuna, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
         { onConflict: 'dars_slug' }
       )
       if (error) throw error
 
-      setTarkib({ dars_slug: tanlanganSlug, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl })
+      setTarkib({ dars_slug: tanlanganSlug, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl })
       setKonspektFayl(null)
       setPrezentatsiyaFayl(null)
       if (konspektInput.current) konspektInput.current.value = ''
@@ -146,12 +150,22 @@ export default function AdminDarslarPage() {
               </h3>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Video linklar (har biri yangi qatordan, YouTube va h.k.)</label>
+                <label style={labelStyle}>Asosiy dars videosi (YouTube, Instagram yoki Facebook havolasi)</label>
+                <input
+                  style={inputStyle}
+                  value={asosiyVideoUrl}
+                  onChange={(e) => setAsosiyVideoUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Qo&apos;shimcha videolar (har biri yangi qatordan — YouTube, Instagram, Facebook)</label>
                 <textarea
                   style={{ ...inputStyle, minHeight: '90px' }}
                   value={videoLinklarMatn}
                   onChange={(e) => setVideoLinklarMatn(e.target.value)}
-                  placeholder={'https://youtube.com/watch?v=...\nhttps://youtube.com/watch?v=...'}
+                  placeholder={'https://youtube.com/watch?v=...\nhttps://instagram.com/reel/...\nhttps://facebook.com/.../videos/...'}
                 />
               </div>
 

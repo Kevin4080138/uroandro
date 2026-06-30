@@ -29,6 +29,7 @@ export type Dars = {
 
   // Quyidagilar ixtiyoriy — to'liq jihozlangan darslar (masalan HARD bosqich) uchun
   nazariyaHtml?: string // tashqi tahririyatdan tayyor HTML (jadval/callout bilan) — mavjud bo'lsa bolimlar/manbalar o'rniga shu ko'rsatiladi
+  asosiyVideoUrl?: string
   videoLinklar?: string[]
   konspektUrl?: string
   prezentatsiyaUrl?: string

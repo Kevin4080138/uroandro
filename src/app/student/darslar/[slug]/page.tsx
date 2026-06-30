@@ -13,6 +13,7 @@ type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat'
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
 type DarsTarkibi = {
   nazariya_html: string | null
+  asosiy_video_url: string | null
   video_linklar: string[] | null
   konspekt_url: string | null
   prezentatsiya_url: string | null
@@ -53,6 +54,7 @@ export default function DarsDetailPage() {
   const { egami, yuklandi: obunaYuklandi } = useMeningObunalarim()
 
   const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
+  const asosiyVideo = tarkib?.asosiy_video_url ?? dars?.asosiyVideoUrl ?? null
   const videoLinklar = tarkib?.video_linklar ?? dars?.videoLinklar ?? []
   // Bular endi public URL emas — 'dars-materiallari' (yopiq bucket) ichidagi fayl yo'li.
   const konspektYoli = tarkib?.konspekt_url ?? dars?.konspektUrl
@@ -66,7 +68,7 @@ export default function DarsDetailPage() {
 
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
-    video: videoLinklar.length > 0,
+    video: !!asosiyVideo || videoLinklar.length > 0,
     yuklab: !!(konspektYoli || prezentatsiyaYoli),
     amaliy: amaliyBank.length > 0,
     usmle: usmleBank.length > 0,
@@ -165,7 +167,7 @@ export default function DarsDetailPage() {
 
         {tab === 'nazariya' && !yuklandi && <BoshUlash matn="Yuklanmoqda..." />}
         {tab === 'nazariya' && yuklandi && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
-        {tab === 'video' && <VideoBolimi linklar={videoLinklar} />}
+        {tab === 'video' && <VideoBolimi asosiyVideo={asosiyVideo} linklar={videoLinklar} />}
         {tab === 'yuklab' && <YuklabOlishBolimi konspektYoli={konspektYoli} prezentatsiyaYoli={prezentatsiyaYoli} />}
         {tab === 'amaliy' && (
           <AmaliyTestBolimi
@@ -233,27 +235,61 @@ function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<t
   )
 }
 
-function VideoBolimi({ linklar }: { linklar: string[] }) {
-  if (linklar.length === 0) {
+function videoPlatformasi(url: string): { belgi: string; nom: string } {
+  const u = url.toLowerCase()
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return { belgi: '▶️', nom: 'YouTube' }
+  if (u.includes('instagram.com')) return { belgi: '📷', nom: 'Instagram' }
+  if (u.includes('facebook.com') || u.includes('fb.watch')) return { belgi: '📘', nom: 'Facebook' }
+  return { belgi: '▶️', nom: 'Video' }
+}
+
+function VideoKartasi({ url, sarlavha, animationDelay }: { url: string; sarlavha: string; animationDelay?: string }) {
+  const { belgi, nom } = videoPlatformasi(url)
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="rise lift" style={{
+      animationDelay,
+      display: 'flex', alignItems: 'center', gap: '14px',
+      background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+      padding: '16px 20px', textDecoration: 'none', color: 'var(--ink)',
+    }}>
+      <span style={{
+        width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+      }}>{belgi}</span>
+      <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{sarlavha}</span>
+      <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>{nom}</span>
+      <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Ko&apos;rish ↗</span>
+    </a>
+  )
+}
+
+function VideoBolimi({ asosiyVideo, linklar }: { asosiyVideo: string | null; linklar: string[] }) {
+  if (!asosiyVideo && linklar.length === 0) {
     return <BoshUlash matn="Video darslik tez orada qo'shiladi." />
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      {linklar.map((url, i) => (
-        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rise lift" style={{
-          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-          display: 'flex', alignItems: 'center', gap: '14px',
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-          padding: '16px 20px', textDecoration: 'none', color: 'var(--ink)',
-        }}>
-          <span style={{
-            width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
-          }}>▶️</span>
-          <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{i + 1}-video darslik</span>
-          <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>Ko&apos;rish ↗</span>
-        </a>
-      ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      {asosiyVideo && (
+        <div>
+          <p style={{ margin: '0 0 10px 0', fontSize: '12.5px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+            Asosiy dars
+          </p>
+          <VideoKartasi url={asosiyVideo} sarlavha="Asosiy dars videosi" />
+        </div>
+      )}
+
+      {linklar.length > 0 && (
+        <div>
+          <p style={{ margin: '0 0 10px 0', fontSize: '12.5px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+            Qo&apos;shimcha videolar
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {linklar.map((url, i) => (
+              <VideoKartasi key={url} url={url} sarlavha={`${i + 1}-qo'shimcha video`} animationDelay={`${Math.min(i * 0.06, 0.4)}s`} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
