@@ -62,6 +62,7 @@ export default function DarsDetailPage() {
   const konspektYoli = tarkib?.konspekt_url ?? dars?.konspektUrl
   const prezentatsiyaYoli = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
   const amaliyBank = tarkib?.savollar_banki?.length ? tarkib.savollar_banki : dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
+  const amaliySavolSoni = dars?.amaliySavolSoni ?? 20
   const usmleBank = tarkib?.usmle_savollar ?? dars?.usmleSavollar ?? []
   const nazoratBank = tarkib?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
   const nazoratSavolSoni = tarkib?.nazorat_savol_soni ?? dars?.nazoratSavolSoni ?? 20
@@ -183,6 +184,7 @@ export default function DarsDetailPage() {
             darsSlug={dars.slug}
             darsNomi={dars.sarlavha}
             bank={amaliyBank}
+            savolSoni={amaliySavolSoni}
           />
         )}
         {tab === 'usmle' && (
@@ -684,11 +686,11 @@ function TestBlok({
   )
 }
 
-function AmaliyTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: TestSavoli[] }) {
+function AmaliyTestBolimi({ darsSlug, darsNomi, bank, savolSoni = 20 }: { darsSlug: string; darsNomi: string; bank: TestSavoli[]; savolSoni?: number }) {
   const supabase = createClient()
   const savollar = useMemo(
-    () => shuffleVaTanla(bank, Math.min(20, bank.length)).map(variantlarniAralashtir),
-    [bank]
+    () => shuffleVaTanla(bank, Math.min(savolSoni, bank.length)).map(variantlarniAralashtir),
+    [bank, savolSoni]
   )
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
