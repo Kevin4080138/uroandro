@@ -1211,6 +1211,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     qisqa: "Qovuq va uretraning asosiy vazifalari va erkak-ayol uretrasi orasidagi farq.",
     daqiqa: 4,
+    amaliySavolSoni: 15,
     bolimlar: [
       {
         sarlavha: '1. Qovuq va uretra',
