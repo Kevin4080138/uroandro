@@ -1251,6 +1251,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     qisqa: "Erkak reproduktiv a'zolarining asosiy tuzilishi va vazifalari.",
     daqiqa: 5,
+    amaliySavolSoni: 15,
     bolimlar: [
       {
         sarlavha: '1. Asosiy a\'zolar',
