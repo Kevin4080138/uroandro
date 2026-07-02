@@ -1093,6 +1093,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     qisqa: "Umumiy siydik tahlilidagi asosiy ko'rsatkichlar va ularning klinik ahamiyati.",
     daqiqa: 5,
+    amaliySavolSoni: 15,
     bolimlar: [
       {
         sarlavha: '1. Asosiy ko\'rsatkichlar',
