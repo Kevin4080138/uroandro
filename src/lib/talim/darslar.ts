@@ -1132,6 +1132,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     qisqa: "Urologiyada UTT nima uchun birinchi tanlovdagi tekshiruv usuli hisoblanadi.",
     daqiqa: 4,
+    amaliySavolSoni: 15,
     bolimlar: [
       {
         sarlavha: '1. UTT nima uchun muhim?',
