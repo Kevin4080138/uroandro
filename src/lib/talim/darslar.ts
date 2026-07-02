@@ -1170,6 +1170,7 @@ export const DARSLAR: Dars[] = [
     slug: 'buyrak-siydik-yollari-anatomiyasi',
     sarlavha: "Buyrak va siydik yo'llarining umumiy anatomiyasi",
     kategoriya: 'Anatomiya va fiziologiya',
+    amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Buyrak, siydik naychalari va ularning asosiy vazifalari haqida umumiy tushuncha.",
     daqiqa: 5,
