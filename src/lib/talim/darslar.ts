@@ -1446,6 +1446,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: "Prostatit — umumiy tasniflash va belgilar",
     kategoriya: "Yallig'lanish kasalliklari",
     bosqich: 'oson',
+    amaliySavolSoni: 15,
     qisqa: "Prostatitning to'rt asosiy turi haqida umumiy, kirish darajasidagi tushuncha.",
     daqiqa: 4,
     bolimlar: [
