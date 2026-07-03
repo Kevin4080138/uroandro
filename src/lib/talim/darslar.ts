@@ -1484,6 +1484,7 @@ export const DARSLAR: Dars[] = [
     slug: 'orxoepididimit-asoslari',
     sarlavha: "Orxoepididimit (moyak-quyma yallig'lanishi) — asosiy belgilar",
     kategoriya: "Yallig'lanish kasalliklari",
+    amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Orxoepididimitning sabablari, belgilari va torsiyadan farqlash zarurati.",
     daqiqa: 4,
