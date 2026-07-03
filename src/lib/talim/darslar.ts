@@ -1406,6 +1406,7 @@ export const DARSLAR: Dars[] = [
     slug: 'uretrit-asoslari',
     sarlavha: "Uretrit (gonokokkli va nogonokokkli) — umumiy tushuncha",
     kategoriya: "Yallig'lanish kasalliklari",
+    amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Uretritning ikki asosiy turi va ularning klinik farqlari.",
     daqiqa: 4,
