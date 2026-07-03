@@ -1329,6 +1329,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: "Sistit (siydik pufagi yallig'lanishi) — asosiy belgilar va davolash",
     kategoriya: "Yallig'lanish kasalliklari",
     bosqich: 'oson',
+    amaliySavolSoni: 15,
     qisqa: "Sistitning asosiy belgilari, sabablari va birinchi qatordagi davolash yondashuvi.",
     daqiqa: 5,
     bolimlar: [
