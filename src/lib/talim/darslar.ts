@@ -1525,6 +1525,7 @@ export const DARSLAR: Dars[] = [
     slug: 'siydik-tosh-kasalligi-asoslari',
     sarlavha: 'Siydik tosh kasalligi — asosiy tushunchalar va klinika',
     kategoriya: "Buyrak va siydik yo'llari",
+    amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Siydik toshlari nima uchun hosil bo'ladi va asosiy klinik ko'rinishi qanday.",
     daqiqa: 5,
