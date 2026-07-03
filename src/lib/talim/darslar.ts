@@ -1290,6 +1290,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     qisqa: "Eng ko'p uchraydigan tug'ma siydik-tanosil anomaliyalari haqida umumiy ma'lumot.",
     daqiqa: 4,
+    amaliySavolSoni: 15,
     bolimlar: [
       {
         sarlavha: '1. Umumiy tushuncha',
