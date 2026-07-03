@@ -1368,6 +1368,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: 'Pielonefrit — asosiy belgilar va davolash',
     kategoriya: "Yallig'lanish kasalliklari",
     bosqich: 'oson',
+    amaliySavolSoni: 15,
     qisqa: "Pielonefritning sistitdan farqi, belgilari va davolash yondashuvi.",
     daqiqa: 5,
     bolimlar: [
