@@ -2,31 +2,31 @@ UPDATE dars_tarkibi
 SET savollar_banki = $buyrak_savollar$[
   {
     "savol": "Buyrak va siydik yo'li qaysi bo'shliqda joylashgan?",
-    "variantlar": ["Intraperitoneal bo'shliq", "Retroperitoneal bo'shliq", "Ekstraperitoneal chanoq bo'shlig'i", "Subperitoneal bo'shliq"],
+    "variantlar": ["Intraperitoneal bo'shliq", "Retroperitoneal bo'shliq", "Ekstraperitoneal chanoq bo'shlig'i", "Subperitoneal (parda osti) bo'shliq"],
     "togri": 1,
     "izoh": "Buyrak va siydik yo'li retroperitoneal bo'shliqda — qorin pardasining orqasida joylashgan."
   },
   {
     "savol": "\"Retroperitoneal\" atamasi qanday ma'noni anglatadi?",
-    "variantlar": ["Qorin pardasi ichida joylashgan", "Qorin pardasining orqasida joylashgan", "Qorin pardasi ustida joylashgan", "Qorin pardasidan yon tomonda joylashgan"],
+    "variantlar": ["Qorin pardasining bevosita ichida joylashgan", "Qorin pardasining orqasida (ortida) joylashgan", "Qorin pardasining ustki qismida joylashgan", "Qorin pardasidan yon (lateral) tomonda joylashgan"],
     "togri": 1,
     "izoh": "Retro (orqada) + peritoneum (qorin parda) = qorin pardasining orqasida joylashgan."
   },
   {
     "savol": "Quyidagilardan qaysi biri \"birlamchi retroperitoneal\" tuzilma HISOBLANMAYDI?",
-    "variantlar": ["Buyrak", "Siydik yo'li", "Qorin aortasi", "Yo'g'on ichak"],
+    "variantlar": ["Buyrak (ren)", "Siydik yo'li (ureter)", "Qorin aortasi (aorta)", "Yo'g'on ichak (kolon)"],
     "togri": 3,
     "izoh": "Yo'g'on ichak ikkilamchi retroperitoneal tuzilma — dastlab intraperitoneal rivojlanib, keyin retroperitoneal holatga o'tadi."
   },
   {
     "savol": "Buyraklar qaysi mushak ustida yotadi?",
-    "variantlar": ["Kvadrat bel mushagi (quadratus lumborum)", "Bel mushagi (psoas major)", "To'g'ri qorin mushagi", "Diafragma"],
+    "variantlar": ["Kvadrat bel mushagi (quadratus lumborum)", "Bel mushagi (psoas major)", "To'g'ri qorin mushagi (rectus)", "Diafragma (ko'krak-qorin pardasi)"],
     "togri": 1,
     "izoh": "Buyraklar bel mushagi (psoas major) ustida yotadi, shu sababli ularning o'qi qiyalashgan."
   },
   {
     "savol": "Buyraklarning uzunlamasiga o'qi qanday yo'nalishda qiyalashgan?",
-    "variantlar": ["Yuqori qutub pastki qutubga nisbatan ko'proq lateral va oldinroq", "Yuqori qutub pastki qutubga nisbatan ko'proq medial va orqaroq", "Ikkala qutub bir xil chiziqda joylashgan", "Pastki qutub yuqori qutubdan ko'proq medial joylashgan"],
+    "variantlar": ["Yuqori qutub pastkiga nisbatan lateral va oldinroq", "Yuqori qutub pastkiga nisbatan medial va orqaroq", "Ikkala qutub ham bir xil vertikal chiziqda", "Pastki qutub yuqori qutubdan medialroq joylashgan"],
     "togri": 1,
     "izoh": "Psoas mushagi ustida yotgani uchun yuqori qutub pastki qutubga nisbatan ko'proq medial va orqaroq joylashgan."
   },
@@ -38,7 +38,7 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Chap buyrak o'ng buyrakka nisbatan qanday joylashgan?",
-    "variantlar": ["Biroz pastroq", "Biroz yuqoriroq", "Bir xil darajada", "Sezilarli darajada pastroq (5 sm)"],
+    "variantlar": ["O'ng buyrakka nisbatan biroz pastroqda", "O'ng buyrakka nisbatan biroz yuqoriroqda", "O'ng buyrak bilan aynan bir xil darajada", "O'ng buyrakdan sezilarli pastroqda (5 sm)"],
     "togri": 1,
     "izoh": "Chap buyrak o'ng buyrakka nisbatan biroz yuqoriroq joylashgan, chunki o'ng tomonda jigar bosim o'tkazadi."
   },
@@ -56,19 +56,19 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "O'ng buyrakning medial tomonida qaysi a'zolar joylashgan?",
-    "variantlar": ["Oshqozon va taloq", "O'n ikki barmoq ichagi va oshqozonosti bezi boshi", "Yo'g'on ichakning taloq burilishi", "Buyrak usti bezi"],
+    "variantlar": ["Oshqozon va taloq (chap tomon a'zolari)", "O'n ikki barmoq ichak va me'daosti bezi boshi", "Yo'g'on ichakning taloq (chap) burilishi", "O'ng buyrak usti bezi (adrenal bez)"],
     "togri": 1,
     "izoh": "O'ng buyrakning medial tomonida o'n ikki barmoq ichagi (duodenum) va oshqozonosti bezi boshi joylashgan."
   },
   {
     "savol": "Chap buyrakning yuqorisida qaysi a'zolar joylashgan (splenorenal bog'lam orqali)?",
-    "variantlar": ["Jigar va o'ng buyrak usti bezi", "Oshqozon va taloq", "O'n ikki barmoq ichagi", "Yo'g'on ichakning jigar burilishi"],
+    "variantlar": ["Jigar va o'ng buyrak usti (adrenal) bezi", "Oshqozon va taloq (splenorenal bog'lam)", "O'n ikki barmoq ichak (duodenum)", "Yo'g'on ichakning jigar (o'ng) burilishi"],
     "togri": 1,
     "izoh": "Chap buyrakning yuqorisida oshqozon va taloq (splenorenal bog'lam orqali) joylashgan."
   },
   {
     "savol": "Buyrakka ortiqcha pastga tortish kuchi qo'llanilganda o'ng tomonda qaysi a'zo shikastlanish xavfi yuqori?",
-    "variantlar": ["Taloq", "Jigar", "Oshqozon", "O'pka"],
+    "variantlar": ["Taloq (chap tomon)", "Jigar (o'ng tomon)", "Oshqozon (me'da)", "O'pka (chap-o'ng)"],
     "togri": 1,
     "izoh": "O'ng tomonda jigar kapsulasi yorilishi xavfi, chap tomonda esa taloq kapsulasi yorilishi xavfi mavjud."
   },
@@ -80,13 +80,13 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "O'rta (perirenal) bo'shliqda qaysi tuzilmalar joylashgan?",
-    "variantlar": ["Yo'g'on ichak va o'n ikki barmoq ichagi", "Faqat yog' to'qimasi", "Buyrak usti bezi, buyrak, proksimal siydik yo'li va perirenal yog'", "Oshqozonosti bezi va taloq"],
+    "variantlar": ["Yo'g'on ichak va o'n ikki barmoq ichak", "Faqat yog' to'qimasi (klechatka)", "Buyrak usti bezi, buyrak, proksimal ureter, yog'", "Oshqozonosti bezi (pankreas) va taloq"],
     "togri": 2,
     "izoh": "Perirenal bo'shliqda buyrak usti bezi, buyrak, proksimal siydik yo'li va perirenal yog' joylashgan."
   },
   {
     "savol": "Bir buyrakdagi infeksiya yoki gematoma odatda qarama-qarshi tomonga o'tmasligi nimaning natijasi?",
-    "variantlar": ["Perirenal yog'ning zichligi", "Gerota fastsiyasining ajratuvchi vazifasi", "Haqiqiy kapsulaning qalinligi", "Buyrak arteriyasining joylashuvi"],
+    "variantlar": ["Perirenal yog'ning yuqori zichligi", "Gerota fastsiyasining ajratuvchi vazifasi", "Haqiqiy buyrak kapsulasining qalinligi", "Buyrak arteriyasining o'ziga xos joylashuvi"],
     "togri": 1,
     "izoh": "Gerota fastsiyasi har bir buyrakning perirenal bo'shlig'ini bir-biridan ajratib turadi."
   },
@@ -122,13 +122,13 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Bertin ustunlari (columns of Bertin) nima?",
-    "variantlar": ["Medulla piramidalarining uchi", "Korteksning piramidalar orasiga kirib turgan qismi", "Kichik kosachalarning birlashgan joyi", "Buyrak jomining bir qismi"],
+    "variantlar": ["Buyrak medulla piramidalarining uchki qismi", "Korteksning piramidalar orasiga kirgan qismi", "Kichik kosachalarning o'zaro birlashgan joyi", "Buyrak jomining (pelvis) bir qismi"],
     "togri": 1,
     "izoh": "Bertin ustunlari — korteks to'qimasining piramidalar orasiga kirib turgan qismlari."
   },
   {
     "savol": "Har bir buyrak piramidasining uchi nima deb ataladi va u nima bilan qoplangan?",
-    "variantlar": ["Bertin ustuni, korteks bilan", "Buyrak so'rg'ichi (papilla), kichik kosacha bilan", "Buyrak sinusi, katta kosacha bilan", "Hilum, adventitsiya bilan"],
+    "variantlar": ["Bertin ustuni, korteks to'qimasi bilan qoplangan", "Buyrak so'rg'ichi (papilla), kichik kosacha bilan", "Buyrak sinusi, katta kosacha bilan qoplangan", "Hilum (darvoza), adventitsiya bilan qoplangan"],
     "togri": 1,
     "izoh": "Piramidaning uchi buyrak so'rg'ichi (papilla) deb ataladi va har bir papilla bitta kichik kosacha bilan qoplangan."
   },
@@ -152,7 +152,7 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Nefron qaysi ikki asosiy tuzilmadan boshlanadi?",
-    "variantlar": ["Proksimal kanalcha va Genle qovuzlog'i", "Glomerula va Bowman kapsulasi", "Distal kanalcha va to'plovchi kanalcha", "Kichik va katta kosacha"],
+    "variantlar": ["Proksimal kanalcha va Genle qovuzlog'i", "Glomerula va Bowman kapsulasi", "Distal va to'plovchi kanalcha", "Kichik va katta kosacha"],
     "togri": 1,
     "izoh": "Nefron glomerula (qon tomirlari to'plami) va uni o'rab turgan Bowman kapsulasidan boshlanadi."
   },
@@ -164,31 +164,31 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Har bir buyrak qaysi arteriya orqali qon oladi va u qorin aortasidan qaysi darajada chiqadi?",
-    "variantlar": ["Buyrak arteriyasi, L1–L2 darajasida", "Buyrak usti arteriyasi, T12 darajasida", "Bel arteriyasi, L3–L4 darajasida", "Ichki chov arteriyasi, S1 darajasida"],
+    "variantlar": ["Buyrak arteriyasi, L1–L2 darajasida chiqadi", "Buyrak usti arteriyasi, T12 darajasida chiqadi", "Bel arteriyasi, L3–L4 darajasida chiqadi", "Ichki chov arteriyasi, S1 darajasida chiqadi"],
     "togri": 0,
     "izoh": "Har bir buyrak buyrak arteriyasi (renal artery) orqali qon oladi, u qorin aortasidan L1-L2 darajasida chiqadi."
   },
   {
     "savol": "Arterial tarmoqlanishda segmentar arteriyalardan keyingi bosqich qaysi?",
-    "variantlar": ["Yoysimon arteriyalar", "Lobar arteriyalar", "Interlobulyar arteriyalar", "Afferent arteriolalar"],
+    "variantlar": ["Yoysimon (arcuate) arteriyalar", "Lobar (bo'lakli) arteriyalar", "Interlobulyar arteriyalar", "Afferent arteriolalar"],
     "togri": 1,
     "izoh": "Tarmoqlanish tartibi: buyrak arteriyasi → segmentar → lobar → interlobar → yoysimon → interlobulyar → afferent arteriolalar."
   },
   {
     "savol": "Yoysimon (arcuate) arteriyalar qayerda joylashadi?",
-    "variantlar": ["Buyrak sinusida", "Piramidalar asosida, korteks-medulla chegarasida", "Korteks ichida radial yo'nalishda", "Bertin ustunlarining markazida"],
+    "variantlar": ["Buyrak sinusi (darvoza) sohasida", "Piramidalar asosida, korteks-medulla chegarasi", "Korteks ichida radial (nurli) yo'nalishda", "Bertin ustunlarining markaziy qismida"],
     "togri": 1,
     "izoh": "Yoysimon arteriyalar piramidalar asosida, korteks va medulla chegarasida joylashadi."
   },
   {
     "savol": "Brodel chizig'i (line of Brodel) nima uchun muhim?",
-    "variantlar": ["Nefronlarning joylashuvini belgilaydi", "Tomirlarsiz chiziq bo'lib, kam qon yo'qotish bilan kesim qilish imkonini beradi", "Buyrak jomining hajmini aniqlaydi", "Siydik yo'lining torayish nuqtasini bildiradi"],
+    "variantlar": ["Nefronlarning aniq joylashuvini belgilaydi", "Tomirsiz chiziq — kam qon yo'qotib kesish imkoni", "Buyrak jomining (pelvis) hajmini aniqlaydi", "Siydik yo'lining torayish nuqtasini bildiradi"],
     "togri": 1,
     "izoh": "Brodel chizig'i — old va orqa segmentar arteriyalar orasidagi nisbatan tomirlarsiz zona, perkutan kirish uchun muhim."
   },
   {
     "savol": "Qo'shimcha (supernumerary) buyrak arteriyalari holatlarning taxminan necha qismida uchraydi?",
-    "variantlar": ["O'ndan bir qismida", "To'rtdan bir qismida", "Yarmida", "Uchdan ikki qismida"],
+    "variantlar": ["Taxminan o'ndan bir qismida", "Taxminan to'rtdan bir qismida", "Taxminan yarmida (50%)", "Taxminan uchdan ikki qismida"],
     "togri": 1,
     "izoh": "Taxminan to'rtdan bir qismida (25%) qo'shimcha buyrak arteriyalari uchraydi."
   },
@@ -200,7 +200,7 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Siydik yo'lining qorin (abdominal) segmenti qayerdan qayergacha davom etadi?",
-    "variantlar": ["Chov tomirlaridan qovuqgacha", "Buyrak jomidan chov tomirlarigacha", "Qovuq devoridan tashqariga", "UPJ dan UVJ gacha"],
+    "variantlar": ["Chov tomirlaridan boshlab qovuqgacha", "Buyrak jomidan chov tomirlarigacha", "Qovuq devoridan boshlab tashqariga", "UPJ dan boshlab UVJ gacha davom etadi"],
     "togri": 1,
     "izoh": "Qorin segmenti buyrak jomidan chov tomirlarigacha davom etadi — umumiy uzunlikning yarmidan ko'prog'i."
   },
@@ -212,31 +212,31 @@ SET savollar_banki = $buyrak_savollar$[
   },
   {
     "savol": "Siydik yo'lining uchta fiziologik torayish nuqtasiga KIRMAYDIGAN qaysi?",
-    "variantlar": ["UPJ (ureteropelvic junction)", "Chov tomirlari bilan kesishgan joy", "UVJ (ureterovesical junction)", "Buyrak sinusi"],
+    "variantlar": ["UPJ (ureteropelvic junction)", "Chov tomirlari bilan kesishgan joy", "UVJ (ureterovesical junction)", "Buyrak sinusi (renal sinus)"],
     "togri": 3,
     "izoh": "Uchta torayish nuqtasi: UPJ, chov tomirlari kesishgan joy va UVJ. Buyrak sinusi torayish nuqtasi emas."
   },
   {
     "savol": "Siydik yo'li mushak qavati qanday harakatni ta'minlaydi?",
-    "variantlar": ["Segmentar qisqarish", "Peristaltik harakat", "Tonik qisqarish", "Refleks qisqarish"],
+    "variantlar": ["Segmentar (bo'lakli) qisqarish", "Peristaltik (to'lqinsimon) harakat", "Tonik (doimiy) qisqarish", "Refleks (javob) qisqarish"],
     "togri": 1,
     "izoh": "Siydik yo'li mushak qavati peristaltik (to'lqinsimon) harakatni ta'minlab, siydikni faol harakatga keltiradi."
   },
   {
     "savol": "Siydik yo'li peristaltikasini boshqaruvchi \"pacemaker\" hujayralar qayerda joylashgan?",
-    "variantlar": ["Buyrak jomida", "Kichik kosachalarda", "UVJ da", "Qovuq devorida"],
+    "variantlar": ["Buyrak jomida (renal pelvis)", "Kichik kosachalarda (calyces)", "UVJ (qovuq birikmasi)da", "Qovuq (siydik pufagi) devorida"],
     "togri": 1,
     "izoh": "Pacemaker hujayralar kichik kosachalarda joylashgan va asab tizimidan nisbatan mustaqil ishlaydi."
   },
   {
     "savol": "Perkutan buyrak kirishda pleura va o'pka shikastlanishi xavfini kamaytirish uchun qaysi kirish nuqtasi afzal ko'riladi?",
-    "variantlar": ["10-qovurg'alar oralig'idan yuqori", "12-qovurg'adan past (subkostal) yoki 11–12-qovurg'alar orasidan", "9-qovurg'adan yuqori", "To'g'ridan-to'g'ri diafragma orqali"],
+    "variantlar": ["10-qovurg'alar oralig'idan yuqoriroqdan", "12-qovurg'adan past yoki 11–12 oralig'idan", "9-qovurg'adan yuqoriroq soha orqali", "To'g'ridan-to'g'ri diafragma orqali"],
     "togri": 1,
     "izoh": "12-qovurg'adan past yoki 11-12-qovurg'alar orasidan kirish pleura/o'pka shikastlanishi xavfini kamaytiradi."
   },
   {
     "savol": "Siydik toshi og'rig'i odatda qaysi soha(lar)ga aks etadi (referred pain)?",
-    "variantlar": ["Ko'krak qafasi va yelka", "Bel/yon qism, chov sohasi yoki moshonka/labiya sohasi", "Qorin yuqori qismi va epigastriy", "Orqa va bosh sohasi"],
+    "variantlar": ["Ko'krak qafasi va yelka kamari sohasiga", "Bel/yon, chov yoki moshonka/labiya sohasiga", "Qorin yuqori qismi va epigastriy sohasiga", "Orqa (bel-dumg'aza) va bosh sohasiga"],
     "togri": 1,
     "izoh": "Buyrak/siydik yo'li og'rig'i simpatik nervlar orqali bel/yon qism, chov va moshonka/labiya sohasiga aks etadi."
   }
