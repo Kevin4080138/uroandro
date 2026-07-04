@@ -2,13 +2,13 @@ UPDATE dars_tarkibi
 SET savollar_banki = $erkak_jinsiy_savollar$[
   {
     "savol": "Erkak jinsiy a'zolari tizimi ikki asosiy vazifani bajaradi. Qaysilar?",
-    "variantlar": ["Testosteron va estrogen ishlab chiqarish", "Spermatozoidlar ishlab chiqarish va urug'ni ayol tanasiga yetkazish", "Siydik hosil qilish va uni chiqarish", "Semen saqlash va uni isitish"],
+    "variantlar": ["Testosteron va estrogen gormonlarini ishlab chiqarish", "Spermatozoid ishlab chiqarish va urug'ni ayolga yetkazish", "Siydik hosil qilish va uni tashqariga chiqarib yuborish", "Semenni saqlash va uni kerakli haroratda isitib turish"],
     "togri": 1,
     "izoh": "Erkak jinsiy tizimining ikki asosiy vazifasi: spermatozoidlar ishlab chiqarish (spermatogenez) va ularni ayol tanasiga yetkazish (ejakulyatsiya)."
   },
   {
     "savol": "Sperma yo'lining to'g'ri ketma-ketligi qaysi?",
-    "variantlar": ["Epididim → Moyak → Vas deferens → Prostatik uretra", "Moyak → Epididim → Vas deferens → Urug' otish kanali → Prostatik uretra", "Moyak → Vas deferens → Epididim → Urug' otish kanali", "Prostatik uretra → Vas deferens → Epididim → Moyak"],
+    "variantlar": ["Epididim → Moyak → Vas deferens → Prostatik uretra", "Moyak → Epididim → Vas deferens → Otish kanali → Uretra", "Moyak → Vas deferens → Epididim → Urug' otish kanali", "Prostatik uretra → Vas deferens → Epididim → Moyak"],
     "togri": 1,
     "izoh": "To'g'ri ketma-ketlik: Moyak (ishlab chiqarish) → Epididim (yetilish/saqlash) → Vas deferens → Urug' otish kanali → Prostatik uretra."
   },
@@ -26,7 +26,7 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Kremaster fastsiyasining asosiy vazifasi nima?",
-    "variantlar": ["Spermani tashish", "Moyakni tortib olish orqali termoregulyatsiyani ta'minlash", "Testosteron ishlab chiqarish", "Semenni suyultirish"],
+    "variantlar": ["Spermatozoidlarni epididimga tashib berish", "Moyakni tortib termoregulyatsiyani ta'minlash", "Asosiy gormon testosteronni ishlab chiqarish", "Ejakulyatsiyadan oldin semenni suyultirish"],
     "togri": 1,
     "izoh": "Kremaster mushagi moyakni yuqoriga tortib, haroratni tartibga solishda ishtirok etadi — sovuqda qisqaradi, issiqda bo'shashadi."
   },
@@ -38,7 +38,7 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Moyak parenximasini o'rab turgan qalin, fibroelastik kapsula qaysi?",
-    "variantlar": ["Tunika vaginalis", "Tunika albuginea", "Tunika vaskuloza", "Ichki urug' fastsiyasi"],
+    "variantlar": ["Tunika vaginalis (seroz parda)", "Tunika albuginea (fibroz kapsula)", "Tunika vaskuloza (tomirli qavat)", "Ichki urug' fastsiyasi (fascia)"],
     "togri": 1,
     "izoh": "Tunika albuginea — moyak parenximasini o'rab turuvchi qalin, oqish fibroelastik kapsula. U ichkariga septalar yuboritib, moyakni bo'lakchalariga ajratadi."
   },
@@ -56,31 +56,31 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Testosteron ishlab chiqaruvchi hujayralar qaysilar va qayerda joylashgan?",
-    "variantlar": ["Sertoli hujayralari — seminifer naycha devorida", "Leydig hujayralari — naychalar orasidagi interstitsial to'qimada", "Urug' hujayralari — naycha ichida", "Leydig hujayralari — epididim boshida"],
+    "variantlar": ["Sertoli hujayralari — seminifer naycha devorida", "Leydig hujayralari — naychalar orasi interstitsiyda", "Urug' (germ) hujayralari — naycha ichi bo'shlig'ida", "Leydig hujayralari — epididim boshi (caput)da"],
     "togri": 1,
     "izoh": "Leydig hujayralari seminifer naychalar orasidagi interstitsial to'qimada joylashib, testosteron sintez qiladi."
   },
   {
     "savol": "Qon-moyak to'sig'ining anatomik asosini qaysi hujayralar orasidagi zich birikmalar tashkil etadi?",
-    "variantlar": ["Leydig hujayralari", "Urug' hujayralari", "Sertoli hujayralari", "Epididim hujayralari"],
+    "variantlar": ["Leydig hujayralari", "Urug' (germ) hujayralari", "Sertoli hujayralari", "Epididim epiteliy hujayralari"],
     "togri": 2,
     "izoh": "Qon-moyak to'sig'i Sertoli hujayralari orasidagi tight junction (zich birikma)lar orqali hosil bo'ladi va rivojlanayotgan spermatozoidlarni immunologik hujumdan himoya qiladi."
   },
   {
     "savol": "Moyak qon ta'minotining asosiy manbai qaysi?",
-    "variantlar": ["Defferensial arteriya", "Tashqi urug' (kremaster) arteriyasi", "Ichki urug' (testicular) arteriyasi, qorin aortasidan to'g'ridan-to'g'ri chiqadi", "Ichki pudendal arteriya"],
+    "variantlar": ["Defferensial arteriya orqali ta'minlanadi", "Tashqi urug' (kremaster) arteriyasi orqali", "Ichki urug' arteriyasi — aortadan bevosita", "Ichki pudendal arteriya tarmog'i orqali"],
     "togri": 2,
     "izoh": "Ichki urug' (testicular) arteriyasi — moyakning asosiy qon manbai bo'lib, qorin aortasidan to'g'ridan-to'g'ri chiqadi."
   },
   {
     "savol": "Pampiniform venoz pleksus bilan arteriya orasidagi yaqin joylashuv nimani ta'minlaydi?",
-    "variantlar": ["Spermani tashish tezligini", "Qarama-qarshi oqim issiqlik almashinuvini (moyak haroratini 2–4°C past saqlash)", "Testosteron miqdorini oshirishni", "Qon-moyak to'sig'ini mustahkamlashni"],
+    "variantlar": ["Spermatozoidlar tashish tezligini oshirishni", "Qarama-qarshi issiqlik almashinuvi (harorat 2–4°C past)", "Qon orqali testosteron miqdorini oshirishni", "Qon-moyak to'sig'ini yanada mustahkamlashni"],
     "togri": 1,
     "izoh": "Pampiniform pleksus venalari va ichki urug' arteriyasining yonma-yon joylashuvi qarama-qarshi oqim issiqlik almashinuvini ta'minlab, moyak haroratini tana haroratidan 2–4°C past saqlaydi."
   },
   {
     "savol": "Epididim necha qismdan iborat?",
-    "variantlar": ["Ikki", "Uch (caput, corpus, cauda)", "To'rt", "Beshta"],
+    "variantlar": ["Ikki qism (bosh va dum)", "Uch qism (caput, corpus, cauda)", "To'rt qism (turli bo'lim)", "Beshta alohida qism"],
     "togri": 1,
     "izoh": "Epididim uch qismdan iborat: caput (bosh) — moyak ustida, corpus (tana) — moyak orqasida, cauda (dum) — moyak pastida."
   },
@@ -92,31 +92,31 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Epididim dumi (cauda) qanday vazifani bajaradi?",
-    "variantlar": ["Spermani ishlab chiqaradi", "Sperma 'ombori' vazifasini bajaradi", "Testosteron sintez qiladi", "Urug' pufakchasi bilan bevosita qo'shiladi"],
+    "variantlar": ["Yangi spermatozoidlarni ishlab chiqaradi", "Sperma 'ombori' (saqlash) vazifasini bajaradi", "Asosiy gormon testosteronni sintez qiladi", "Urug' pufakchasi bilan bevosita qo'shiladi"],
     "togri": 1,
     "izoh": "Epididim dumi yetilgan spermatozoidlarni saqlash (omborxona) vazifasini bajaradi va ejakulyatsiyaga qadar ularni ushlab turadi."
   },
   {
     "savol": "Epididim naychasi caput-corpus chegarasidan keyin qanday tuzilishga ega bo'ladi?",
-    "variantlar": ["Bir nechta parallel naychaga bo'linadi", "Yagona, uzluksiz naychaga aylanadi", "To'liq yo'qoladi", "Ikkiga bo'linib qayta birlashadi"],
-    "togri": 1,
+    "variantlar": ["Barcha naychalar birlashib yagona uzluksiz naychaga", "Bir necha parallel naychaga ajralib bo'linadi", "To'liq yo'qolib, o'rniga bo'sh joy qoladi", "Ikkiga bo'linib, so'ng qayta birlashadi"],
+    "togri": 0,
     "izoh": "Caput-corpus chegarasidan keyin barcha efferent naychalar birlashib yagona, juda uzun (6–7 m) va uzluksiz epididim naychasiga aylanadi."
   },
   {
     "savol": "Vas deferens faqat qaysi arteriyadan qon oladi?",
-    "variantlar": ["Ichki urug' arteriyasi", "Tashqi urug' (kremaster) arteriyasi", "Defferensial arteriya", "Ichki pudendal arteriya"],
+    "variantlar": ["Ichki urug' (testicular) arteriyasidan qon oladi", "Tashqi urug' (kremaster) arteriyasidan qon oladi", "Faqat defferensial arteriyadan qon oladi", "Ichki pudendal arteriya tarmog'idan qon oladi"],
     "togri": 2,
     "izoh": "Vas deferens qon ta'minotini faqat defferensial arteriyadan oladi — bu jarrohlik uchun muhim anatomik jihat."
   },
   {
     "savol": "Vas deferens ikki nuqtada kesilsa yoki tiqilsa, oradagi segmentga nima bo'ladi?",
-    "variantlar": ["Qayta tiklanadi", "Qon ta'minotsiz qolib fibrozga uchraydi", "Kengayadi va kista hosil qiladi", "O'zgarishsiz qoladi"],
+    "variantlar": ["O'z-o'zidan qayta tiklanib bitib ketadi", "Qon ta'minotsiz qolib fibrozga uchraydi", "Kengayib, ichida kista hosil qiladi", "Hech qanday o'zgarishsiz saqlanib qoladi"],
     "togri": 1,
     "izoh": "Vas deferens yagona qon manbasiga (defferensial arteriya) bog'liqligi sababli, ikki nuqtada to'siq bo'lsa oradagi segment ishemiyaga uchradi va fibrozlashadi."
   },
   {
     "savol": "Urug' pufakchalari qayerda joylashgan?",
-    "variantlar": ["Moyak orqasida", "Qovuq va prostata orqasida", "Prostata ostida", "Epididim yonida"],
+    "variantlar": ["Moyakning orqa yuzasida", "Qovuq va prostata orqasida", "Prostata bezining ostida", "Epididim boshi yonida"],
     "togri": 1,
     "izoh": "Urug' pufakchalari juft organ bo'lib, qovuq posteriorida va prostata yuqorisida joylashgan."
   },
@@ -128,19 +128,19 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Urug' otish kanali qanday hosil bo'ladi?",
-    "variantlar": ["Faqat vas deferensdan", "Urug' pufakchasi chiqaruv naychasi vas deferens ampulasi bilan qo'shilib", "Prostata to'qimasidan bevosita", "Epididim dumi va moyak birikishidan"],
+    "variantlar": ["Faqat vas deferensning kengayishidan hosil bo'ladi", "Vas deferens ampulasi va pufakcha naychasi qo'shilib", "Bevosita prostata bez to'qimasidan hosil bo'ladi", "Epididim dumi va moyak birikishidan hosil bo'ladi"],
     "togri": 1,
     "izoh": "Urug' otish kanali (ejaculatory duct) — vas deferens ampulasi va urug' pufakchasi chiqaruv naychasining birlashuvidan hosil bo'ladi."
   },
   {
     "savol": "Urug' otish kanali qayerda prostatik uretraga ochiladi?",
-    "variantlar": ["Bulbar segmentda", "Verumontanum darajasida", "Membranoz uretrada", "Penil uretrada"],
+    "variantlar": ["Bulbar uretra segmentida", "Verumontanum darajasida", "Membranoz uretra qismida", "Penil (olat) uretrada"],
     "togri": 1,
     "izoh": "Urug' otish kanali prostatadan o'tib, verumontanum (seminal colliculus) darajasida prostatik uretraga ochiladi."
   },
   {
     "savol": "Urug' otish kanalida siydikning teskari oqishi qanday oldi olinadi?",
-    "variantlar": ["Haqiqiy mushak sfinkteri orqali", "Kanalning uretraga o'tkir burchak ostida kirishi orqali", "Verumontanumdagi klapan orqali", "Prostata bosimi orqali"],
+    "variantlar": ["Kuchli haqiqiy mushak sfinkteri yordamida", "Kanalning uretraga o'tkir burchak ostida kirishi", "Verumontanumdagi maxsus klapan yordamida", "Prostata bezining doimiy bosimi yordamida"],
     "togri": 1,
     "izoh": "Urug' otish kanali prostatik uretraga o'tkir burchak ostida kiradi — bu geometrik jihat siydikni kanalga teskari oqishini mexanik tarzda to'xtatadi."
   },
@@ -152,13 +152,13 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Semenogelin oqsili qanday vazifani bajaradi?",
-    "variantlar": ["Spermatozoidlarni energiya bilan ta'minlaydi", "Ejakulyatsiyadan keyin semenni gel-shaklga keltiradi (koagulyatsiya)", "Semenni suyultiradi", "Testosteron darajasini oshiradi"],
+    "variantlar": ["Spermatozoidlarni harakat energiyasi bilan ta'minlaydi", "Ejakulyatsiyadan keyin semenni gel-shaklga keltiradi", "Ejakulyatsiyadan keyin semenni tez suyultiradi", "Qondagi testosteron darajasini oshirib beradi"],
     "togri": 1,
     "izoh": "Urug' pufakchasi ishlab chiqaradigan semenogelin ejakulyatsiyadan so'ng semenni gel-shaklga keltiradi. Keyinchalik PSA bu gelatinni parchalab suyuqlashtiradi."
   },
   {
     "savol": "Prostata bezi semen hajmiga taxminan qancha ulush qo'shadi va asosiy tarkibi nima?",
-    "variantlar": ["~70%, fruktoza va prostaglandinlar", "~20–30%, sink, sitrat, PSA va proteolitik fermentlar", "~10%, faqat spermatozoidlar", "~50%, semenogelin"],
+    "variantlar": ["~70%, asosan fruktoza va prostaglandinlar", "~20–30%, sink, sitrat, PSA, proteolitik ferment", "~10%, deyarli faqat spermatozoidlardan iborat", "~50%, asosan semenogelin oqsilidan iborat"],
     "togri": 1,
     "izoh": "Prostata semen hajmining ~20–30%ini tashkil etadi. Sekreti sink, sitrat, PSA (prostatik spetsifik antigen) va proteolitik fermentlarni o'z ichiga oladi."
   },
@@ -176,67 +176,67 @@ SET savollar_banki = $erkak_jinsiy_savollar$[
   },
   {
     "savol": "Prostata saratonining ko'pchiligi qaysi zonadan boshlanadi?",
-    "variantlar": ["Markaziy zona", "O'tish zonasi", "Periferik zona", "Old fibromuskulyar zona"],
+    "variantlar": ["Markaziy zona (central zone)", "O'tish zonasi (transition)", "Periferik zona (peripheral)", "Old fibromuskulyar zona"],
     "togri": 2,
     "izoh": "Prostata saratonining taxminan 70–80%i periferik zonadan boshlanadi — bu zona TRUS biopsiyas uchun eng muhim zona."
   },
   {
     "savol": "Yosh bilan eng tez o'sadigan va BPH ga olib keladigan zona qaysi?",
-    "variantlar": ["Periferik zona", "Markaziy zona", "O'tish zonasi", "Old fibromuskulyar zona"],
+    "variantlar": ["Periferik zona (peripheral)", "Markaziy zona (central)", "O'tish zonasi (transition)", "Old fibromuskulyar zona"],
     "togri": 2,
     "izoh": "O'tish zonasi (transition zone) yosh bilan kengayib, benign prostata giperplaziyasi (BPH) rivojlanishiga olib keladi va siydik chiqarishni qiyinlashtiradi."
   },
   {
     "savol": "Markaziy zona (central zone) qanday tuzilmani o'rab turadi?",
-    "variantlar": ["Verumontanumni", "Urug' otish kanallarini", "Prostatik utrikulusni", "Prostatik uretrani"],
+    "variantlar": ["Verumontanum tuzilmasini", "Urug' otish kanallarini", "Prostatik utrikulusni", "Prostatik uretra kanalini"],
     "togri": 1,
     "izoh": "Markaziy zona urug' otish kanallarini (ejaculatory ducts) o'rab turadi va asosida verumontanumga tutashadi."
   },
   {
     "savol": "Old fibromuskulyar zonaning tarkibi qanday?",
-    "variantlar": ["Bez to'qimasidan iborat", "Faqat biriktiruvchi va mushak to'qimasidan iborat, bez to'qimasi yo'q", "Faqat bez to'qimasi va qon tomirlaridan iborat", "Verumontanum bilan bevosita bog'liq"],
+    "variantlar": ["Asosan sekretor bez to'qimasidan iborat", "Faqat biriktiruvchi va mushak to'qimasidan", "Faqat bez to'qimasi va qon tomirlaridan", "Verumontanum bilan bevosita bog'liq to'qima"],
     "togri": 1,
     "izoh": "Old (anterior) fibromuskulyar zona prostataning old yuzasini qoplab, faqat biriktiruvchi to'qima va silliq mushakdan iborat — bez elementi yo'q."
   },
   {
     "savol": "Verumontanumga qaysi tuzilmalar ochiladi?",
-    "variantlar": ["Faqat vas deferens", "Ikkala urug' otish kanali va prostatik utrikulus", "Faqat prostatik utrikulus", "Cooper bezlari"],
+    "variantlar": ["Faqat vas deferens kanali", "Ikkala otish kanali va utrikulus", "Faqat prostatik utrikulus", "Cooper (bulbouretral) bezlari"],
     "togri": 1,
     "izoh": "Verumontanumga ikkala urug' otish kanali (ejaculatory ducts) va prostatik utrikulus (Myuller kanalining qoldig'i) ochiladi."
   },
   {
     "savol": "PSA (prostate-specific antigen) ning vazifasi nima?",
-    "variantlar": ["Testosteron ishlab chiqarish", "Semenni suyultirishga yordam berish", "Semenni gel-shaklga keltirish", "Spermatozoidlarga energiya berish"],
+    "variantlar": ["Asosiy erkaklik gormoni testosteronni sintez qilish", "Ejakulyatdan keyin semenni parchalab suyultirish", "Ejakulyatsiyadan keyin semenni gelga aylantirish", "Spermatozoidlarni harakat energiyasi bilan ta'minlash"],
     "togri": 1,
     "izoh": "PSA — prostata epiteli ishlab chiqaradigan serin proteaza. Asosiy vazifasi: ejakulyatsiyadan keyin semenogelin gelatinini parchalab, semenni suyuqlashtirish."
   },
   {
     "savol": "PSA darajasining oshishi haqida qaysi fikr TO'G'RI?",
-    "variantlar": ["Faqat saratonga xos", "Faqat BPH ga xos", "Saraton, BPH va yallig'lanish kabi bir nechta holatlarda ko'tarilishi mumkin", "Faqat yosh o'zgarishi bilan bog'liq"],
+    "variantlar": ["Faqat prostata saratoniga xos ko'rsatkich", "Faqat BPH (adenoma) holatiga xos ko'rsatkich", "Saraton, BPH va yallig'lanishda ko'tarilishi mumkin", "Faqat yosh ortishi bilan bog'liq o'zgaradigan ko'rsatkich"],
     "togri": 2,
     "izoh": "PSA prostata-spetsifik, lekin saraton-spetsifik emas. BPH, prostatit, travma va hatto rektual tekshiruv ham PSAni ko'tarishi mumkin."
   },
   {
     "savol": "Olat uch silindrsimon to'qimadan iborat. Ular qaysilar?",
-    "variantlar": ["Ikkita corpus spongiosum va bitta corpus cavernosum", "Ikkita corpus cavernosum va bitta corpus spongiosum", "Uchta corpus cavernosum", "Uchta corpus spongiosum"],
+    "variantlar": ["Ikkita corpus spongiosum va bitta cavernosum", "Ikkita corpus cavernosum va bitta spongiosum", "Uchta corpus cavernosum (erektil to'qima)", "Uchta corpus spongiosum (uretra atrofi)"],
     "togri": 1,
     "izoh": "Olat ikkita corpus cavernosum (yuqorida, juft) va bitta corpus spongiosum (pastda, juft emas, uretrani o'rab turadi)dan iborat."
   },
   {
     "savol": "Corpus spongiosum qanday vazifani bajaradi?",
-    "variantlar": ["Ereksiyaning asosiy manbai bo'ladi", "Uretrani o'rab turadi va boshcha (glans penis)ni hosil qiladi", "Testosteron ishlab chiqaradi", "Spermani saqlaydi"],
+    "variantlar": ["Ereksiyaning asosiy qon manbai bo'lib xizmat qiladi", "Uretrani o'rab, boshcha (glans penis)ni hosil qiladi", "Asosiy gormon testosteronni ishlab chiqaradi", "Yetilgan spermatozoidlarni saqlab turadi"],
     "togri": 1,
     "izoh": "Corpus spongiosum penile uretrani o'rab himoya qiladi va distal uchida kengayib boshcha (glans penis)ni hosil qiladi."
   },
   {
     "savol": "Erektil to'qima (corpus cavernosum) qaysi arteriya tarmoqlaridan qon oladi?",
-    "variantlar": ["Tashqi pudendal tomirlar", "Ichki pudendal arteriyaning tarmoqlari", "Defferensial arteriya", "Ichki urug' arteriyasi"],
+    "variantlar": ["Tashqi pudendal yuzaki tomirlaridan qon oladi", "Ichki pudendal arteriya tarmoqlaridan qon oladi", "Defferensial arteriya tarmoqlaridan qon oladi", "Ichki urug' arteriyasi tarmoqlaridan qon oladi"],
     "togri": 1,
     "izoh": "Corpus cavernosum qon ta'minotini ichki pudendal arteriyaning tarmoqlari — dorsal va kavernoz arteriyalardan oladi."
   },
   {
     "savol": "Zinner sindromi qaysi uch holat uyg'unligidan iborat?",
-    "variantlar": ["Varikosele + gidrosele + kriptorxizm", "BPH + prostata saratoni + prostatit", "Urug' pufakchasi kistasi + buyrak agenezi + urug' otish kanali to'siqligi", "Epididimit + orxit + varikosele"],
+    "variantlar": ["Varikosele + gidrosele + kriptorxizm uyg'unligi", "BPH + prostata saratoni + prostatit uyg'unligi", "Pufakcha kistasi + buyrak agenezi + kanal to'sig'i", "Epididimit + orxit + varikosele uyg'unligi"],
     "togri": 2,
     "izoh": "Zinner sindromi — urug' pufakchasi kistasi, ipsilateral buyrak agenezi va urug' otish kanali to'siqligi uchligidan iborat nadir embriologik anomaliya."
   }
