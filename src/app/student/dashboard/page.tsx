@@ -50,8 +50,7 @@ export default function StudentDashboard() {
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { icon: '🏆', title: 'Reyting', desc: 'Faollik bo\'yicha talabalar reytingi', c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
-    { icon: '🏥', title: 'Klinik holatlar', desc: 'Bemor scenariylari — tashxis va davolash', c: 'var(--danger)', href: '/student/klinik-holatlar' },
-    { icon: '🃏', title: 'Flashcardlar', desc: 'Muhim faktlarni tezda yod oling', c: 'var(--accent)', href: '/student/flashcard' },
+    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Turli mavzudan aralash savol, karta va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
   ]
 
   // Boshqa rollarga nazar solish — asosiy bo'limlardan ajratib, kichikroq ko'rinishda chiqariladi
