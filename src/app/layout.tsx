@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'Urologiya va Andrologiya platformasi',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Urosfera', statusBarStyle: 'default' },
-  icons: { icon: '/icon-192.png', apple: '/icon-192.png' },
+  icons: { icon: '/icon-192.png', apple: '/apple-touch-icon.png' },
 }
 
 export const viewport: Viewport = {
