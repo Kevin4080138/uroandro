@@ -23,6 +23,35 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Qoida: Normalogiya → klinik format yo'q (har darajada)
 
+## Bosqichlar o'rtasidagi mavzu munosabati
+
+### Umumiy tamoyil
+Har bir klinik mavzu uchta bosqichda **ketma-ket chuqurlashib** boradi.
+EASY → O'RTA → QIYIN bir-birini takrorlamaydi, balki bir-birini davom ettiradi.
+
+### Mavzu tarqalishi
+
+| Daraja | Maqsad | Misol |
+|--------|--------|-------|
+| EASY | Tushuncha, tasnif, asosiy belgilar | `prostata-adenomasi-asosiy-belgilar` |
+| O'RTA | Diagnostika algoritmi, differensial tashxis, dori davolash | `prostata-adenomasi-diagnostika` |
+| QIYIN | Jarrohlik, asoratlar, murakkab klinik holatlar, Campbell-Walsh darajasi | `bph-luts` |
+
+### Slug qoidasi
+- EASY: `[mavzu]-asoslari` yoki `[mavzu]-umumiy-[tushuncha]`
+- O'RTA: `[mavzu]-klinik` yoki `[mavzu]-diagnostika` yoki `[mavzu]-davolash`
+- QIYIN: `[mavzu]` (to'liq nom, suffix shart emas)
+
+### Yangi mavzular
+Ba'zi mavzular faqat O'RTA yoki QIYIN da boshlanishi mumkin (EASY da asosi yo'q):
+- Erektil disfunksiya, Prostata saratoni — QIYIN da boshlanadi (EASY da namuna yo'q)
+- Bunday holatlarda shu bosqichdan boshlanadi, quyi bosqichda bo'sh qoladi
+
+### Takrorlash qoidasi
+- Bir bosqich ichida bir xil mavzu ikki marta bo'lmasin
+- O'RTA darsi EASY darsini qaytarmasin — yangi klinik qatlam qo'shsin
+- QIYIN darsi O'RTA darsini qaytarmasin — murakkablik qo'shsin
+
 ## Sertifikat qoidasi
 
 - Sertifikat **har bir dars uchun emas** — **bosqich** (O'RTA yoki QIYIN) uchun bitta
