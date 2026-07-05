@@ -1606,7 +1606,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Buyrak va siydik yo'llari",
     bosqich: 'oson',
     qisqa: "Siydik tutolmaslikning asosiy turlari va ularning sabablari.",
-    daqiqa: 5,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/siydik-tutolmaslik-turlari.html',
     bolimlar: [
       {
         sarlavha: '1. Asosiy turlari',
