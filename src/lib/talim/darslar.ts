@@ -2139,7 +2139,6 @@ export const DARSLAR: Dars[] = [
     sarlavha: 'Prostata adenomasi (BPH) — asosiy belgilar',
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
-    bepulNamuna: true,
     qisqa: "BPHning yosh bilan bog'liqligi va asosiy siyish simptomlari haqida kirish darajasidagi tushuncha.",
     daqiqa: 17,
     nazariyaIframe: '/nazariyalar/prostata-adenomasi-asosiy-belgilar.html',

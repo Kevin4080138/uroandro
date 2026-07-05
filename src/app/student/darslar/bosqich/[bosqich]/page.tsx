@@ -78,8 +78,8 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
       className="rise lift"
       style={{
         animationDelay: `${Math.min(tartib * 0.05, 0.35)}s`,
-        background: dars.bepulNamuna ? 'linear-gradient(135deg, #f0fdf4, #dcfce7)' : 'var(--surface)',
-        border: dars.bepulNamuna ? '1.5px solid #86efac' : '1px solid var(--line)',
+        background: dars.bepulNamuna ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)' : 'var(--surface)',
+        border: dars.bepulNamuna ? '1.5px solid #4ade80' : '1px solid var(--line)',
         borderRadius: '20px',
         padding: '20px 22px',
         cursor: 'pointer',
