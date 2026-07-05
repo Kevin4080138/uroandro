@@ -36,29 +36,29 @@ function bosqichBolimlar(bosqich: string): { emoji: string; nom: string }[] {
   if (bosqich === 'oson') return [
     { emoji: '📖', nom: 'Nazariya' },
     { emoji: '🎥', nom: 'Video' },
+    { emoji: '📂', nom: 'Materiallar' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
-    { emoji: '📂', nom: 'Materiallar' },
   ]
   if (bosqich === "o'rta") return [
     { emoji: '📖', nom: 'Nazariya' },
     { emoji: '🎥', nom: 'Video' },
+    { emoji: '📂', nom: 'Materiallar' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
-    { emoji: '📂', nom: 'Materiallar' },
     { emoji: '🏅', nom: 'USMLE' },
-    { emoji: '🔒', nom: 'Nazorat' },
+    { emoji: '🎓', nom: 'Nazorat' },
   ]
   return [
     { emoji: '📖', nom: 'Nazariya' },
     { emoji: '🎥', nom: 'Video' },
+    { emoji: '📂', nom: 'Materiallar' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
-    { emoji: '📂', nom: 'Materiallar' },
     { emoji: '🏅', nom: 'USMLE' },
-    { emoji: '🔒', nom: 'Nazorat' },
     { emoji: '🏥', nom: 'Klinik holat' },
     { emoji: '🧩', nom: 'Interaktiv case' },
+    { emoji: '🎓', nom: 'Nazorat' },
   ]
 }
 

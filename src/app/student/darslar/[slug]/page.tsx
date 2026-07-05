@@ -9,7 +9,7 @@ import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
 
-type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'flashcard' | 'usmle' | 'nazorat' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar'
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar' | 'nazorat'
 
 // `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
@@ -89,14 +89,14 @@ export default function DarsDetailPage() {
     nazariya: '📖 Nazariya',
     video: '🎥 Video',
     yuklab: '📂 Materiallar',
-    amaliy: '✅ Amaliy test',
     flashcard: '🃏 Flashcard',
+    amaliy: '✅ Amaliy test',
     usmle: '🏅 USMLE',
-    nazorat: '🔒 Nazorat',
     klinik: '🏥 Klinik holat',
     interaktiv: '🧩 Interaktiv case',
     vaziyatli: '📋 Vaziyatli masala',
     xatolar: '🔍 Xatolar tahlili',
+    nazorat: '🎓 Nazorat',
   }
 
   const [tab, setTab] = useState<Tab>('nazariya')
