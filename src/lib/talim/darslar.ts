@@ -1726,7 +1726,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Varikotsele va gidrotsele orasidagi asosiy farqlarni tushunish uchun kirish darajasidagi dars.",
-    daqiqa: 4,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/varikotsele-gidrotsele-farqi.html',
     bolimlar: [
       {
         sarlavha: '1. Farqlari',
