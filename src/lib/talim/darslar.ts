@@ -1409,6 +1409,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Yallig'lanish kasalliklari",
     amaliySavolSoni: 15,
     bosqich: 'oson',
+    bepulNamuna: true,
     qisqa: "Uretritning ikki asosiy turi va ularning klinik farqlari.",
     daqiqa: 4,
     bolimlar: [
@@ -3077,6 +3078,7 @@ export const DARSLAR: Dars[] = [
     sarlavha: "O'tkir moyak burilishi (torsiya) va o'tkir yorg'oq sindromi — shoshilinch belgilar",
     kategoriya: 'Shoshilinch holatlar',
     bosqich: 'oson',
+    bepulNamuna: true,
     qisqa: "Moyak torsiyasini nima uchun soatlar ichida aniqlash va davolash hayotiy ahamiyatga ega.",
     daqiqa: 20,
     nazariyaIframe: '/nazariyalar/moyak-torsiyasi-asoslari.html',
