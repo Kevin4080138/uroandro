@@ -521,7 +521,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     bepulNamuna: true,
     qisqa: "Urologiya nimani o'rganadi va uning ichki yo'nalishlari haqida umumiy tushuncha.",
-    daqiqa: 4,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Urologiya nima?',
@@ -812,7 +812,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Kirish va semiotika',
     bosqich: 'oson',
     qisqa: "Urologiyada eng ko'p uchraydigan to'rt asosiy shikoyat turi va ularning ma'nosi.",
-    daqiqa: 5,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Asosiy simptomlar',
@@ -1093,7 +1093,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Kirish va semiotika',
     bosqich: 'oson',
     qisqa: "Umumiy siydik tahlilidagi asosiy ko'rsatkichlar va ularning klinik ahamiyati.",
-    daqiqa: 5,
+    daqiqa: 10,
     amaliySavolSoni: 15,
     bolimlar: [
       {
@@ -1132,7 +1132,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Kirish va semiotika',
     bosqich: 'oson',
     qisqa: "Urologiyada UTT nima uchun birinchi tanlovdagi tekshiruv usuli hisoblanadi.",
-    daqiqa: 4,
+    daqiqa: 10,
     amaliySavolSoni: 15,
     bolimlar: [
       {
@@ -1174,7 +1174,7 @@ export const DARSLAR: Dars[] = [
     amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Buyrak, siydik naychalari va ularning asosiy vazifalari haqida umumiy tushuncha.",
-    daqiqa: 5,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Asosiy tuzilish',
@@ -1212,7 +1212,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Anatomiya va fiziologiya',
     bosqich: 'oson',
     qisqa: "Qovuq va uretraning asosiy vazifalari va erkak-ayol uretrasi orasidagi farq.",
-    daqiqa: 4,
+    daqiqa: 10,
     amaliySavolSoni: 15,
     bolimlar: [
       {
@@ -1251,7 +1251,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Anatomiya va fiziologiya',
     bosqich: 'oson',
     qisqa: "Erkak reproduktiv a'zolarining asosiy tuzilishi va vazifalari.",
-    daqiqa: 5,
+    daqiqa: 10,
     amaliySavolSoni: 15,
     bolimlar: [
       {
@@ -1290,7 +1290,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Anatomiya va fiziologiya',
     bosqich: 'oson',
     qisqa: "Eng ko'p uchraydigan tug'ma siydik-tanosil anomaliyalari haqida umumiy ma'lumot.",
-    daqiqa: 4,
+    daqiqa: 10,
     amaliySavolSoni: 15,
     bolimlar: [
       {
@@ -1332,7 +1332,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     amaliySavolSoni: 15,
     qisqa: "Sistitning asosiy belgilari, sabablari va birinchi qatordagi davolash yondashuvi.",
-    daqiqa: 5,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Belgilari va sababi',
@@ -1371,7 +1371,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     amaliySavolSoni: 15,
     qisqa: "Pielonefritning sistitdan farqi, belgilari va davolash yondashuvi.",
-    daqiqa: 5,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Belgilari va davolash',
@@ -1411,7 +1411,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     bepulNamuna: true,
     qisqa: "Uretritning ikki asosiy turi va ularning klinik farqlari.",
-    daqiqa: 4,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Turlari va farqlari',
@@ -1450,7 +1450,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     amaliySavolSoni: 15,
     qisqa: "Prostatitning to'rt asosiy turi haqida umumiy, kirish darajasidagi tushuncha.",
-    daqiqa: 4,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Umumiy tasniflash',
@@ -1489,7 +1489,7 @@ export const DARSLAR: Dars[] = [
     amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Orxoepididimitning sabablari, belgilari va torsiyadan farqlash zarurati.",
-    daqiqa: 4,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Sabab va belgilar',
@@ -1530,7 +1530,7 @@ export const DARSLAR: Dars[] = [
     amaliySavolSoni: 15,
     bosqich: 'oson',
     qisqa: "Siydik toshlari nima uchun hosil bo'ladi va asosiy klinik ko'rinishi qanday.",
-    daqiqa: 5,
+    daqiqa: 10,
     bolimlar: [
       {
         sarlavha: '1. Asosiy tushunchalar',
@@ -1568,7 +1568,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Buyrak va siydik yo'llari",
     bosqich: 'oson',
     qisqa: "Gidronefrozning sabablari va nima uchun u xavfli bo'lishi mumkinligi.",
-    daqiqa: 20,
+    daqiqa: 17,
     nazariyaIframe: '/nazariyalar/gidronefroz-asoslari.html',
     bolimlar: [
       {
@@ -1855,7 +1855,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Buyrak va siydik yo'llari",
     bosqich: 'oson',
     qisqa: "Siydik tutolmaslikning asosiy turlari va ularning sabablari.",
-    daqiqa: 20,
+    daqiqa: 17,
     nazariyaIframe: '/nazariyalar/siydik-tutolmaslik-turlari.html',
     bolimlar: [
       {
@@ -2141,7 +2141,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     bepulNamuna: true,
     qisqa: "BPHning yosh bilan bog'liqligi va asosiy siyish simptomlari haqida kirish darajasidagi tushuncha.",
-    daqiqa: 20,
+    daqiqa: 17,
     nazariyaIframe: '/nazariyalar/prostata-adenomasi-asosiy-belgilar.html',
     bolimlar: [
       {
@@ -2387,7 +2387,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Fimoz va parafimoz orasidagi farq va parafimozning shoshilinch xususiyati.",
-    daqiqa: 20,
+    daqiqa: 17,
     nazariyaIframe: '/nazariyalar/fimoz-parafimoz-asoslari.html',
     bolimlar: [
       {
@@ -2651,7 +2651,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Varikotsele va gidrotsele orasidagi asosiy farqlarni tushunish uchun kirish darajasidagi dars.",
-    daqiqa: 20,
+    daqiqa: 16,
     nazariyaIframe: '/nazariyalar/varikotsele-gidrotsele-farqi.html',
     bolimlar: [
       {
@@ -2885,7 +2885,7 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Kriptorxizmning ahamiyati va nima uchun erta davolash zarur.",
-    daqiqa: 20,
+    daqiqa: 16,
     nazariyaIframe: '/nazariyalar/kriptorxizm-asoslari.html',
     bolimlar: [
       {
@@ -3080,7 +3080,7 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     bepulNamuna: true,
     qisqa: "Moyak torsiyasini nima uchun soatlar ichida aniqlash va davolash hayotiy ahamiyatga ega.",
-    daqiqa: 20,
+    daqiqa: 16,
     nazariyaIframe: '/nazariyalar/moyak-torsiyasi-asoslari.html',
     bolimlar: [
       {
