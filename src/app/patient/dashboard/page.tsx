@@ -56,6 +56,7 @@ export default function PatientDashboard() {
             { icon: '📨', title: 'Mening murojaatlarim', desc: 'Yuborilgan shikoyatlar va javoblar', href: '/patient/murojaatlarim', c: 'var(--good)' },
             { icon: '💊', title: 'Dorilarim', desc: "Shifokor yozgan retseptlar va qabul eslatmalari", href: '/patient/dorilarim', c: 'var(--accent)' },
             { icon: '❓', title: 'Savol-javob', desc: "Eng ko'p beriladigan savollarga javoblar", href: '/patient/savollar', c: 'var(--warn)' },
+            { icon: '🧪', title: 'Qaysi tahlil kerak?', desc: 'Shikoyatingizga qarab tavsiya etiladigan tahlillar', href: '/patient/qaysi-tahlil', c: 'var(--good)' },
             { icon: '🩻', title: "O'z-o'zini tekshirish", desc: "Erta aniqlash uchun bosqichma-bosqich yo'riqnomalar", href: '/patient/oz-tekshiruv', c: 'var(--accent-2)' },
           ].map((item, i) => (
             <div key={item.title} onClick={() => item.href && router.push(item.href)}
