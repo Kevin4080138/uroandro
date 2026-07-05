@@ -1687,7 +1687,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Fimoz va parafimoz orasidagi farq va parafimozning shoshilinch xususiyati.",
-    daqiqa: 4,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/fimoz-parafimoz-asoslari.html',
     bolimlar: [
       {
         sarlavha: '1. Farqi va yordam',
