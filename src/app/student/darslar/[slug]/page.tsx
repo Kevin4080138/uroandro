@@ -9,7 +9,7 @@ import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
 
-type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'usmle' | 'nazorat' | 'klinik' | 'flashcard'
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'flashcard' | 'usmle' | 'nazorat' | 'sertifikat' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar'
 
 // `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
@@ -77,20 +77,28 @@ export default function DarsDetailPage() {
     video: true,
     yuklab: true,
     amaliy: true,
-    usmle: usmleBank.length > 0 && dars.bosqich !== 'oson',
-    nazorat: nazoratBank.length > 0 && dars.bosqich !== 'oson',
-    klinik: klinikHolatlar.length > 0 && dars.bosqich === 'qiyin',
     flashcard: true,
+    usmle: dars?.bosqich !== 'oson',
+    nazorat: dars?.bosqich !== 'oson',
+    sertifikat: dars?.bosqich !== 'oson',
+    klinik: dars?.bosqich === 'qiyin',
+    interaktiv: dars?.bosqich === 'qiyin',
+    vaziyatli: dars?.bosqich === 'qiyin',
+    xatolar: dars?.bosqich === 'qiyin',
   }
   const TAB_NOMI: Record<Tab, string> = {
     nazariya: '📖 Nazariya',
     video: '🎥 Video',
     yuklab: '📂 Materiallar',
     amaliy: '✅ Amaliy test',
+    flashcard: '🃏 Flashcard',
     usmle: '🏅 USMLE',
     nazorat: '🔒 Nazorat',
+    sertifikat: '🎓 Sertifikat',
     klinik: '🏥 Klinik holat',
-    flashcard: '🃏 Flashcard',
+    interaktiv: '🧩 Interaktiv case',
+    vaziyatli: '📋 Vaziyatli masala',
+    xatolar: '🔍 Xatolar tahlili',
   }
 
   const [tab, setTab] = useState<Tab>('nazariya')
@@ -187,24 +195,22 @@ export default function DarsDetailPage() {
             savolSoni={amaliySavolSoni}
           />
         )}
-        {tab === 'usmle' && (
-          <UsmleTestBolimi
-            darsSlug={dars.slug}
-            darsNomi={dars.sarlavha}
-            bank={usmleBank}
-          />
+        {tab === 'usmle' && (usmleBank.length > 0
+          ? <UsmleTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={usmleBank} />
+          : <BoshUlash matn="USMLE savollari tez orada qo'shiladi." />
         )}
-        {tab === 'nazorat' && (
-          <NazoratTestBolimi
-            darsSlug={dars.slug}
-            darsNomi={dars.sarlavha}
-            bank={nazoratBank}
-            savolSoni={nazoratSavolSoni}
-            vaqtDaqiqa={nazoratVaqtDaqiqa}
-            otishFoizi={sertifikatOtishFoizi}
-          />
+        {tab === 'nazorat' && (nazoratBank.length > 0
+          ? <NazoratTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={nazoratBank} savolSoni={nazoratSavolSoni} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />
+          : <BoshUlash matn="Nazorat testi tez orada qo'shiladi." />
         )}
-        {tab === 'klinik' && <KlinikHolatlarBolimi holatlar={klinikHolatlar} />}
+        {tab === 'sertifikat' && <BoshUlash matn="Sertifikat tez orada qo'shiladi." />}
+        {tab === 'klinik' && (klinikHolatlar.length > 0
+          ? <KlinikHolatlarBolimi holatlar={klinikHolatlar} />
+          : <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
+        )}
+        {tab === 'interaktiv' && <BoshUlash matn="Interaktiv case tez orada qo'shiladi." />}
+        {tab === 'vaziyatli' && <BoshUlash matn="Vaziyatli masalalar tez orada qo'shiladi." />}
+        {tab === 'xatolar' && <BoshUlash matn="Xatolar tahlili tez orada qo'shiladi." />}
         {tab === 'flashcard' && <FlashcardBolimi kartalar={flashcardlar} />}
       </div>
     </div>
