@@ -1806,7 +1806,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: 'Shoshilinch holatlar',
     bosqich: 'oson',
     qisqa: "Moyak torsiyasini nima uchun soatlar ichida aniqlash va davolash hayotiy ahamiyatga ega.",
-    daqiqa: 5,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/moyak-torsiyasi-asoslari.html',
     bolimlar: [
       {
         sarlavha: "1. Nima va nega shoshilinch?",
