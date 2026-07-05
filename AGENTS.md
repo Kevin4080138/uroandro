@@ -6,7 +6,47 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Kontent qoidalari
 
+## Daraja matritsasi — bo'limlar
+
+| Bo'lim               | EASY       | O'RTA | QIYIN    |
+|----------------------|------------|-------|----------|
+| Nazariya             | ✅ sodda   | ✅    | ✅ chuqur |
+| Flashcard            | ✅         | ✅    | ✅        |
+| Amaliy test          | ✅         | ✅    | ✅        |
+| Materiallar + Media  | ✅         | ✅    | ✅        |
+| Nazorat              | ❌         | ✅    | ✅        |
+| USMLE                | ❌         | ✅    | ✅        |
+| Interaktiv case      | ❌         | ❌    | ✅        |
+| Vaziyatli masala     | ❌         | ❌    | ✅        |
+| Xatolar tahlili      | ❌         | ❌    | ✅        |
+| Sertifikat           | ❌         | ✅    | ✅        |
+
+Qoida: Normalogiya → klinik format yo'q (har darajada)
+
 ## Amaliy test savol banki
-- Har bir dars uchun `savollarBanki` da **40 ta savol** tuziladi
-- `amaliySavolSoni: 15` — har testda bankdan 15 tasi tasodifiy (shuffle) tanlanib chiqadi
+
+| Daraja | Bankdagi savol soni | Ko'rsatiladigan (shuffle) |
+|--------|---------------------|---------------------------|
+| EASY   | 40 ta               | 15 ta                     |
+| O'RTA  | 45 ta               | 20 ta                     |
+| QIYIN  | 50 ta               | 20 ta                     |
+
+- `savollarBanki` — to'liq bank
+- `amaliySavolSoni` — shuffle bo'lib chiqadigan son
 - Savollar nazariya HTML mazmuniga asoslanib tuziladi
+
+## Flashcard banki
+
+| Daraja | Ko'rsatiladigan | Bankdagi (ikki barobar, shuffle) |
+|--------|-----------------|----------------------------------|
+| EASY   | 10 ta           | 20 ta                            |
+| O'RTA  | 15 ta           | 30 ta                            |
+| QIYIN  | 20 ta           | 40 ta                            |
+
+## Test savollari tuzish qoidalari (sifat talablari)
+
+1. **To'g'ri javob tarqalishi**: A, B, C, D variantlari orasida to'g'ri javoblar taxminan teng taqsimlangan bo'lsin — faqat B yoki faqat C to'g'ri bo'lib qolmasin
+2. **Variant uzunligi**: Barcha variantlar taxminan bir xil uzunlikda bo'lsin — faqat to'g'ri javob uzun (yoki qisqa) bo'lmasin, chunki bu javobni ko'rsatib qo'yadi
+3. **Chalg'ituvchi variantlar**: Har bir noto'g'ri variant mantiqli va o'xshash bo'lsin — "hech qaysi" yoki aniq bema'ni javoblar qo'yilmasin
+4. **Bir mavzu, bir savol**: Bir xil faktni so'raydigan savollar takrorlanmasin
+5. **Izoh majburiy**: Har bir savolda `izoh` bo'lishi shart — nima uchun to'g'ri javob to'g'ri ekanligini tushuntirsin
