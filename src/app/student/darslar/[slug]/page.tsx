@@ -77,9 +77,9 @@ export default function DarsDetailPage() {
     video: true,
     yuklab: true,
     amaliy: true,
-    usmle: usmleBank.length > 0,
-    nazorat: nazoratBank.length > 0,
-    klinik: true,
+    usmle: usmleBank.length > 0 && dars.bosqich !== 'oson',
+    nazorat: nazoratBank.length > 0 && dars.bosqich !== 'oson',
+    klinik: klinikHolatlar.length > 0 && dars.bosqich === 'qiyin',
     flashcard: true,
   }
   const TAB_NOMI: Record<Tab, string> = {
