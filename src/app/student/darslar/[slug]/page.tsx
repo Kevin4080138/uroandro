@@ -92,7 +92,7 @@ export default function DarsDetailPage() {
     amaliy: '✅ Amaliy test',
     flashcard: '🃏 Flashcard',
     usmle: '🏅 USMLE',
-    nazorat: '🎓 Nazorat & Sertifikat',
+    nazorat: '🔒 Nazorat',
     klinik: '🏥 Klinik holat',
     interaktiv: '🧩 Interaktiv case',
     vaziyatli: '📋 Vaziyatli masala',

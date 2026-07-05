@@ -23,6 +23,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Qoida: Normalogiya → klinik format yo'q (har darajada)
 
+## Sertifikat qoidasi
+
+- Sertifikat **har bir dars uchun emas** — **bosqich** (O'RTA yoki QIYIN) uchun bitta
+- Berilish sharti: o'sha bosqichdagi **barcha darslarning Nazorat testidan** muvaffaqiyatli o'tish
+- Nazorat tab — har bir dars ichida (test o'tkazish uchun)
+- Sertifikat — bosqich sahifasida yoki alohida sertifikat sahifasida ko'rsatiladi (dars ichida emas)
+- EASY bosqichida Nazorat ham, Sertifikat ham yo'q
+
 ## Amaliy test savol banki
 
 | Daraja | Bankdagi savol soni | Ko'rsatiladigan (shuffle) |
