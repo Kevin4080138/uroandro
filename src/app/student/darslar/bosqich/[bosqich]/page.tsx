@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
-import { flashcardlarOl } from '@/lib/talim/flashcardlar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
@@ -36,12 +35,14 @@ const KATEGORIYA_RANGI: Record<string, string> = {
 function bosqichBolimlar(bosqich: string): { emoji: string; nom: string }[] {
   if (bosqich === 'oson') return [
     { emoji: '📖', nom: 'Nazariya' },
+    { emoji: '🎥', nom: 'Video' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
     { emoji: '📂', nom: 'Materiallar' },
   ]
   if (bosqich === "o'rta") return [
     { emoji: '📖', nom: 'Nazariya' },
+    { emoji: '🎥', nom: 'Video' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
     { emoji: '📂', nom: 'Materiallar' },
@@ -50,6 +51,7 @@ function bosqichBolimlar(bosqich: string): { emoji: string; nom: string }[] {
   ]
   return [
     { emoji: '📖', nom: 'Nazariya' },
+    { emoji: '🎥', nom: 'Video' },
     { emoji: '🃏', nom: 'Flashcard' },
     { emoji: '✅', nom: 'Amaliy test' },
     { emoji: '📂', nom: 'Materiallar' },
@@ -67,8 +69,6 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
   bosqich: string
   onClick: () => void
 }) {
-  const flashcards = flashcardlarOl(dars.slug)
-  const savolSoni = dars.amaliySavolSoni ?? (bosqich === 'oson' ? 15 : bosqich === "o'rta" ? 20 : 25)
   const accent = KATEGORIYA_RANGI[dars.kategoriya] ?? '#2563eb'
   const bolimlar = bosqichBolimlar(bosqich)
 
@@ -132,7 +132,7 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
             </div>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, paddingTop: '4px' }}>
-            ⏱ {dars.daqiqa} daq
+            ⏱ {dars.daqiqa} daqiqa
           </span>
         </div>
 
@@ -164,22 +164,8 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
           ))}
         </div>
 
-        {/* Pastki stat qatori */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <span style={{
-            fontSize: '11px', fontWeight: 700, color: accent,
-            background: accent + '12', borderRadius: '999px', padding: '3px 10px',
-          }}>
-            ✅ {savolSoni} ta test
-          </span>
-          {flashcards.length > 0 && (
-            <span style={{
-              fontSize: '11px', fontWeight: 700, color: '#7c3aed',
-              background: '#7c3aed12', borderRadius: '999px', padding: '3px 10px',
-            }}>
-              🃏 {flashcards.length} ta flashcard
-            </span>
-          )}
+        {/* Pastki qator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span style={{
             fontSize: '11px', color: 'var(--muted)', fontWeight: 600,
             border: '1px solid var(--line)', borderRadius: '999px', padding: '3px 10px',
@@ -187,7 +173,7 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
             {dars.kategoriya}
           </span>
           <span style={{ marginLeft: 'auto', fontSize: '12px', color: accent, fontWeight: 700 }}>
-            {qulflangan && !dars.bepulNamuna ? 'Ko\'rish →' : 'Ochish →'}
+            {qulflangan && !dars.bepulNamuna ? "Ko'rish →" : 'Ochish →'}
           </span>
         </div>
       </div>
