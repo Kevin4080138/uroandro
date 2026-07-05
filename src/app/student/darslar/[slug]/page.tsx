@@ -9,7 +9,7 @@ import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
 
-type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'flashcard' | 'usmle' | 'nazorat' | 'sertifikat' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar'
+type Tab = 'nazariya' | 'video' | 'yuklab' | 'amaliy' | 'flashcard' | 'usmle' | 'nazorat' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar'
 
 // `dars_tarkibi` jadvalidan keladigan og'ir tarkib — har bir dars sahifasi faqat
 // o'ziniki kerakli qatorini so'raydi, butun DARSLAR ro'yxati bilan birga yuklanmaydi.
@@ -80,7 +80,6 @@ export default function DarsDetailPage() {
     flashcard: true,
     usmle: dars?.bosqich !== 'oson',
     nazorat: dars?.bosqich !== 'oson',
-    sertifikat: dars?.bosqich !== 'oson',
     klinik: dars?.bosqich === 'qiyin',
     interaktiv: dars?.bosqich === 'qiyin',
     vaziyatli: dars?.bosqich === 'qiyin',
@@ -93,8 +92,7 @@ export default function DarsDetailPage() {
     amaliy: '✅ Amaliy test',
     flashcard: '🃏 Flashcard',
     usmle: '🏅 USMLE',
-    nazorat: '🔒 Nazorat',
-    sertifikat: '🎓 Sertifikat',
+    nazorat: '🎓 Nazorat & Sertifikat',
     klinik: '🏥 Klinik holat',
     interaktiv: '🧩 Interaktiv case',
     vaziyatli: '📋 Vaziyatli masala',
@@ -203,7 +201,6 @@ export default function DarsDetailPage() {
           ? <NazoratTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={nazoratBank} savolSoni={nazoratSavolSoni} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />
           : <BoshUlash matn="Nazorat testi tez orada qo'shiladi." />
         )}
-        {tab === 'sertifikat' && <BoshUlash matn="Sertifikat tez orada qo'shiladi." />}
         {tab === 'klinik' && (klinikHolatlar.length > 0
           ? <KlinikHolatlarBolimi holatlar={klinikHolatlar} />
           : <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
