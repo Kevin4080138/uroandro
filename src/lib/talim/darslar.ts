@@ -1648,7 +1648,8 @@ export const DARSLAR: Dars[] = [
     bosqich: 'oson',
     bepulNamuna: true,
     qisqa: "BPHning yosh bilan bog'liqligi va asosiy siyish simptomlari haqida kirish darajasidagi tushuncha.",
-    daqiqa: 4,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/prostata-adenomasi-asosiy-belgilar.html',
     bolimlar: [
       {
         sarlavha: '1. Asosiy tushuncha',
