@@ -87,3 +87,4 @@ Ba'zi mavzular faqat O'RTA yoki QIYIN da boshlanishi mumkin (EASY da asosi yo'q)
 3. **Chalg'ituvchi variantlar**: Har bir noto'g'ri variant mantiqli va o'xshash bo'lsin — "hech qaysi" yoki aniq bema'ni javoblar qo'yilmasin
 4. **Bir mavzu, bir savol**: Bir xil faktni so'raydigan savollar takrorlanmasin
 5. **Izoh majburiy**: Har bir savolda `izoh` bo'lishi shart — nima uchun to'g'ri javob to'g'ri ekanligini tushuntirsin
+6. **Uzun javob tuzoq**: Ko'pincha uzun variant to'g'ri bo'lib qolmasin — bu talabani o'ylamasdan uzun javobni tanlashga o'rgatadi. To'g'ri javob ba'zan qisqa ham bo'lishi mumkin.
