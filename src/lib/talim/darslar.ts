@@ -1765,7 +1765,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Prostata va erkak jinsiy a'zolari",
     bosqich: 'oson',
     qisqa: "Kriptorxizmning ahamiyati va nima uchun erta davolash zarur.",
-    daqiqa: 4,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/kriptorxizm-asoslari.html',
     bolimlar: [
       {
         sarlavha: '1. Nima va nega muhim?',
