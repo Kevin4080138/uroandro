@@ -214,20 +214,15 @@ export default function DarsDetailPage() {
 function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<typeof darsTop>>; nazariyaHtml?: string | null }) {
   if (dars.nazariyaIframe) {
     return (
-      <div className="rise" style={{
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        transform: 'translateX(-50%)',
-      }}>
+      <div className="rise" style={{ marginLeft: '-16px', marginRight: '-16px' }}>
         <iframe
           src={dars.nazariyaIframe}
           title={dars.sarlavha}
           style={{
             width: '100%',
             height: '90vh',
-            border: 'none',
-            borderTop: '1px solid var(--line)',
+            border: '1px solid var(--line)',
+            borderRadius: '12px',
             background: 'white',
             display: 'block',
           }}
