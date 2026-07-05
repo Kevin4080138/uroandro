@@ -77,6 +77,30 @@ export function OzTekshiruvIkon({ tur, size = 64 }: { tur: string; size?: number
           <path d="M44 50 l4 4" stroke={ranglar.stroke} strokeWidth="2" strokeLinecap="round" />
         </svg>
       )
+    case 'kalkulyator':
+      return (
+        <svg {...props}>
+          <rect x="12" y="10" width="40" height="44" rx="5" fill={ranglar.fill} stroke={ranglar.stroke} strokeWidth="2" />
+          <rect x="18" y="16" width="28" height="10" rx="3" fill={ranglar.stroke} opacity=".25" />
+          <path d="M18 34 h8 M18 42 h8 M34 34 h12 M34 42 h12" stroke={ranglar.stroke} strokeWidth="2" strokeLinecap="round" />
+          <circle cx="22" cy="34" r="0" /><circle cx="22" cy="42" r="0" />
+        </svg>
+      )
+    case 'yurak':
+      return (
+        <svg {...props}>
+          <path d="M32 48 C20 38 10 30 10 20 A11 11 0 0 1 32 16 A11 11 0 0 1 54 20 C54 30 44 38 32 48Z" fill={ranglar.fill} stroke={ranglar.stroke} strokeWidth="2" />
+          <path d="M22 32 l4 4 l8 -10" stroke={ranglar.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      )
+    case 'vaqt':
+      return (
+        <svg {...props}>
+          <circle cx="32" cy="34" r="18" fill={ranglar.fill} stroke={ranglar.stroke} strokeWidth="2" />
+          <path d="M32 22 v12 l8 5" stroke={ranglar.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M28 10 h8" stroke={ranglar.stroke} strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      )
     case 'kuzatish':
     default:
       return (

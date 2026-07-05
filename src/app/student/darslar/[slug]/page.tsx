@@ -212,6 +212,26 @@ export default function DarsDetailPage() {
 }
 
 function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<typeof darsTop>>; nazariyaHtml?: string | null }) {
+  if (dars.nazariyaIframe) {
+    return (
+      <div className="rise">
+        <iframe
+          src={dars.nazariyaIframe}
+          title={dars.sarlavha}
+          style={{
+            width: '100%',
+            height: '85vh',
+            border: '1px solid var(--line)',
+            borderRadius: '16px',
+            background: 'white',
+            display: 'block',
+          }}
+          loading="lazy"
+        />
+      </div>
+    )
+  }
+
   if (nazariyaHtml) {
     return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: nazariyaHtml }} />
   }

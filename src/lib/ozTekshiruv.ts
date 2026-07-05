@@ -1,11 +1,14 @@
 export type Bosqich = {
   sarlavha: string
   matn: string
-  svg: 'dush' | 'qollar' | 'aylantirish' | 'solishtirish' | 'jurnal' | 'kalendar' | 'shifokor' | 'kuzatish'
+  svg: 'dush' | 'qollar' | 'aylantirish' | 'solishtirish' | 'jurnal' | 'kalendar' | 'shifokor' | 'kuzatish' | 'kalkulyator' | 'yurak' | 'vaqt'
 }
+
+export type YoriqnomaTuri = 'yoriqnoma' | 'kalkulyator'
 
 export type Yoriqnoma = {
   slug: string
+  tur: YoriqnomaTuri
   sarlavha: string
   organ: string
   qisqa: string
@@ -17,7 +20,53 @@ export type Yoriqnoma = {
 
 export const OZ_TEKSHIRUV_YORIQNOMALARI: Yoriqnoma[] = [
   {
+    slug: 'erektil-disfunksiya',
+    tur: 'kalkulyator',
+    sarlavha: 'Erektil disfunksiya (IIEF-5 testi)',
+    organ: 'Jinsiy funksiya',
+    qisqa: 'So\'nggi 4 hafta ichidagi ereksiya sifatini 5 savol orqali baholang va ED darajasini aniqlang.',
+    davriylik: 'Har 3 oyda yoki belgilar o\'zgarganda',
+    bosqichlar: [],
+    ogohlantiruvchiBelgilar: [
+      'Ereksiya umuman bo\'lmasa',
+      '3 oydan ortiq davom etayotgan muammo',
+      'Yurak-qon tomir kasalligi bilan birgalikda',
+    ],
+    manba: 'International Index of Erectile Function (IIEF-5) — Rosen et al., 1999',
+  },
+  {
+    slug: 'tez-boshanish',
+    tur: 'kalkulyator',
+    sarlavha: 'Tez bo\'shanish (PEDT + IELT)',
+    organ: 'Jinsiy funksiya',
+    qisqa: 'Ejakulyatsiya nazoratini PEDT anketa va IELT vaqt ko\'rsatkichi orqali aniqlang.',
+    davriylik: 'Kerak bo\'lganda yoki belgilar o\'zgarganda',
+    bosqichlar: [],
+    ogohlantiruvchiBelgilar: [
+      'Har safar 1 daqiqadan kam davom etsa',
+      'Hamkor qoniqmasligi munosabatga ta\'sir qilsa',
+      'Psixologik tashvish kuchayib ketsa',
+    ],
+    manba: 'Premature Ejaculation Diagnostic Tool (PEDT) — Symonds et al., 2007; IELT — Waldinger et al.',
+  },
+  {
+    slug: 'jinsiy-zaiflik',
+    tur: 'kalkulyator',
+    sarlavha: 'Jinsiy zaiflik umumiy baholash',
+    organ: 'Jinsiy funksiya',
+    qisqa: 'Yosh, davomiyllik, kasalliklar va belgilar asosida jinsiy zaiflik xavfini baholang va tavsiya oling.',
+    davriylik: 'Kerak bo\'lganda',
+    bosqichlar: [],
+    ogohlantiruvchiBelgilar: [
+      '40 yoshdan katta bo\'lib, belgilar 6 oydan ortiq davom etsa',
+      'Qandli diabet yoki yurak kasalligi bilan birgalikda',
+      'Gormonal buzilish belgilari (soqol kamayishi, ko\'krak kengayishi)',
+    ],
+    manba: 'EAU Guidelines on Sexual and Reproductive Health; AUA guideline on ED',
+  },
+  {
     slug: 'moyak-oz-tekshiruv',
+    tur: 'yoriqnoma' as YoriqnomaTuri,
     sarlavha: "Moyaklarni o'z-o'zini tekshirish (TSE)",
     organ: 'Moyaklar',
     qisqa: "Moyak saratoni va boshqa o'zgarishlarni erta aniqlash uchun oyiga bir marta bajariladigan oddiy tekshiruv.",
@@ -66,6 +115,7 @@ export const OZ_TEKSHIRUV_YORIQNOMALARI: Yoriqnoma[] = [
   },
   {
     slug: 'siydik-simptom-kuzatuv',
+    tur: 'yoriqnoma' as YoriqnomaTuri,
     sarlavha: "Siydik chiqarish simptomlarini kuzatish jurnali",
     organ: 'Prostata / Siydik pufagi',
     qisqa: "BPH va boshqa siydik yo'li muammolarini erta aniqlash uchun o'z simptomlaringizni tizimli kuzatish usuli.",

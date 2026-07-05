@@ -29,6 +29,7 @@ export type Dars = {
 
   // Quyidagilar ixtiyoriy — to'liq jihozlangan darslar (masalan HARD bosqich) uchun
   nazariyaHtml?: string // tashqi tahririyatdan tayyor HTML (jadval/callout bilan) — mavjud bo'lsa bolimlar/manbalar o'rniga shu ko'rsatiladi
+  nazariyaIframe?: string // /public/ papkasidagi standalone HTML nazariya sahifasining yo'li (iframe orqali ko'rsatiladi)
   asosiyVideoUrl?: string
   videoLinklar?: string[]
   konspektUrl?: string
@@ -1566,7 +1567,8 @@ export const DARSLAR: Dars[] = [
     kategoriya: "Buyrak va siydik yo'llari",
     bosqich: 'oson',
     qisqa: "Gidronefrozning sabablari va nima uchun u xavfli bo'lishi mumkinligi.",
-    daqiqa: 4,
+    daqiqa: 20,
+    nazariyaIframe: '/nazariyalar/gidronefroz-asoslari.html',
     bolimlar: [
       {
         sarlavha: '1. Sabablari va ahamiyati',
