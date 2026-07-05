@@ -9,6 +9,7 @@ import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktivCaselar'
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
+import { vaziyatliMasalalarOl, type VaziyatliMasala } from '@/lib/talim/vaziyatliMasalalar'
 import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar' | 'nazorat'
@@ -74,6 +75,7 @@ export default function DarsDetailPage() {
   const klinikHolatlar = klinikHolatlarOl(slug)
   const interaktivCaselar = interaktivCaselarOl(slug)
   const xatolarTahlili = xatolarTahliliOl(slug)
+  const vaziyatliMasalalar = vaziyatliMasalalarOl(slug)
   const flashcardlar = flashcardlarOl(slug)
 
   const tabMavjud: Record<Tab, boolean> = {
@@ -213,7 +215,10 @@ export default function DarsDetailPage() {
           ? <InteraktivCaseBolimi caselar={interaktivCaselar} />
           : <BoshUlash matn="Interaktiv case tez orada qo'shiladi." />
         )}
-        {tab === 'vaziyatli' && <BoshUlash matn="Vaziyatli masalalar tez orada qo'shiladi." />}
+        {tab === 'vaziyatli' && (vaziyatliMasalalar.length > 0
+          ? <VaziyatliMasalaBolimi masalalar={vaziyatliMasalalar} />
+          : <BoshUlash matn="Vaziyatli masalalar tez orada qo'shiladi." />
+        )}
         {tab === 'xatolar' && (xatolarTahlili.length > 0
           ? <XatolarTahlilyBolimi tahlillar={xatolarTahlili} />
           : <BoshUlash matn="Xatolar tahlili tez orada qo'shiladi." />
@@ -1584,6 +1589,171 @@ function XatolarTahlilyBolimi({ tahlillar }: { tahlillar: XatoTahlil[] }) {
           </button>
         </>
       )}
+    </>
+  )
+}
+
+function VaziyatliMasalaBolimi({ masalalar }: { masalalar: VaziyatliMasala[] }) {
+  const [joriy, setJoriy] = useState<number | 'menu'>('menu')
+  const [qadam, setQadam] = useState(0)
+  const [tanlangan, setTanlangan] = useState<number | null>(null)
+  const [tekshirildi, setTekshirildi] = useState(false)
+  const [togrilar, setTogrilar] = useState(0)
+  const [yakunlangan, setYakunlangan] = useState<Set<number>>(new Set())
+
+  const masala = typeof joriy === 'number' ? masalalar[joriy] : null
+  const joriyS = masala?.savollar[qadam]
+
+  const boshla = (i: number) => {
+    setJoriy(i); setQadam(0); setTanlangan(null); setTekshirildi(false); setTogrilar(0)
+  }
+
+  const tekshir = () => {
+    if (tanlangan === null || !joriyS) return
+    setTekshirildi(true)
+    if (tanlangan === joriyS.togri) setTogrilar((t) => t + 1)
+  }
+
+  const keyingi = () => {
+    if (!masala) return
+    if (qadam < masala.savollar.length - 1) {
+      setQadam((q) => q + 1); setTanlangan(null); setTekshirildi(false)
+    } else {
+      setYakunlangan((prev) => new Set([...prev, joriy as number]))
+      setJoriy('menu')
+    }
+  }
+
+  if (joriy === 'menu') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="rise" style={{
+          background: 'linear-gradient(135deg, #1e3a8a, #7c3aed)',
+          borderRadius: '16px', padding: '18px 20px', color: 'white', marginBottom: '4px',
+        }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, opacity: 0.8, marginBottom: '4px', textTransform: 'uppercase' }}>📋 Vaziyatli masala</div>
+          <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: 1.5 }}>
+            Bir klinik vaziyatga asoslangan bir nechta bog&apos;liq savollarga javob bering. Har bir savol oldingi ma&apos;lumotlar asosida klinik fikrlashni talab qiladi.
+          </p>
+        </div>
+        {masalalar.map((m, i) => (
+          <div key={m.id} onClick={() => boshla(i)} className="rise lift" style={{
+            background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? '#16a34a' : 'var(--line)'}`,
+            borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.07}s`,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1 }}>
+                <span style={{ fontSize: '26px' }}>{m.emoji}</span>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '2px' }}>{m.sarlavha}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>{m.savollar.length} ta savol • Bir vaziyat</div>
+                </div>
+              </div>
+              {yakunlangan.has(i) ? <span style={{ fontSize: '18px' }}>✅</span> : (
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#7c3aed', background: '#7c3aed15', borderRadius: '999px', padding: '3px 10px' }}>Boshlash</span>
+              )}
+            </div>
+            <div style={{ marginTop: '10px', fontSize: '13px', color: 'var(--ink-soft)', background: 'var(--surface-2)', borderRadius: '8px', padding: '10px 14px', lineHeight: 1.6 }}>
+              {m.vaziyat.slice(0, 160)}…
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (!masala || !joriyS) return null
+
+  const progress = ((qadam + (tekshirildi ? 1 : 0)) / masala.savollar.length) * 100
+
+  return (
+    <>
+      {/* Progress */}
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)', marginBottom: '5px' }}>
+          <span style={{ fontWeight: 700 }}>{masala.sarlavha}</span>
+          <span>{qadam + 1} / {masala.savollar.length}</span>
+        </div>
+        <div style={{ height: '5px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', borderRadius: '999px', width: `${progress}%`, background: '#7c3aed', transition: 'width .3s' }} />
+        </div>
+      </div>
+
+      {/* Vaziyat — har bir savol uchun ko'rinadi */}
+      <div className="rise" style={{ background: 'linear-gradient(135deg, #1e3a8a0d, #7c3aed0d)', border: '1px solid #7c3aed30', borderRadius: '14px', padding: '16px 20px', marginBottom: '14px' }}>
+        <div style={{ fontSize: '11px', color: '#7c3aed', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>📋 Klinik vaziyat</div>
+        <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--ink)' }}>{masala.vaziyat}</p>
+      </div>
+
+      {/* Savol */}
+      <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '16px 20px', marginBottom: '12px' }}>
+        <div style={{ fontSize: '11px', color: '#7c3aed', fontWeight: 700, marginBottom: '6px' }}>Savol {qadam + 1}</div>
+        <p style={{ fontSize: '14px', fontWeight: 600, margin: 0, lineHeight: 1.5 }}>{joriyS.savol}</p>
+      </div>
+
+      {/* Variantlar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+        {joriyS.variantlar.map((v, i) => {
+          const tanlanganMi = tanlangan === i
+          const togriMi = i === joriyS.togri
+          let bg = 'var(--surface)'
+          let border = '1px solid var(--line)'
+          if (tekshirildi) {
+            if (togriMi) { bg = '#16a34a12'; border = '1.5px solid #16a34a'; }
+            else if (tanlanganMi) { bg = '#dc262612'; border = '1.5px solid #dc2626'; }
+          } else if (tanlanganMi) {
+            bg = '#7c3aed12'; border = '1.5px solid #7c3aed'
+          }
+          return (
+            <div key={i} onClick={() => { if (!tekshirildi) setTanlangan(i) }}
+              className={tekshirildi ? '' : 'soft-press'}
+              style={{ background: bg, border, borderRadius: '12px', padding: '14px 16px', cursor: tekshirildi ? 'default' : 'pointer', transition: 'all .15s' }}
+            >
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                <div style={{
+                  width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0, marginTop: '1px',
+                  background: tekshirildi ? (togriMi ? '#16a34a' : tanlanganMi ? '#dc2626' : 'var(--surface-2)') : (tanlanganMi ? '#7c3aed' : 'var(--surface-2)'),
+                  border: !tekshirildi && !tanlanganMi ? '2px solid var(--line)' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'white', fontWeight: 700,
+                }}>
+                  {['A','B','C','D'][i]}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 4px', fontSize: '13.5px', lineHeight: 1.5, color: 'var(--ink)' }}>{v}</p>
+                  {tekshirildi && (tanlanganMi || togriMi) && (
+                    <p style={{ margin: 0, fontSize: '12px', color: togriMi ? '#16a34a' : '#dc2626', lineHeight: 1.5, fontStyle: 'italic' }}>
+                      {joriyS.izoh}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {!tekshirildi ? (
+        <button onClick={tekshir} disabled={tanlangan === null} style={{
+          width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
+          background: tanlangan === null ? 'var(--surface-2)' : '#7c3aed',
+          color: tanlangan === null ? 'var(--muted)' : 'white',
+          fontSize: '14px', fontWeight: 700, cursor: tanlangan === null ? 'not-allowed' : 'pointer',
+        }}>
+          Tekshirish
+        </button>
+      ) : (
+        <button onClick={keyingi} style={{
+          width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
+          background: '#7c3aed', color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+        }}>
+          {qadam < masala.savollar.length - 1 ? 'Keyingi savol →' : '✅ Yakunlash'}
+        </button>
+      )}
+
+      <button onClick={() => { setJoriy('menu'); setQadam(0); setTanlangan(null); setTekshirildi(false) }}
+        style={{ width: '100%', marginTop: '8px', padding: '10px', borderRadius: '12px', border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted)', fontSize: '13px', cursor: 'pointer' }}>
+        ← Ro&apos;yxatga qaytish
+      </button>
     </>
   )
 }
