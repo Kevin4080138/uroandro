@@ -29,7 +29,7 @@ Qoida: Normalogiya → klinik format yo'q (har darajada)
 |--------|---------------------|---------------------------|
 | EASY   | 40 ta               | 15 ta                     |
 | O'RTA  | 45 ta               | 20 ta                     |
-| QIYIN  | 50 ta               | 20 ta                     |
+| QIYIN  | 50 ta               | 25 ta                     |
 
 - `savollarBanki` — to'liq bank
 - `amaliySavolSoni` — shuffle bo'lib chiqadigan son
