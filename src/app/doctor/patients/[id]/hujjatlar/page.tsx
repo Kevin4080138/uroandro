@@ -36,48 +36,89 @@ export default function HujjatlarPage() {
   const [saving, setSaving] = useState(false)
   const [saqlandi, setSaqlandi] = useState(false)
   const [chopId, setChopId] = useState<string | null>(null)
+  const [yotishlar, setYotishlar] = useState<{ soni: number; sana: string | null }[]>([])
+  const [yotishSoni, setYotishSoni] = useState(1)
+  const [yangiYotishModal, setYangiYotishModal] = useState(false)
   const [chapKeng, setChapKeng] = useState(380)
   const [faolIndex, setFaolIndex] = useState(0)
   const [bosmaScale, setBosmaScale] = useState(1)
   const bosmaRef = useRef<HTMLDivElement>(null)
 
+  const yotishniYukla = async (soni: number, bemorc: any, profc: any) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: hd } = await supabase.from('hujjat_malumotlari').select('malumot')
+      .eq('bemor_id', id).eq('doctor_id', user?.id).eq('shablon', shablonId)
+      .eq('yotish_soni', soni).maybeSingle()
+    const boshlang: Record<string, any> = {}
+    for (const g of shablon.guruhlar) for (const m of g.maydonlar) {
+      if (m.default) boshlang[m.key] = m.default
+      if (m.type === 'checklist') boshlang[m.key] = []
+    }
+    if (bemorc?.tugilgan_sana) boshlang.tugilgan_yil = String(bemorc.tugilgan_sana).slice(0, 4)
+    if (bemorc?.manzil) boshlang.manzil = bemorc.manzil
+    boshlang.davolovchi = profc?.full_name ?? ''
+    boshlang.bolim_mudiri = profc?.full_name ?? ''
+    setDefaults(boshlang)
+    const saqlangan = hd?.malumot ?? {}
+    const hujjatIdlar = shablon.hujjatlar.map((h) => h.id)
+    const yangiFormat = Object.keys(saqlangan).some((k) => hujjatIdlar.includes(k))
+    setDocData(yangiFormat ? saqlangan : (Object.keys(saqlangan).length > 0 ? { [ASOS_HUJJAT]: saqlangan } : {}))
+    setSaqlandi(false)
+    setFaolIndex(0)
+    setLoading(false)
+  }
+
   useEffect(() => {
     setLoading(true)
-    setFaolIndex(0)
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      const [{ data: b }, { data: prof }, { data: hd }] = await Promise.all([
+      const [{ data: b }, { data: prof }, { data: barcha }] = await Promise.all([
         supabase.from('bemorlar').select('*').eq('id', id).single(),
         supabase.from('profiles').select('full_name').eq('id', user?.id).single(),
-        supabase.from('hujjat_malumotlari').select('malumot').eq('bemor_id', id).eq('doctor_id', user?.id).eq('shablon', shablonId).maybeSingle(),
+        supabase.from('hujjat_malumotlari').select('yotish_soni,yotish_sana')
+          .eq('bemor_id', id).eq('doctor_id', user?.id).eq('shablon', shablonId)
+          .order('yotish_soni'),
       ])
+
+      // yotishlar ro'yxati
+      const yList = (barcha ?? []).map((r: any) => ({ soni: r.yotish_soni, sana: r.yotish_sana }))
+      if (yList.length === 0) yList.push({ soni: 1, sana: null })
+      setYotishlar(yList)
       setBemor(b)
       setShifokorIsmi(prof?.full_name ?? '')
 
-      // boshlang'ich qiymatlar: saqlangan -> default
-      const boshlang: Record<string, any> = {}
-      for (const g of shablon.guruhlar) for (const m of g.maydonlar) {
-        if (m.default) boshlang[m.key] = m.default
-        if (m.type === 'checklist') boshlang[m.key] = []
-      }
-      // pasport ma'lumotlarini bemordan avtomatik to'ldirish
-      if (b?.tugilgan_sana) boshlang.tugilgan_yil = String(b.tugilgan_sana).slice(0, 4)
-      if (b?.manzil) boshlang.manzil = b.manzil
-      // vrach maydonlari — ro'yxatdan o'tgan shifokor ismi (o'zgartirsa bo'ladi)
-      boshlang.davolovchi = prof?.full_name ?? ''
-      boshlang.bolim_mudiri = prof?.full_name ?? ''
-      setDefaults(boshlang)
-
-      // saqlangan ma'lumot: yangi (hujjat bo'yicha) yoki eski (yassi) format
-      const saqlangan = hd?.malumot ?? {}
-      const hujjatIdlar = shablon.hujjatlar.map((h) => h.id)
-      const yangiFormat = Object.keys(saqlangan).some((k) => hujjatIdlar.includes(k))
-      setDocData(yangiFormat ? saqlangan : { [ASOS_HUJJAT]: saqlangan })
-      setLoading(false)
+      const joriySoni = yList[yList.length - 1].soni
+      setYotishSoni(joriySoni)
+      await yotishniYukla(joriySoni, b, prof)
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, shablonId])
+
+  const yotishniAlmashtir = async (soni: number) => {
+    setYotishSoni(soni)
+    setLoading(true)
+    const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', (await supabase.auth.getUser()).data.user?.id).single()
+    await yotishniYukla(soni, bemor, prof)
+  }
+
+  const yangiYotishQosh = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    const yangiSoni = Math.max(...yotishlar.map((y) => y.soni)) + 1
+    const bugun = new Date().toISOString().slice(0, 10)
+    await supabase.from('hujjat_malumotlari').insert({
+      bemor_id: id, doctor_id: user!.id, shablon: shablonId,
+      yotish_soni: yangiSoni, yotish_sana: bugun, malumot: {},
+    })
+    const yangiList = [...yotishlar, { soni: yangiSoni, sana: bugun }]
+    setYotishlar(yangiList)
+    setYangiYotishModal(false)
+    setLoading(true)
+    const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', user?.id).single()
+    setYotishSoni(yangiSoni)
+    await yotishniYukla(yangiSoni, bemor, prof)
+  }
+
 
   const faolId = shablon.hujjatlar[faolIndex]?.id ?? ASOS_HUJJAT
   const maydonVariant = (key: string): string[] => {
@@ -144,8 +185,9 @@ export default function HujjatlarPage() {
     if (!user) return
     setSaving(true)
     await supabase.from('hujjat_malumotlari').upsert({
-      bemor_id: id, doctor_id: user.id, shablon: shablonId, malumot: docData, updated_at: new Date().toISOString(),
-    }, { onConflict: 'bemor_id,doctor_id,shablon' })
+      bemor_id: id, doctor_id: user.id, shablon: shablonId,
+      yotish_soni: yotishSoni, malumot: docData, updated_at: new Date().toISOString(),
+    }, { onConflict: 'bemor_id,doctor_id,shablon,yotish_soni' })
     setSaving(false)
     setSaqlandi(true)
   }
@@ -213,6 +255,61 @@ export default function HujjatlarPage() {
               {saving ? 'Saqlanmoqda...' : saqlandi ? '✓ Saqlandi' : 'Saqlash'}
             </button>
           </div>
+
+          {/* Yotish tanlash */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={lbl}>Yotish tarixi</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
+              {yotishlar.map((y) => (
+                <button
+                  key={y.soni}
+                  onClick={() => yotishniAlmashtir(y.soni)}
+                  className="btn-animated"
+                  style={{
+                    border: 'none', borderRadius: '999px', padding: '5px 12px',
+                    cursor: 'pointer', fontSize: '12px', fontWeight: 600,
+                    background: y.soni === yotishSoni ? 'var(--accent)' : 'var(--surface-2)',
+                    color: y.soni === yotishSoni ? 'white' : 'var(--ink-soft)',
+                  }}
+                >
+                  {y.soni}-yotish{y.sana ? ` · ${y.sana}` : ''}
+                </button>
+              ))}
+              <button
+                onClick={() => setYangiYotishModal(true)}
+                className="btn-animated"
+                style={{
+                  border: '1px dashed var(--accent)', borderRadius: '999px', padding: '5px 12px',
+                  cursor: 'pointer', fontSize: '12px', fontWeight: 600,
+                  background: 'transparent', color: 'var(--accent)',
+                }}
+              >
+                + Yangi yotish
+              </button>
+            </div>
+          </div>
+
+          {/* Yangi yotish tasdiqlash */}
+          {yangiYotishModal && (
+            <div style={{
+              background: 'var(--surface)', border: '1px solid var(--accent)', borderRadius: '12px',
+              padding: '14px 16px', marginBottom: '12px',
+            }}>
+              <p style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 600 }}>
+                {yotishlar.length + 1}-yotish uchun yangi kasallik tarixi ochiladi. Davom etasizmi?
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={yangiYotishQosh} className="btn-animated" style={{
+                  background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px',
+                  padding: '7px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+                }}>Ha, yangi yotish</button>
+                <button onClick={() => setYangiYotishModal(false)} className="btn-animated" style={{
+                  background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)',
+                  borderRadius: '8px', padding: '7px 16px', cursor: 'pointer', fontSize: '13px',
+                }}>Bekor</button>
+              </div>
+            </div>
+          )}
 
           {/* Kasallik shabloni tanlash */}
           <div style={{ marginBottom: '14px' }}>
