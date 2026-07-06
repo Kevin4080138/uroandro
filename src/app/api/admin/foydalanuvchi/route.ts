@@ -33,12 +33,14 @@ export async function PATCH(req: Request) {
   }
 
   // audit log ixtiyoriy — xato bersa ham davom etamiz
-  await admin.from('admin_audit_log').insert({
-    admin_id: user.id,
-    amal: 'foydalanuvchi_tahrirlash',
-    maqsad_user_id: userId,
-    tafsilot: { email: email || undefined, telefon: telefon || undefined, parol_ozgartirildi: !!parol },
-  }).then(() => {}).catch(() => {})
+  try {
+    await admin.from('admin_audit_log').insert({
+      admin_id: user.id,
+      amal: 'foydalanuvchi_tahrirlash',
+      maqsad_user_id: userId,
+      tafsilot: { email: email || undefined, telefon: telefon || undefined, parol_ozgartirildi: !!parol },
+    })
+  } catch (_) { /* ixtiyoriy */ }
 
   return NextResponse.json({ ok: true })
 }
