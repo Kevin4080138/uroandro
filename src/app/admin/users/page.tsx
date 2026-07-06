@@ -73,13 +73,21 @@ export default function AdminUsersPage() {
   }
 
   const tasdiqlash = async (u: Profile) => {
-    await supabase.from('profiles').update({ role: 'doctor', doctor_holati: 'tasdiqlandi' }).eq('id', u.id)
-    setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
+    const res = await fetch('/api/admin/shifokor-tasdiq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: u.id, amal: 'tasdiqlash' }),
+    })
+    if (res.ok) setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
   }
 
   const radEtish = async (u: Profile) => {
-    await supabase.from('profiles').update({ doctor_holati: 'rad_etildi' }).eq('id', u.id)
-    setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
+    const res = await fetch('/api/admin/shifokor-tasdiq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: u.id, amal: 'rad_etish' }),
+    })
+    if (res.ok) setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
   }
 
   useEffect(() => {
