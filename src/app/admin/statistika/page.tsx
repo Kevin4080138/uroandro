@@ -65,7 +65,7 @@ export default function AdminStatistikaPage() {
       supabase.from('profiles').select('role'),
       supabase.from('profiles').select('role, created_at').gte('created_at', o_ttiz_kun.toISOString()),
       supabase.from('bemorlar').select('id', { count: 'exact', head: true }),
-      supabase.from('tashriflar').select('holat'),
+      supabase.from('tashriflar').select('holat, doctor_id'),
       supabase.from('varikotsele_tadqiqot').select('method'),
       supabase.from('profiles').select('id, full_name').eq('role', 'doctor'),
       supabase.from('bemorlar').select('id, created_by'),
