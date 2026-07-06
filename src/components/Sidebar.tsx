@@ -11,6 +11,7 @@ const NAV = [
   { href: '/doctor/murojaatlar', icon: '📨', label: 'Murojaatlar' },
   { href: '/doctor/protokollar', icon: '📋', label: 'Protokollar' },
   { href: '/doctor/calculators', icon: '🧮', label: 'Kalkulatorlar' },
+  { href: '/doctor/statistika', icon: '📊', label: 'Statistika' },
   { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
   { href: '/doctor/qollanmalar', icon: '🌐', label: "Qo'llanmalar" },
 ]

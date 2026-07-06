@@ -450,6 +450,12 @@ export default function PatientCardPage() {
             }}>
               📄 Hujjatlar
             </button>
+            <button onClick={() => router.push(`/doctor/patients/${id}/natija`)} className="btn-animated soft-press" style={{
+              background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '999px',
+              padding: '10px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap',
+            }}>
+              📊 Natija
+            </button>
             <button onClick={() => setShowRetsept((v) => !v)} className="btn-animated soft-press" style={{
               background: showRetsept ? 'var(--accent)' : 'var(--surface-2)', color: showRetsept ? 'white' : 'var(--ink-soft)',
               border: showRetsept ? 'none' : '1px solid var(--line)', borderRadius: '999px',
