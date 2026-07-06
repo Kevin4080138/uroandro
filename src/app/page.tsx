@@ -21,6 +21,12 @@ const sections = [
     desc: "Bemorlar bilan ishlash, protokollar, kalkulyatorlar va kasbiy kutubxona bir platformada.",
     c: 'var(--accent-2)',
   },
+  {
+    icon: '🧑',
+    title: 'Bemorlar uchun',
+    desc: "Shifokorga murojaat qilish, tavsiyalarni kuzatish va sog'liq ma'lumotlarini bir joyda saqlash.",
+    c: 'var(--good)',
+  },
 ]
 
 export default function LandingPage() {

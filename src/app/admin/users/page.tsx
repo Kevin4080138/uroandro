@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 
-type Profile = { id: string; full_name: string; role: string; telefon: string | null; email: string | null; faol: boolean; created_at: string; arxivlangan: boolean }
+type Profile = { id: string; full_name: string; role: string; telefon: string | null; email: string | null; faol: boolean; created_at: string; arxivlangan: boolean; doctor_holati: string | null; mutaxassislik: string | null; ish_joyi: string | null }
 
 const ROLLAR = [
   { value: 'student', label: '🎓 Talaba' },
@@ -41,6 +41,8 @@ export default function AdminUsersPage() {
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
+  const [kutayotganlar, setKutayotganlar] = useState<Profile[]>([])
+  const [kutayotganlarLoading, setKutayotganlarLoading] = useState(true)
 
   const load = async (q: string, rol: string, s: number) => {
     setLoading(true)
@@ -58,6 +60,31 @@ export default function AdminUsersPage() {
     setObunalar(om)
     setLoading(false)
   }
+
+  const loadKutayotganlar = async () => {
+    setKutayotganlarLoading(true)
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('doctor_holati', 'kutish')
+      .order('created_at', { ascending: false })
+    setKutayotganlar((data as Profile[]) ?? [])
+    setKutayotganlarLoading(false)
+  }
+
+  const tasdiqlash = async (u: Profile) => {
+    await supabase.from('profiles').update({ role: 'doctor', doctor_holati: 'tasdiqlandi' }).eq('id', u.id)
+    setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
+  }
+
+  const radEtish = async (u: Profile) => {
+    await supabase.from('profiles').update({ doctor_holati: 'rad_etildi' }).eq('id', u.id)
+    setKutayotganlar((prev) => prev.filter((x) => x.id !== u.id))
+  }
+
+  useEffect(() => {
+    loadKutayotganlar()
+  }, [])
 
   useEffect(() => {
     setSahifa(0)
@@ -154,6 +181,64 @@ export default function AdminUsersPage() {
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
 
       <div className="fade-in px-4 py-6 sm:px-8 sm:py-8">
+
+        {/* Kutayotgan shifokorlar */}
+        {(kutayotganlarLoading || kutayotganlar.length > 0) && (
+          <div style={{ marginBottom: '32px' }}>
+            <h2 style={{ margin: '0 0 12px 0', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⏳ Tasdiqlash kutayotgan shifokorlar
+              {kutayotganlar.length > 0 && (
+                <span style={{ background: 'var(--danger)', color: 'white', borderRadius: '12px', padding: '2px 10px', fontSize: '13px' }}>
+                  {kutayotganlar.length}
+                </span>
+              )}
+            </h2>
+            {kutayotganlarLoading ? (
+              <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Yuklanmoqda...</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {kutayotganlar.map((u) => (
+                  <div key={u.id} style={{
+                    background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
+                    padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap'
+                  }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <div style={{ fontWeight: 600, fontSize: '15px' }}>{u.full_name}</div>
+                      <div style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '2px' }}>
+                        {u.mutaxassislik && <span>{u.mutaxassislik}</span>}
+                        {u.mutaxassislik && u.ish_joyi && <span> · </span>}
+                        {u.ish_joyi && <span>{u.ish_joyi}</span>}
+                      </div>
+                      <div style={{ color: 'var(--muted)', fontSize: '12px', marginTop: '2px' }}>{u.email}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => tasdiqlash(u)}
+                        style={{
+                          background: '#059669', color: 'white', border: 'none', borderRadius: '8px',
+                          padding: '8px 18px', fontSize: '13px', fontWeight: 600, cursor: 'pointer'
+                        }}
+                      >
+                        ✓ Tasdiqlash
+                      </button>
+                      <button
+                        onClick={() => radEtish(u)}
+                        style={{
+                          background: 'var(--surface-2)', color: 'var(--danger)', border: '1px solid var(--danger)',
+                          borderRadius: '8px', padding: '8px 18px', fontSize: '13px', fontWeight: 600, cursor: 'pointer'
+                        }}
+                      >
+                        ✕ Rad etish
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <hr style={{ border: 'none', borderTop: '1px solid var(--line)', marginTop: '24px' }} />
+          </div>
+        )}
+
         <div style={{ marginBottom: '20px' }}>
           <h2 style={{ margin: '0 0 16px 0', fontSize: '24px' }}>Foydalanuvchilar</h2>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>

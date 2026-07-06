@@ -35,7 +35,7 @@ export default function LoginPage() {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, faol')
+      .select('role, faol, doctor_holati')
       .eq('id', data.user.id)
       .single()
 
@@ -48,6 +48,20 @@ export default function LoginPage() {
     if (profile?.faol === false) {
       await supabase.auth.signOut()
       setError('Hisobingiz bloklangan. Administrator bilan bog\'laning.')
+      setLoading(false)
+      return
+    }
+
+    if (profile?.doctor_holati === 'kutish') {
+      await supabase.auth.signOut()
+      setError('Shifokor hisobingiz hali admin tomonidan tasdiqlanmagan. Tez orada tasdiqlangach, xabar beramiz.')
+      setLoading(false)
+      return
+    }
+
+    if (profile?.doctor_holati === 'rad_etildi') {
+      await supabase.auth.signOut()
+      setError('Shifokor so\'rovingiz rad etildi. Qo\'shimcha ma\'lumot uchun administrator bilan bog\'laning.')
       setLoading(false)
       return
     }

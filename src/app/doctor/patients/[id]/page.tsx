@@ -731,23 +731,6 @@ export default function PatientCardPage() {
               <textarea style={{ ...inputStyle, minHeight: '60px' }} value={yangiForm.anamnez} onChange={setY('anamnez')} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginTop: '12px' }}>
-              <div>
-                <label style={labelStyle}>Og&apos;riq / simptom</label>
-                <select style={inputStyle} value={yangiForm.ogriq} onChange={setY('ogriq')}>
-                  <option value="yo'q">yo&apos;q</option>
-                  <option value="bor">bor</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Oldin operatsiya bo&apos;lganmi?</label>
-                <select style={inputStyle} value={yangiForm.oldin_operatsiya} onChange={setY('oldin_operatsiya')}>
-                  <option value="yo'q">yo&apos;q</option>
-                  <option value="ha">ha</option>
-                </select>
-              </div>
-            </div>
-
             {tanlanganOrganlar.length > 0 && (
               <div style={{ marginTop: '20px' }}>
                 <label style={labelStyle}>Tavsiya etilgan tekshiruvlar</label>

@@ -14,6 +14,8 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState('')
+  const [mutaxassislik, setMutaxassislik] = useState('')
+  const [ishJoyi, setIshJoyi] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -22,6 +24,7 @@ export default function RegisterPage() {
   const { theme, toggle } = useTheme()
 
   const isPatient = role === 'patient'
+  const isDoctor = role === 'doctor'
 
   const handleRegister = async () => {
     setError('')
@@ -29,6 +32,11 @@ export default function RegisterPage() {
 
     if (!fullName || !role || (isPatient ? !telefon : !email) || !password) {
       setError('Barcha maydonlarni to\'ldiring')
+      return
+    }
+
+    if (isDoctor && (!mutaxassislik || !ishJoyi)) {
+      setError('Mutaxassislik va ish joyini kiriting')
       return
     }
 
@@ -57,6 +65,8 @@ export default function RegisterPage() {
           full_name: fullName,
           role: role,
           telefon: isPatient ? telefon : null,
+          mutaxassislik: isDoctor ? mutaxassislik : null,
+          ish_joyi: isDoctor ? ishJoyi : null,
         }
       }
     })
@@ -67,7 +77,13 @@ export default function RegisterPage() {
       return
     }
 
-    setSuccess(isPatient ? 'Tabriklaymiz! Endi telefon va parolingiz orqali kira olasiz.' : 'Tabriklaymiz! Email manzilingizni tasdiqlang.')
+    setSuccess(
+      isPatient
+        ? 'Tabriklaymiz! Endi telefon va parolingiz orqali kira olasiz.'
+        : isDoctor
+        ? 'So\'rovingiz qabul qilindi! Admin tasdiqlagandan so\'ng emailingizga xabar yuboriladi.'
+        : 'Tabriklaymiz! Email manzilingizni tasdiqlang.'
+    )
     setLoading(false)
   }
 
@@ -159,6 +175,55 @@ export default function RegisterPage() {
               <option value="patient">🧑 Bemor</option>
             </select>
           </div>
+
+          {isDoctor && (
+            <>
+              <div>
+                <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                  Mutaxassislik
+                </label>
+                <input
+                  type="text"
+                  value={mutaxassislik}
+                  onChange={(e) => setMutaxassislik(e.target.value)}
+                  placeholder="Masalan: Urolog, Androlog"
+                  style={{
+                    width: '100%',
+                    background: 'var(--surface-2)',
+                    color: 'var(--ink)',
+                    border: '1px solid var(--line)',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+                  Ish joyi
+                </label>
+                <input
+                  type="text"
+                  value={ishJoyi}
+                  onChange={(e) => setIshJoyi(e.target.value)}
+                  placeholder="Masalan: 1-son shahar shifoxonasi"
+                  style={{
+                    width: '100%',
+                    background: 'var(--surface-2)',
+                    color: 'var(--ink)',
+                    border: '1px solid var(--line)',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </>
+          )}
 
           {isPatient ? (
             <div>
