@@ -51,6 +51,9 @@ export default function AdminStatistikaPage() {
   const [rolePieData, setRolePieData] = useState<{ name: string; value: number; color: string }[]>([])
   const [tashrifBarData, setTashrifBarData] = useState<{ nom: string; soni: number; color: string }[]>([])
   const [usulBarData, setUsulBarData] = useState<{ nom: string; soni: number; color: string }[]>([])
+  const [shifokorData, setShifokorData] = useState<{ nom: string; bemorlar: number; tashriflar: number; natijalar: number }[]>([])
+  const [mavzuData, setMavzuData] = useState<{ nom: string; soni: number; color: string }[]>([])
+  const [natijalarData, setNatijalarData] = useState<{ nom: string; soni: number }[]>([])
 
   const load = async (yangilash = false) => {
     if (yangilash) setYangilanmoqda(true)
@@ -58,12 +61,15 @@ export default function AdminStatistikaPage() {
 
     const o_ttiz_kun = new Date(); o_ttiz_kun.setDate(o_ttiz_kun.getDate() - 29); o_ttiz_kun.setHours(0, 0, 0, 0)
 
-    const [profilesAll, profilesOttiz, bemorlar, tashriflar, tadqiqot] = await Promise.all([
+    const [profilesAll, profilesOttiz, bemorlar, tashriflar, tadqiqot, shifokorlar, bemorlarFull, natijalarAll] = await Promise.all([
       supabase.from('profiles').select('role'),
       supabase.from('profiles').select('role, created_at').gte('created_at', o_ttiz_kun.toISOString()),
       supabase.from('bemorlar').select('id', { count: 'exact', head: true }),
       supabase.from('tashriflar').select('holat'),
       supabase.from('varikotsele_tadqiqot').select('method'),
+      supabase.from('profiles').select('id, full_name').eq('role', 'doctor'),
+      supabase.from('bemorlar').select('id, created_by'),
+      supabase.from('bemor_natijalar').select('doctor_id, mavzu, malumot'),
     ])
 
     // KPI
@@ -113,6 +119,39 @@ export default function AdminStatistikaPage() {
         nom: USULLAR[id].nom, soni: uc[id] ?? 0, color: USULLAR[id].color,
       }))
     )
+
+    // Shifokorlar kesimi
+    const tashrifDocMap: Record<string, number> = {}
+    for (const t of tashriflar.data ?? []) tashrifDocMap[t.doctor_id] = (tashrifDocMap[t.doctor_id] ?? 0) + 1
+    const bemorDocMap: Record<string, number> = {}
+    for (const b of bemorlarFull.data ?? []) bemorDocMap[b.created_by] = (bemorDocMap[b.created_by] ?? 0) + 1
+    const natijaDocMap: Record<string, number> = {}
+    for (const n of natijalarAll.data ?? []) natijaDocMap[n.doctor_id] = (natijaDocMap[n.doctor_id] ?? 0) + 1
+    setShifokorData(
+      (shifokorlar.data ?? [])
+        .map((s: any) => ({
+          nom: s.full_name ?? 'Noma\'lum',
+          bemorlar: bemorDocMap[s.id] ?? 0,
+          tashriflar: tashrifDocMap[s.id] ?? 0,
+          natijalar: natijaDocMap[s.id] ?? 0,
+        }))
+        .sort((a, b) => b.bemorlar - a.bemorlar)
+    )
+
+    // Mavzu taqsimoti
+    const MAVZU_RANG: Record<string, string> = { varikotsele: '#3b82f6', bph: '#f59e0b', prostatit: '#f97316', urolitiaz: '#8b5cf6' }
+    const MAVZU_NOM: Record<string, string> = { varikotsele: 'Varikotsele', bph: 'BPH', prostatit: 'Prostatit', urolitiaz: 'Urolitiaz' }
+    const mc: Record<string, number> = {}
+    for (const n of natijalarAll.data ?? []) mc[n.mavzu] = (mc[n.mavzu] ?? 0) + 1
+    setMavzuData(Object.keys(mc).map((m) => ({ nom: MAVZU_NOM[m] ?? m, soni: mc[m], color: MAVZU_RANG[m] ?? '#6b7280' })))
+
+    // Umumiy natijalar statistikasi (varikotsele umumiy_natija)
+    const nc: Record<string, number> = {}
+    for (const n of natijalarAll.data ?? []) {
+      const natija = (n.malumot as any)?.umumiy_natija
+      if (natija) nc[natija] = (nc[natija] ?? 0) + 1
+    }
+    setNatijalarData(Object.keys(nc).map((k) => ({ nom: k, soni: nc[k] })))
 
     setOxirgiYangilanish(new Date())
     setLoading(false)
@@ -277,6 +316,89 @@ export default function AdminStatistikaPage() {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Mavzu taqsimoti + Umumiy natijalar */}
+            {(mavzuData.length > 0 || natijalarData.length > 0) && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                {mavzuData.length > 0 && (
+                  <div style={card}>
+                    <h3 style={cardTitle}>Natija kiritilgan mavzular</h3>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={mavzuData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }} barSize={32}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                        <XAxis dataKey="nom" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} />
+                        <Bar dataKey="soni" name="Bemorlar" radius={[6, 6, 0, 0]}>
+                          {mavzuData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                {natijalarData.length > 0 && (
+                  <div style={card}>
+                    <h3 style={cardTitle}>Davolash natijalari</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <ResponsiveContainer width={160} height={160}>
+                        <PieChart>
+                          <Pie data={natijalarData} cx="50%" cy="50%" innerRadius={46} outerRadius={70}
+                            dataKey="soni" paddingAngle={3}>
+                            {natijalarData.map((_, i) => (
+                              <Cell key={i} fill={['#10b981', '#f59e0b', '#ef4444'][i % 3]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {natijalarData.map((d, i) => (
+                          <div key={d.nom} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                            <span style={{ width: 10, height: 10, borderRadius: '50%', background: ['#10b981', '#f59e0b', '#ef4444'][i % 3], flexShrink: 0 }} />
+                            <span style={{ flex: 1 }}>{d.nom}</span>
+                            <span style={{ fontWeight: 700 }}>{d.soni}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Shifokorlar kesimi */}
+            {shifokorData.length > 0 && (
+              <div style={{ ...card, marginTop: '20px' }}>
+                <h3 style={cardTitle}>Shifokorlar faolligi</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--surface-2)' }}>
+                        {['Shifokor', 'Bemorlar', 'Qabullar', 'Natijalar kiritilgan'].map((h) => (
+                          <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: 'var(--muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {shifokorData.map((s, i) => (
+                        <tr key={i} style={{ borderTop: '1px solid var(--line)' }}>
+                          <td style={{ padding: '10px 14px', fontWeight: 600 }}>{s.nom}</td>
+                          <td style={{ padding: '10px 14px' }}>
+                            <span style={{ background: '#dbeafe', color: '#1d4ed8', borderRadius: '999px', padding: '2px 10px', fontWeight: 700, fontSize: '12px' }}>{s.bemorlar}</span>
+                          </td>
+                          <td style={{ padding: '10px 14px' }}>{s.tashriflar}</td>
+                          <td style={{ padding: '10px 14px' }}>
+                            {s.natijalar > 0
+                              ? <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '999px', padding: '2px 10px', fontWeight: 700, fontSize: '12px' }}>{s.natijalar}</span>
+                              : <span style={{ color: 'var(--muted)' }}>—</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </>
