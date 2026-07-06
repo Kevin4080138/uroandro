@@ -165,20 +165,24 @@ export default function AdminUsersPage() {
   const tahrirniSaqla = async (u: Profile) => {
     setSaqlanmoqda(true)
     setXato(null)
-    const body: any = { userId: u.id }
-    if (u.role === 'patient') body.telefon = tahrirLogin.trim()
-    else body.email = tahrirLogin.trim()
-    if (tahrirParol.trim()) body.parol = tahrirParol.trim()
+    try {
+      const body: any = { userId: u.id }
+      if (u.role === 'patient') body.telefon = tahrirLogin.trim()
+      else body.email = tahrirLogin.trim()
+      if (tahrirParol.trim()) body.parol = tahrirParol.trim()
 
-    const res = await fetch('/api/admin/foydalanuvchi', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-    })
-    const json = await res.json()
-    setSaqlanmoqda(false)
-    if (!res.ok) { setXato(json.error ?? 'Xatolik yuz berdi'); return }
-
-    setTahrirId(null)
-    load(qidiruv, rolFiltr, sahifa)
+      const res = await fetch('/api/admin/foydalanuvchi', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      })
+      const json = await res.json()
+      if (!res.ok) { setXato(json.error ?? 'Xatolik yuz berdi'); return }
+      setTahrirId(null)
+      load(qidiruv, rolFiltr, sahifa)
+    } catch (e: any) {
+      setXato(e?.message ?? 'Tarmoq xatosi')
+    } finally {
+      setSaqlanmoqda(false)
+    }
   }
 
   const filtered = users.filter((u) => !u.arxivlangan)
