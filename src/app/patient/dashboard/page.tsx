@@ -7,6 +7,7 @@ import { Header } from '@/components/Header'
 import { DoriEslatmaKartasi } from '@/components/DoriEslatmaKartasi'
 import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 import { Onboarding } from '@/components/Onboarding'
+import { BannerCarousel } from '@/components/BannerCarousel'
 
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -37,6 +38,7 @@ export default function PatientDashboard() {
       <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
       <div style={{ padding: '28px 24px 48px', maxWidth: 680, margin: '0 auto' }}>
+        <BannerCarousel role={profile.role} />
 
         {/* Salom */}
         <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>

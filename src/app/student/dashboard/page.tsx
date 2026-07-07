@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR } from '@/lib/talim/darslar'
+import { BannerCarousel } from '@/components/BannerCarousel'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -66,6 +67,7 @@ export default function StudentDashboard() {
 
       {/* Content */}
       <div style={{ padding: '32px' }}>
+        <BannerCarousel role={profile.role} />
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
         <h1 className="rise" style={{ fontSize: '32px', marginBottom: '20px' }}>
           {profile.full_name}
