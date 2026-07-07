@@ -22,26 +22,26 @@ const ORTA_JAMI  = DARSLAR.filter(d => d.bosqich === "o'rta").length || 1
 const QIYIN_JAMI = DARSLAR.filter(d => d.bosqich === 'qiyin').length || 1
 
 const RANKS: Omit<RankInfo, 'keyingiFoiz'>[] = [
-  // Tier: boshlang (hali hech narsa yo'q)
-  { darajaSon: 0,  nom: 'Yangi Talaba',      unvon: '—',              tier: 'boshlang', subRank: 1, keyingiNom: 'Yangi Tabib',     tavsif: 'Birinchi darsni boshlang!' },
+  // Tier: boshlang
+  { darajaSon: 0,  nom: 'Novice',       unvon: '▰',                tier: 'boshlang', subRank: 1, keyingiNom: 'Novice',        tavsif: 'Birinchi darsni boshlang!' },
 
-  // Oson bosqich — bronza
-  { darajaSon: 1,  nom: 'Yangi Tabib',        unvon: 'I-chevron',      tier: 'oson',     subRank: 1, keyingiNom: 'Izchi Tabib',      tavsif: 'Tibbiyot asoslarini o\'rganmoqda' },
-  { darajaSon: 2,  nom: 'Izchi Tabib',         unvon: 'II-chevron',     tier: 'oson',     subRank: 2, keyingiNom: 'Tajribali Tabib',  tavsif: 'Klinik bilimlarni mustahkamlayapti' },
-  { darajaSon: 3,  nom: 'Tajribali Tabib',     unvon: 'III-chevron',    tier: 'oson',     subRank: 3, keyingiNom: 'Rezident',         tavsif: 'Asoslar bosqichini zabt etdi' },
+  // Oson bosqich — bronza (bars)
+  { darajaSon: 1,  nom: 'Novice',       unvon: '▰',                tier: 'oson',     subRank: 1, keyingiNom: 'Apprentice',    tavsif: 'Tibbiyot asoslarini o\'rganmoqda' },
+  { darajaSon: 2,  nom: 'Apprentice',   unvon: '▰▰',               tier: 'oson',     subRank: 2, keyingiNom: 'Scholar',       tavsif: 'Bilimlarni mustahkamlayapti' },
+  { darajaSon: 3,  nom: 'Scholar',      unvon: '▰▰▰',              tier: 'oson',     subRank: 3, keyingiNom: 'Explorer',      tavsif: 'Asoslar bosqichini zabt etdi' },
 
-  // O'rta bosqich — kumush
-  { darajaSon: 4,  nom: 'Rezident',            unvon: 'I-olmos',        tier: 'orta',     subRank: 1, keyingiNom: 'Klinik Hakim',    tavsif: 'Klinik amaliyotga qadam qo\'ydi' },
-  { darajaSon: 5,  nom: 'Klinik Hakim',        unvon: 'II-olmos',       tier: 'orta',     subRank: 2, keyingiNom: 'Shifo Ustasi',    tavsif: 'Diagnostika va davolashni o\'zlashtirmoqda' },
-  { darajaSon: 6,  nom: 'Shifo Ustasi',        unvon: 'III-olmos',      tier: 'orta',     subRank: 3, keyingiNom: 'Urolog',          tavsif: 'O\'rta bosqichni muvaffaqiyatli yakunladi' },
+  // O'rta bosqich — kumush (star + bars)
+  { darajaSon: 4,  nom: 'Explorer',     unvon: '⭐ ▰▰▰',           tier: 'orta',     subRank: 1, keyingiNom: 'Practitioner',  tavsif: 'Klinik amaliyotga qadam qo\'ydi' },
+  { darajaSon: 5,  nom: 'Practitioner', unvon: '⭐⭐ ▰▰▰',          tier: 'orta',     subRank: 2, keyingiNom: 'Specialist',    tavsif: 'Diagnostika va davolashni o\'zlashtirmoqda' },
+  { darajaSon: 6,  nom: 'Specialist',   unvon: '⭐⭐⭐ ▰▰▰',         tier: 'orta',     subRank: 3, keyingiNom: 'Expert',        tavsif: 'O\'rta bosqichni muvaffaqiyatli yakunladi' },
 
-  // Qiyin bosqich — oltin
-  { darajaSon: 7,  nom: 'Urolog',              unvon: 'I-yulduz',       tier: 'qiyin',    subRank: 1, keyingiNom: 'Bosh Urolog',     tavsif: 'Murakkab klinik masalalarni hal qilmoqda' },
-  { darajaSon: 8,  nom: 'Bosh Urolog',         unvon: 'II-yulduz',      tier: 'qiyin',    subRank: 2, keyingiNom: 'Urolog Olimi',    tavsif: 'Campbell-Walsh darajasida bilimga ega' },
-  { darajaSon: 9,  nom: 'Urolog Olimi',        unvon: 'III-yulduz',     tier: 'qiyin',    subRank: 3, keyingiNom: 'Akademik',        tavsif: 'Qiyin bosqichni zabt etdi' },
+  // Qiyin bosqich — oltin (stars)
+  { darajaSon: 7,  nom: 'Expert',       unvon: '⭐⭐⭐⭐',            tier: 'qiyin',    subRank: 1, keyingiNom: 'Master',        tavsif: 'Murakkab klinik masalalarni hal qilmoqda' },
+  { darajaSon: 8,  nom: 'Master',       unvon: '⭐⭐⭐⭐⭐',           tier: 'qiyin',    subRank: 2, keyingiNom: 'Elite',         tavsif: 'Campbell-Walsh darajasida bilimga ega' },
+  { darajaSon: 9,  nom: 'Elite',        unvon: '⭐⭐⭐⭐⭐ 🏅',        tier: 'qiyin',    subRank: 3, keyingiNom: 'Legend',        tavsif: 'Qiyin bosqichni zabt etdi' },
 
-  // Akademik — qirollik
-  { darajaSon: 10, nom: 'Urologiya Akademigi', unvon: 'Akademik',       tier: 'akademik', subRank: 3, keyingiNom: '—',               tavsif: 'Urologiya bo\'yicha to\'liq kurs yakunlandi! 🏆' },
+  // Legend — qirollik
+  { darajaSon: 10, nom: 'Legend',       unvon: '👑 ⭐⭐⭐⭐⭐ 🪽',    tier: 'akademik', subRank: 3, keyingiNom: '—',             tavsif: 'Urologiya bo\'yicha to\'liq kurs yakunlandi! 🏆' },
 ]
 
 export function getRank(p: ProgressData): RankInfo {
