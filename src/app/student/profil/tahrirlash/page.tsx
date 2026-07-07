@@ -62,30 +62,26 @@ export default function ProfilTahrirlashPage() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
-      // avatar_url mavjud bo'lmasa ham ishlashi uchun alohida so'rov
-      const { data } = await supabase
+      const { data, error: dbErr } = await supabase
         .from('profiles')
-        .select('full_name, telefon, role, mutaxassislik, ish_joyi, talim_joyi')
+        .select('full_name, telefon, role, mutaxassislik, ish_joyi')
         .eq('id', user.id)
         .maybeSingle()
 
+      if (dbErr || !data) { setYuklanmadi(true); return }
+
+      // avatar_url — yangi ustun, yo'q bo'lsa xato bermaydi
       const { data: avatarData } = await supabase
         .from('profiles')
         .select('avatar_url')
         .eq('id', user.id)
         .maybeSingle()
 
-      if (data) {
-        const merged = { ...data, avatar_url: avatarData?.avatar_url ?? null }
-        setProfile(merged as Profile)
-        setFullName(data.full_name ?? '')
-        setMutaxassislik(data.mutaxassislik ?? '')
-        setIshJoyi(data.ish_joyi ?? '')
-        setTalimJoyi(data.talim_joyi ?? '')
-        setAvatarPreview(avatarData?.avatar_url ?? null)
-      } else {
-        setYuklanmadi(true)
-      }
+      setProfile({ ...data, avatar_url: avatarData?.avatar_url ?? null, talim_joyi: null } as Profile)
+      setFullName(data.full_name ?? '')
+      setMutaxassislik(data.mutaxassislik ?? '')
+      setIshJoyi(data.ish_joyi ?? '')
+      setAvatarPreview(avatarData?.avatar_url ?? null)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -134,9 +130,6 @@ export default function ProfilTahrirlashPage() {
     if (profile?.role === 'doctor') {
       yangilash.mutaxassislik = mutaxassislik.trim() || null
       yangilash.ish_joyi = ishJoyi.trim() || null
-    }
-    if (profile?.role === 'student') {
-      yangilash.talim_joyi = talimJoyi.trim() || null
     }
 
     const { error: dbErr } = await supabase.from('profiles').update(yangilash).eq('id', userId)
