@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-type Profile = { full_name: string; role: string }
+type Profile = { full_name: string; role: string; avatar_url: string | null }
 
 const ROL_NOMI: Record<string, string> = {
   student: '🎓 Talaba', doctor: '👨‍⚕️ Shifokor', patient: '🧑 Bemor', admin: '🛠️ Admin',
@@ -20,7 +20,7 @@ export function ProfileMenu() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      const { data } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle()
+      const { data } = await supabase.from('profiles').select('full_name, role, avatar_url').eq('id', user.id).maybeSingle()
       if (data) setProfile(data as Profile)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,10 +52,13 @@ export function ProfileMenu() {
         style={{
           width: '36px', height: '36px', borderRadius: '50%', border: 'none', cursor: 'pointer',
           background: 'var(--accent)', color: 'white', fontSize: '14px', fontWeight: 700,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0,
         }}
       >
-        {harf}
+        {profile.avatar_url
+          ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : harf
+        }
       </button>
 
       {ochiq && (
