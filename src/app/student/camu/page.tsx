@@ -1,52 +1,91 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import Image from 'next/image'
 
-const BEPUL_DARSLAR = [
+const SEMESTRLAR = [
   {
-    icon: '🫁',
-    sarlavha: 'Urologiya asoslari',
-    izoh: 'Buyrak, siydik pufagi va siydik yo\'llarining anatomiyasi va fiziologiyasi',
-    href: '/student/darslar',
+    nomer: 7,
     rang: 'var(--accent)',
+    soat: 30,
+    mavzular: [
+      {
+        n: 1,
+        sarlavha: 'Buyraklar va siydik yo\'llari funksional anatomiyasi va fiziologiyasi',
+        klinik: 4, amaliy: 2, icon: '🫁',
+        href: '/student/darslar',
+      },
+      {
+        n: 2,
+        sarlavha: 'Urologik kasalliklar simptomlari, tashxislash usullari, davolash va asoratlari',
+        klinik: 4, amaliy: 2, icon: '🔬',
+        href: '/student/darslar',
+      },
+      {
+        n: 3,
+        sarlavha: 'O\'tkir pielonefrit (asoratlanmagan va asoratlangan). Pielonefritning asoratlari (buyrak abssessi va karbunkuli, paranefrit). Surunkali pielonefrit',
+        klinik: 4, amaliy: 2, icon: '🦠',
+        href: '/student/darslar',
+      },
+      {
+        n: 4,
+        sarlavha: 'O\'tkir va surunkali sistit. Prostatit kasalliklari haqida umumiy ma\'lumot',
+        klinik: 2, amaliy: 4, icon: '🧫',
+        href: '/student/darslar',
+      },
+      {
+        n: 5,
+        sarlavha: 'Uretrit, orxit va epididimit kasalliklari haqida umumiy ma\'lumot',
+        klinik: 4, amaliy: 2, icon: '🩺',
+        href: '/student/darslar',
+      },
+    ],
   },
   {
-    icon: '🔬',
-    sarlavha: 'Diagnostika usullari',
-    izoh: 'USI, KT, MRT — urologik tekshiruvlar qo\'llanmasi',
-    href: '/student/darslar',
-    rang: 'var(--good)',
-  },
-  {
-    icon: '💊',
-    sarlavha: 'Klinik farmakologiya',
-    izoh: 'Urologiyada ishlatiladigan asosiy dorilar va dozalash',
-    href: '/student/darslar',
-    rang: 'var(--accent-2)',
-  },
-]
-
-const MAQOLALAR = [
-  {
-    sarlavha: 'Prostata adenomasi: yangi qarashlar',
-    muallif: 'Urosfera tahririyati',
-    sana: '2025 yil',
-    icon: '📝',
-  },
-  {
-    sarlavha: 'USMLE uchun urologiya savollar tahlili',
-    muallif: 'Urosfera tahririyati',
-    sana: '2025 yil',
-    icon: '📋',
-  },
-  {
-    sarlavha: 'Klinik holat: 45 yoshli erkakda gematüriya',
-    muallif: 'Urosfera tahririyati',
-    sana: '2025 yil',
-    icon: '🩺',
+    nomer: 8,
+    rang: '#7c3aed',
+    soat: 32,
+    mavzular: [
+      {
+        n: 1,
+        sarlavha: 'Varikotsele. Peyroni kasalligi. Orxialgiya kasalliklari haqida umumiy ma\'lumot',
+        klinik: 4, amaliy: 2, icon: '🔵',
+        href: '/student/darslar',
+      },
+      {
+        n: 2,
+        sarlavha: 'Erkaklar bepushtligi. Erektil disfunksiya kasalliklari haqida umumiy ma\'lumot',
+        klinik: 4, amaliy: 2, icon: '🧬',
+        href: '/student/darslar',
+      },
+      {
+        n: 3,
+        sarlavha: 'Prostata bezi xavfsiz giperplaziyasi',
+        klinik: 2, amaliy: 4, icon: '🫘',
+        href: '/student/darslar',
+      },
+      {
+        n: 4,
+        sarlavha: 'Siydik tosh kasalligi',
+        klinik: 2, amaliy: 4, icon: '💎',
+        href: '/student/darslar',
+      },
+      {
+        n: 5,
+        sarlavha: 'Buyraklar, siydik yo\'llari va erkaklar jinsiy a\'zolari jarohatlari',
+        klinik: 4, amaliy: 2, icon: '🏥',
+        href: '/student/darslar',
+      },
+      {
+        n: 6,
+        sarlavha: 'Gidrosele klinikasi, tashxisi, davolash va asoratlari',
+        klinik: 2, amaliy: 0, icon: '💧',
+        href: '/student/darslar',
+      },
+    ],
   },
 ]
 
@@ -54,13 +93,14 @@ const IMKONIYATLAR = [
   { icon: '🎓', sarlavha: 'Bepul kurslar', izoh: 'CAMU talabalari uchun barcha asosiy kurslar bepul', rang: 'var(--accent)' },
   { icon: '📚', sarlavha: 'Kutubxona', izoh: 'Darsliklar, qo\'llanmalar va rasmiy protokollar', rang: 'var(--good)' },
   { icon: '🏆', sarlavha: 'Sertifikat', izoh: 'Kursni tugatgandan so\'ng elektron sertifikat', rang: 'var(--accent-2)' },
-  { icon: '🤝', sarlavha: 'Mentorlik', izoh: 'Klinisi shifokorlar bilan bog\'lanish imkoniyati', rang: 'var(--warn)' },
   { icon: '📊', sarlavha: 'Test banklar', izoh: '500+ USMLE va klinik savol', rang: 'var(--danger)' },
-  { icon: '🧬', sarlavha: 'Klinik holatlar', izoh: 'Real klinik vaziyatlar bo\'yicha mashq', rang: '#7c3aed' },
 ]
 
 export default function CamuPage() {
   const router = useRouter()
+  const [activeSemestr, setActiveSemestr] = useState(7)
+
+  const semestr = SEMESTRLAR.find(s => s.nomer === activeSemestr)!
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -68,145 +108,168 @@ export default function CamuPage() {
 
       <div style={{ maxWidth: '700px', margin: '0 auto', padding: '24px 20px' }}>
 
-        {/* Hero — CAMU Logo va sarlavha */}
+        {/* Hero */}
         <div className="rise" style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center', marginBottom: '36px', padding: '32px 20px',
+          textAlign: 'center', marginBottom: '28px', padding: '28px 20px',
           background: 'linear-gradient(135deg, #0f2573 0%, #1a3a9e 60%, #2451c8 100%)',
           borderRadius: '24px', position: 'relative', overflow: 'hidden',
         }}>
-          {/* Bezak doiralar */}
-          <div style={{
-            position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px',
-            borderRadius: '50%', background: 'rgba(255,255,255,0.05)',
-          }} />
-          <div style={{
-            position: 'absolute', bottom: '-30px', left: '-30px', width: '140px', height: '140px',
-            borderRadius: '50%', background: 'rgba(255,255,255,0.05)',
-          }} />
+          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+          <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
 
-          {/* Logo */}
           <div style={{
-            width: '110px', height: '110px', borderRadius: '50%', overflow: 'hidden',
-            border: '3px solid rgba(255,255,255,0.4)', marginBottom: '18px',
+            width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden',
+            border: '3px solid rgba(255,255,255,0.4)', marginBottom: '14px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)', flexShrink: 0,
-            background: '#1a3a9e',
           }}>
-            <Image
-              src="/camu-logo.png"
-              alt="CAMU Logo"
-              width={110}
-              height={110}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <Image src="/camu-logo.png" alt="CAMU Logo" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
 
-          <h1 style={{ color: '#fff', fontSize: '22px', fontWeight: 800, margin: '0 0 6px', lineHeight: 1.2 }}>
+          <h1 style={{ color: '#fff', fontSize: '20px', fontWeight: 800, margin: '0 0 4px', lineHeight: 1.2 }}>
             Central Asian Medical University
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px', margin: '0 0 6px' }}>
-            Since 2022 · Toshkent, O&apos;zbekiston
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12.5px', margin: '0 0 10px' }}>
+            Since 2022 · Farg&apos;ona, O&apos;zbekiston
           </p>
           <div style={{
             display: 'inline-block', background: 'rgba(255,255,255,0.15)', borderRadius: '999px',
-            padding: '5px 16px', fontSize: '12px', color: '#fff', fontWeight: 600, marginTop: '8px',
+            padding: '5px 16px', fontSize: '12px', color: '#fff', fontWeight: 600,
           }}>
             🎓 CAMU talabalari uchun maxsus bo&apos;lim
           </div>
         </div>
 
         {/* Imkoniyatlar */}
-        <h2 className="rise" style={{ fontSize: '16px', fontWeight: 800, marginBottom: '14px', animationDelay: '.04s' }}>
+        <h2 className="rise" style={{ fontSize: '15px', fontWeight: 800, marginBottom: '12px', animationDelay: '.04s' }}>
           ✨ Sizga nima beriladi
         </h2>
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-          gap: '10px', marginBottom: '32px',
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '28px' }}>
           {IMKONIYATLAR.map((item, i) => (
             <div key={item.sarlavha} className="rise" style={{
               background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-              padding: '14px 16px', animationDelay: `${0.06 + i * 0.04}s`,
+              padding: '14px 14px', animationDelay: `${0.06 + i * 0.04}s`,
             }}>
-              <div style={{ fontSize: '22px', marginBottom: '6px' }}>{item.icon}</div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: item.rang, marginBottom: '4px' }}>{item.sarlavha}</div>
-              <div style={{ fontSize: '11.5px', color: 'var(--muted)', lineHeight: 1.4 }}>{item.izoh}</div>
+              <div style={{ fontSize: '20px', marginBottom: '5px' }}>{item.icon}</div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: item.rang, marginBottom: '3px' }}>{item.sarlavha}</div>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4 }}>{item.izoh}</div>
             </div>
           ))}
         </div>
 
-        {/* Bepul darslar */}
-        <h2 className="rise" style={{ fontSize: '16px', fontWeight: 800, marginBottom: '14px', animationDelay: '.08s' }}>
-          📖 Bepul darslar
+        {/* Amaliy mashg'ulotlar — semestr tabs */}
+        <h2 className="rise" style={{ fontSize: '15px', fontWeight: 800, marginBottom: '12px', animationDelay: '.1s' }}>
+          📋 Amaliy mashg&apos;ulotlar jadvali
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
-          {BEPUL_DARSLAR.map((d, i) => (
+
+        {/* Tab switcher */}
+        <div className="rise" style={{
+          display: 'flex', gap: '8px', marginBottom: '16px',
+          background: 'var(--surface)', border: '1px solid var(--line)',
+          borderRadius: '12px', padding: '4px', animationDelay: '.12s',
+        }}>
+          {SEMESTRLAR.map(s => (
+            <button
+              key={s.nomer}
+              onClick={() => setActiveSemestr(s.nomer)}
+              style={{
+                flex: 1, padding: '9px', borderRadius: '9px', border: 'none', cursor: 'pointer',
+                fontWeight: 700, fontSize: '13px', transition: 'all .2s',
+                background: activeSemestr === s.nomer ? s.rang : 'transparent',
+                color: activeSemestr === s.nomer ? '#fff' : 'var(--muted)',
+              }}
+            >
+              {s.nomer}-semestr
+            </button>
+          ))}
+        </div>
+
+        {/* Mavzular */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+          {semestr.mavzular.map((m, i) => (
             <div
-              key={d.sarlavha}
-              onClick={() => router.push(d.href)}
+              key={m.n}
+              onClick={() => router.push(m.href)}
               className="rise lift"
               style={{
-                animationDelay: `${0.1 + i * 0.04}s`,
+                animationDelay: `${i * 0.04}s`,
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-                padding: '16px 18px', cursor: 'pointer', display: 'flex', gap: '14px', alignItems: 'center',
+                padding: '14px 16px', cursor: 'pointer', display: 'flex', gap: '12px', alignItems: 'flex-start',
               }}
             >
               <div style={{
-                width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0,
-                background: d.rang + '22', color: d.rang,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
+                width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
+                background: semestr.rang + '22', color: semestr.rang,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '9px', fontWeight: 800,
               }}>
-                {d.icon}
+                {m.n}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '3px' }}>{d.sarlavha}</div>
-                <div style={{ fontSize: '12px', color: 'var(--muted)', lineHeight: 1.4 }}>{d.izoh}</div>
-              </div>
-              <span style={{ color: 'var(--muted)', fontSize: '18px' }}>›</span>
-            </div>
-          ))}
-
-          <button
-            onClick={() => router.push('/student/darslar')}
-            style={{
-              background: '#0f2573', color: '#fff', border: 'none', borderRadius: '14px',
-              padding: '14px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            }}
-          >
-            🎓 Barcha darslarni ko&apos;rish
-          </button>
-        </div>
-
-        {/* Maqolalar */}
-        <h2 className="rise" style={{ fontSize: '16px', fontWeight: 800, marginBottom: '14px', animationDelay: '.14s' }}>
-          📰 Maqolalar va resurslar
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
-          {MAQOLALAR.map((m, i) => (
-            <div key={m.sarlavha} className="rise" style={{
-              animationDelay: `${0.16 + i * 0.04}s`,
-              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-              padding: '14px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start',
-            }}>
-              <span style={{ fontSize: '22px', flexShrink: 0 }}>{m.icon}</span>
-              <div>
-                <div style={{ fontSize: '13.5px', fontWeight: 700, marginBottom: '4px' }}>{m.sarlavha}</div>
-                <div style={{ fontSize: '11.5px', color: 'var(--muted)' }}>{m.muallif} · {m.sana}</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px', lineHeight: 1.4 }}>{m.sarlavha}</div>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
+                    background: 'var(--accent)22', color: 'var(--accent)', fontWeight: 600,
+                  }}>
+                    🏥 Klinik: {m.klinik} soat
+                  </span>
+                  {m.amaliy > 0 && (
+                    <span style={{
+                      fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
+                      background: 'var(--good)22', color: 'var(--good)', fontWeight: 600,
+                    }}>
+                      🔬 Amaliy: {m.amaliy} soat
+                    </span>
+                  )}
+                  <span style={{
+                    fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
+                    background: 'var(--surface-2)', color: 'var(--muted)', fontWeight: 600,
+                  }}>
+                    Jami: {m.klinik + m.amaliy} soat
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Jami soat */}
+        <div style={{
+          background: semestr.rang + '15', border: `1px solid ${semestr.rang}44`,
+          borderRadius: '12px', padding: '12px 16px', marginBottom: '28px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>
+            {semestr.nomer}-semestr jami
+          </span>
+          <span style={{ fontSize: '16px', fontWeight: 800, color: semestr.rang }}>
+            {semestr.soat} soat
+          </span>
+        </div>
+
+        {/* Barcha darslar tugmasi */}
+        <button
+          onClick={() => router.push('/student/darslar')}
+          style={{
+            width: '100%', background: '#0f2573', color: '#fff', border: 'none', borderRadius: '14px',
+            padding: '14px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            marginBottom: '28px',
+          }}
+        >
+          🎓 Barcha darslarni ko&apos;rish
+        </button>
 
         {/* Aloqa */}
         <div className="rise" style={{
           background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-          padding: '20px', textAlign: 'center', animationDelay: '.22s',
+          padding: '20px', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>💬</div>
+          <div style={{ fontSize: '26px', marginBottom: '8px' }}>💬</div>
           <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 6px' }}>CAMU talabasisiz?</h3>
           <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: '0 0 14px', lineHeight: 1.5 }}>
-            Urosfera jamoasi bilan bog&apos;laning — savollar, takliflar va hamkorlik uchun.
+            Savollar, takliflar va hamkorlik uchun Urosfera jamoasi bilan bog&apos;laning.
           </p>
           <button
             onClick={() => router.push('/student/profil/feedback')}
