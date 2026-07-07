@@ -14,11 +14,11 @@ type Notification = {
   read: boolean
 }
 
-const TYPE_STYLE: Record<string, { icon: string; bg: string; color: string; border: string }> = {
-  info:    { icon: 'ℹ️', bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
-  success: { icon: '✅', bg: '#f0fdf4', color: '#16a34a', border: '#86efac' },
-  warning: { icon: '⚠️', bg: '#fefce8', color: '#ca8a04', border: '#fde047' },
-  urgent:  { icon: '🚨', bg: '#fff1f2', color: '#dc2626', border: '#fca5a5' },
+const TYPE_STYLE: Record<string, { icon: string; accent: string }> = {
+  info:    { icon: 'ℹ️', accent: '#2563eb' },
+  success: { icon: '✅', accent: '#16a34a' },
+  warning: { icon: '⚠️', accent: '#ca8a04' },
+  urgent:  { icon: '🚨', accent: '#dc2626' },
 }
 
 function formatSana(iso: string) {
@@ -137,10 +137,12 @@ export default function BildirishnomalarPage() {
                   key={n.id}
                   onClick={() => markRead(n.id)}
                   style={{
-                    background: n.read ? 'var(--surface)' : s.bg,
-                    border: `1px solid ${n.read ? 'var(--line)' : s.border}`,
+                    background: 'var(--surface)',
+                    border: `1px solid var(--line)`,
+                    borderLeft: `4px solid ${n.read ? 'var(--line)' : s.accent}`,
                     borderRadius: '14px', padding: '16px 18px', cursor: 'pointer',
-                    transition: 'background .2s',
+                    transition: 'border-color .2s',
+                    opacity: n.read ? 0.75 : 1,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
@@ -150,12 +152,12 @@ export default function BildirishnomalarPage() {
                         <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: 'var(--ink)' }}>{n.title}</p>
                         {!n.read && (
                           <span style={{
-                            background: s.color, color: 'white', borderRadius: '6px',
+                            background: s.accent, color: 'white', borderRadius: '6px',
                             padding: '1px 7px', fontSize: '10px', fontWeight: 700,
                           }}>Yangi</span>
                         )}
                       </div>
-                      <p style={{ margin: '0 0 8px', fontSize: '13px', color: 'var(--ink)', lineHeight: 1.6, opacity: n.read ? 0.75 : 1 }}>
+                      <p style={{ margin: '0 0 8px', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>
                         {n.body}
                       </p>
                       <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>{formatSana(n.created_at)}</p>

@@ -65,7 +65,7 @@ export function ProfileMenu() {
         <div
           className="rise"
           style={{
-            position: 'absolute', right: 0, top: 'calc(100% + 10px)', zIndex: 50, minWidth: '220px',
+            position: 'fixed', right: '12px', top: '60px', zIndex: 200, minWidth: '220px', maxWidth: 'calc(100vw - 24px)',
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
             boxShadow: 'var(--shadow)', padding: '14px', overflow: 'hidden',
           }}
