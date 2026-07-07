@@ -54,6 +54,7 @@ export default function ProfilTahrirlashPage() {
 
   // Umumiy
   const [loading, setLoading] = useState(false)
+  const [yuklanmadi, setYuklanmadi] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -61,18 +62,29 @@ export default function ProfilTahrirlashPage() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
+      // avatar_url mavjud bo'lmasa ham ishlashi uchun alohida so'rov
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, telefon, role, mutaxassislik, ish_joyi, talim_joyi, avatar_url')
+        .select('full_name, telefon, role, mutaxassislik, ish_joyi, talim_joyi')
         .eq('id', user.id)
         .maybeSingle()
+
+      const { data: avatarData } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .maybeSingle()
+
       if (data) {
-        setProfile(data as Profile)
+        const merged = { ...data, avatar_url: avatarData?.avatar_url ?? null }
+        setProfile(merged as Profile)
         setFullName(data.full_name ?? '')
         setMutaxassislik(data.mutaxassislik ?? '')
         setIshJoyi(data.ish_joyi ?? '')
         setTalimJoyi(data.talim_joyi ?? '')
-        setAvatarPreview(data.avatar_url ?? null)
+        setAvatarPreview(avatarData?.avatar_url ?? null)
+      } else {
+        setYuklanmadi(true)
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,8 +173,18 @@ export default function ProfilTahrirlashPage() {
 
   if (!profile) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+        {yuklanmadi ? (
+          <>
+            <p style={{ color: 'var(--danger)' }}>Ma'lumotlar yuklanmadi</p>
+            <button onClick={() => router.push('/student/profil')} style={{
+              background: 'var(--accent)', color: 'white', border: 'none',
+              borderRadius: '10px', padding: '10px 24px', cursor: 'pointer', fontSize: '14px',
+            }}>Orqaga</button>
+          </>
+        ) : (
+          <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        )}
       </div>
     )
   }
