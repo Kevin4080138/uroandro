@@ -5,89 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import Image from 'next/image'
-
-const SEMESTRLAR = [
-  {
-    nomer: 7,
-    rang: 'var(--accent)',
-    soat: 30,
-    mavzular: [
-      {
-        n: 1,
-        sarlavha: 'Buyraklar va siydik yo\'llari funksional anatomiyasi va fiziologiyasi',
-        klinik: 4, amaliy: 2, icon: '🫁',
-        href: '/student/darslar',
-      },
-      {
-        n: 2,
-        sarlavha: 'Urologik kasalliklar simptomlari, tashxislash usullari, davolash va asoratlari',
-        klinik: 4, amaliy: 2, icon: '🔬',
-        href: '/student/darslar',
-      },
-      {
-        n: 3,
-        sarlavha: 'O\'tkir pielonefrit (asoratlanmagan va asoratlangan). Pielonefritning asoratlari (buyrak abssessi va karbunkuli, paranefrit). Surunkali pielonefrit',
-        klinik: 4, amaliy: 2, icon: '🦠',
-        href: '/student/darslar',
-      },
-      {
-        n: 4,
-        sarlavha: 'O\'tkir va surunkali sistit. Prostatit kasalliklari haqida umumiy ma\'lumot',
-        klinik: 2, amaliy: 4, icon: '🧫',
-        href: '/student/darslar',
-      },
-      {
-        n: 5,
-        sarlavha: 'Uretrit, orxit va epididimit kasalliklari haqida umumiy ma\'lumot',
-        klinik: 4, amaliy: 2, icon: '🩺',
-        href: '/student/darslar',
-      },
-    ],
-  },
-  {
-    nomer: 8,
-    rang: '#7c3aed',
-    soat: 32,
-    mavzular: [
-      {
-        n: 1,
-        sarlavha: 'Varikotsele. Peyroni kasalligi. Orxialgiya kasalliklari haqida umumiy ma\'lumot',
-        klinik: 4, amaliy: 2, icon: '🔵',
-        href: '/student/darslar',
-      },
-      {
-        n: 2,
-        sarlavha: 'Erkaklar bepushtligi. Erektil disfunksiya kasalliklari haqida umumiy ma\'lumot',
-        klinik: 4, amaliy: 2, icon: '🧬',
-        href: '/student/darslar',
-      },
-      {
-        n: 3,
-        sarlavha: 'Prostata bezi xavfsiz giperplaziyasi',
-        klinik: 2, amaliy: 4, icon: '🫘',
-        href: '/student/darslar',
-      },
-      {
-        n: 4,
-        sarlavha: 'Siydik tosh kasalligi',
-        klinik: 2, amaliy: 4, icon: '💎',
-        href: '/student/darslar',
-      },
-      {
-        n: 5,
-        sarlavha: 'Buyraklar, siydik yo\'llari va erkaklar jinsiy a\'zolari jarohatlari',
-        klinik: 4, amaliy: 2, icon: '🏥',
-        href: '/student/darslar',
-      },
-      {
-        n: 6,
-        sarlavha: 'Gidrosele klinikasi, tashxisi, davolash va asoratlari',
-        klinik: 2, amaliy: 0, icon: '💧',
-        href: '/student/darslar',
-      },
-    ],
-  },
-]
+import { getCamuSemestrDarslar } from '@/lib/camu/darslar'
 
 const IMKONIYATLAR = [
   { icon: '🎓', sarlavha: 'Bepul kurslar', izoh: 'CAMU talabalari uchun barcha asosiy kurslar bepul', rang: 'var(--accent)' },
@@ -96,11 +14,17 @@ const IMKONIYATLAR = [
   { icon: '📊', sarlavha: 'Test banklar', izoh: '500+ USMLE va klinik savol', rang: 'var(--danger)' },
 ]
 
+const SEMESTR_META: Record<number, { rang: string; soat: number }> = {
+  7: { rang: 'var(--accent)', soat: 30 },
+  8: { rang: '#7c3aed', soat: 32 },
+}
+
 export default function CamuPage() {
   const router = useRouter()
-  const [activeSemestr, setActiveSemestr] = useState(7)
+  const [activeSemestr, setActiveSemestr] = useState<7 | 8>(7)
 
-  const semestr = SEMESTRLAR.find(s => s.nomer === activeSemestr)!
+  const meta = SEMESTR_META[activeSemestr]
+  const mavzular = getCamuSemestrDarslar(activeSemestr)
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -157,39 +81,39 @@ export default function CamuPage() {
           ))}
         </div>
 
-        {/* Amaliy mashg'ulotlar — semestr tabs */}
+        {/* Amaliy mashg'ulotlar */}
         <h2 className="rise" style={{ fontSize: '15px', fontWeight: 800, marginBottom: '12px', animationDelay: '.1s' }}>
           📋 Amaliy mashg&apos;ulotlar jadvali
         </h2>
 
-        {/* Tab switcher */}
+        {/* Semestr tabs */}
         <div className="rise" style={{
           display: 'flex', gap: '8px', marginBottom: '16px',
           background: 'var(--surface)', border: '1px solid var(--line)',
           borderRadius: '12px', padding: '4px', animationDelay: '.12s',
         }}>
-          {SEMESTRLAR.map(s => (
+          {([7, 8] as const).map(s => (
             <button
-              key={s.nomer}
-              onClick={() => setActiveSemestr(s.nomer)}
+              key={s}
+              onClick={() => setActiveSemestr(s)}
               style={{
                 flex: 1, padding: '9px', borderRadius: '9px', border: 'none', cursor: 'pointer',
                 fontWeight: 700, fontSize: '13px', transition: 'all .2s',
-                background: activeSemestr === s.nomer ? s.rang : 'transparent',
-                color: activeSemestr === s.nomer ? '#fff' : 'var(--muted)',
+                background: activeSemestr === s ? SEMESTR_META[s].rang : 'transparent',
+                color: activeSemestr === s ? '#fff' : 'var(--muted)',
               }}
             >
-              {s.nomer}-semestr
+              {s}-semestr
             </button>
           ))}
         </div>
 
         {/* Mavzular */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-          {semestr.mavzular.map((m, i) => (
+          {mavzular.map((m, i) => (
             <div
-              key={m.n}
-              onClick={() => router.push(m.href)}
+              key={m.slug}
+              onClick={() => router.push(`/student/camu/darslar/${m.slug}`)}
               className="rise lift"
               style={{
                 animationDelay: `${i * 0.04}s`,
@@ -199,67 +123,46 @@ export default function CamuPage() {
             >
               <div style={{
                 width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
-                background: semestr.rang + '22', color: semestr.rang,
+                background: meta.rang + '22', color: meta.rang,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '9px', fontWeight: 800,
+                fontSize: '13px', fontWeight: 800,
               }}>
                 {m.n}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px', lineHeight: 1.4 }}>{m.sarlavha}</div>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
-                    background: 'var(--accent)22', color: 'var(--accent)', fontWeight: 600,
-                  }}>
-                    🏥 Klinik: {m.klinik} soat
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px', background: 'var(--accent)22', color: 'var(--accent)', fontWeight: 600 }}>
+                    🏥 Klinik: {m.klinik}s
                   </span>
                   {m.amaliy > 0 && (
-                    <span style={{
-                      fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
-                      background: 'var(--good)22', color: 'var(--good)', fontWeight: 600,
-                    }}>
-                      🔬 Amaliy: {m.amaliy} soat
+                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px', background: 'var(--good)22', color: 'var(--good)', fontWeight: 600 }}>
+                      🔬 Amaliy: {m.amaliy}s
                     </span>
                   )}
-                  <span style={{
-                    fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
-                    background: 'var(--surface-2)', color: 'var(--muted)', fontWeight: 600,
-                  }}>
-                    Jami: {m.klinik + m.amaliy} soat
+                  <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px', background: 'var(--surface-2)', color: 'var(--muted)', fontWeight: 600 }}>
+                    Jami: {m.klinik + m.amaliy}s
                   </span>
                 </div>
               </div>
+              <span style={{ color: 'var(--muted)', fontSize: '18px', alignSelf: 'center' }}>›</span>
             </div>
           ))}
         </div>
 
         {/* Jami soat */}
         <div style={{
-          background: semestr.rang + '15', border: `1px solid ${semestr.rang}44`,
+          background: meta.rang + '15', border: `1px solid ${meta.rang}44`,
           borderRadius: '12px', padding: '12px 16px', marginBottom: '28px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>
-            {semestr.nomer}-semestr jami
+            {activeSemestr}-semestr jami
           </span>
-          <span style={{ fontSize: '16px', fontWeight: 800, color: semestr.rang }}>
-            {semestr.soat} soat
+          <span style={{ fontSize: '16px', fontWeight: 800, color: meta.rang }}>
+            {meta.soat} soat
           </span>
         </div>
-
-        {/* Barcha darslar tugmasi */}
-        <button
-          onClick={() => router.push('/student/darslar')}
-          style={{
-            width: '100%', background: '#0f2573', color: '#fff', border: 'none', borderRadius: '14px',
-            padding: '14px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            marginBottom: '28px',
-          }}
-        >
-          🎓 Barcha darslarni ko&apos;rish
-        </button>
 
         {/* Aloqa */}
         <div className="rise" style={{
