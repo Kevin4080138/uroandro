@@ -7,10 +7,13 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR } from '@/lib/talim/darslar'
 import { BannerCarousel } from '@/components/BannerCarousel'
+import { RankCard } from '@/components/RankBadge'
+import { getRank, getProgressData } from '@/lib/rank'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [bajarilganSoni, setBajarilganSoni] = useState(0)
+  const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -31,7 +34,9 @@ export default function StudentDashboard() {
         .from('talim_natijalari')
         .select('dars_slug')
         .eq('student_id', user.id)
-      const yakunlangan = new Set((natijalar ?? []).map((n: any) => n.dars_slug))
+      const list = natijalar ?? []
+      setNatijalarList(list)
+      const yakunlangan = new Set(list.map((n: any) => n.dars_slug))
       setBajarilganSoni(yakunlangan.size)
     }
     getProfile()
@@ -45,6 +50,7 @@ export default function StudentDashboard() {
 
   const jamiDars = DARSLAR.length
   const progress = jamiDars ? Math.round((bajarilganSoni / jamiDars) * 100) : 0
+  const rank = getRank(getProgressData(natijalarList))
 
   const KARTALAR = [
     { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
@@ -69,9 +75,14 @@ export default function StudentDashboard() {
       <div style={{ padding: '32px' }}>
         <BannerCarousel role={profile.role} />
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '20px' }}>
+        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '16px' }}>
           {profile.full_name}
         </h1>
+
+        {/* Unvon kartasi */}
+        <div className="rise" style={{ marginBottom: '24px', animationDelay: '.06s' }}>
+          <RankCard rank={rank} />
+        </div>
 
         {/* Progress */}
         <div className="rise" style={{

@@ -6,6 +6,8 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { useTheme } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase'
+import { RankMini } from '@/components/RankBadge'
+import { getRank, getProgressData } from '@/lib/rank'
 
 type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
 
@@ -32,6 +34,7 @@ export default function ProfilPage() {
   const supabase = createClient()
   const { theme, toggle } = useTheme()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
   const [ochirilmoqda, setOchirilmoqda] = useState(false)
   const [parolModal, setParolModal] = useState(false)
   const [parol, setParol] = useState('')
@@ -42,6 +45,8 @@ export default function ProfilPage() {
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('full_name, telefon, role, avatar_url').eq('id', user.id).maybeSingle()
       setProfile(data as Profile)
+      const { data: nat } = await supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id)
+      setNatijalarList(nat ?? [])
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -109,9 +114,12 @@ export default function ProfilPage() {
           </div>
           <div style={{ minWidth: 0 }}>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{profile.full_name}</h2>
-            <p style={{ margin: '3px 0 0', fontSize: '13px', opacity: .85 }}>
+            <p style={{ margin: '3px 0 6px', fontSize: '13px', opacity: .85 }}>
               {profile.telefon ?? ROL_NOMI[profile.role] ?? profile.role}
             </p>
+            {profile.role === 'student' && (
+              <RankMini rank={getRank(getProgressData(natijalarList))} />
+            )}
           </div>
         </div>
 

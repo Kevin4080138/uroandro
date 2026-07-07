@@ -1,0 +1,300 @@
+'use client'
+
+import type { RankInfo } from '@/lib/rank'
+
+// ── SVG Pogon shakllari ──────────────────────────────────────────────────────
+
+function Chevron({ x, y, size = 14, color }: { x: number; y: number; size?: number; color: string }) {
+  const h = size * 0.6
+  return (
+    <path
+      d={`M${x} ${y + h} L${x + size / 2} ${y} L${x + size} ${y + h}`}
+      fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+    />
+  )
+}
+
+function Diamond({ cx, cy, r = 6, color }: { cx: number; cy: number; r?: number; color: string }) {
+  return (
+    <polygon
+      points={`${cx},${cy - r} ${cx + r * 0.75},${cy} ${cx},${cy + r} ${cx - r * 0.75},${cy}`}
+      fill={color} stroke="rgba(255,255,255,0.4)" strokeWidth="0.8"
+    />
+  )
+}
+
+function Star({ cx, cy, r = 7, color }: { cx: number; cy: number; r?: number; color: string }) {
+  const pts: string[] = []
+  for (let i = 0; i < 10; i++) {
+    const ang = (i * Math.PI) / 5 - Math.PI / 2
+    const rad = i % 2 === 0 ? r : r * 0.42
+    pts.push(`${cx + Math.cos(ang) * rad},${cy + Math.sin(ang) * rad}`)
+  }
+  return (
+    <polygon points={pts.join(' ')} fill={color} stroke="rgba(255,255,255,0.35)" strokeWidth="0.6" />
+  )
+}
+
+function Crown({ cx, cy, size = 22, color }: { cx: number; cy: number; size?: number; color: string }) {
+  const h = size * 0.55
+  const w = size
+  return (
+    <g>
+      <path
+        d={`M${cx - w / 2} ${cy + h / 2}
+            L${cx - w / 2} ${cy - h / 4}
+            L${cx - w / 4} ${cy - h / 2 + 2}
+            L${cx} ${cy - h / 2 - 4}
+            L${cx + w / 4} ${cy - h / 2 + 2}
+            L${cx + w / 2} ${cy - h / 4}
+            L${cx + w / 2} ${cy + h / 2}
+            Z`}
+        fill={color} stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"
+      />
+      <circle cx={cx - w / 2} cy={cy - h / 4} r="2" fill="white" opacity="0.9" />
+      <circle cx={cx} cy={cy - h / 2 - 4} r="2.5" fill="white" opacity="0.9" />
+      <circle cx={cx + w / 2} cy={cy - h / 4} r="2" fill="white" opacity="0.9" />
+    </g>
+  )
+}
+
+// ── Tier konfiguratsiyasi ────────────────────────────────────────────────────
+
+const TIER_CONFIG = {
+  boshlang: {
+    bg1: '#64748b', bg2: '#475569', stripe: '#94a3b8',
+    labelColor: '#cbd5e1', borderColor: '#94a3b8',
+    glow: 'rgba(100,116,139,0.3)',
+  },
+  oson: {
+    bg1: '#92400e', bg2: '#78350f', stripe: '#d97706',
+    labelColor: '#fde68a', borderColor: '#f59e0b',
+    glow: 'rgba(217,119,6,0.35)',
+  },
+  orta: {
+    bg1: '#334155', bg2: '#1e293b', stripe: '#94a3b8',
+    labelColor: '#e2e8f0', borderColor: '#94a3b8',
+    glow: 'rgba(148,163,184,0.35)',
+  },
+  qiyin: {
+    bg1: '#78350f', bg2: '#451a03', stripe: '#f59e0b',
+    labelColor: '#fef3c7', borderColor: '#fbbf24',
+    glow: 'rgba(251,191,36,0.4)',
+  },
+  akademik: {
+    bg1: '#3b0764', bg2: '#1e1b4b', stripe: '#a855f7',
+    labelColor: '#f0abfc', borderColor: '#c084fc',
+    glow: 'rgba(168,85,247,0.5)',
+  },
+}
+
+// ── Pogon SVG ────────────────────────────────────────────────────────────────
+
+function PogonSvg({ rank, size = 'md' }: { rank: RankInfo; size?: 'sm' | 'md' | 'lg' }) {
+  const cfg = TIER_CONFIG[rank.tier]
+  const n = rank.subRank
+  const W = size === 'lg' ? 120 : size === 'md' ? 96 : 72
+  const H = size === 'lg' ? 52 : size === 'md' ? 42 : 32
+  const cx = W / 2
+  const cy = H / 2
+
+  // Insignia
+  const renderInsignia = () => {
+    if (rank.tier === 'boshlang') return null
+
+    if (rank.tier === 'oson') {
+      // Chevronlar: bronza
+      const chW = size === 'lg' ? 18 : size === 'md' ? 14 : 10
+      const spacing = chW + (size === 'lg' ? 7 : 5)
+      const totalW = n * chW + (n - 1) * (spacing - chW)
+      const startX = cx - totalW / 2
+      return Array.from({ length: n }).map((_, i) => (
+        <Chevron key={i} x={startX + i * spacing} y={cy - (size === 'lg' ? 6 : 5)} size={chW} color={cfg.labelColor} />
+      ))
+    }
+
+    if (rank.tier === 'orta') {
+      // Olmoslar: kumush
+      const r = size === 'lg' ? 8 : size === 'md' ? 6 : 4.5
+      const spacing = r * 2.5
+      const totalW = (n - 1) * spacing
+      const startX = cx - totalW / 2
+      return Array.from({ length: n }).map((_, i) => (
+        <Diamond key={i} cx={startX + i * spacing} cy={cy} r={r} color={cfg.labelColor} />
+      ))
+    }
+
+    if (rank.tier === 'qiyin') {
+      // Yulduzlar: oltin
+      const r = size === 'lg' ? 9 : size === 'md' ? 7 : 5
+      const spacing = r * 2.6
+      const totalW = (n - 1) * spacing
+      const startX = cx - totalW / 2
+      return Array.from({ length: n }).map((_, i) => (
+        <Star key={i} cx={startX + i * spacing} cy={cy} r={r} color={cfg.labelColor} />
+      ))
+    }
+
+    if (rank.tier === 'akademik') {
+      // Toj + 2 yulduz
+      const starR = size === 'lg' ? 7 : 5.5
+      return (
+        <>
+          <Star cx={cx - (size === 'lg' ? 30 : 24)} cy={cy + 1} r={starR} color={cfg.labelColor} />
+          <Crown cx={cx} cy={cy} size={size === 'lg' ? 24 : 18} color={cfg.labelColor} />
+          <Star cx={cx + (size === 'lg' ? 30 : 24)} cy={cy + 1} r={starR} color={cfg.labelColor} />
+        </>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id={`pg-${rank.darajaSon}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={cfg.bg1} />
+          <stop offset="100%" stopColor={cfg.bg2} />
+        </linearGradient>
+        {/* Chiziqli tekstura */}
+        <pattern id={`stripe-${rank.darajaSon}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke={cfg.stripe} strokeOpacity="0.15" strokeWidth="2" />
+        </pattern>
+      </defs>
+
+      {/* Pogon asosi */}
+      <rect x="1" y="1" width={W - 2} height={H - 2} rx="6" ry="6"
+        fill={`url(#pg-${rank.darajaSon})`} />
+      <rect x="1" y="1" width={W - 2} height={H - 2} rx="6" ry="6"
+        fill={`url(#stripe-${rank.darajaSon})`} />
+
+      {/* Chekka chiziq */}
+      <rect x="1" y="1" width={W - 2} height={H - 2} rx="6" ry="6"
+        fill="none" stroke={cfg.borderColor} strokeWidth="1.5" strokeOpacity="0.7" />
+
+      {/* Ichki yaltiroq chiziq (yuqori) */}
+      <line x1="8" y1="4" x2={W - 8} y2="4"
+        stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeLinecap="round" />
+
+      {/* Insignia */}
+      {renderInsignia()}
+    </svg>
+  )
+}
+
+// ── Asosiy eksport: RankBadge ────────────────────────────────────────────────
+
+export function RankBadge({ rank, size = 'md' }: { rank: RankInfo; size?: 'sm' | 'md' | 'lg' }) {
+  const cfg = TIER_CONFIG[rank.tier]
+  const isLg = size === 'lg'
+
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: isLg ? '8px' : '5px' }}>
+      <div style={{
+        filter: `drop-shadow(0 4px 12px ${cfg.glow})`,
+        transition: 'filter .3s',
+      }}>
+        <PogonSvg rank={rank} size={size} />
+      </div>
+      <span style={{
+        fontSize: isLg ? '13px' : size === 'md' ? '11px' : '10px',
+        fontWeight: 800,
+        color: cfg.borderColor,
+        letterSpacing: '0.02em',
+        textAlign: 'center',
+        lineHeight: 1.2,
+      }}>
+        {rank.nom}
+      </span>
+    </div>
+  )
+}
+
+// ── Katta karta (dashboard uchun) ────────────────────────────────────────────
+
+export function RankCard({ rank }: { rank: RankInfo }) {
+  const cfg = TIER_CONFIG[rank.tier]
+
+  return (
+    <div style={{
+      background: `linear-gradient(135deg, ${cfg.bg1}22, ${cfg.bg2}11)`,
+      border: `1px solid ${cfg.borderColor}50`,
+      borderRadius: '18px',
+      padding: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '18px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Fon glow */}
+      <div style={{
+        position: 'absolute', right: -20, top: -20,
+        width: 120, height: 120, borderRadius: '50%',
+        background: cfg.glow, filter: 'blur(40px)', pointerEvents: 'none',
+      }} />
+
+      {/* Pogon */}
+      <div style={{ flexShrink: 0 }}>
+        <PogonSvg rank={rank} size="lg" />
+      </div>
+
+      {/* Ma'lumot */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ margin: '0 0 2px', fontSize: '11px', fontWeight: 700, color: cfg.borderColor, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Sizning unvoningiz
+        </p>
+        <p style={{ margin: '0 0 8px', fontSize: '18px', fontWeight: 900, color: 'var(--ink)', lineHeight: 1.2 }}>
+          {rank.nom}
+        </p>
+        <p style={{ margin: '0 0 10px', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.4 }}>
+          {rank.tavsif}
+        </p>
+
+        {rank.tier !== 'akademik' && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>
+                Keyingi: <span style={{ color: cfg.borderColor }}>{rank.keyingiNom}</span>
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700 }}>
+                {rank.keyingiFoiz}%
+              </span>
+            </div>
+            <div style={{ height: '5px', background: 'var(--line)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: '999px',
+                width: `${rank.keyingiFoiz}%`,
+                background: `linear-gradient(90deg, ${cfg.bg1}, ${cfg.borderColor})`,
+                transition: 'width 0.8s ease',
+              }} />
+            </div>
+          </>
+        )}
+
+        {rank.tier === 'akademik' && (
+          <p style={{ margin: 0, fontSize: '13px', color: cfg.borderColor, fontWeight: 800 }}>
+            🏆 Eng oliy unvon — to'liq kurs yakunlandi!
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Mini badge (profil sahifasi uchun) ───────────────────────────────────────
+
+export function RankMini({ rank }: { rank: RankInfo }) {
+  const cfg = TIER_CONFIG[rank.tier]
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: '8px',
+      background: `${cfg.bg1}22`, border: `1px solid ${cfg.borderColor}50`,
+      borderRadius: '10px', padding: '6px 12px',
+    }}>
+      <PogonSvg rank={rank} size="sm" />
+      <span style={{ fontSize: '12px', fontWeight: 800, color: cfg.borderColor }}>{rank.nom}</span>
+    </div>
+  )
+}
