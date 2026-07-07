@@ -50,10 +50,18 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [refCode, setRefCode] = useState('')
 
   const router = useRouter()
   const supabase = createClient()
   const { theme, toggle } = useTheme()
+
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      setRefCode(params.get('ref') ?? '')
+    }
+  })
 
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'UrosferaBot'
   const BOT_LINK = `https://t.me/${botUsername}`
@@ -132,7 +140,7 @@ export default function RegisterPage() {
       ? telefonToEmail(normalizePhone(telefon))
       : `t${normalizePhone(telefon)}@staff.urosfera.uz`
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -152,6 +160,15 @@ export default function RegisterPage() {
       setError('Xatolik: ' + signUpError.message)
       setLoading(false)
       return
+    }
+
+    // Referral record
+    if (refCode && data.user) {
+      fetch('/api/referral/record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref_code: refCode, invited_id: data.user.id }),
+      }).catch(() => {})
     }
 
     setStep('done')
