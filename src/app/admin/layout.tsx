@@ -19,9 +19,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)', alignItems: 'flex-start' }}>
       <AdminSidebar />
-      <main style={{ flex: 1, minHeight: '100vh', overflowY: 'auto' }}>
+      <main style={{ flex: 1, minHeight: '100vh', overflowY: 'auto' }} className="admin-layout-main">
         {children}
       </main>
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-layout-main header {
+            padding-left: 60px !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

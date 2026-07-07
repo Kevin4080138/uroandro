@@ -103,18 +103,27 @@ export default function BildirishnomalarPage() {
             {unreadCount > 0 && (
               <span style={{
                 background: 'var(--danger)', color: 'white', borderRadius: '999px',
-                padding: '2px 10px', fontSize: '12px', fontWeight: 700,
+                minWidth: '24px', height: '24px', padding: '0 8px',
+                fontSize: '12px', fontWeight: 800,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                {unreadCount} yangi
+                {unreadCount}
               </span>
             )}
           </div>
           {unreadCount > 0 && (
-            <button onClick={markAllRead} style={{
-              background: 'none', border: 'none', color: 'var(--accent)',
-              fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0,
-            }}>
-              Hammasini o'qildi deb belgilash
+            <button
+              onClick={markAllRead}
+              title="Hammasini o'qildi deb belgilash"
+              style={{
+                background: 'var(--surface-2)', border: '1px solid var(--line)',
+                borderRadius: '10px', cursor: 'pointer',
+                width: '36px', height: '36px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '18px', flexShrink: 0,
+              }}
+            >
+              ✓
             </button>
           )}
         </div>
