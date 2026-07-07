@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { useTheme } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase'
 
-type Profile = { full_name: string; telefon: string | null; role: string }
+type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
 
 const ROL_NOMI: Record<string, string> = {
   student: '🎓 Talaba', doctor: '👨‍⚕️ Shifokor', patient: '🧑 Bemor', admin: '🛠️ Admin',
@@ -36,7 +36,7 @@ export default function ProfilPage() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/auth/login'); return }
-      const { data } = await supabase.from('profiles').select('full_name, telefon, role').eq('id', user.id).maybeSingle()
+      const { data } = await supabase.from('profiles').select('full_name, telefon, role, avatar_url').eq('id', user.id).maybeSingle()
       setProfile(data as Profile)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,8 +96,12 @@ export default function ProfilPage() {
           <div style={{
             width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 800, flexShrink: 0,
+            overflow: 'hidden',
           }}>
-            {harf}
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : harf
+            }
           </div>
           <div style={{ minWidth: 0 }}>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{profile.full_name}</h2>
