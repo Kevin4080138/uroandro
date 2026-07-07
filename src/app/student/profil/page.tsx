@@ -17,6 +17,7 @@ const BANDLAR = [
   { icon: '👤', label: 'Profil ma\'lumotlari', href: '/student/profil/tahrirlash' },
   { icon: '📊', label: 'Faolligingiz', href: '/student/profil/faollik' },
   { icon: '🏅', label: 'Sertifikatlar', href: '/student/profil/sertifikatlar' },
+  { icon: '🔔', label: 'Bildirishnomalar', href: '/student/profil/bildirishnomalar' },
   { icon: '🎁', label: "Do'stlarni taklif qilish", href: '/student/profil/taklif' },
   { icon: 'ℹ️', label: 'Biz haqimizda', href: '/student/profil/biz-haqimizda' },
   { icon: '💬', label: 'Izoh (feedback)', href: '/student/profil/feedback' },

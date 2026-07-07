@@ -131,6 +131,7 @@ export default function AdminDashboard() {
                 { icon: '💬', title: 'Fikrlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
                 { icon: '📈', title: 'Statistika', href: '/admin/statistika', c: 'var(--good)' },
                 { icon: '🛡️', title: 'Audit log', href: '/admin/audit', c: 'var(--danger)' },
+                { icon: '📢', title: 'Bildirishnoma', href: '/admin/bildirishnomalar', c: 'var(--warn)' },
               ].map((item) => (
                 <div key={item.title} onClick={() => router.push(item.href)}
                   className="dash-card rise"

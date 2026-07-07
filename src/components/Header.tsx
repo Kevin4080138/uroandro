@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 import { ProfileMenu } from './ProfileMenu'
+import { NotificationBell } from './NotificationBell'
 
 export function Header({
   backHref, backLabel = 'Bosh sahifa', actions,
@@ -37,6 +38,7 @@ export function Header({
       </h1>
       <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
         {actions}
+        <NotificationBell />
         <button
           onClick={toggle}
           aria-label="Temani almashtirish"
