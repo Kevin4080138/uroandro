@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, BOSQICH_YOLI } from '@/lib/talim/darslar'
-import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
   oson:    'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)',
@@ -50,10 +49,8 @@ const BOSQICH_BOLIMLAR: Record<string, { emoji: string; nom: string }[]> = {
 
 export default function DarslarPage() {
   const router = useRouter()
-  const { egami, yuklandi } = useMeningObunalarim()
 
   const jami = DARSLAR.length
-  const bepulJami = DARSLAR.filter((d) => d.bepulNamuna).length
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -66,8 +63,7 @@ export default function DarslarPage() {
             <div>
               <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>📖 Darslar</h2>
               <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: '13.5px' }}>
-                Jami <strong style={{ color: 'var(--ink)' }}>{jami}</strong> ta dars —{' '}
-                <strong style={{ color: '#16a34a' }}>🎁 {bepulJami} ta bepul</strong> sinab ko&apos;rish uchun ochiq.
+                Jami <strong style={{ color: 'var(--ink)' }}>{jami}</strong> ta dars mavjud.
               </p>
             </div>
             <button
@@ -88,8 +84,6 @@ export default function DarslarPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {BOSQICHLAR.map((b, i) => {
             const darsSoni = DARSLAR.filter((d) => d.bosqich === b.id).length
-            const bepulSoni = DARSLAR.filter((d) => d.bosqich === b.id && d.bepulNamuna).length
-            const qulflangan = yuklandi && !egami(b.id)
             const gradient = BOSQICH_GRADIENT[b.id] ?? BOSQICH_GRADIENT['oson']
             const accent = BOSQICH_ACCENT[b.id] ?? '#16a34a'
             const bolimlar = BOSQICH_BOLIMLAR[b.id] ?? BOSQICH_BOLIMLAR['oson']
@@ -128,19 +122,6 @@ export default function DarslarPage() {
                     background: 'rgba(255,255,255,0.05)',
                   }} />
 
-                  {/* Lock belgisi */}
-                  {qulflangan && (
-                    <div style={{
-                      position: 'absolute', top: '16px', right: '16px',
-                      background: 'rgba(0,0,0,0.25)', borderRadius: '50%',
-                      width: '34px', height: '34px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '16px',
-                    }}>
-                      🔒
-                    </div>
-                  )}
-
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{
                       width: '52px', height: '52px', borderRadius: '15px',
@@ -174,15 +155,6 @@ export default function DarslarPage() {
                     }}>
                       📚 {darsSoni} ta dars
                     </span>
-                    {bepulSoni > 0 && (
-                      <span style={{
-                        fontSize: '11.5px', fontWeight: 700,
-                        color: '#16a34a', background: '#16a34a14',
-                        borderRadius: '999px', padding: '4px 12px',
-                      }}>
-                        🎁 {bepulSoni} ta bepul
-                      </span>
-                    )}
                   </div>
 
                   {/* Bo'limlar */}
@@ -203,7 +175,7 @@ export default function DarslarPage() {
                   {/* Havolа */}
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: accent }}>
-                      {qulflangan ? 'Sotib olish →' : 'Darslarni ko\'rish →'}
+                      Darslarni ko&apos;rish →
                     </span>
                   </div>
                 </div>
