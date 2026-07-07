@@ -14,6 +14,7 @@ const ROL_NOMI: Record<string, string> = {
 }
 
 const BANDLAR = [
+  { icon: '👤', label: 'Profil ma\'lumotlari', href: '/student/profil/tahrirlash' },
   { icon: 'ℹ️', label: 'Biz haqimizda', href: '/student/profil/biz-haqimizda' },
   { icon: '💬', label: 'Izoh (feedback)', href: '/student/profil/feedback' },
   { icon: '📩', label: 'Adminga yozish', href: 'https://t.me/urolog_arabboyev', tashqi: true },
