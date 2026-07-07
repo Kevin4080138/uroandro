@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
+import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktivCaselar'
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
@@ -55,6 +56,7 @@ export default function DarsDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const dars = darsTop(slug)
   const { tarkib, yuklandi } = useDarsTarkibi(slug)
+  const { egami, yuklandi: obunaYuklandi } = useMeningObunalarim()
 
   const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
   const asosiyVideo = tarkib?.asosiy_video_url ?? dars?.asosiyVideoUrl ?? null
@@ -111,6 +113,33 @@ export default function DarsDetailPage() {
         <Header backHref="/student/darslar" backLabel="Darslar" />
         <div className="mx-auto max-w-[760px] px-8 py-12">
           <p>Dars topilmadi.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!dars.bepulNamuna && obunaYuklandi && !egami(dars.bosqich)) {
+    const bosqichMa = BOSQICHLAR.find((b) => b.id === dars.bosqich)
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+        <Header backHref="/student/darslar" backLabel="Darslar" />
+        <div className="mx-auto max-w-[600px] px-8 py-12">
+          <div className="rise" style={{
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '18px',
+            padding: '40px 32px', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</div>
+            <h2 style={{ margin: '0 0 8px', fontSize: '19px', fontWeight: 800 }}>{dars.sarlavha}</h2>
+            <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)' }}>
+              Bu dars <strong>{bosqichMa?.emoji} {bosqichMa?.nom}</strong> bosqichiga tegishli — uni ko&apos;rish uchun shu bosqichni sotib olishingiz kerak.
+            </p>
+            <a href="https://t.me/urolog_arabboyev" target="_blank" rel="noopener noreferrer" className="btn-animated soft-press" style={{
+              display: 'inline-block', background: 'var(--accent)', color: 'white', textDecoration: 'none',
+              borderRadius: '12px', padding: '12px 26px', fontSize: '14px', fontWeight: 700,
+            }}>
+              Sotib olish uchun bog&apos;lanish →
+            </a>
+          </div>
         </div>
       </div>
     )

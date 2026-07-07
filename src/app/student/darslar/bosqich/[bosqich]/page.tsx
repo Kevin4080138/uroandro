@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
+import { useMeningObunalarim } from '@/lib/talim/useObuna'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
   oson:   'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)',
@@ -77,8 +78,8 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
       className="rise lift"
       style={{
         animationDelay: `${Math.min(tartib * 0.05, 0.35)}s`,
-        background: 'var(--surface)',
-        border: '1px solid var(--line)',
+        background: dars.bepulNamuna ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)' : 'var(--surface)',
+        border: dars.bepulNamuna ? '1.5px solid #4ade80' : '1px solid var(--line)',
         borderRadius: '20px',
         padding: '20px 22px',
         cursor: 'pointer',
@@ -106,6 +107,20 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
               {tartib}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                {dars.bepulNamuna && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 800, color: '#16a34a',
+                    background: '#16a34a18', borderRadius: '999px', padding: '2px 8px',
+                  }}>🎁 BEPUL</span>
+                )}
+                {qulflangan && !dars.bepulNamuna && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 800, color: '#6b7280',
+                    background: 'var(--surface-2)', borderRadius: '999px', padding: '2px 8px',
+                  }}>🔒 Qulflangan</span>
+                )}
+              </div>
               <h3 style={{
                 margin: '2px 0 0', fontSize: '15px', fontWeight: 700,
                 color: 'var(--ink)', lineHeight: 1.35,
@@ -171,6 +186,8 @@ export default function BosqichDarslariPage() {
   const { bosqich: bosqichYoli } = useParams<{ bosqich: string }>()
   const bosqich = bosqichYolidanTop(bosqichYoli)
   const [filtr, setFiltr] = useState<string>('Hammasi')
+  const { egami, yuklandi } = useMeningObunalarim()
+
   const bosqichMa = BOSQICHLAR.find((b) => b.id === bosqich)
   const bosqichDarslari = useMemo(
     () => (bosqich ? bosqichBoyichaTartibla(DARSLAR.filter((d) => d.bosqich === bosqich), bosqich) : []),
@@ -195,6 +212,8 @@ export default function BosqichDarslariPage() {
       </div>
     )
   }
+
+  const bepulSoni = bosqichDarslari.filter((d) => d.bepulNamuna).length
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -243,6 +262,7 @@ export default function BosqichDarslariPage() {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
             {[
               { qiymat: `${bosqichDarslari.length} ta`, tavsif: 'dars' },
+              { qiymat: `${bepulSoni} ta`, tavsif: 'bepul namuna' },
               { qiymat: `${bolimlar.length} ta`, tavsif: "bo'lim" },
             ].map((s) => (
               <div key={s.tavsif} style={{
@@ -306,7 +326,7 @@ export default function BosqichDarslariPage() {
               key={d.slug}
               dars={d}
               tartib={bosqichDarslari.indexOf(d) + 1}
-              qulflangan={false}
+              qulflangan={yuklandi && !egami(d.bosqich)}
               bosqich={bosqich}
               onClick={() => router.push(`/student/darslar/${d.slug}`)}
             />
