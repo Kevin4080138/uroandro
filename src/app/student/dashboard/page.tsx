@@ -60,7 +60,6 @@ export default function StudentDashboard() {
       <style>{`
         .db-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 24px; }
         .db-hero { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
-        .db-banner { height: 220px; }
         .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 680px) {
           .db-hero { grid-template-columns: 1fr; }
