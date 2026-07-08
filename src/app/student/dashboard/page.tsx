@@ -76,20 +76,21 @@ export default function StudentDashboard() {
 
         <div className="db-wrap">
 
-          {/* HERO: chap — info, o'ng — banner */}
+          {/* Salom + ism — griddan tashqarida */}
+          <div style={{ marginBottom: '16px' }}>
+            <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '3px', fontWeight: 500 }}>
+              Xush kelibsiz 👋
+            </p>
+            <h1 className="rise" style={{ fontSize: '26px', lineHeight: 1.2, margin: 0, animationDelay: '.03s' }}>
+              {profile.full_name}
+            </h1>
+          </div>
+
+          {/* HERO: chap — rank+progress, o'ng — banner */}
           <div className="db-hero">
 
-            {/* Chap: salom + rank + progress */}
+            {/* Chap: rank + progress */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '3px', fontWeight: 500 }}>
-                  Xush kelibsiz 👋
-                </p>
-                <h1 className="rise" style={{ fontSize: '26px', lineHeight: 1.2, margin: 0, animationDelay: '.03s' }}>
-                  {profile.full_name}
-                </h1>
-              </div>
-
               <div className="rise" style={{ animationDelay: '.05s' }}>
                 <RankCard rank={rank} />
               </div>
