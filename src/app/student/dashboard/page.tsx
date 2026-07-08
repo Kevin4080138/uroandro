@@ -46,7 +46,7 @@ export default function StudentDashboard() {
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
-    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol, karta va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
+    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
     { icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
   ]
 
@@ -56,124 +56,129 @@ export default function StudentDashboard() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
-      <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
-
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 24px' }}>
-
-        {/* ── TOP ROW: profil + banner ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.4fr)',
-          gap: '24px',
-          marginBottom: '28px',
-          alignItems: 'start',
-        }} className="dash-top-row">
-
-          {/* Chap: salom + rank + progress */}
-          <div>
-            <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>
-              Xush kelibsiz 👋
-            </p>
-            <h1 className="rise" style={{ fontSize: '28px', marginBottom: '16px', lineHeight: 1.2 }}>
-              {profile.full_name}
-            </h1>
-
-            <div className="rise" style={{ marginBottom: '16px', animationDelay: '.05s' }}>
-              <RankCard rank={rank} />
-            </div>
-
-            <div className="rise" style={{
-              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-              padding: '16px 20px', animationDelay: '.08s',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars} dars</span>
-              </div>
-              <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: '999px', width: `${progress}%`,
-                  background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s ease',
-                }} />
-              </div>
-              <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
-                {progress}% yakunlangan
-              </p>
-            </div>
-          </div>
-
-          {/* O'ng: banner */}
-          <div className="rise" style={{ animationDelay: '.04s' }}>
-            <BannerCarousel role={profile.role} />
-          </div>
-        </div>
-
-        {/* ── KARTALAR ── */}
-        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s' }}>
-          📌 Bo&apos;limlar
-        </p>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: '14px',
-          marginBottom: '28px',
-        }}>
-          {KARTALAR.map((item, i) => (
-            <div
-              key={item.title}
-              onClick={() => router.push(item.href)}
-              className="dash-card rise"
-              style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: 'pointer' }}
-            >
-              <div className="dash-icon">
-                {(item as any).imgSrc
-                  ? <img src={(item as any).imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
-                  : item.icon}
-              </div>
-              <h3 className="dash-title">{item.title}</h3>
-              <p className="dash-desc">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* ── NAZAR SOLISH ── */}
-        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 10px', animationDelay: '.22s' }}>
-          👁️ Nazar solish
-        </p>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {NAZAR_KARTALAR.map((item, i) => (
-            <div
-              key={item.title}
-              onClick={() => router.push(item.href)}
-              className="rise soft-press"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
-                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
-                padding: '10px 16px', opacity: 0.8, animationDelay: `${0.24 + i * 0.04}s`,
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>{item.icon}</span>
-              <div>
-                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--ink-soft)' }}>{item.title}</div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-      </div>
-
-      {/* Mobil uchun top-row ustun qilib ko'rsatish */}
+    <>
       <style>{`
-        @media (max-width: 680px) {
-          .dash-top-row {
-            grid-template-columns: 1fr !important;
-          }
+        .db-wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+        .db-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-bottom: 24px; }
+        .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        @media (max-width: 700px) {
+          .db-top { grid-template-columns: 1fr; }
+          .db-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 420px) {
+          .db-cards { grid-template-columns: 1fr; }
+          .db-wrap { padding: 16px 16px 0; }
         }
       `}</style>
 
-      <BottomNav />
-    </div>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
+        <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
+
+        <div className="db-wrap">
+
+          {/* Banner — to'liq kenglikda */}
+          <div className="rise" style={{ marginBottom: '24px' }}>
+            <BannerCarousel role={profile.role} />
+          </div>
+
+          {/* Yuqori qator: salom+rank (chap) | progress (o'ng) */}
+          <div className="db-top">
+
+            {/* Chap: salom + rank */}
+            <div>
+              <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '3px', fontWeight: 500 }}>
+                Xush kelibsiz 👋
+              </p>
+              <h1 className="rise" style={{ fontSize: '26px', marginBottom: '14px', lineHeight: 1.2, animationDelay: '.03s' }}>
+                {profile.full_name}
+              </h1>
+              <div className="rise" style={{ animationDelay: '.06s' }}>
+                <RankCard rank={rank} />
+              </div>
+            </div>
+
+            {/* O'ng: progress */}
+            <div className="rise" style={{ animationDelay: '.08s' }}>
+              <div style={{
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+                padding: '20px 22px', height: '100%', boxSizing: 'border-box',
+              }}>
+                <p style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 700, color: 'var(--ink-soft)' }}>
+                  📈 O&apos;zlashtirish darajangiz
+                </p>
+
+                {/* Katta foiz */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '42px', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{progress}</span>
+                  <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--muted)', paddingBottom: '4px' }}>%</span>
+                </div>
+
+                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '10px' }}>
+                  <div style={{
+                    height: '100%', borderRadius: '999px', width: `${progress}%`,
+                    background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .5s ease',
+                  }} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Bajarilgan</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)' }}>{bajarilganSoni} / {jamiDars} dars</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bo'limlar */}
+          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s' }}>
+            📌 Bo&apos;limlar
+          </p>
+          <div className="db-cards">
+            {KARTALAR.map((item, i) => (
+              <div
+                key={item.title}
+                onClick={() => router.push(item.href)}
+                className="dash-card rise"
+                style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: 'pointer' }}
+              >
+                <div className="dash-icon">
+                  {(item as any).imgSrc
+                    ? <img src={(item as any).imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
+                    : item.icon}
+                </div>
+                <h3 className="dash-title">{item.title}</h3>
+                <p className="dash-desc">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Nazar solish */}
+          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 10px', animationDelay: '.26s' }}>
+            👁️ Nazar solish
+          </p>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {NAZAR_KARTALAR.map((item, i) => (
+              <div
+                key={item.title}
+                onClick={() => router.push(item.href)}
+                className="rise soft-press"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                  background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
+                  padding: '10px 16px', opacity: 0.8, animationDelay: `${0.28 + i * 0.04}s`,
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--ink-soft)' }}>{item.title}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+        <BottomNav />
+      </div>
+    </>
   )
 }
