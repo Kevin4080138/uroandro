@@ -103,9 +103,9 @@ export function BannerCarousel({ role }: { role?: string }) {
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={handleClick}
+        className="banner-slide"
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: '220px',
           cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url
             ? 'var(--surface)'
