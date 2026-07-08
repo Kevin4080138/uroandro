@@ -92,7 +92,7 @@ export function BannerCarousel({ role }: { role?: string }) {
   const tl = TYPE_LABEL[b.type] ?? TYPE_LABEL['yangilik']
 
   return (
-    <div style={{ marginBottom: '24px', userSelect: 'none' }}>
+    <div style={{ userSelect: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Slide */}
       <div
         onTouchStart={onTouchStart}
@@ -102,7 +102,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         onClick={() => { if (b.link_href && Math.abs(startX.current - 0) < 5) router.push(b.link_href) }}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: '160px', cursor: b.link_href ? 'pointer' : 'default',
+          height: '160px', minHeight: '160px', flex: 1, cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url
             ? 'var(--surface)'
             : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,

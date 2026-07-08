@@ -59,13 +59,11 @@ export default function StudentDashboard() {
     <>
       <style>{`
         .db-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 24px; }
-        .db-banner { max-width: 560px; margin: 0 auto 24px; }
-        .db-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-bottom: 24px; }
+        .db-hero { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
         .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-        @media (max-width: 700px) {
-          .db-top { grid-template-columns: 1fr; }
+        @media (max-width: 680px) {
+          .db-hero { grid-template-columns: 1fr; }
           .db-cards { grid-template-columns: repeat(2, 1fr); }
-          .db-banner { max-width: 100%; }
         }
         @media (max-width: 420px) {
           .db-wrap { padding: 16px 16px 0; }
@@ -77,56 +75,47 @@ export default function StudentDashboard() {
 
         <div className="db-wrap">
 
-          {/* Banner — telefon razmerida, markazda */}
-          <div className="db-banner rise">
-            <BannerCarousel role={profile.role} />
-          </div>
+          {/* HERO: chap — info, o'ng — banner */}
+          <div className="db-hero">
 
-          {/* Yuqori qator: salom+rank (chap) | progress (o'ng) */}
-          <div className="db-top">
+            {/* Chap: salom + rank + progress */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '3px', fontWeight: 500 }}>
+                  Xush kelibsiz 👋
+                </p>
+                <h1 className="rise" style={{ fontSize: '26px', lineHeight: 1.2, margin: 0, animationDelay: '.03s' }}>
+                  {profile.full_name}
+                </h1>
+              </div>
 
-            {/* Chap: salom + rank */}
-            <div>
-              <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '3px', fontWeight: 500 }}>
-                Xush kelibsiz 👋
-              </p>
-              <h1 className="rise" style={{ fontSize: '26px', marginBottom: '14px', lineHeight: 1.2, animationDelay: '.03s' }}>
-                {profile.full_name}
-              </h1>
-              <div className="rise" style={{ animationDelay: '.06s' }}>
+              <div className="rise" style={{ animationDelay: '.05s' }}>
                 <RankCard rank={rank} />
               </div>
-            </div>
 
-            {/* O'ng: progress */}
-            <div className="rise" style={{ animationDelay: '.08s' }}>
-              <div style={{
+              <div className="rise" style={{
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-                padding: '20px 22px', height: '100%', boxSizing: 'border-box',
+                padding: '16px 18px', animationDelay: '.08s',
               }}>
-                <p style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 700, color: 'var(--ink-soft)' }}>
-                  📈 O&apos;zlashtirish darajangiz
-                </p>
-
-                {/* Katta foiz */}
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '42px', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{progress}</span>
-                  <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--muted)', paddingBottom: '4px' }}>%</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars}</span>
                 </div>
-
-                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '10px' }}>
+                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '6px' }}>
                   <div style={{
                     height: '100%', borderRadius: '999px', width: `${progress}%`,
                     background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .5s ease',
                   }} />
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Bajarilgan</span>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)' }}>{bajarilganSoni} / {jamiDars} dars</span>
-                </div>
+                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{progress}% yakunlangan</span>
               </div>
             </div>
+
+            {/* O'ng: banner */}
+            <div className="rise" style={{ animationDelay: '.04s' }}>
+              <BannerCarousel role={profile.role} />
+            </div>
+
           </div>
 
           {/* Bo'limlar */}
