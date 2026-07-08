@@ -132,7 +132,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         onClick={handleClick}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: '160px', minHeight: '160px', flex: 1,
+          height: '100%', minHeight: '160px', flex: 1,
           cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url ? 'var(--surface)' : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
