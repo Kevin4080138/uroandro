@@ -23,7 +23,7 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
 }
 
 const VISIBLE = 4
-const INTERVAL_MS = 3500
+const INTERVAL_MS = 6000
 
 export function DoctorBannerStrip({ role }: { role?: string }) {
   const supabase = createClient()

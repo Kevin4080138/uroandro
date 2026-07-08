@@ -21,7 +21,7 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
   bildirishnoma:  { label: '🔔 Bildirishnoma',   bg: 'rgba(220,38,38,0.85)' },
 }
 
-const INTERVAL_MS = 4000
+const INTERVAL_MS = 6000
 
 export function BannerCarousel({ role }: { role?: string }) {
   const supabase = createClient()
