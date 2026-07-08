@@ -30,12 +30,10 @@ export function BannerCarousel({ role }: { role?: string }) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [idx, setIdx] = useState(0)
   const [animKey, setAnimKey] = useState(0)
-  const [visible, setVisible] = useState(true)
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
   const didDrag = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -61,16 +59,6 @@ export function BannerCarousel({ role }: { role?: string }) {
     }, INTERVAL_MS)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [banners.length])
-
-  // Animatsiya: animKey o'zgarganda visible false→true
-  useEffect(() => {
-    setVisible(false)
-    if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = requestAnimationFrame(() => setVisible(true))
-    })
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
-  }, [animKey])
 
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -125,13 +113,8 @@ export function BannerCarousel({ role }: { role?: string }) {
             : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
       >
-        {/* Scale animatsiyasi — CSS transition bilan (keyframes emas) */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          transition: 'opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)',
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'scale(1)' : 'scale(0.9)',
-        }}>
+        {/* globals.css dagi bannerScaleIn keyframe, key o'zgarganda remount → animatsiya qayta boshlanadi */}
+        <div key={animKey} className="banner-anim">
           {b.image_url && (
             <img
               src={b.image_url}

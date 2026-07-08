@@ -185,6 +185,15 @@ h1, h2, h3, h4 {
 .dash-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; font-family: var(--font-display), sans-serif; letter-spacing: -.02em; }
 .dash-desc { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
 
+@keyframes bannerScaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.banner-anim {
+  position: absolute; inset: 0;
+  animation: bannerScaleIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
