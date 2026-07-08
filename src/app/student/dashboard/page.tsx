@@ -102,13 +102,35 @@ export default function StudentDashboard() {
                   <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
                   <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars}</span>
                 </div>
-                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '6px' }}>
+                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '10px' }}>
                   <div style={{
                     height: '100%', borderRadius: '999px', width: `${progress}%`,
                     background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .5s ease',
                   }} />
                 </div>
-                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{progress}% yakunlangan</span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{
+                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
+                    padding: '10px 12px', textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--good)' }}>{bajarilganSoni}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Bajarildi</div>
+                  </div>
+                  <div style={{
+                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
+                    padding: '10px 12px', textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--warn)' }}>{jamiDars - bajarilganSoni}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Qoldi</div>
+                  </div>
+                  <div style={{
+                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
+                    padding: '10px 12px', textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent)' }}>{progress}%</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Daraja</div>
+                  </div>
+                </div>
               </div>
             </div>
 
