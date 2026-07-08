@@ -93,6 +93,17 @@ export function BannerCarousel({ role }: { role?: string }) {
 
   return (
     <div style={{ userSelect: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @keyframes bannerZoomIn {
+          from { transform: scale(1.08); opacity: 0; }
+          to   { transform: scale(1);    opacity: 1; }
+        }
+        .banner-slide-inner {
+          position: absolute; inset: 0;
+          animation: bannerZoomIn 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+      `}</style>
+
       {/* Slide */}
       <div
         onTouchStart={onTouchStart}
@@ -103,46 +114,52 @@ export function BannerCarousel({ role }: { role?: string }) {
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
           height: '160px', minHeight: '160px', flex: 1, cursor: b.link_href ? 'pointer' : 'default',
-          background: b.image_url
-            ? 'var(--surface)'
-            : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
+          background: b.image_url ? 'var(--surface)' : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
       >
-        {/* Rasm */}
-        {b.image_url && (
-          <img
-            src={b.image_url}
-            alt={b.sarlavha}
-            draggable={false}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        )}
-
-        {/* Qoraytirgich + matn */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: b.image_url
-            ? 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)'
-            : 'transparent',
-          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-          padding: '16px 18px',
-        }}>
-          <span style={{
-            display: 'inline-block', background: tl.bg,
-            backdropFilter: 'blur(4px)', borderRadius: '6px',
-            padding: '2px 10px', fontSize: '11px', fontWeight: 700,
-            color: 'white', marginBottom: '6px', alignSelf: 'flex-start',
-          }}>
-            {tl.label}
-          </span>
-          <p style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'white', lineHeight: 1.3 }}>
-            {b.sarlavha}
-          </p>
-          {b.tavsif && (
-            <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
-              {b.tavsif}
-            </p>
+        {/* key={idx} har o'zgarishda animatsiyani qayta ishga tushiradi */}
+        <div key={idx} className="banner-slide-inner">
+          {b.image_url && (
+            <img
+              src={b.image_url}
+              alt={b.sarlavha}
+              draggable={false}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           )}
+          {!b.image_url && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
+            }} />
+          )}
+
+          {/* Qoraytirgich + matn */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: b.image_url
+              ? 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)'
+              : 'transparent',
+            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+            padding: '16px 18px',
+          }}>
+            <span style={{
+              display: 'inline-block', background: tl.bg,
+              backdropFilter: 'blur(4px)', borderRadius: '6px',
+              padding: '2px 10px', fontSize: '11px', fontWeight: 700,
+              color: 'white', marginBottom: '6px', alignSelf: 'flex-start',
+            }}>
+              {tl.label}
+            </span>
+            <p style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'white', lineHeight: 1.3 }}>
+              {b.sarlavha}
+            </p>
+            {b.tavsif && (
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
+                {b.tavsif}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Navigatsiya o'qlari (ko'p banner bo'lsa) */}
@@ -153,12 +170,14 @@ export function BannerCarousel({ role }: { role?: string }) {
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 2,
             }}>‹</button>
             <button onClick={(e) => { e.stopPropagation(); next() }} style={{
               position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 2,
             }}>›</button>
           </>
         )}
