@@ -21,23 +21,12 @@ export default function StudentDashboard() {
     const getProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
-
-      const { data: natijalar } = await supabase
-        .from('talim_natijalari')
-        .select('dars_slug')
-        .eq('student_id', user.id)
+      const { data: natijalar } = await supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id)
       const list = natijalar ?? []
       setNatijalarList(list)
-      const yakunlangan = new Set(list.map((n: any) => n.dars_slug))
-      setBajarilganSoni(yakunlangan.size)
+      setBajarilganSoni(new Set(list.map((n: any) => n.dars_slug)).size)
     }
     getProfile()
   }, [])
@@ -55,61 +44,87 @@ export default function StudentDashboard() {
   const KARTALAR = [
     { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
-    { icon: '🏆', title: 'Reyting', desc: 'Faollik bo\'yicha talabalar reytingi', c: 'var(--accent-2)', href: '/student/reyting' },
+    { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
-    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Turli mavzudan aralash savol, karta va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
-    { icon: null, imgSrc: '/camu-logo.png', title: 'CAMU bo\'limi', desc: 'Central Asian Medical University talabalari uchun', c: '#1a3a9e', href: '/student/camu' },
+    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol, karta va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
+    { icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
   ]
 
-  // Boshqa rollarga nazar solish — asosiy bo'limlardan ajratib, kichikroq ko'rinishda chiqariladi
   const NAZAR_KARTALAR = [
-    { icon: '🧑‍🤝‍🧑', title: 'Bemor bo\'limi', desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
-    { icon: '👨‍⚕️', title: 'Shifokor bo\'limi', desc: 'Tanishish uchun', href: '/student/shifokor-bolimi' },
+    { icon: '🧑‍🤝‍🧑', title: "Bemor bo'limi", desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
+    { icon: '👨‍⚕️', title: "Shifokor bo'limi", desc: 'Tanishish uchun', href: '/student/shifokor-bolimi' },
   ]
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
-
       <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
-      {/* Content */}
-      <div style={{ padding: '32px' }}>
-        <BannerCarousel role={profile.role} />
-        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '16px' }}>
-          {profile.full_name}
-        </h1>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 24px' }}>
 
-        {/* Unvon kartasi */}
-        <div className="rise" style={{ marginBottom: '24px', animationDelay: '.06s' }}>
-          <RankCard rank={rank} />
+        {/* ── TOP ROW: profil + banner ── */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.4fr)',
+          gap: '24px',
+          marginBottom: '28px',
+          alignItems: 'start',
+        }} className="dash-top-row">
+
+          {/* Chap: salom + rank + progress */}
+          <div>
+            <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>
+              Xush kelibsiz 👋
+            </p>
+            <h1 className="rise" style={{ fontSize: '28px', marginBottom: '16px', lineHeight: 1.2 }}>
+              {profile.full_name}
+            </h1>
+
+            <div className="rise" style={{ marginBottom: '16px', animationDelay: '.05s' }}>
+              <RankCard rank={rank} />
+            </div>
+
+            <div className="rise" style={{
+              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+              padding: '16px 20px', animationDelay: '.08s',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars} dars</span>
+              </div>
+              <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: '999px', width: `${progress}%`,
+                  background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s ease',
+                }} />
+              </div>
+              <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                {progress}% yakunlangan
+              </p>
+            </div>
+          </div>
+
+          {/* O'ng: banner */}
+          <div className="rise" style={{ animationDelay: '.04s' }}>
+            <BannerCarousel role={profile.role} />
+          </div>
         </div>
 
-        {/* Progress */}
-        <div className="rise" style={{
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-          padding: '20px 24px', marginBottom: '28px', maxWidth: '520px', animationDelay: '.04s',
+        {/* ── KARTALAR ── */}
+        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s' }}>
+          📌 Bo&apos;limlar
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+          gap: '14px',
+          marginBottom: '28px',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish darajangiz</span>
-            <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars} dars</span>
-          </div>
-          <div style={{ height: '10px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', borderRadius: '999px', width: `${progress}%`,
-              background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s ease',
-            }} />
-          </div>
-        </div>
-
-        {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
           {KARTALAR.map((item, i) => (
             <div
               key={item.title}
               onClick={() => router.push(item.href)}
               className="dash-card rise"
-              style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s`, cursor: 'pointer' }}
+              style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: 'pointer' }}
             >
               <div className="dash-icon">
                 {(item as any).imgSrc
@@ -122,11 +137,11 @@ export default function StudentDashboard() {
           ))}
         </div>
 
-        {/* Nazar solish — boshqa rollar qanday tuzilganini ko'rib chiqish, ajratilgan va kichikroq */}
-        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 700, margin: '0 0 10px' }}>
+        {/* ── NAZAR SOLISH ── */}
+        <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 10px', animationDelay: '.22s' }}>
           👁️ Nazar solish
         </p>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {NAZAR_KARTALAR.map((item, i) => (
             <div
               key={item.title}
@@ -135,7 +150,7 @@ export default function StudentDashboard() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
-                padding: '10px 16px', opacity: 0.85, animationDelay: `${0.15 + i * 0.05}s`,
+                padding: '10px 16px', opacity: 0.8, animationDelay: `${0.24 + i * 0.04}s`,
               }}
             >
               <span style={{ fontSize: '16px' }}>{item.icon}</span>
@@ -146,7 +161,18 @@ export default function StudentDashboard() {
             </div>
           ))}
         </div>
+
       </div>
+
+      {/* Mobil uchun top-row ustun qilib ko'rsatish */}
+      <style>{`
+        @media (max-width: 680px) {
+          .dash-top-row {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
       <BottomNav />
     </div>
   )
