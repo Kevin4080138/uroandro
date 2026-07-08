@@ -39,6 +39,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         .select('id, sarlavha, tavsif, image_url, link_href, type, rang')
         .eq('faol', true)
         .order('sort_order', { ascending: true })
+        .limit(5)
 
       if (role) {
         query = query.or(`target_role.is.null,target_role.eq.${role}`)
