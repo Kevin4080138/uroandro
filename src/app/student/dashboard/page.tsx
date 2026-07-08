@@ -58,7 +58,7 @@ export default function StudentDashboard() {
     { icon: '🏆', title: 'Reyting', desc: 'Faollik bo\'yicha talabalar reytingi', c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
     { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Turli mavzudan aralash savol, karta va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
-    { icon: '🏫', title: 'CAMU bo\'limi', desc: 'Central Asian Medical University talabalari uchun', c: '#1a3a9e', href: '/student/camu' },
+    { icon: null, imgSrc: '/camu-logo.png', title: 'CAMU bo\'limi', desc: 'Central Asian Medical University talabalari uchun', c: '#1a3a9e', href: '/student/camu' },
   ]
 
   // Boshqa rollarga nazar solish — asosiy bo'limlardan ajratib, kichikroq ko'rinishda chiqariladi
@@ -111,7 +111,11 @@ export default function StudentDashboard() {
               className="dash-card rise"
               style={{ ['--c' as any]: item.c, animationDelay: `${i * 0.05}s`, cursor: 'pointer' }}
             >
-              <div className="dash-icon">{item.icon}</div>
+              <div className="dash-icon">
+                {(item as any).imgSrc
+                  ? <img src={(item as any).imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
+                  : item.icon}
+              </div>
               <h3 className="dash-title">{item.title}</h3>
               <p className="dash-desc">{item.desc}</p>
             </div>
