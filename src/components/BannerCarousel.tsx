@@ -105,7 +105,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         onClick={handleClick}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          aspectRatio: '1 / 1',
+          height: '220px',
           cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url
             ? 'var(--surface)'
