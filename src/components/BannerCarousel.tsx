@@ -22,6 +22,7 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
 }
 
 const INTERVAL_MS = 4000
+const SLIDE_H = 220
 
 export function BannerCarousel({ role }: { role?: string }) {
   const supabase = createClient()
@@ -29,10 +30,12 @@ export function BannerCarousel({ role }: { role?: string }) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [idx, setIdx] = useState(0)
   const [animKey, setAnimKey] = useState(0)
+  const [visible, setVisible] = useState(true)
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
   const didDrag = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -42,11 +45,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         .eq('faol', true)
         .order('sort_order', { ascending: true })
         .limit(5)
-
-      if (role) {
-        query = query.or(`target_role.is.null,target_role.eq.${role}`)
-      }
-
+      if (role) query = query.or(`target_role.is.null,target_role.eq.${role}`)
       const { data } = await query
       if (data && data.length > 0) setBanners(data)
     }
@@ -63,6 +62,16 @@ export function BannerCarousel({ role }: { role?: string }) {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [banners.length])
 
+  // Animatsiya: animKey o'zgarganda visible false→true
+  useEffect(() => {
+    setVisible(false)
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => setVisible(true))
+    })
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [animKey])
+
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
@@ -75,38 +84,22 @@ export function BannerCarousel({ role }: { role?: string }) {
   const prev = () => { setIdx(i => (i - 1 + banners.length) % banners.length); setAnimKey(k => k + 1); resetTimer() }
   const next = () => { setIdx(i => (i + 1) % banners.length); setAnimKey(k => k + 1); resetTimer() }
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    startX.current = e.touches[0].clientX
-    didDrag.current = false
-    setDragging(true)
-  }
+  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; didDrag.current = false; setDragging(true) }
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!dragging) return
     const diff = startX.current - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 40) {
-      didDrag.current = true
-      diff > 0 ? next() : prev()
-    }
+    if (Math.abs(diff) > 40) { didDrag.current = true; diff > 0 ? next() : prev() }
     setDragging(false)
   }
-  const onMouseDown = (e: React.MouseEvent) => {
-    startX.current = e.clientX
-    didDrag.current = false
-    setDragging(true)
-  }
+  const onMouseDown = (e: React.MouseEvent) => { startX.current = e.clientX; didDrag.current = false; setDragging(true) }
   const onMouseUp = (e: React.MouseEvent) => {
     if (!dragging) return
     const diff = startX.current - e.clientX
-    if (Math.abs(diff) > 40) {
-      didDrag.current = true
-      diff > 0 ? next() : prev()
-    }
+    if (Math.abs(diff) > 40) { didDrag.current = true; diff > 0 ? next() : prev() }
     setDragging(false)
   }
   const handleClick = () => {
-    if (!didDrag.current && banners[idx]?.link_href) {
-      router.push(banners[idx].link_href!)
-    }
+    if (!didDrag.current && banners[idx]?.link_href) router.push(banners[idx].link_href!)
   }
 
   if (banners.length === 0) return null
@@ -115,14 +108,7 @@ export function BannerCarousel({ role }: { role?: string }) {
   const tl = TYPE_LABEL[b.type] ?? TYPE_LABEL['yangilik']
 
   return (
-    <div style={{ userSelect: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <style>{`
-        @keyframes bannerScaleIn {
-          from { transform: scale(0.88); opacity: 0; }
-          to   { transform: scale(1);    opacity: 1; }
-        }
-      `}</style>
-
+    <div style={{ userSelect: 'none' }}>
       {/* Slide */}
       <div
         onTouchStart={onTouchStart}
@@ -132,16 +118,19 @@ export function BannerCarousel({ role }: { role?: string }) {
         onClick={handleClick}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: '100%', minHeight: '160px', flex: 1,
+          height: `${SLIDE_H}px`,
           cursor: b.link_href ? 'pointer' : 'default',
-          background: b.image_url ? 'var(--surface)' : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
+          background: b.image_url
+            ? 'var(--surface)'
+            : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
       >
-        {/* animKey har o'zgarishda remount → animatsiya qayta ishga tushadi */}
-        <div key={animKey} style={{
+        {/* Scale animatsiyasi — CSS transition bilan (keyframes emas) */}
+        <div style={{
           position: 'absolute', inset: 0,
-          animation: 'bannerScaleIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both',
-          willChange: 'transform, opacity',
+          transition: 'opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1)' : 'scale(0.9)',
         }}>
           {b.image_url && (
             <img
@@ -158,7 +147,6 @@ export function BannerCarousel({ role }: { role?: string }) {
             }} />
           )}
 
-          {/* Qoraytirgich + matn */}
           <div style={{
             position: 'absolute', inset: 0,
             background: b.image_url
@@ -186,22 +174,19 @@ export function BannerCarousel({ role }: { role?: string }) {
           </div>
         </div>
 
-        {/* Navigatsiya o'qlari */}
         {banners.length > 1 && (
           <>
             <button onClick={(e) => { e.stopPropagation(); prev() }} style={{
               position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 2,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
             }}>‹</button>
             <button onClick={(e) => { e.stopPropagation(); next() }} style={{
               position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 2,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
             }}>›</button>
           </>
         )}
