@@ -227,7 +227,13 @@ export default function AdminBannerlarPage() {
           </div>
           <div>
             <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>Tavsif (ixtiyoriy)</label>
-            <input value={tavsif} onChange={e => setTavsif(e.target.value)} placeholder="Qisqa izoh..." style={inp} />
+            <textarea
+              value={tavsif}
+              onChange={e => { setTavsif(e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+              placeholder="Qisqa izoh..."
+              rows={1}
+              style={{ ...inp, resize: 'none', overflow: 'hidden', lineHeight: '1.5' }}
+            />
           </div>
           <div>
             <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>Havola (bosilganda) (ixtiyoriy)</label>
