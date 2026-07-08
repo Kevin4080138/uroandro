@@ -31,6 +31,7 @@ export function BannerCarousel({ role }: { role?: string }) {
   const [animKey, setAnimKey] = useState(0)
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
+  const didDrag = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export function BannerCarousel({ role }: { role?: string }) {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
       setIdx(i => (i + 1) % banners.length)
+      setAnimKey(k => k + 1)
     }, INTERVAL_MS)
   }
 
@@ -73,19 +75,38 @@ export function BannerCarousel({ role }: { role?: string }) {
   const prev = () => { setIdx(i => (i - 1 + banners.length) % banners.length); setAnimKey(k => k + 1); resetTimer() }
   const next = () => { setIdx(i => (i + 1) % banners.length); setAnimKey(k => k + 1); resetTimer() }
 
-  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; setDragging(true) }
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX
+    didDrag.current = false
+    setDragging(true)
+  }
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!dragging) return
     const diff = startX.current - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 40) diff > 0 ? next() : prev()
+    if (Math.abs(diff) > 40) {
+      didDrag.current = true
+      diff > 0 ? next() : prev()
+    }
     setDragging(false)
   }
-  const onMouseDown = (e: React.MouseEvent) => { startX.current = e.clientX; setDragging(true) }
+  const onMouseDown = (e: React.MouseEvent) => {
+    startX.current = e.clientX
+    didDrag.current = false
+    setDragging(true)
+  }
   const onMouseUp = (e: React.MouseEvent) => {
     if (!dragging) return
     const diff = startX.current - e.clientX
-    if (Math.abs(diff) > 40) diff > 0 ? next() : prev()
+    if (Math.abs(diff) > 40) {
+      didDrag.current = true
+      diff > 0 ? next() : prev()
+    }
     setDragging(false)
+  }
+  const handleClick = () => {
+    if (!didDrag.current && banners[idx]?.link_href) {
+      router.push(banners[idx].link_href!)
+    }
   }
 
   if (banners.length === 0) return null
@@ -96,8 +117,8 @@ export function BannerCarousel({ role }: { role?: string }) {
   return (
     <div style={{ userSelect: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`
-        @keyframes bannerZoomIn {
-          from { transform: scale(1.18); opacity: 0; }
+        @keyframes bannerScaleIn {
+          from { transform: scale(0.88); opacity: 0; }
           to   { transform: scale(1);    opacity: 1; }
         }
       `}</style>
@@ -108,17 +129,18 @@ export function BannerCarousel({ role }: { role?: string }) {
         onTouchEnd={onTouchEnd}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
-        onClick={() => { if (b.link_href && Math.abs(startX.current - 0) < 5) router.push(b.link_href) }}
+        onClick={handleClick}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: '160px', minHeight: '160px', flex: 1, cursor: b.link_href ? 'pointer' : 'default',
+          height: '160px', minHeight: '160px', flex: 1,
+          cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url ? 'var(--surface)' : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
       >
-        {/* animKey har nav da o'zgaradi — remount animatsiyani qayta ishga tushiradi */}
+        {/* animKey har o'zgarishda remount → animatsiya qayta ishga tushadi */}
         <div key={animKey} style={{
           position: 'absolute', inset: 0,
-          animation: 'bannerZoomIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both',
+          animation: 'bannerScaleIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both',
           willChange: 'transform, opacity',
         }}>
           {b.image_url && (
@@ -164,7 +186,7 @@ export function BannerCarousel({ role }: { role?: string }) {
           </div>
         </div>
 
-        {/* Navigatsiya o'qlari (ko'p banner bo'lsa) */}
+        {/* Navigatsiya o'qlari */}
         {banners.length > 1 && (
           <>
             <button onClick={(e) => { e.stopPropagation(); prev() }} style={{
