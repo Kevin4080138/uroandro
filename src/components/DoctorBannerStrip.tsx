@@ -84,7 +84,7 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
         .doc-card {
           flex: 1;
           min-width: 0;
-          height: 170px;
+          height: 200px;
           border-radius: 14px;
           overflow: hidden;
           position: relative;
@@ -135,6 +135,12 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'white', lineHeight: 1.3 }}>
                       {b.sarlavha}
                     </p>
+                    {b.tavsif && (
+                      <p style={{ margin: '3px 0 0', fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.3,
+                        overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                        {b.tavsif}
+                      </p>
+                    )}
                   </div>
                 </div>
               )
