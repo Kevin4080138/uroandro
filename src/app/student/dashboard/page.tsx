@@ -58,10 +58,16 @@ export default function StudentDashboard() {
   return (
     <>
       <style>{`
-        .db-wrap { max-width: 560px; margin: 0 auto; padding: 24px 20px; }
-        .db-top { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin-bottom: 24px; }
-        .db-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
-        @media (max-width: 480px) {
+        .db-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 24px; }
+        .db-banner { max-width: 560px; margin: 0 auto 24px; }
+        .db-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-bottom: 24px; }
+        .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        @media (max-width: 700px) {
+          .db-top { grid-template-columns: 1fr; }
+          .db-cards { grid-template-columns: repeat(2, 1fr); }
+          .db-banner { max-width: 100%; }
+        }
+        @media (max-width: 420px) {
           .db-wrap { padding: 16px 16px 0; }
         }
       `}</style>
@@ -71,8 +77,8 @@ export default function StudentDashboard() {
 
         <div className="db-wrap">
 
-          {/* Banner — to'liq kenglikda */}
-          <div className="rise" style={{ marginBottom: '24px' }}>
+          {/* Banner — telefon razmerida, markazda */}
+          <div className="db-banner rise">
             <BannerCarousel role={profile.role} />
           </div>
 
