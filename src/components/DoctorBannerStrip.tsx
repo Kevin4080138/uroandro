@@ -22,15 +22,15 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
   bildirishnoma: { label: '🔔 Bildirishnoma',  bg: 'rgba(220,38,38,0.85)' },
 }
 
-const CARD_W = 280   // har bir karta kengligi (px)
-const CARD_GAP = 14  // oraliq
+const VISIBLE = 4
+const INTERVAL_MS = 3500
 
 export function DoctorBannerStrip({ role }: { role?: string }) {
   const supabase = createClient()
   const router = useRouter()
   const [banners, setBanners] = useState<Banner[]>([])
-  const trackRef = useRef<HTMLDivElement>(null)
-  const [paused, setPaused] = useState(false)
+  const [offset, setOffset] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -48,68 +48,68 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role])
 
+  useEffect(() => {
+    if (banners.length <= VISIBLE) return
+    timerRef.current = setInterval(() => {
+      setOffset(o => (o + 1) % banners.length)
+    }, INTERVAL_MS)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [banners.length])
+
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    if (banners.length <= VISIBLE) return
+    timerRef.current = setInterval(() => {
+      setOffset(o => (o + 1) % banners.length)
+    }, INTERVAL_MS)
+  }
+
+  const prev = () => { setOffset(o => (o - 1 + banners.length) % banners.length); resetTimer() }
+  const next = () => { setOffset(o => (o + 1) % banners.length); resetTimer() }
+
   if (banners.length === 0) return null
 
-  // Animatsiya uchun duplikat (uzluksiz loop)
-  const loop = [...banners, ...banners]
-  const totalW = banners.length * (CARD_W + CARD_GAP)
+  // 4 ta ko'rinadigan banner (offset dan boshlab, loop bilan)
+  const visible = Array.from({ length: VISIBLE }, (_, i) => banners[(offset + i) % banners.length])
 
   return (
     <>
       <style>{`
-        @keyframes bannerScroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-${totalW}px); }
-        }
-        .doc-strip-track {
-          display: flex;
-          gap: ${CARD_GAP}px;
-          animation: bannerScroll ${banners.length * 3.5}s linear infinite;
-          width: max-content;
-        }
-        .doc-strip-track.paused { animation-play-state: paused; }
-        .doc-strip-wrap {
-          overflow: hidden;
-          cursor: pointer;
-        }
-        /* Mobilda oddiy carousel ko'rinadi */
         .doc-strip-desktop { display: block; }
         .doc-strip-mobile  { display: none; }
         @media (max-width: 768px) {
           .doc-strip-desktop { display: none; }
           .doc-strip-mobile  { display: block; }
         }
+        .doc-card {
+          flex: 1;
+          min-width: 0;
+          height: 170px;
+          border-radius: 14px;
+          overflow: hidden;
+          position: relative;
+          cursor: pointer;
+          animation: bannerScaleIn 0.45s cubic-bezier(0.22,0.61,0.36,1) both;
+        }
       `}</style>
 
-      {/* Desktop: gorizontal strip */}
+      {/* Desktop */}
       <div className="doc-strip-desktop" style={{ marginBottom: '28px' }}>
-        <div
-          className="doc-strip-wrap"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          style={{ borderRadius: '16px' }}
-        >
-          <div
-            ref={trackRef}
-            className={`doc-strip-track${paused ? ' paused' : ''}`}
-          >
-            {loop.map((b, i) => {
+        <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '14px' }}>
+            {visible.map((b, i) => {
               const tl = TYPE_LABEL[b.type] ?? TYPE_LABEL['yangilik']
               return (
                 <div
-                  key={`${b.id}-${i}`}
+                  key={`${b.id}-${offset}-${i}`}
+                  className="doc-card"
                   onClick={() => b.link_href && router.push(b.link_href)}
                   style={{
-                    width: `${CARD_W}px`,
-                    height: '170px',
-                    flexShrink: 0,
-                    borderRadius: '14px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    cursor: b.link_href ? 'pointer' : 'default',
+                    animationDelay: `${i * 0.06}s`,
                     background: b.image_url
                       ? 'var(--surface)'
                       : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
+                    cursor: b.link_href ? 'pointer' : 'default',
                   }}
                 >
                   {b.image_url && (
@@ -135,21 +135,53 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'white', lineHeight: 1.3 }}>
                       {b.sarlavha}
                     </p>
-                    {b.tavsif && (
-                      <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.3,
-                        overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
-                        {b.tavsif}
-                      </p>
-                    )}
                   </div>
                 </div>
               )
             })}
           </div>
+
+          {/* O'q tugmalar */}
+          {banners.length > VISIBLE && (
+            <>
+              <button onClick={prev} style={{
+                position: 'absolute', left: '-16px', top: '50%', transform: 'translateY(-50%)',
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '50%',
+                width: '32px', height: '32px', fontSize: '16px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--ink)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 2,
+              }}>‹</button>
+              <button onClick={next} style={{
+                position: 'absolute', right: '-16px', top: '50%', transform: 'translateY(-50%)',
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '50%',
+                width: '32px', height: '32px', fontSize: '16px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--ink)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 2,
+              }}>›</button>
+            </>
+          )}
         </div>
+
+        {/* Dots */}
+        {banners.length > VISIBLE && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+            {banners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setOffset(i); resetTimer() }}
+                style={{
+                  width: i === offset ? '20px' : '7px', height: '7px',
+                  borderRadius: '4px', border: 'none', padding: 0, cursor: 'pointer',
+                  background: i === offset ? 'var(--accent)' : 'var(--line)',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Mobile: oddiy carousel */}
+      {/* Mobile */}
       <div className="doc-strip-mobile" style={{ marginBottom: '24px' }}>
         <BannerCarousel role={role} />
       </div>
