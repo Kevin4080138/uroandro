@@ -84,7 +84,7 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
         .doc-card {
           flex: 1;
           min-width: 0;
-          height: 200px;
+          height: 335px;
           border-radius: 14px;
           overflow: hidden;
           position: relative;
