@@ -28,6 +28,7 @@ export function BannerCarousel({ role }: { role?: string }) {
   const router = useRouter()
   const [banners, setBanners] = useState<Banner[]>([])
   const [idx, setIdx] = useState(0)
+  const [animKey, setAnimKey] = useState(0)
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -56,6 +57,7 @@ export function BannerCarousel({ role }: { role?: string }) {
     if (banners.length <= 1) return
     timerRef.current = setInterval(() => {
       setIdx(i => (i + 1) % banners.length)
+      setAnimKey(k => k + 1)
     }, INTERVAL_MS)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [banners.length])
@@ -67,9 +69,9 @@ export function BannerCarousel({ role }: { role?: string }) {
     }, INTERVAL_MS)
   }
 
-  const goTo = (n: number) => { setIdx(n); resetTimer() }
-  const prev = () => { setIdx(i => (i - 1 + banners.length) % banners.length); resetTimer() }
-  const next = () => { setIdx(i => (i + 1) % banners.length); resetTimer() }
+  const goTo = (n: number) => { setIdx(n); setAnimKey(k => k + 1); resetTimer() }
+  const prev = () => { setIdx(i => (i - 1 + banners.length) % banners.length); setAnimKey(k => k + 1); resetTimer() }
+  const next = () => { setIdx(i => (i + 1) % banners.length); setAnimKey(k => k + 1); resetTimer() }
 
   const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; setDragging(true) }
   const onTouchEnd = (e: React.TouchEvent) => {
@@ -95,12 +97,8 @@ export function BannerCarousel({ role }: { role?: string }) {
     <div style={{ userSelect: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`
         @keyframes bannerZoomIn {
-          from { transform: scale(1.08); opacity: 0; }
+          from { transform: scale(1.18); opacity: 0; }
           to   { transform: scale(1);    opacity: 1; }
-        }
-        .banner-slide-inner {
-          position: absolute; inset: 0;
-          animation: bannerZoomIn 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) both;
         }
       `}</style>
 
@@ -117,8 +115,12 @@ export function BannerCarousel({ role }: { role?: string }) {
           background: b.image_url ? 'var(--surface)' : `linear-gradient(135deg, ${b.rang ?? '#2563eb'}, ${b.rang ?? '#2563eb'}99)`,
         }}
       >
-        {/* key={idx} har o'zgarishda animatsiyani qayta ishga tushiradi */}
-        <div key={idx} className="banner-slide-inner">
+        {/* animKey har nav da o'zgaradi — remount animatsiyani qayta ishga tushiradi */}
+        <div key={animKey} style={{
+          position: 'absolute', inset: 0,
+          animation: 'bannerZoomIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both',
+          willChange: 'transform, opacity',
+        }}>
           {b.image_url && (
             <img
               src={b.image_url}
