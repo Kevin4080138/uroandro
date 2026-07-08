@@ -213,7 +213,7 @@ export default function CamuDarsPage() {
                       >
                         <span style={{
                           width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0,
-                          background: tanlangan !== null && togri ? 'var(--good)' : tanlandi ? 'var(--danger)' : 'var(--surface-2)',
+                          background: tanlangan !== null && togri ? 'var(--good)' : tanladi ? 'var(--danger)' : 'var(--surface-2)',
                           color: tanlangan !== null && (togri || tanladi) ? '#fff' : 'var(--muted)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '11px', fontWeight: 800,
