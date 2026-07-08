@@ -22,7 +22,6 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
 }
 
 const INTERVAL_MS = 4000
-const SLIDE_H = 220
 
 export function BannerCarousel({ role }: { role?: string }) {
   const supabase = createClient()
@@ -106,7 +105,7 @@ export function BannerCarousel({ role }: { role?: string }) {
         onClick={handleClick}
         style={{
           position: 'relative', borderRadius: '18px', overflow: 'hidden',
-          height: `${SLIDE_H}px`,
+          aspectRatio: '1 / 1',
           cursor: b.link_href ? 'pointer' : 'default',
           background: b.image_url
             ? 'var(--surface)'
