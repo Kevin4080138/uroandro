@@ -45,6 +45,7 @@ export default function RegisterPage() {
   const [otpVerified, setOtpVerified] = useState(false)
 
   // Password step
+  const [loginEmail, setLoginEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
@@ -130,6 +131,10 @@ export default function RegisterPage() {
   // ── Ro'yxatdan o'tish ──────────────────────────────────────────────────────
   async function handleRegister() {
     setError('')
+    if (role !== 'patient') {
+      if (!loginEmail.trim()) { setError('Login (email) kiriting'); return }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail.trim())) { setError("To'g'ri email manzil kiriting"); return }
+    }
     if (!password) { setError('Parolni kiriting'); return }
     if (password.length < 8) { setError("Parol kamida 8 ta belgi bo'lishi kerak"); return }
     if (password !== confirmPassword) { setError("Parollar mos kelmayapti"); return }
@@ -138,7 +143,7 @@ export default function RegisterPage() {
 
     const email = role === 'patient'
       ? telefonToEmail(normalizePhone(telefon))
-      : `t${normalizePhone(telefon)}@staff.urosfera.uz`
+      : loginEmail.trim()
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -450,14 +455,30 @@ export default function RegisterPage() {
           {step === 'password' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {role !== 'patient' && (
-                <div style={{
-                  background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)',
-                  borderRadius: '10px', padding: '12px 16px',
-                }}>
-                  <p style={{ color: '#34d399', fontSize: '13px', margin: 0 }}>
-                    ✅ Telefon raqam tasdiqlandi: <strong>{telefon}</strong>
-                  </p>
-                </div>
+                <>
+                  <div style={{
+                    background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)',
+                    borderRadius: '10px', padding: '12px 16px',
+                  }}>
+                    <p style={{ color: '#34d399', fontSize: '13px', margin: 0 }}>
+                      ✅ Telefon raqam tasdiqlandi: <strong>{telefon}</strong>
+                    </p>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Login (email)</label>
+                    <input
+                      type="email"
+                      value={loginEmail}
+                      onChange={e => setLoginEmail(e.target.value)}
+                      placeholder="example@gmail.com"
+                      style={inputStyle}
+                      autoComplete="email"
+                    />
+                    <p style={{ color: 'var(--muted)', fontSize: '12px', margin: '6px 0 0' }}>
+                      Keyinroq tizimga kirish uchun ishlatiladi
+                    </p>
+                  </div>
+                </>
               )}
 
               <div>
