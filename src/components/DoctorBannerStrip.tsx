@@ -22,8 +22,8 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
   bildirishnoma: { label: '🔔 Bildirishnoma', bg: 'rgba(220,38,38,0.85)' },
 }
 
-const CARD_W   = 570   // karta kengligi
-const CARD_H   = 220   // karta balandligi
+const CARD_W   = 570              // karta kengligi
+const CARD_H   = Math.round(570 * 9 / 16)  // 16:9 → 321px
 const CARD_GAP = 16
 
 export function DoctorBannerStrip({ role }: { role?: string }) {
