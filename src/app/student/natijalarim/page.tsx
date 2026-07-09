@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { SkeletonRow } from '@/components/Skeleton'
 import { createClient } from '@/lib/supabase'
 import { DARSLAR, BOSQICHLAR } from '@/lib/talim/darslar'
 
@@ -175,7 +176,9 @@ export default function NatijalarimPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+          </div>
         ) : natijalar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
             <div style={{ fontSize: '36px', marginBottom: '10px' }}>📝</div>

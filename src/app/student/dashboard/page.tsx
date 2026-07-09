@@ -7,6 +7,7 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR } from '@/lib/talim/darslar'
 import { BannerCarousel } from '@/components/BannerCarousel'
+import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
 
@@ -32,8 +33,8 @@ export default function StudentDashboard() {
   }, [])
 
   if (!profile) return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <SkeletonDashboard />
     </div>
   )
 

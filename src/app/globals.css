@@ -188,6 +188,30 @@ h1, h2, h3, h4 {
 .banner-slide { height: 335px; }
 @media (max-width: 680px) { .banner-slide { height: 220px; } }
 
+/* ── Skeleton shimmer ── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton {
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+    var(--surface-2) 25%,
+    color-mix(in srgb, var(--surface-2) 60%, var(--line)) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* ── List row hover ── */
+.list-row {
+  transition: background .18s ease, transform .18s ease;
+  cursor: pointer;
+}
+.list-row:hover { background: var(--surface-2) !important; }
+.list-row:active { transform: scale(0.99); }
+
 @keyframes bannerScaleIn {
   from { transform: scale(0.9); opacity: 0; }
   to   { transform: scale(1);   opacity: 1; }

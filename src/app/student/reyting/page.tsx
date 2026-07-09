@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { createClient } from '@/lib/supabase'
+import { SkeletonRow } from '@/components/Skeleton'
 
 type Natija = { student_id: string; foiz: number; created_at: string }
 type ReytingQatori = { studentId: string; ism: string; urinishSoni: number; ortachaFoiz: number }
@@ -122,7 +123,9 @@ export default function ReytingPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+          </div>
         ) : royxat.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
             <div style={{ fontSize: '36px', marginBottom: '10px' }}>📊</div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { createClient } from '@/lib/supabase'
+import { SkeletonCard } from '@/components/Skeleton'
 import {
   DARSLAR, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR,
   type TestSavoli, type UsmleSavoli, type Bosqich,
@@ -123,7 +124,9 @@ export default function OzingizniTekshiringPage() {
         </div>
 
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} h="100px" />)}
+          </div>
         ) : hechnarsa ? (
           <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '32px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '10px' }}>🔒</div>

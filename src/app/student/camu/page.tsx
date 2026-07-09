@@ -114,11 +114,11 @@ export default function CamuPage() {
             <div
               key={m.slug}
               onClick={() => router.push(`/student/camu/darslar/${m.slug}`)}
-              className="rise lift"
+              className="rise lift list-row"
               style={{
                 animationDelay: `${i * 0.04}s`,
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-                padding: '14px 16px', cursor: 'pointer', display: 'flex', gap: '12px', alignItems: 'flex-start',
+                padding: '14px 16px', display: 'flex', gap: '12px', alignItems: 'flex-start',
               }}
             >
               <div style={{
