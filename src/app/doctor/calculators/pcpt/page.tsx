@@ -1,35 +1,41 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 function hisoblash(yosh: number, aa: boolean, psa: number, dreTog: boolean, oilaTar: boolean, oldinBiopsiya: boolean) {
   const logitHammasi =
-    -2.84368 +
-    0.03059 * yosh +
-    (aa ? 0.68092 : 0) +
-    0.26758 * Math.log(psa) +
-    (dreTog ? 0.83098 : 0) +
-    (oilaTar ? 0.62291 : 0) +
-    (oldinBiopsiya ? -0.83981 : 0)
-
+    -2.84368 + 0.03059 * yosh + (aa ? 0.68092 : 0) + 0.26758 * Math.log(psa) +
+    (dreTog ? 0.83098 : 0) + (oilaTar ? 0.62291 : 0) + (oldinBiopsiya ? -0.83981 : 0)
   const logitYuqori =
-    -8.34002 +
-    0.05837 * yosh +
-    (aa ? 0.5497 : 0) +
-    1.0818 * Math.log(psa) +
-    (dreTog ? 0.4919 : 0) +
-    (oilaTar ? 0.0534 : 0) +
-    (oldinBiopsiya ? -0.0783 : 0)
-
-  const har = Math.round(100 / (1 + Math.exp(-logitHammasi)))
-  const yuq = Math.round(100 / (1 + Math.exp(-logitYuqori)))
-  return { har: Math.min(har, 99), yuq: Math.min(yuq, 99) }
+    -8.34002 + 0.05837 * yosh + (aa ? 0.5497 : 0) + 1.0818 * Math.log(psa) +
+    (dreTog ? 0.4919 : 0) + (oilaTar ? 0.0534 : 0) + (oldinBiopsiya ? -0.0783 : 0)
+  return {
+    har: Math.min(Math.round(100 / (1 + Math.exp(-logitHammasi))), 99),
+    yuq: Math.min(Math.round(100 / (1 + Math.exp(-logitYuqori))), 99),
+  }
 }
 
 export default function PCPTPage() {
+  return <Suspense fallback={null}><PCPTIchki /></Suspense>
+}
+
+function PCPTIchki() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
   const [yosh, setYosh] = useState('')
   const [psa, setPsa] = useState('')
   const [aa, setAa] = useState(false)
@@ -42,6 +48,15 @@ export default function PCPTPage() {
 
   const rang = (foiz: number) => foiz < 15 ? '#16a34a' : foiz < 25 ? '#eab308' : '#dc2626'
 
+  const saqlash = async () => {
+    if (!bemorId || !natija) return { error: 'Bemor tanlanmagan yoki ma\'lumotlar to\'liq emas' }
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'pcpt', sarlavha: 'PCPT Risk Kalkulyatori',
+      xulosa: `Istalgan saraton: ${natija.har}% | Yuqori daraja (Gleason≥7): ${natija.yuq}%`,
+      malumot: { yosh: +yosh, psa: +psa, aa, dreTog, oilaTar, oldinBiopsiya, har: natija.har, yuq: natija.yuq },
+    })
+  }
+
   return (
     <AppShell title="PCPT — Prostata saratoni xavfi">
       <div className="mx-auto max-w-[820px] px-8 py-8">
@@ -51,6 +66,8 @@ export default function PCPTPage() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tayyor} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #b91c1c, #7c3aed)', color: 'white',
@@ -65,43 +82,27 @@ export default function PCPTPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
-          {/* Yosh va PSA */}
           <div className="rise" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
-                Yosh (yil)
-              </label>
-              <input
-                type="number" value={yosh} onChange={e => setYosh(e.target.value)}
-                placeholder="55"
-                style={{
-                  display: 'block', width: '100%', marginTop: '8px', padding: '10px 12px',
-                  borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--surface-2)',
-                  fontSize: '16px', fontWeight: 700, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box',
-                }}
-              />
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Yosh (yil)</label>
+              <input type="number" value={yosh} onChange={e => setYosh(e.target.value)} placeholder="55" style={{
+                display: 'block', width: '100%', marginTop: '8px', padding: '10px 12px',
+                borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--surface-2)',
+                fontSize: '16px', fontWeight: 700, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box',
+              }} />
             </div>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
-                PSA (ng/mL)
-              </label>
-              <input
-                type="number" value={psa} onChange={e => setPsa(e.target.value)}
-                placeholder="4.0" step="0.1"
-                style={{
-                  display: 'block', width: '100%', marginTop: '8px', padding: '10px 12px',
-                  borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--surface-2)',
-                  fontSize: '16px', fontWeight: 700, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box',
-                }}
-              />
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>PSA (ng/mL)</label>
+              <input type="number" value={psa} onChange={e => setPsa(e.target.value)} placeholder="4.0" step="0.1" style={{
+                display: 'block', width: '100%', marginTop: '8px', padding: '10px 12px',
+                borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--surface-2)',
+                fontSize: '16px', fontWeight: 700, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box',
+              }} />
             </div>
           </div>
 
-          {/* Checkboxlar */}
           <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '18px 20px' }}>
-            <p style={{ margin: '0 0 14px', fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>
-              Qo&apos;shimcha omillar
-            </p>
+            <p style={{ margin: '0 0 14px', fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>Qo&apos;shimcha omillar</p>
             {[
               { label: 'Afrika-amerikalik irq (AA)', val: aa, set: setAa },
               { label: 'Rektal tekshiruvda (DRE) patologiya', val: dreTog, set: setDreTog },
@@ -112,10 +113,8 @@ export default function PCPTPage() {
                 display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer',
                 padding: '10px 0', borderBottom: '1px solid var(--line)',
               }}>
-                <input
-                  type="checkbox" checked={val} onChange={e => set(e.target.checked)}
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
-                />
+                <input type="checkbox" checked={val} onChange={e => set(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }} />
                 <span style={{ fontSize: '13.5px', fontWeight: 500 }}>{label}</span>
               </label>
             ))}
@@ -153,19 +152,10 @@ export default function PCPTPage() {
           <div style={{ fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <p style={{ margin: 0 }}>
               <strong style={{ color: 'var(--ink)' }}>PCPT Risk Calculator</strong> — Thompson va boshqlar tomonidan
-              2003-yilda NEJM da e&apos;lon qilingan, 2006-yilda yangilangan logistik regressiya modeli (PCPT trialidan ~19,000 erkak ma&apos;lumoti).
-            </p>
-            <p style={{ margin: 0 }}>
-              Model ikkita alohida natijani hisoblaydi: <strong style={{ color: 'var(--ink)' }}>istalgan histologik saratoni</strong> xavfi va
-              <strong style={{ color: 'var(--ink)' }}> Gleason ≥7 yuqori darajali saratoni</strong> xavfi.
-            </p>
-            <p style={{ margin: 0 }}>
-              <strong style={{ color: 'var(--ink)' }}>Klinik qo&apos;llanish:</strong> Biopsiya mezonini belgilashda yordamchi vosita sifatida, PSA bilan birgalikda.
-              Manfiy biopsiya xavfni pasaytiradi.
+              2003-yilda NEJM da e&apos;lon qilingan, 2006-yilda yangilangan logistik regressiya modeli.
             </p>
             <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>
-              Manba: Thompson IM et al. NEJM 2004; 350:2239. NEJM 2006; 354:2757. AUA/EAU Prostata Saratoni Qo&apos;llanmasi.
-              Faqat klinik yordamchi vosita — yakuniy qaror shifokor tomonidan qabul qilinadi.
+              Manba: Thompson IM et al. NEJM 2004; 350:2239. Faqat klinik yordamchi vosita.
             </p>
           </div>
         </div>

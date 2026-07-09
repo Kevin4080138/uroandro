@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { createClient } from '@/lib/supabase'
+import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
+import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
 
 const DARAJALAR = [
   {
@@ -38,10 +41,33 @@ const DARAJALAR = [
 ]
 
 export default function EHSPage() {
-  const router = useRouter()
-  const [tanlangan, setTanlangan] = useState<number | null>(null)
+  return <Suspense fallback={null}><EHSIchki /></Suspense>
+}
 
+function EHSIchki() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const bemorId = searchParams.get('bemorId')
+  const supabase = createClient()
+  const [bemor, setBemor] = useState<{ fio: string } | null>(null)
+
+  useEffect(() => {
+    if (!bemorId) return
+    supabase.from('bemorlar').select('fio').eq('id', bemorId).single().then(({ data }) => setBemor(data))
+  }, [bemorId])
+
+  const [tanlangan, setTanlangan] = useState<number | null>(null)
   const natija = tanlangan !== null ? DARAJALAR[tanlangan] : null
+
+  const saqlash = async () => {
+    if (!bemorId || tanlangan === null) return { error: 'Bemor tanlanmagan' }
+    const d = DARAJALAR[tanlangan]
+    return kalkulyatorNatijasiniSaqla({
+      bemorId, kalkulyator: 'ehs', sarlavha: 'EHS — Ereksiya Qattiqligi Shkala',
+      xulosa: `Daraja ${d.ball}: ${d.nom}`,
+      malumot: { daraja: d.ball, nom: d.nom },
+    })
+  }
 
   return (
     <AppShell title="EHS — Ereksiya Qattiqligi Shkala">
@@ -52,6 +78,8 @@ export default function EHSPage() {
         }}>
           ← Kalkulyatorlarga qaytish
         </button>
+
+        <KalkulyatorBemorPaneli bemorId={bemorId} bemor={bemor} tayyor={tanlangan !== null} saqlash={saqlash} />
 
         <div className="rise" style={{
           background: 'linear-gradient(135deg, #7c3aed, #db2777)', color: 'white',
