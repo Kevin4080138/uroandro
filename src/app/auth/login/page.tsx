@@ -22,13 +22,14 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    const staffEmail = email.includes('@') ? email : `${email}@urosfera.uz`
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: mode === 'patient' ? telefonToEmail(telefon) : email,
+      email: mode === 'patient' ? telefonToEmail(telefon) : staffEmail,
       password,
     })
 
     if (error) {
-      setError(mode === 'patient' ? "Telefon yoki parol noto'g'ri" : "Email yoki parol noto'g'ri")
+      setError(mode === 'patient' ? "Telefon yoki parol noto'g'ri" : "Login yoki parol noto'g'ri")
       setLoading(false)
       return
     }
@@ -155,13 +156,13 @@ export default function LoginPage() {
           ) : (
             <div>
               <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
-                Email
+                Login
               </label>
               <input
-                type="email"
+                type="text"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
+                onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
+                placeholder="arabboyev yoki email@gmail.com"
                 style={{
                   width: '100%',
                   background: 'var(--surface-2)',

@@ -132,8 +132,8 @@ export default function RegisterPage() {
   async function handleRegister() {
     setError('')
     if (role !== 'patient') {
-      if (!loginEmail.trim()) { setError('Login (email) kiriting'); return }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail.trim())) { setError("To'g'ri email manzil kiriting"); return }
+      if (!loginEmail.trim()) { setError('Login kiriting'); return }
+      if (/\s/.test(loginEmail.trim())) { setError("Loginda bo'sh joy bo'lmasin"); return }
     }
     if (!password) { setError('Parolni kiriting'); return }
     if (password.length < 8) { setError("Parol kamida 8 ta belgi bo'lishi kerak"); return }
@@ -141,9 +141,10 @@ export default function RegisterPage() {
 
     setLoading(true)
 
+    const rawLogin = loginEmail.trim()
     const email = role === 'patient'
       ? telefonToEmail(normalizePhone(telefon))
-      : loginEmail.trim()
+      : rawLogin.includes('@') ? rawLogin : `${rawLogin}@urosfera.uz`
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -465,17 +466,17 @@ export default function RegisterPage() {
                     </p>
                   </div>
                   <div>
-                    <label style={labelStyle}>Login (email)</label>
+                    <label style={labelStyle}>Login (foydalanuvchi nomi)</label>
                     <input
-                      type="email"
+                      type="text"
                       value={loginEmail}
-                      onChange={e => setLoginEmail(e.target.value)}
-                      placeholder="example@gmail.com"
+                      onChange={e => setLoginEmail(e.target.value.replace(/\s/g, ''))}
+                      placeholder="masalan: arabboyev yoki email@gmail.com"
                       style={inputStyle}
-                      autoComplete="email"
+                      autoComplete="username"
                     />
                     <p style={{ color: 'var(--muted)', fontSize: '12px', margin: '6px 0 0' }}>
-                      Keyinroq tizimga kirish uchun ishlatiladi
+                      Ism yoki email — keyinroq tizimga kirish uchun ishlatiladi
                     </p>
                   </div>
                 </>
