@@ -56,17 +56,30 @@ export default function AdminDarslarPage() {
     setYuklanmoqda(false)
   }
 
-  // Fayl yo'li (URL emas!) saqlanadi — bucket yopiq, ko'rish vaqtida vaqtinchalik havola generatsiya qilinadi.
-  const faylYoliniOl = async (fayl: File, papka: string): Promise<string> => {
+  const BUCKET = 'dars-materiallari'
+
+  // Yangi fayl yuklashdan oldin eski faylni storage dan o'chiradi
+  const faylYoliniOl = async (fayl: File, papka: string, eskiYol: string | null | undefined): Promise<string> => {
+    if (eskiYol) {
+      await supabase.storage.from(BUCKET).remove([eskiYol])
+    }
     const yol = `${tanlanganSlug}/${papka}-${crypto.randomUUID()}_${fayl.name}`
-    const { error } = await supabase.storage.from('dars-materiallari').upload(yol, fayl)
+    const { error } = await supabase.storage.from(BUCKET).upload(yol, fayl)
     if (error) throw error
     return yol
   }
 
   const koʻrishUchunOch = async (yol: string) => {
-    const { data, error } = await supabase.storage.from('dars-materiallari').createSignedUrl(yol, 300)
-    if (!error && data) window.open(data.signedUrl, '_blank')
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(yol, 3600)
+    if (error || !data) return
+    const kengaytma = yol.split('.').pop()?.toLowerCase() ?? ''
+    if (['pptx', 'ppt', 'docx', 'doc'].includes(kengaytma)) {
+      // MS Office Online viewer — PPTX/DOCX ni to'liq sifatda ko'rsatadi
+      const viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(data.signedUrl)}`
+      window.open(viewerUrl, '_blank')
+    } else {
+      window.open(data.signedUrl, '_blank')
+    }
   }
 
   const saqla = async () => {
@@ -76,8 +89,8 @@ export default function AdminDarslarPage() {
     try {
       const asosiyVideo = asosiyVideoUrl.trim() || null
       const videoLinklar = videoLinklarMatn.split('\n').map((s) => s.trim()).filter(Boolean)
-      const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt') : tarkib?.konspekt_url ?? null
-      const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya') : tarkib?.prezentatsiya_url ?? null
+      const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt', tarkib?.konspekt_url) : tarkib?.konspekt_url ?? null
+      const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya', tarkib?.prezentatsiya_url) : tarkib?.prezentatsiya_url ?? null
       // bosqich/bepul_namuna — obuna/RLS tekshiruvi shularni o'qiydi, shu sababli darslar.ts bilan avtomatik sinxronlanadi.
       const darsMa = DARSLAR.find((d) => d.slug === tanlanganSlug)
       const bosqich = darsMa?.bosqich ?? null
@@ -170,29 +183,31 @@ export default function AdminDarslarPage() {
               </div>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Konspekt (PDF)</label>
+                <label style={labelStyle}>Konspekt (PDF, DOCX)</label>
                 {tarkib?.konspekt_url && (
                   <p style={{ margin: '0 0 8px 0', fontSize: '12.5px' }}>
-                    Hozirgi fayl bor —{' '}
+                    Hozirgi fayl: <strong>{tarkib.konspekt_url.split('/').pop()}</strong> —{' '}
                     <button onClick={() => koʻrishUchunOch(tarkib.konspekt_url!)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', cursor: 'pointer', fontSize: '12.5px' }}>
                       ko&apos;rish ↗
                     </button>
+                    <span style={{ color: 'var(--muted)', marginLeft: '6px', fontSize: '11px' }}>(yangi yuklasangiz eski o&apos;chadi)</span>
                   </p>
                 )}
-                <input ref={konspektInput} type="file" accept="application/pdf" onChange={(e) => setKonspektFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
+                <input ref={konspektInput} type="file" accept="application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setKonspektFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
               </div>
 
               <div style={{ marginBottom: '20px' }}>
-                <label style={labelStyle}>Prezentatsiya (PDF/PPTX)</label>
+                <label style={labelStyle}>Prezentatsiya (PDF, PPTX, DOCX)</label>
                 {tarkib?.prezentatsiya_url && (
                   <p style={{ margin: '0 0 8px 0', fontSize: '12.5px' }}>
-                    Hozirgi fayl bor —{' '}
+                    Hozirgi fayl: <strong>{tarkib.prezentatsiya_url.split('/').pop()}</strong> —{' '}
                     <button onClick={() => koʻrishUchunOch(tarkib.prezentatsiya_url!)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent)', cursor: 'pointer', fontSize: '12.5px' }}>
                       ko&apos;rish ↗
                     </button>
+                    <span style={{ color: 'var(--muted)', marginLeft: '6px', fontSize: '11px' }}>(yangi yuklasangiz eski o&apos;chadi)</span>
                   </p>
                 )}
-                <input ref={prezentatsiyaInput} type="file" accept="application/pdf,.ppt,.pptx" onChange={(e) => setPrezentatsiyaFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
+                <input ref={prezentatsiyaInput} type="file" accept="application/pdf,.ppt,.pptx,.doc,.docx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" onChange={(e) => setPrezentatsiyaFayl(e.target.files?.[0] ?? null)} style={{ color: 'var(--muted)', fontSize: '14px' }} />
               </div>
 
               <button onClick={saqla} disabled={saqlanmoqda} className="btn-animated" style={{
