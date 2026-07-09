@@ -127,9 +127,12 @@ export default function ReytingPage() {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
           </div>
         ) : royxat.length === 0 ? (
-          <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>📊</div>
-            <p style={{ margin: 0 }}>Bu oraliqda hali hech kim test ishlamagan.</p>
+          <div className="rise" style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--muted)' }}>
+            <div style={{ fontSize: '52px', marginBottom: '14px', lineHeight: 1 }}>🏆</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--ink)', marginBottom: '8px' }}>Reyting bo&apos;sh</div>
+            <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.6, maxWidth: '260px', marginInline: 'auto' }}>
+              Bu oraliqda hali hech kim test ishlamagan. Birinchi bo&apos;lishga harakat qiling!
+            </p>
           </div>
         ) : (
           <>
@@ -173,7 +176,7 @@ export default function ReytingPage() {
                 {qolganlar.map((q, i) => {
                   const oz = q.studentId === ozId
                   return (
-                    <div key={q.studentId} className="rise lift" style={{
+                    <div key={q.studentId} className="rise lift list-row" style={{
                       animationDelay: `${Math.min(i * 0.04, 0.3)}s`,
                       background: oz ? 'var(--accent-soft)' : 'var(--surface)',
                       border: oz ? '1px solid var(--accent)' : '1px solid var(--line)',

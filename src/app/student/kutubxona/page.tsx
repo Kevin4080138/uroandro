@@ -38,9 +38,12 @@ export default function StudentKutubxonaPage() {
             {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
           </div>
         ) : fayllar.length === 0 ? (
-          <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>📂</div>
-            <p style={{ margin: 0 }}>Hozircha material yo&apos;q.</p>
+          <div className="rise" style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--muted)' }}>
+            <div style={{ fontSize: '52px', marginBottom: '14px', lineHeight: 1 }}>📂</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--ink)', marginBottom: '8px' }}>Material yo&apos;q</div>
+            <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.6, maxWidth: '260px', marginInline: 'auto' }}>
+              Shifokorlar hali hech qanday material yuklamagan. Keyinroq qaytib keling.
+            </p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -48,11 +51,11 @@ export default function StudentKutubxonaPage() {
               <div
                 key={f.id}
                 onClick={() => ochish(f.file_path)}
-                className="rise lift"
+                className="rise lift list-row"
                 style={{
                   animationDelay: `${Math.min(i * 0.05, 0.4)}s`,
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-                  padding: '16px 20px', cursor: 'pointer', display: 'flex', gap: '14px', alignItems: 'center',
+                  padding: '16px 20px', display: 'flex', gap: '14px', alignItems: 'center',
                 }}
               >
                 <div style={{

@@ -180,9 +180,12 @@ export default function NatijalarimPage() {
             {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
           </div>
         ) : natijalar.length === 0 ? (
-          <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>📝</div>
-            <p style={{ margin: '0 0 16px' }}>Hali test topshirmagansiz.</p>
+          <div className="rise" style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--muted)' }}>
+            <div style={{ fontSize: '52px', marginBottom: '14px', lineHeight: 1 }}>📝</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--ink)', marginBottom: '8px' }}>Natija yo&apos;q</div>
+            <p style={{ margin: '0 0 20px', fontSize: '13.5px', lineHeight: 1.6, maxWidth: '260px', marginInline: 'auto' }}>
+              Hali birorta ham test topshirmagansiz. Darslarni boshlang!
+            </p>
             <button onClick={() => router.push('/student/darslar')} className="soft-press" style={{
               background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
               padding: '10px 20px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
@@ -193,11 +196,10 @@ export default function NatijalarimPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {natijalar.map((n, i) => (
-              <div key={n.id} className="rise lift" style={{
+              <div key={n.id} className="rise lift list-row" style={{
                 animationDelay: `${Math.min(i * 0.04, 0.3)}s`,
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px',
                 padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
-                cursor: 'pointer',
               }}
                 onClick={() => router.push(`/student/darslar/${n.dars_slug}`)}
               >
