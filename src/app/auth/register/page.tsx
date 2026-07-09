@@ -152,6 +152,7 @@ export default function RegisterPage() {
           ish_joyi: role === 'doctor' ? ishJoyi : null,
           talim_joyi: role === 'student' ? mutaxassislik : null,
           telefon_tasdiqlangan: role !== 'patient' ? true : false,
+          doctor_holati: role === 'doctor' ? 'kutish' : null,
         },
       },
     })
