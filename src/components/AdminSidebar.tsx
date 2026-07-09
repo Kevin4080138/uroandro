@@ -42,6 +42,8 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/content', icon: '📋', label: 'Protokollar & Kutubxona' },
       { href: '/admin/bannerlar', icon: '🎠', label: 'Bannerlar & E\'lonlar' },
+      { href: '/admin/maqolalar', icon: '📰', label: 'Maqolalar' },
+      { href: '/admin/adabiyotlar', icon: '📖', label: 'Adabiyotlar & Darsliklar' },
       { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar', tezOrada: true },
       { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda', tezOrada: true },
     ],
