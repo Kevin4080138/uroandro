@@ -211,6 +211,12 @@ export default function ShifokorlarKatalogiPage() {
                       )}
 
                       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <Link href={`/patient/navbat?doctor=${p.doctor_id}`} style={{
+                          textDecoration: 'none', background: 'var(--good)', color: 'white', borderRadius: '10px',
+                          padding: '11px 20px', fontSize: '13.5px', fontWeight: 700,
+                        }}>
+                          🗓 Navbat olish
+                        </Link>
                         <Link href="/patient/murojaat" style={{
                           textDecoration: 'none', background: 'var(--accent)', color: 'white', borderRadius: '10px',
                           padding: '11px 20px', fontSize: '13.5px', fontWeight: 700,
