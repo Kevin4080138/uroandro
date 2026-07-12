@@ -1,22 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { AppShell } from '@/components/AppShell'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 
 type Murojaat = {
-  id: string; patient_id: string; shikoyatlar: string; taxminiy_tashxis: string | null
+  id: string; patient_id: string; organlar: string | null; shikoyatlar: string; taxminiy_tashxis: string | null
   sabablar: string | null; tavsiya: string | null; javob: string | null
   holat: string; shoshilinch: boolean; created_at: string
   doctor_id: string | null; target_doctor_id: string | null
-  bemor_korgan: boolean; arxiv: boolean
+  bemor_korgan: boolean; arxiv: boolean; bemor_id: string | null
 }
 type BemorInfo = { name: string; telefon: string | null }
 
 const HOLAT_LABEL: Record<string, { text: string; color: string }> = {
   kutilmoqda: { text: 'Kutilmoqda', color: 'var(--warn)' },
   qabul_qilindi: { text: 'Qabul qilindi', color: 'var(--accent)' },
+  qabulda: { text: 'Qabulda', color: 'var(--accent-2)' },
   javob_berildi: { text: 'Javob berildi', color: 'var(--good)' },
 }
 
@@ -66,6 +68,7 @@ function PushToggleTugmasi() {
 
 export default function DoctorMurojaatlarPage() {
   const supabase = createClient()
+  const router = useRouter()
   const [murojaatlar, setMurojaatlar] = useState<Murojaat[]>([])
   const [bemorInfo, setBemorInfo] = useState<Record<string, BemorInfo>>({})
   const [myId, setMyId] = useState<string | null>(null)
@@ -116,6 +119,54 @@ export default function DoctorMurojaatlarPage() {
 
   const setJavob = (id: string, val: string) => setJavobMatn((p) => ({ ...p, [id]: val }))
 
+  // Murojaatni qabulga olish: bemorlar reestrida karta ochiladi (yoki mavjudi
+  // topiladi), shikoyat bilan birinchi tashrif yaratiladi va murojaat bog'lanadi.
+  const [qabulgaOlinmoqda, setQabulgaOlinmoqda] = useState<string | null>(null)
+  const qabulgaOlish = async (m: Murojaat) => {
+    if (!myId) return
+    if (m.bemor_id) { router.push(`/doctor/patients/${m.bemor_id}`); return }
+    setQabulgaOlinmoqda(m.id)
+
+    const info = bemorInfo[m.patient_id]
+    const fio = info?.name ?? 'Bemor'
+
+    // shu shifokor reestrida shu bemor (telefon yoki F.I.O bo'yicha) bormi?
+    let bemorId: string | null = null
+    if (info?.telefon) {
+      const { data: mavjud } = await supabase.from('bemorlar').select('id')
+        .eq('created_by', myId).eq('telefon', info.telefon).limit(1).maybeSingle()
+      bemorId = mavjud?.id ?? null
+    }
+    if (!bemorId) {
+      const { data: mavjud } = await supabase.from('bemorlar').select('id')
+        .eq('created_by', myId).eq('fio', fio).limit(1).maybeSingle()
+      bemorId = mavjud?.id ?? null
+    }
+    if (!bemorId) {
+      const { data: yangi, error } = await supabase.from('bemorlar')
+        .insert({ fio, telefon: info?.telefon ?? null, created_by: myId })
+        .select('id').single()
+      if (error || !yangi) { setQabulgaOlinmoqda(null); return }
+      bemorId = yangi.id
+    }
+
+    // murojaat shikoyati bilan birinchi tashrif
+    await supabase.from('tashriflar').insert({
+      bemor_id: bemorId, doctor_id: myId, fio, holat: 'yangi',
+      shikoyat: m.shikoyatlar,
+      organlar: m.organlar ?? '',
+      anamnez: m.taxminiy_tashxis ? `Onlayn murojaat orqali. Taxminiy yo'nalish: ${m.taxminiy_tashxis}` : 'Onlayn murojaat orqali.',
+      ogriq: "yo'q", oldin_operatsiya: "yo'q",
+    })
+
+    await supabase.from('murojaatlar')
+      .update({ bemor_id: bemorId, doctor_id: myId, holat: 'qabulda' })
+      .eq('id', m.id)
+
+    setQabulgaOlinmoqda(null)
+    router.push(`/doctor/patients/${bemorId}`)
+  }
+
   const arxivla = async (m: Murojaat, holat: boolean) => {
     await supabase.from('murojaatlar').update({ arxiv: holat }).eq('id', m.id)
     load()
@@ -149,7 +200,8 @@ export default function DoctorMurojaatlarPage() {
               : navbat.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla}
+                  qabulgaOlish={qabulgaOlish} qabulgaOlinmoqda={qabulgaOlinmoqda === m.id} />
               ))}
 
             <div style={{ height: '24px' }} />
@@ -159,7 +211,8 @@ export default function DoctorMurojaatlarPage() {
               : javobKutilayotgan.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla}
+                  qabulgaOlish={qabulgaOlish} qabulgaOlinmoqda={qabulgaOlinmoqda === m.id} />
               ))}
 
             <div style={{ height: '24px' }} />
@@ -169,7 +222,8 @@ export default function DoctorMurojaatlarPage() {
               : javobBerilganlar.map((m, i) => (
                 <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                   javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+                  qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla}
+                  qabulgaOlish={qabulgaOlish} qabulgaOlinmoqda={qabulgaOlinmoqda === m.id} />
               ))}
 
             {arxivlar.length > 0 && (
@@ -185,7 +239,8 @@ export default function DoctorMurojaatlarPage() {
                     {arxivlar.map((m, i) => (
                       <MurojaatCard key={m.id} m={m} i={i} bemor={bemorInfo[m.patient_id]}
                         javobMatn={javobMatn[m.id] ?? m.javob ?? ''} setJavob={setJavob}
-                        qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla} />
+                        qabulQil={qabulQil} javobYubor={javobYubor} saving={saving === m.id} arxivla={arxivla}
+                  qabulgaOlish={qabulgaOlish} qabulgaOlinmoqda={qabulgaOlinmoqda === m.id} />
                     ))}
                   </div>
                 )}
@@ -198,11 +253,12 @@ export default function DoctorMurojaatlarPage() {
   )
 }
 
-function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, saving, arxivla }: {
+function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, saving, arxivla, qabulgaOlish, qabulgaOlinmoqda }: {
   m: Murojaat; i: number; bemor?: BemorInfo
   javobMatn: string; setJavob: (id: string, v: string) => void
   qabulQil: (m: Murojaat) => void; javobYubor: (m: Murojaat) => void; saving: boolean
   arxivla: (m: Murojaat, holat: boolean) => void
+  qabulgaOlish: (m: Murojaat) => void; qabulgaOlinmoqda: boolean
 }) {
   const holat = HOLAT_LABEL[m.holat] ?? HOLAT_LABEL.kutilmoqda
   const boshHarf = (bemor?.name ?? 'B').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()
@@ -257,6 +313,14 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
               padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: saving ? 0.7 : 1,
             }}>
               {saving ? 'Yuborilmoqda...' : m.javob ? '✓ Javobni yangilash' : '📤 Javobni yuborish'}
+            </button>
+            <button onClick={() => qabulgaOlish(m)} disabled={qabulgaOlinmoqda} className="btn-animated soft-press" style={{
+              background: m.bemor_id ? 'var(--surface-2)' : 'var(--accent)',
+              color: m.bemor_id ? 'var(--ink-soft)' : 'white',
+              border: m.bemor_id ? '1px solid var(--line)' : 'none', borderRadius: '999px',
+              padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: qabulgaOlinmoqda ? 0.7 : 1,
+            }}>
+              {qabulgaOlinmoqda ? 'Ochilmoqda...' : m.bemor_id ? '📂 Bemor kartasi' : '🧑‍🤝‍🧑 Qabulga olish'}
             </button>
             {/* Ko'rildi belgisi */}
             {m.javob && (

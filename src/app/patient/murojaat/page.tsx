@@ -12,11 +12,23 @@ const card = {
 } as React.CSSProperties
 
 const chip = (active: boolean): React.CSSProperties => ({
-  border: 'none', borderRadius: '20px', padding: '8px 16px', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600,
-  background: active ? 'var(--accent)' : 'var(--surface-2)', color: active ? 'white' : 'var(--ink-soft)',
+  border: active ? '2px solid var(--accent)' : '1.5px solid var(--line)', borderRadius: '22px',
+  padding: '11px 18px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
+  background: active ? 'var(--accent)' : 'var(--surface-2)', color: active ? 'white' : 'var(--ink)',
 })
 
 type Doctor = { id: string; full_name: string }
+
+// Bemorga tushunarli belgi — toifa nomiga qo'shib ko'rsatiladi
+const TOIFA_BELGI: Record<string, string> = {
+  'Siyish': '💧',
+  'Buyrak': '🫘',
+  'Qovuq': '🚽',
+  'Prostata bezi': '🔵',
+  'Jinsiy aloqa': '❤️',
+  'Moshonka / Tuxumdon': '⚪',
+  'Bepushtlik / reproduktiv': '👶',
+}
 
 export default function MurojaatYuborishPage() {
   const router = useRouter()
@@ -101,16 +113,29 @@ export default function MurojaatYuborishPage() {
 
         {bosqich === 1 && (
           <div style={card}>
-            <h2 style={{ margin: '0 0 4px 0', fontSize: '20px' }}>Muammoingiz qaysi soha bilan bog&apos;liq?</h2>
-            <p style={{ color: 'var(--muted)', fontSize: '13.5px', marginBottom: '18px' }}>Bir yoki bir nechtasini tanlang.</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {shikoyatToifalari.map((t) => (
-                <button key={t.nom} style={chip(organlar.includes(t.nom))} onClick={() => toggleOrgan(t.nom)}>{t.nom}</button>
-              ))}
+            <h2 style={{ margin: '0 0 4px 0', fontSize: '20px' }}>Qayeringiz bezovta qilyapti?</h2>
+            <p style={{ color: 'var(--muted)', fontSize: '13.5px', marginBottom: '18px' }}>Bir yoki bir nechtasini bosing.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+              {shikoyatToifalari.map((t) => {
+                const faol = organlar.includes(t.nom)
+                return (
+                  <button key={t.nom} onClick={() => toggleOrgan(t.nom)} className="soft-press" style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                    padding: '16px 10px', borderRadius: '14px', cursor: 'pointer',
+                    border: faol ? '2px solid var(--accent)' : '1.5px solid var(--line)',
+                    background: faol ? 'var(--accent-soft)' : 'var(--surface-2)',
+                    color: faol ? 'var(--accent)' : 'var(--ink)',
+                    fontSize: '14px', fontWeight: 600, textAlign: 'center', lineHeight: 1.3,
+                  }}>
+                    <span style={{ fontSize: '28px' }}>{TOIFA_BELGI[t.nom] ?? '🩺'}</span>
+                    {t.nom}
+                  </button>
+                )
+              })}
             </div>
             <button disabled={organlar.length === 0} onClick={() => setBosqich(2)} className="btn-animated" style={{
-              marginTop: '24px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
-              padding: '12px 24px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, opacity: organlar.length === 0 ? 0.5 : 1,
+              marginTop: '24px', width: '100%', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
+              padding: '15px 24px', cursor: 'pointer', fontSize: '15px', fontWeight: 700, opacity: organlar.length === 0 ? 0.5 : 1,
             }}>
               Davom etish →
             </button>
