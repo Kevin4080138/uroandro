@@ -63,10 +63,111 @@ function HolatIzi({ m }: { m: Murojaat }) {
   )
 }
 
+type Baho = { doctor_id: string; muomala: number; samara: number; tushuntirish: number; kutish: number; izoh: string | null }
+
+const BAHO_MEZONLARI: { kalit: keyof Omit<Baho, 'doctor_id' | 'izoh'>; nom: string }[] = [
+  { kalit: 'muomala', nom: 'Muomala' },
+  { kalit: 'samara', nom: 'Davolash samarasi' },
+  { kalit: 'tushuntirish', nom: 'Tushuntirish' },
+  { kalit: 'kutish', nom: 'Kutish vaqti' },
+]
+
+// Shifokorga 4 mezon bo'yicha yulduzcha berish oynasi
+function BahoBerish({ doctorId, doctorNom, mavjud, saqlandi }: {
+  doctorId: string; doctorNom: string; mavjud: Baho | null; saqlandi: (b: Baho) => void
+}) {
+  const supabase = createClient()
+  const [ochiq, setOchiq] = useState(false)
+  const [qiymatlar, setQiymatlar] = useState<Record<string, number>>({
+    muomala: mavjud?.muomala ?? 0, samara: mavjud?.samara ?? 0,
+    tushuntirish: mavjud?.tushuntirish ?? 0, kutish: mavjud?.kutish ?? 0,
+  })
+  const [izoh, setIzoh] = useState(mavjud?.izoh ?? '')
+  const [saving, setSaving] = useState(false)
+
+  const toliq = BAHO_MEZONLARI.every((m) => qiymatlar[m.kalit] > 0)
+
+  const yubor = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || !toliq) return
+    setSaving(true)
+    const payload = {
+      doctor_id: doctorId, patient_id: user.id,
+      muomala: qiymatlar.muomala, samara: qiymatlar.samara,
+      tushuntirish: qiymatlar.tushuntirish, kutish: qiymatlar.kutish,
+      izoh: izoh.trim() || null,
+    }
+    const { error } = await supabase.from('baholar').upsert(payload, { onConflict: 'doctor_id,patient_id' })
+    setSaving(false)
+    if (!error) {
+      setOchiq(false)
+      saqlandi(payload as Baho)
+    }
+  }
+
+  if (!ochiq) {
+    return (
+      <button onClick={() => setOchiq(true)} className="btn-animated" style={{
+        marginTop: '10px', background: mavjud ? 'var(--surface-2)' : 'var(--warn)',
+        color: mavjud ? 'var(--ink-soft)' : 'white',
+        border: mavjud ? '1px solid var(--line)' : 'none',
+        borderRadius: '999px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+      }}>
+        {mavjud
+          ? `⭐ Bahoyingiz: ${(((mavjud.muomala + mavjud.samara + mavjud.tushuntirish + mavjud.kutish) / 4)).toFixed(1)} — o'zgartirish`
+          : '⭐ Shifokorga baho bering'}
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ marginTop: '12px', background: 'var(--surface-2)', borderRadius: '10px', padding: '14px 16px' }}>
+      <p style={{ margin: '0 0 10px', fontSize: '13.5px', fontWeight: 700 }}>{doctorNom} shifokorga baho</p>
+      {BAHO_MEZONLARI.map((m) => (
+        <div key={m.kalit} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '10px' }}>
+          <span style={{ fontSize: '13px' }}>{m.nom}</span>
+          <span style={{ display: 'inline-flex', gap: '2px' }}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <button key={i} onClick={() => setQiymatlar((q) => ({ ...q, [m.kalit]: i }))} style={{
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: '19px', padding: '0 1px',
+                opacity: qiymatlar[m.kalit] >= i ? 1 : 0.25,
+              }}>⭐</button>
+            ))}
+          </span>
+        </div>
+      ))}
+      <textarea
+        value={izoh} onChange={(e) => setIzoh(e.target.value)}
+        placeholder="Izoh (ixtiyoriy) — boshqa bemorlarga yordam beradi"
+        style={{
+          width: '100%', minHeight: '52px', background: 'var(--surface)', color: 'var(--ink)',
+          border: '1px solid var(--line)', borderRadius: '8px', padding: '9px 11px', fontSize: '13px',
+          outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', marginBottom: '10px',
+        }}
+      />
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={yubor} disabled={saving || !toliq} className="btn-animated" style={{
+          background: 'var(--good)', color: 'white', border: 'none', borderRadius: '8px',
+          padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: !toliq ? 0.5 : 1,
+        }}>
+          {saving ? 'Yuborilmoqda...' : 'Bahoni yuborish'}
+        </button>
+        <button onClick={() => setOchiq(false)} className="btn-animated" style={{
+          background: 'var(--surface)', color: 'var(--ink-soft)', border: '1px solid var(--line)',
+          borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px',
+        }}>
+          Bekor
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function MurojaatlarimPage() {
   const supabase = createClient()
   const [murojaatlar, setMurojaatlar] = useState<Murojaat[]>([])
   const [doctorNames, setDoctorNames] = useState<Record<string, string>>({})
+  const [baholarim, setBaholarim] = useState<Record<string, Baho>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -81,6 +182,17 @@ export default function MurojaatlarimPage() {
         const map: Record<string, string> = {}
         for (const d of docs ?? []) map[d.id] = d.full_name
         setDoctorNames(map)
+      }
+
+      // mening bergan baholarim (shifokor bo'yicha)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: blar } = await supabase.from('baholar')
+          .select('doctor_id, muomala, samara, tushuntirish, kutish, izoh')
+          .eq('patient_id', user.id)
+        const bmap: Record<string, Baho> = {}
+        for (const b of (blar as Baho[]) ?? []) bmap[b.doctor_id] = b
+        setBaholarim(bmap)
       }
       setLoading(false)
 
@@ -126,6 +238,14 @@ export default function MurojaatlarimPage() {
                       <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--accent)' }}>Shifokor javobi:</p>
                       <p style={{ margin: '4px 0 0 0', fontSize: '14px' }}>{m.javob}</p>
                     </div>
+                  )}
+                  {m.javob && m.doctor_id && (
+                    <BahoBerish
+                      doctorId={m.doctor_id}
+                      doctorNom={doctorNames[m.doctor_id] ?? 'Shifokor'}
+                      mavjud={baholarim[m.doctor_id] ?? null}
+                      saqlandi={(b) => setBaholarim((p) => ({ ...p, [b.doctor_id]: b }))}
+                    />
                   )}
                 </div>
               )

@@ -94,6 +94,13 @@ export default function LandingPage() {
             >
               Kirish
             </Link>
+            <Link
+              href="/shifokorlar"
+              className="rounded-xl border px-6 py-3 text-base font-semibold transition-colors"
+              style={{ borderColor: 'var(--line)', color: 'var(--accent)' }}
+            >
+              👨‍⚕️ Shifokorlar katalogi
+            </Link>
           </motion.div>
         </div>
       </div>
