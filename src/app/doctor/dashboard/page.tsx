@@ -46,6 +46,7 @@ export default function DoctorDashboard() {
           {[
             { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", href: '/doctor/patients', c: 'var(--danger)' },
             { icon: '📨', title: 'Murojaatlar', desc: 'Bemor shikoyatlari', href: '/doctor/murojaatlar', c: 'var(--accent-2)' },
+            { icon: '📝', title: 'Mening shablonlarim', desc: 'Kasallik tarixi shablonlari', href: '/doctor/shablonlarim', c: 'var(--accent)' },
             { icon: '📋', title: 'Protokollar', desc: 'Klinik protokollar', href: '/doctor/protokollar', c: 'var(--accent)' },
             { icon: '🧮', title: 'Kalkulatorlar', desc: 'Varikotsele usul tanlash, IPSS, PSA', href: '/doctor/calculators', c: 'var(--accent-2)' },
             { icon: '📚', title: 'Kutubxona', desc: 'PDF materiallar', href: '/doctor/kutubxona', c: 'var(--good)' },

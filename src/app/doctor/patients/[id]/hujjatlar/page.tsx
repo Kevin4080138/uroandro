@@ -5,7 +5,9 @@ import { createPortal } from 'react-dom'
 import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
-import { shablonTop, SHABLONLAR, type HujjatBlok, type Maydon } from '@/lib/shablonlar'
+import { SHABLONLAR, type Shablon, type Maydon } from '@/lib/shablonlar'
+import { shaxsiyShablonga, type ShaxsiyShablonRow } from '@/lib/shablonlar/deklarativ'
+import { HujjatVaraq } from '@/components/HujjatVaraq'
 
 const ASOS_HUJJAT = 'birlamchi'   // boshqa hujjatlar shundan boshlang'ich ma'lumot oladi
 
@@ -26,7 +28,8 @@ export default function HujjatlarPage() {
   const supabase = createClient()
 
   const [shablonId, setShablonId] = useState('prostatit')
-  const shablon = shablonTop(shablonId)!
+  const [shaxsiylar, setShaxsiylar] = useState<Shablon[]>([])
+  const shablon = [...SHABLONLAR, ...shaxsiylar].find((s) => s.id === shablonId) ?? SHABLONLAR[0]
 
   const [bemor, setBemor] = useState<any>(null)
   const [shifokorIsmi, setShifokorIsmi] = useState('')
@@ -67,6 +70,14 @@ export default function HujjatlarPage() {
     setFaolIndex(0)
     setLoading(false)
   }
+
+  // Shifokorning shaxsiy shablonlari (RLS — faqat o'ziniki keladi)
+  useEffect(() => {
+    supabase.from('shifokor_shablonlari').select('id, kasallik, tuzilma').order('kasallik').then(({ data }) => {
+      setShaxsiylar(((data as ShaxsiyShablonRow[]) ?? []).map(shaxsiyShablonga))
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -315,7 +326,14 @@ export default function HujjatlarPage() {
           <div style={{ marginBottom: '14px' }}>
             <label style={lbl}>Kasallik shabloni</label>
             <select value={shablonId} onChange={(e) => setShablonId(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
-              {SHABLONLAR.map((s) => <option key={s.id} value={s.id}>{s.kasallik}</option>)}
+              <optgroup label="Tizim shablonlari">
+                {SHABLONLAR.map((s) => <option key={s.id} value={s.id}>{s.kasallik}</option>)}
+              </optgroup>
+              {shaxsiylar.length > 0 && (
+                <optgroup label="Mening shablonlarim">
+                  {shaxsiylar.map((s) => <option key={s.id} value={s.id}>{s.kasallik}</option>)}
+                </optgroup>
+              )}
             </select>
           </div>
 
@@ -678,43 +696,3 @@ function VariantSelect({ value, variantlar, onChange }: { value: string; variant
   )
 }
 
-function HujjatVaraq({ bloklar, print }: { bloklar: HujjatBlok[]; chop?: boolean; print?: boolean }) {
-  // chop rejimida kompakt — bitta A4 varaqqa sig'sin
-  const fs = print ? '10.5px' : '13.5px'
-  const lh = print ? 1.28 : 1.6
-  const pm = print ? '2px' : '4px'   // paragraf orasidagi masofa
-  return (
-    <div style={{
-      background: print ? 'white' : 'var(--surface)', color: print ? '#000' : 'var(--ink)',
-      border: print ? 'none' : '1px solid var(--line)', borderRadius: print ? 0 : '12px',
-      padding: print ? 0 : '28px 32px', fontSize: fs, lineHeight: lh,
-      maxWidth: 'none', margin: 0,
-      fontFamily: print ? "'Times New Roman', Georgia, serif" : 'inherit',
-    }}>
-      {bloklar.map((b, i) => {
-        if (b.tur === 'bosh') return <div key={i} style={{ height: print ? '8px' : '12px' }} />
-        if (b.tur === 'sarlavha') return <h3 key={i} style={{ fontSize: print ? '12px' : '14px', fontWeight: 700, margin: print ? '8px 0 3px' : '12px 0 5px' }}>{b.matn}</h3>
-        if (b.tur === 'matn') return <p key={i} style={{ margin: `0 0 ${pm}`, whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{b.matn}</p>
-        if (b.tur === 'band') return (
-          <p key={i} style={{ margin: `0 0 ${pm}`, textAlign: 'justify', textIndent: print ? '1.2em' : 0 }}>
-            <strong>{b.etiket}:</strong>{b.matn ? ' ' + b.matn : ''}
-          </p>
-        )
-        if (b.tur === 'royxat') return <ul key={i} style={{ margin: `0 0 ${pm}`, paddingLeft: '24px' }}>{b.bandlar.map((x, j) => <li key={j} style={{ marginBottom: print ? '1px' : '2px' }}>{x}</li>)}</ul>
-        if (b.tur === 'imzo') return (
-          <div key={i} style={{ display: 'flex', justifyContent: 'flex-end', gap: '40px', padding: print ? '3px 0' : '6px 0' }}>
-            <strong>{b.chap}:</strong>
-            <span style={{ minWidth: '150px' }}>{b.ong}</span>
-          </div>
-        )
-        // qator (label: value)
-        return (
-          <div key={i} style={{ display: 'flex', gap: '10px', padding: print ? '1px 0' : '2px 0' }}>
-            <span style={{ color: print ? '#000' : 'var(--muted)', minWidth: '150px', flexShrink: 0 }}>{b.chap}:</span>
-            <span style={{ fontWeight: 500 }}>{b.ong}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
