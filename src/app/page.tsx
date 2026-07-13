@@ -1,129 +1,151 @@
 'use client'
 
-import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0 },
+const ROL_DASHBOARD: Record<string, string> = {
+  student: '/student/dashboard',
+  doctor: '/doctor/dashboard',
+  patient: '/patient/dashboard',
+  admin: '/admin/dashboard',
 }
 
-const sections = [
+const ESHIKLAR = [
   {
-    icon: '🎓',
-    title: 'Talabalar uchun',
-    desc: "Darslar, qo'llanmalar, testlar va reyting tizimi orqali urologiya yo'nalishini chuqur o'rganing.",
-    c: 'var(--accent)',
+    kalit: 'bemor',
+    belgi: '🧑',
+    sarlavha: 'Men bemorman',
+    izoh: 'Shifokor topaman, navbatga yozilaman',
+    href: '/bemor',
+    asosiy: true,
   },
   {
-    icon: '👨‍⚕️',
-    title: 'Shifokorlar uchun',
-    desc: "Bemorlar bilan ishlash, protokollar, kalkulyatorlar va kasbiy kutubxona bir platformada.",
-    c: 'var(--accent-2)',
+    kalit: 'shifokor',
+    belgi: '👨‍⚕️',
+    sarlavha: 'Men shifokorman',
+    izoh: 'Bemorlar, protokollar, kasbiy vositalar',
+    href: '/kasbiy?rol=shifokor',
+    asosiy: false,
   },
   {
-    icon: '🧑',
-    title: 'Bemorlar uchun',
-    desc: "Shifokorga murojaat qilish, tavsiyalarni kuzatish va sog'liq ma'lumotlarini bir joyda saqlash.",
-    c: 'var(--good)',
+    kalit: 'talaba',
+    belgi: '🎓',
+    sarlavha: 'Men talabaman',
+    izoh: 'Darslar, testlar, reyting',
+    href: '/kasbiy?rol=talaba',
+    asosiy: false,
   },
 ]
 
-export default function LandingPage() {
-  return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <div className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute -top-32 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
-          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)' }}
-        />
+function Ostona() {
+  const router = useRouter()
+  const params = useSearchParams()
+  const supabase = createClient()
+  const [tayyor, setTayyor] = useState(false)
 
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-24 text-center sm:py-32">
-          <motion.span
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="mb-6 w-fit rounded-full border px-4 py-1.5 text-sm font-medium"
-            style={{ borderColor: 'var(--line)', color: 'var(--accent)', background: 'var(--accent-soft)' }}
-          >
-            Urologiya va Andrologiya platformasi
-          </motion.span>
+  useEffect(() => {
+    const tekshir = async () => {
+      // Login qilgan foydalanuvchi — to'g'ri dashboardga
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        const yol = ROL_DASHBOARD[data?.role ?? '']
+        if (yol) { router.replace(yol); return }
+      }
+      // Oldingi tanlov eslab qolingan bo'lsa — to'g'ri eshikka (agar qayta tanlash so'ralmagan bo'lsa)
+      const qaytaTanla = params.get('tanla') === '1'
+      if (!qaytaTanla && typeof window !== 'undefined') {
+        const saqlangan = localStorage.getItem('urosfera_rol')
+        const eshik = ESHIKLAR.find((e) => e.kalit === saqlangan)
+        if (eshik) { router.replace(eshik.href); return }
+      }
+      setTayyor(true)
+    }
+    tekshir()
+  }, [])
 
-          <motion.h1
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl font-extrabold leading-tight sm:text-6xl"
-            style={{ color: 'var(--ink)' }}
-          >
-            Uro<span style={{ color: 'var(--accent)' }}>sfera</span>{' '}bilan o&apos;qing va ishlang
-          </motion.h1>
+  const tanla = (eshik: typeof ESHIKLAR[number]) => {
+    try { localStorage.setItem('urosfera_rol', eshik.kalit) } catch {}
+    router.push(eshik.href)
+  }
 
-          <motion.p
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 max-w-xl text-lg"
-            style={{ color: 'var(--muted)' }}
-          >
-            Talabalar va shifokorlar uchun ta&apos;lim, amaliyot va kasbiy rivojlanishni bir joyga
-            jamlagan platforma.
-          </motion.p>
-
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-10 flex flex-col gap-3 sm:flex-row"
-          >
-            <Link
-              href="/auth/register"
-              className="rounded-xl px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]"
-              style={{ background: 'var(--accent)', boxShadow: 'var(--shadow)' }}
-            >
-              Ro&apos;yxatdan o&apos;tish
-            </Link>
-            <Link
-              href="/auth/login"
-              className="rounded-xl border px-6 py-3 text-base font-semibold transition-colors"
-              style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
-            >
-              Kirish
-            </Link>
-            <Link
-              href="/shifokorlar"
-              className="rounded-xl border px-6 py-3 text-base font-semibold transition-colors"
-              style={{ borderColor: 'var(--line)', color: 'var(--accent)' }}
-            >
-              👨‍⚕️ Shifokorlar katalogi
-            </Link>
-          </motion.div>
-        </div>
+  if (!tayyor) {
+    return (
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="pulse" style={{ color: 'var(--muted)', fontSize: 14 }}>Yuklanmoqda...</div>
       </div>
+    )
+  }
 
-      <div className="mx-auto max-w-4xl px-6 pb-24">
-        <div className="grid gap-6 sm:grid-cols-2">
-          {sections.map((s, i) => (
-            <motion.div
-              key={s.title}
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              transition={{ duration: 0.5, delay: 0.1 * i }}
-              className="dash-card"
-              style={{ ['--c' as any]: s.c }}
+  return (
+    <div style={{
+      minHeight: '100dvh', background: 'var(--bg)', color: 'var(--ink)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '32px 20px',
+    }}>
+      <div style={{ width: '100%', maxWidth: 460, textAlign: 'center' }}>
+
+        {/* Brend */}
+        <div className="rise" style={{ marginBottom: 8 }}>
+          <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-.02em' }}>
+            Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
+          </span>
+        </div>
+        <p className="rise" style={{ color: 'var(--muted)', fontSize: 13.5, margin: '0 0 32px', animationDelay: '.05s' }}>
+          Farg&apos;ona urologiya ekotizimi
+        </p>
+
+        {/* Savol */}
+        <h1 className="rise" style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.2, margin: '0 0 24px', animationDelay: '.1s' }}>
+          Kim uchun keldingiz?
+        </h1>
+
+        {/* Eshiklar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {ESHIKLAR.map((e, i) => (
+            <button
+              key={e.kalit}
+              onClick={() => tanla(e)}
+              className="rise lift soft-press"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', cursor: 'pointer',
+                background: e.asosiy ? 'var(--accent)' : 'var(--surface)',
+                color: e.asosiy ? '#fff' : 'var(--ink)',
+                border: e.asosiy ? 'none' : '1.5px solid var(--line)',
+                borderRadius: 18, padding: '20px 22px',
+                animationDelay: `${0.15 + i * 0.07}s`,
+                boxShadow: e.asosiy ? '0 10px 28px rgba(37,99,235,.28)' : 'none',
+              }}
             >
-              <div className="dash-icon">{s.icon}</div>
-              <h3 className="dash-title">{s.title}</h3>
-              <p className="dash-desc">{s.desc}</p>
-            </motion.div>
+              <span style={{
+                fontSize: 30, width: 52, height: 52, flexShrink: 0, borderRadius: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: e.asosiy ? 'rgba(255,255,255,.18)' : 'var(--surface-2)',
+              }}>{e.belgi}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 18, fontWeight: 800, lineHeight: 1.2 }}>{e.sarlavha}</span>
+                <span style={{ display: 'block', fontSize: 13, marginTop: 3, opacity: e.asosiy ? 0.9 : 1, color: e.asosiy ? '#fff' : 'var(--muted)', lineHeight: 1.4 }}>{e.izoh}</span>
+              </span>
+              <span style={{ fontSize: 22, opacity: e.asosiy ? 0.9 : 0.5 }}>›</span>
+            </button>
           ))}
         </div>
+
+        <p className="rise" style={{ marginTop: 28, fontSize: 12, color: 'var(--muted)', lineHeight: 1.5, animationDelay: '.4s' }}>
+          Ro&apos;yxatdan o&apos;tmasdan ham shifokor topishingiz mumkin
+        </p>
       </div>
     </div>
+  )
+}
+
+export default function OstonaPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)' }} />
+    }>
+      <Ostona />
+    </Suspense>
   )
 }
