@@ -95,6 +95,8 @@ export default function PatientDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 12 }}>
           {[
             { icon: '🗓', title: 'Navbat olish', desc: 'Shifokorga onlayn yozilish', href: '/patient/navbat', c: '#059669' },
+            { icon: '🏥', title: 'Operatsiyalar', desc: 'Oddiy tilda tushuntirish', href: '/patient/operatsiyalar', c: '#0d9488' },
+            { icon: '🩹', title: 'Operatsiya kuzatuvim', desc: 'Tiklanish bosqichlari', href: '/patient/operatsiya-kuzatuvim', c: '#e11d48' },
             { icon: '💊', title: 'Dorilarim', desc: 'Retsept va eslatmalar', href: '/patient/dorilarim', c: '#8b5cf6' },
             { icon: '🧪', title: 'Qaysi tahlil?', desc: 'Shikoyatga qarab', href: '/patient/qaysi-tahlil', c: '#0891b2' },
             { icon: '🩻', title: 'O\'z-o\'zini tekshirish', desc: 'Yo\'riqnoma + kalkulyator', href: '/patient/oz-tekshiruv', c: '#2563eb' },
