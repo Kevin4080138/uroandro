@@ -126,6 +126,8 @@ export default function AdminDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               {[
                 { icon: '👥', title: 'Foydalanuvchilar', href: '/admin/users', c: 'var(--accent)' },
+                { icon: '🏥', title: 'Klinikalar', href: '/admin/klinikalar', c: 'var(--good)' },
+                { icon: '🌐', title: 'Katalog nazorati', href: '/admin/katalog', c: 'var(--accent)' },
                 { icon: '📝', title: 'Kontent', href: '/admin/content', c: 'var(--accent-2)' },
                 { icon: '📚', title: 'Darslar', href: '/admin/darslar', c: 'var(--warn)' },
                 { icon: '💬', title: 'Fikrlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
