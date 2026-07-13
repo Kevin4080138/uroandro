@@ -44,6 +44,7 @@ export default function DoctorDashboard() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           {[
+            { icon: '📈', title: 'Faoliyat paneli', desc: 'Murojaat, navbat, reyting ko\'rsatkichlari', href: '/doctor/faoliyat', c: 'var(--accent)' },
             { icon: '🧑‍🤝‍🧑', title: 'Bemorlar', desc: "Ro'yxat va yangi qabul", href: '/doctor/patients', c: 'var(--danger)' },
             { icon: '📨', title: 'Murojaatlar', desc: 'Bemor shikoyatlari', href: '/doctor/murojaatlar', c: 'var(--accent-2)' },
             { icon: '📝', title: 'Mening shablonlarim', desc: 'Kasallik tarixi shablonlari', href: '/doctor/shablonlarim', c: 'var(--accent)' },

@@ -55,6 +55,11 @@ export default function AdminStatistikaPage() {
   const [mavzuData, setMavzuData] = useState<{ nom: string; soni: number; color: string }[]>([])
   const [natijalarData, setNatijalarData] = useState<{ nom: string; soni: number }[]>([])
 
+  // Ekotizim (yangi funksiyalar)
+  const [ekoKpi, setEkoKpi] = useState({ murojaat: 0, navbat: 0, ochiqProfil: 0, klinika: 0, kuzatuv: 0, reyting: 0, bahoSoni: 0 })
+  const [murojaatHolatData, setMurojaatHolatData] = useState<{ nom: string; soni: number; color: string }[]>([])
+  const [navbatHolatData, setNavbatHolatData] = useState<{ nom: string; soni: number; color: string }[]>([])
+
   const load = async (yangilash = false) => {
     if (yangilash) setYangilanmoqda(true)
     else setLoading(true)
@@ -153,6 +158,44 @@ export default function AdminStatistikaPage() {
     }
     setNatijalarData(Object.keys(nc).map((k) => ({ nom: k, soni: nc[k] })))
 
+    // ── Ekotizim ko'rsatkichlari ──
+    const [murojaatlarEko, navbatlarEko, ochiqProfillar, klinikalar, kuzatuvlar, baholar] = await Promise.all([
+      supabase.from('murojaatlar').select('holat'),
+      supabase.from('navbatlar').select('holat'),
+      supabase.from('shifokor_profillari').select('id', { count: 'exact', head: true }).eq('ochiq', true),
+      supabase.from('klinikalar').select('id', { count: 'exact', head: true }),
+      supabase.from('operatsiya_kuzatuvi').select('id', { count: 'exact', head: true }),
+      supabase.from('baholar').select('muomala, samara, tushuntirish, kutish'),
+    ])
+
+    const MUR_LABEL: Record<string, string> = { kutilmoqda: 'Kutilmoqda', yangi: 'Yangi', qabulda: 'Qabulda', qabul_qilindi: 'Qabul qilindi', tekshirilmoqda: 'Tekshirilmoqda', javob_berildi: 'Javob berildi' }
+    const MUR_COLOR: Record<string, string> = { kutilmoqda: '#f59e0b', yangi: '#f59e0b', qabulda: '#3b82f6', qabul_qilindi: '#3b82f6', tekshirilmoqda: '#f97316', javob_berildi: '#10b981' }
+    const murData = murojaatlarEko.data ?? []
+    const mrc: Record<string, number> = {}
+    for (const x of murData) mrc[x.holat] = (mrc[x.holat] ?? 0) + 1
+    setMurojaatHolatData(Object.keys(mrc).map((h) => ({ nom: MUR_LABEL[h] ?? h, soni: mrc[h], color: MUR_COLOR[h] ?? '#6b7280' })))
+
+    const NAV_LABEL: Record<string, string> = { kutilmoqda: 'Kutilmoqda', tasdiqlandi: 'Tasdiqlandi', yakunlandi: 'Yakunlandi', bekor: 'Bekor' }
+    const NAV_COLOR: Record<string, string> = { kutilmoqda: '#f59e0b', tasdiqlandi: '#3b82f6', yakunlandi: '#10b981', bekor: '#ef4444' }
+    const navData = navbatlarEko.data ?? []
+    const nvc: Record<string, number> = {}
+    for (const x of navData) nvc[x.holat] = (nvc[x.holat] ?? 0) + 1
+    setNavbatHolatData(Object.keys(NAV_LABEL).map((h) => ({ nom: NAV_LABEL[h], soni: nvc[h] ?? 0, color: NAV_COLOR[h] })))
+
+    const bh = baholar.data ?? []
+    const reytingOrt = bh.length > 0
+      ? bh.reduce((s: number, b: any) => s + (b.muomala + b.samara + b.tushuntirish + b.kutish) / 4, 0) / bh.length
+      : 0
+    setEkoKpi({
+      murojaat: murData.length,
+      navbat: navData.length,
+      ochiqProfil: ochiqProfillar.count ?? 0,
+      klinika: klinikalar.count ?? 0,
+      kuzatuv: kuzatuvlar.count ?? 0,
+      reyting: reytingOrt,
+      bahoSoni: bh.length,
+    })
+
     setOxirgiYangilanish(new Date())
     setLoading(false)
     setYangilanmoqda(false)
@@ -211,6 +254,74 @@ export default function AdminStatistikaPage() {
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '6px' }}>{k.label}</div>
                 </div>
               ))}
+            </div>
+
+            {/* ── Ekotizim ko'rsatkichlari ── */}
+            <div style={{ ...card, marginBottom: '24px', padding: '22px' }}>
+              <h3 style={{ ...cardTitle, marginBottom: '16px' }}>Ekotizim — xizmatlar bo&apos;yicha</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
+                {[
+                  { label: 'Murojaatlar', value: ekoKpi.murojaat, color: '#3b82f6', icon: '📨' },
+                  { label: 'Onlayn navbatlar', value: ekoKpi.navbat, color: '#10b981', icon: '🗓' },
+                  { label: 'Katalogdagi profillar', value: ekoKpi.ochiqProfil, color: '#8b5cf6', icon: '🌐' },
+                  { label: 'Klinikalar', value: ekoKpi.klinika, color: '#f59e0b', icon: '🏥' },
+                  { label: 'Operatsiya kuzatuvi', value: ekoKpi.kuzatuv, color: '#e11d48', icon: '🩹' },
+                ].map((k) => (
+                  <div key={k.label} style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '14px 16px' }}>
+                    <div style={{ fontSize: '18px', marginBottom: '4px' }}>{k.icon}</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '26px', fontWeight: 700, color: k.color }}>
+                      <CountUp value={k.value} />
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{k.label}</div>
+                  </div>
+                ))}
+                <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '18px', marginBottom: '4px' }}>⭐</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '26px', fontWeight: 700, color: '#eab308' }}>
+                    {ekoKpi.reyting > 0 ? ekoKpi.reyting.toFixed(1) : '—'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
+                    O&apos;rtacha reyting {ekoKpi.bahoSoni > 0 && `(${ekoKpi.bahoSoni})`}
+                  </div>
+                </div>
+              </div>
+
+              {(murojaatHolatData.length > 0 || navbatHolatData.some((d) => d.soni > 0)) && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                  {murojaatHolatData.length > 0 && (
+                    <div>
+                      <h4 style={{ fontSize: '12.5px', color: 'var(--muted)', margin: '0 0 12px', fontWeight: 600 }}>Murojaatlar holati</h4>
+                      <ResponsiveContainer width="100%" height={160}>
+                        <BarChart data={murojaatHolatData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }} barSize={26}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                          <XAxis dataKey="nom" tick={{ fontSize: 10.5, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                          <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} />
+                          <Bar dataKey="soni" name="Soni" radius={[6, 6, 0, 0]}>
+                            {murojaatHolatData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                  {navbatHolatData.some((d) => d.soni > 0) && (
+                    <div>
+                      <h4 style={{ fontSize: '12.5px', color: 'var(--muted)', margin: '0 0 12px', fontWeight: 600 }}>Navbatlar holati</h4>
+                      <ResponsiveContainer width="100%" height={160}>
+                        <BarChart data={navbatHolatData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }} barSize={26}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                          <XAxis dataKey="nom" tick={{ fontSize: 10.5, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                          <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} />
+                          <Bar dataKey="soni" name="Soni" radius={[6, 6, 0, 0]}>
+                            {navbatHolatData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Chiziqli grafik — 30 kunlik o'sish */}
