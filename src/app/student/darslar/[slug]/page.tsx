@@ -972,13 +972,13 @@ function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsN
 }
 
 function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
-  if (kartalar.length === 0) return <BoshUlash matn="Flashcardlar tez orada qo'shiladi." />
-
   const [tartib, setTartib] = useState<number[]>(() => kartalar.map((_, i) => i).sort(() => Math.random() - 0.5))
   const [joriy, setJoriy] = useState(0)
   const [ochiq, setOchiq] = useState(false)
   const [bilganlar, setBilganlar] = useState<Set<number>>(new Set())
   const [bilmaganlar, setBilmaganlar] = useState<Set<number>>(new Set())
+
+  if (kartalar.length === 0) return <BoshUlash matn="Flashcardlar tez orada qo'shiladi." />
 
   const tartiblanganlar = tartib.map((i) => kartalar[i])
   const joriyKarta = tartiblanganlar[joriy]
@@ -1300,7 +1300,7 @@ function NazoratTestBolimi({
       setYuklanmoqda(false)
     }
     tekshir()
-  }, [darsSlug, bank, savolSoni])
+  }, [darsSlug, bank, savolSoni, supabase])
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
     setYakunlandi({ togriSon, jami })
@@ -1565,7 +1565,8 @@ function InteraktivCaseBolimi({ caselar }: { caselar: InteraktivCase[] }) {
                 if (tekshirildi) return
                 setTanlangan((prev) => {
                   const next = new Set(prev)
-                  next.has(i) ? next.delete(i) : next.add(i)
+                  if (next.has(i)) next.delete(i)
+                  else next.add(i)
                   return next
                 })
               }}
@@ -1783,20 +1784,18 @@ function VaziyatliMasalaBolimi({ masalalar }: { masalalar: VaziyatliMasala[] }) 
   const [qadam, setQadam] = useState(0)
   const [tanlangan, setTanlangan] = useState<number | null>(null)
   const [tekshirildi, setTekshirildi] = useState(false)
-  const [togrilar, setTogrilar] = useState(0)
   const [yakunlangan, setYakunlangan] = useState<Set<number>>(new Set())
 
   const masala = typeof joriy === 'number' ? masalalar[joriy] : null
   const joriyS = masala?.savollar[qadam]
 
   const boshla = (i: number) => {
-    setJoriy(i); setQadam(0); setTanlangan(null); setTekshirildi(false); setTogrilar(0)
+    setJoriy(i); setQadam(0); setTanlangan(null); setTekshirildi(false)
   }
 
   const tekshir = () => {
     if (tanlangan === null || !joriyS) return
     setTekshirildi(true)
-    if (tanlangan === joriyS.togri) setTogrilar((t) => t + 1)
   }
 
   const keyingi = () => {
