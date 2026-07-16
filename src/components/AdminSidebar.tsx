@@ -14,9 +14,9 @@ const GROUPS: NavGroup[] = [
     id: 'foydalanuvchilar', icon: '👥', label: 'Foydalanuvchilar',
     items: [
       { href: '/admin/users', icon: '👤', label: "Ro'yxat va aktivatsiya" },
-      { href: '/admin/oquvchilar', icon: '🎓', label: "O'quvchilar reytingi", tezOrada: true },
+      { href: '/admin/oquvchilar', icon: '🎓', label: "O'quvchilar reytingi" },
       { href: '/admin/oqituvchilar', icon: '👨‍🏫', label: "O'qituvchilar", tezOrada: true },
-      { href: '/admin/shifokorlar', icon: '👨‍⚕️', label: 'Shifokorlar tasdiqlash', tezOrada: true },
+      { href: '/admin/shifokorlar', icon: '👨‍⚕️', label: 'Shifokorlar tasdiqlash' },
     ],
   },
   {
@@ -25,8 +25,8 @@ const GROUPS: NavGroup[] = [
       { href: '/admin/darslar', icon: '🎥', label: 'Darslar tarkibi' },
       { href: '/admin/talabalar-nazorati', icon: '📈', label: 'Talabalar nazorati' },
       { href: '/admin/yonalishlari', icon: '🗂️', label: "Yo'nalishlari", tezOrada: true },
-      { href: '/admin/testbank', icon: '❓', label: 'Test banki', tezOrada: true },
-      { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar', tezOrada: true },
+      { href: '/admin/testbank', icon: '❓', label: 'Test banki' },
+      { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar' },
     ],
   },
   {
