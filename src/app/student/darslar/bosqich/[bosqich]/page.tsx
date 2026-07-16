@@ -6,6 +6,7 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
+import { useUmumiyProgress, darsOchiqmi, darsTugadimi } from '@/lib/talim/useDarsProgress'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
   oson:   'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)',
@@ -62,11 +63,13 @@ function bosqichBolimlar(bosqich: string): { emoji: string; nom: string }[] {
   ]
 }
 
-function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
+function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi, onClick }: {
   dars: Dars
   tartib: number
   qulflangan: boolean
   bosqich: string
+  ketmaKetYopiq: boolean // oson bosqichda oldingi dars tugallanmagani uchun yopiq
+  tugadi: boolean
   onClick: () => void
 }) {
   const accent = KATEGORIYA_RANGI[dars.kategoriya] ?? '#2563eb'
@@ -74,17 +77,18 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
 
   return (
     <div
-      onClick={onClick}
-      className="rise lift"
+      onClick={ketmaKetYopiq ? undefined : onClick}
+      className={ketmaKetYopiq ? 'rise' : 'rise lift'}
       style={{
         animationDelay: `${Math.min(tartib * 0.05, 0.35)}s`,
-        background: dars.bepulNamuna ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)' : 'var(--surface)',
-        border: dars.bepulNamuna ? '1.5px solid #4ade80' : '1px solid var(--line)',
+        background: dars.bepulNamuna && bosqich !== 'oson' ? 'linear-gradient(135deg, #16a34a14, #05966914)' : 'var(--surface)',
+        border: tugadi ? '1.5px solid #16a34a88' : dars.bepulNamuna && bosqich !== 'oson' ? '1.5px solid #4ade80' : '1px solid var(--line)',
         borderRadius: '20px',
         padding: '20px 22px',
-        cursor: 'pointer',
+        cursor: ketmaKetYopiq ? 'not-allowed' : 'pointer',
         position: 'relative',
         overflow: 'hidden',
+        opacity: ketmaKetYopiq ? 0.55 : 1,
       }}
     >
       {/* Chap rang chiziq */}
@@ -108,7 +112,19 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                {dars.bepulNamuna && (
+                {tugadi && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 800, color: '#16a34a',
+                    background: '#16a34a18', borderRadius: '999px', padding: '2px 8px',
+                  }}>✅ Tugallangan</span>
+                )}
+                {ketmaKetYopiq && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 800, color: '#6b7280',
+                    background: 'var(--surface-2)', borderRadius: '999px', padding: '2px 8px',
+                  }}>🔒 Oldingi darsni tugating</span>
+                )}
+                {dars.bepulNamuna && bosqich !== 'oson' && (
                   <span style={{
                     fontSize: '10px', fontWeight: 800, color: '#16a34a',
                     background: '#16a34a18', borderRadius: '999px', padding: '2px 8px',
@@ -173,7 +189,7 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, onClick }: {
             {dars.kategoriya}
           </span>
           <span style={{ marginLeft: 'auto', fontSize: '12px', color: accent, fontWeight: 700 }}>
-            {qulflangan && !dars.bepulNamuna ? "Ko'rish →" : 'Ochish →'}
+            {ketmaKetYopiq ? '🔒 Yopiq' : qulflangan && !dars.bepulNamuna ? "Ko'rish →" : tugadi ? 'Takrorlash →' : 'Ochish →'}
           </span>
         </div>
       </div>
@@ -187,6 +203,7 @@ export default function BosqichDarslariPage() {
   const bosqich = bosqichYolidanTop(bosqichYoli)
   const [filtr, setFiltr] = useState<string>('Hammasi')
   const { egami, yuklandi } = useMeningObunalarim()
+  const { progress } = useUmumiyProgress()
 
   const bosqichMa = BOSQICHLAR.find((b) => b.id === bosqich)
   const bosqichDarslari = useMemo(
@@ -262,7 +279,9 @@ export default function BosqichDarslariPage() {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
             {[
               { qiymat: `${bosqichDarslari.length} ta`, tavsif: 'dars' },
-              { qiymat: `${bepulSoni} ta`, tavsif: 'bepul namuna' },
+              bosqich === 'oson'
+                ? { qiymat: '100%', tavsif: 'bepul' }
+                : { qiymat: `${bepulSoni} ta`, tavsif: 'bepul namuna' },
               { qiymat: `${bolimlar.length} ta`, tavsif: "bo'lim" },
             ].map((s) => (
               <div key={s.tavsif} style={{
@@ -321,16 +340,24 @@ export default function BosqichDarslariPage() {
 
         {/* Darslar ro'yxati */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {royxat.map((d, i) => (
-            <DarsKartasi
-              key={d.slug}
-              dars={d}
-              tartib={bosqichDarslari.indexOf(d) + 1}
-              qulflangan={yuklandi && !egami(d.bosqich)}
-              bosqich={bosqich}
-              onClick={() => router.push(`/student/darslar/${d.slug}`)}
-            />
-          ))}
+          {royxat.map((d) => {
+            const indeks = bosqichDarslari.indexOf(d)
+            // Oson bosqich bepul, lekin darslar ketma-ket ochiladi — oldingi darsning
+            // asosiy qadamlari (nazariya + amaliy) tugagach keyingisi ochiladi.
+            const ketmaKetYopiq = bosqich === 'oson' && !darsOchiqmi(bosqichDarslari, indeks, progress)
+            return (
+              <DarsKartasi
+                key={d.slug}
+                dars={d}
+                tartib={indeks + 1}
+                qulflangan={yuklandi && !egami(d.bosqich)}
+                bosqich={bosqich}
+                ketmaKetYopiq={ketmaKetYopiq}
+                tugadi={darsTugadimi(progress.get(d.slug))}
+                onClick={() => router.push(`/student/darslar/${d.slug}`)}
+              />
+            )
+          })}
         </div>
       </div>
 

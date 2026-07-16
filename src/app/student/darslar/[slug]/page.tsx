@@ -6,6 +6,7 @@ import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
+import { useDarsProgress, BOSQICH_QADAMLARI } from '@/lib/talim/useDarsProgress'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktivCaselar'
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
@@ -91,21 +92,51 @@ export default function DarsDetailPage() {
     vaziyatli: dars?.bosqich === 'qiyin',
     xatolar: dars?.bosqich === 'qiyin',
   }
-  const TAB_NOMI: Record<Tab, string> = {
-    nazariya: '📖 Nazariya',
-    video: '🎥 Video',
-    yuklab: '📂 Materiallar',
-    flashcard: '🃏 Flashcard',
-    amaliy: '✅ Amaliy test',
-    usmle: '🏅 USMLE',
-    klinik: '🏥 Klinik holat',
-    interaktiv: '🧩 Interaktiv case',
-    vaziyatli: '📋 Vaziyatli masala',
-    xatolar: '🔍 Xatolar tahlili',
-    nazorat: '🎓 Nazorat',
+  const QADAM_NOMI: Record<Tab, { emoji: string; nom: string; turi: string }> = {
+    nazariya:   { emoji: '📖', nom: 'Nazariya',         turi: "O'qish" },
+    video:      { emoji: '🎥', nom: 'Video',            turi: 'Video' },
+    yuklab:     { emoji: '📂', nom: 'Materiallar',      turi: 'Fayllar' },
+    flashcard:  { emoji: '🃏', nom: 'Flashcard',        turi: 'Takrorlash' },
+    amaliy:     { emoji: '✅', nom: 'Amaliy test',      turi: 'Mashq' },
+    usmle:      { emoji: '🏅', nom: 'USMLE',            turi: 'Mashq' },
+    klinik:     { emoji: '🏥', nom: 'Klinik holat',     turi: 'Klinika' },
+    interaktiv: { emoji: '🧩', nom: 'Interaktiv case',  turi: 'Simulyatsiya' },
+    vaziyatli:  { emoji: '📋', nom: 'Vaziyatli masala', turi: 'Masala' },
+    xatolar:    { emoji: '🔍', nom: 'Xatolar tahlili',  turi: 'Tahlil' },
+    nazorat:    { emoji: '🎓', nom: 'Nazorat',          turi: 'Imtihon' },
   }
 
-  const [tab, setTab] = useState<Tab>('nazariya')
+  const BOSQICH_ACCENT: Record<string, string> = { oson: '#16a34a', "o'rta": '#d97706', qiyin: '#dc2626' }
+  const accent = BOSQICH_ACCENT[dars?.bosqich ?? 'oson'] ?? '#16a34a'
+  const accent2 = dars?.bosqich === 'oson' ? '#059669' : dars?.bosqich === "o'rta" ? '#f59e0b' : '#e11d48'
+
+  // Qadamlar ketma-ketligi — bosqichga qarab (path-interfeys tartibi)
+  const qadamlar = (BOSQICH_QADAMLARI[dars?.bosqich ?? 'oson'] as Tab[]).filter((t) => tabMavjud[t])
+
+  const [joriy, setJoriy] = useState(0)
+  const [tarkibOchiq, setTarkibOchiq] = useState(false)
+  const { tugallangan, yakunla } = useDarsProgress(slug)
+
+  const qadam = qadamlar[Math.min(joriy, qadamlar.length - 1)]
+  const progress = qadamlar.length ? Math.round((qadamlar.filter((t) => tugallangan.has(t)).length / qadamlar.length) * 100) : 0
+
+  // Qadam ochiqmi: birinchisi har doim; keyingilari oldingi qadam yakunlangach
+  const ochiqMi = (i: number) => i === 0 || tugallangan.has(qadamlar[i - 1]) || tugallangan.has(qadamlar[i])
+
+  const qadamgaOt = (i: number) => {
+    if (i < 0 || i >= qadamlar.length || !ochiqMi(i)) return
+    setJoriy(i)
+    setTarkibOchiq(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const yakunlaVaDavom = () => {
+    yakunla(qadam)
+    if (joriy < qadamlar.length - 1) {
+      setJoriy(joriy + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   if (!dars) {
     return (
@@ -145,85 +176,239 @@ export default function DarsDetailPage() {
     )
   }
 
+  const Tarkib = (
+    <div>
+      <div style={{ padding: '16px 16px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '13px', fontWeight: 900 }}>Tarkib</span>
+        <span style={{
+          fontSize: '10.5px', fontWeight: 800, color: accent, background: accent + '16',
+          borderRadius: '999px', padding: '3px 10px',
+        }}>{qadamlar.length} qadam</span>
+      </div>
+
+      <div style={{ padding: '0 16px 14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', fontWeight: 700, color: 'var(--muted)', marginBottom: '5px' }}>
+          <span>Dars progressi</span><span style={{ color: accent }}>{progress}%</span>
+        </div>
+        <div style={{ height: '6px', background: 'var(--surface-2)', borderRadius: '999px', overflow: 'hidden' }}>
+          <div style={{
+            width: `${progress}%`, height: '100%', borderRadius: '999px',
+            background: `linear-gradient(90deg, ${accent}, ${accent2})`, transition: 'width .4s ease',
+          }} />
+        </div>
+      </div>
+
+      {qadamlar.map((t, i) => {
+        const ma = QADAM_NOMI[t]
+        const tugadi = tugallangan.has(t)
+        const faol = i === joriy
+        const ochiq = ochiqMi(i)
+        return (
+          <div
+            key={t}
+            onClick={() => qadamgaOt(i)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '11px',
+              padding: '11px 16px',
+              cursor: ochiq ? 'pointer' : 'not-allowed',
+              background: faol ? accent + '10' : 'transparent',
+              borderLeft: faol ? `3px solid ${accent}` : '3px solid transparent',
+              opacity: ochiq ? 1 : 0.45,
+              transition: 'all .15s ease',
+            }}
+          >
+            <div style={{
+              width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
+              background: tugadi ? '#16a34a1a' : faol ? accent + '1c' : 'var(--surface-2)',
+              border: tugadi ? '1.5px solid #16a34a' : faol ? `1.5px solid ${accent}` : '1px solid var(--line)',
+            }}>
+              {tugadi ? '✅' : ochiq ? ma.emoji : '🔒'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '12.5px', fontWeight: faol ? 800 : 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {i + 1}. {ma.nom}
+              </div>
+              <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 600 }}>{ma.turi}</div>
+            </div>
+            {faol && !tugadi && <span style={{ fontSize: '10px', fontWeight: 900, color: accent }}>▶</span>}
+          </div>
+        )
+      })}
+
+      {dars.bosqich !== 'oson' && (
+        <div style={{
+          margin: '12px 16px 16px',
+          background: '#f59e0b14', border: '1px solid #f59e0b55',
+          borderRadius: '12px', padding: '10px 12px', fontSize: '11px', lineHeight: 1.5, color: 'var(--ink-soft)', fontWeight: 600,
+        }}>
+          🏆 Nazoratdan o&apos;tsangiz — bosqich sertifikatiga bir qadam yaqinlashasiz
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
-      <Header backHref="/student/darslar" backLabel="Darslar" />
-      <div className="mx-auto max-w-[760px] px-8 py-8">
-        <div className="rise" style={{
-          background: 'linear-gradient(135deg, #2563eb, #0891b2)', color: 'white',
-          borderRadius: '18px', padding: '26px 28px', marginBottom: '20px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '.04em' }}>{dars.kategoriya}</span>
-            {dars.bepulNamuna && (
-              <span style={{
-                fontSize: '10.5px', fontWeight: 800, background: 'rgba(255,255,255,.22)', borderRadius: '999px',
-                padding: '2px 10px', letterSpacing: '.02em',
-              }}>
-                🎁 BEPUL NAMUNA
-              </span>
-            )}
+      <Header backHref={`/student/darslar/bosqich/${dars.bosqich === "o'rta" ? 'orta' : dars.bosqich}`} backLabel="Darslar" />
+
+      {/* Yopishqoq dars paneli: sarlavha + progress + mobil Tarkib tugmasi */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        background: 'var(--surface)', borderBottom: '1px solid var(--line)',
+        padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+      }}>
+        <button
+          onClick={() => setTarkibOchiq(!tarkibOchiq)}
+          className="soft-press lg:hidden"
+          style={{
+            background: accent + '14', color: accent, border: `1px solid ${accent}44`,
+            borderRadius: '10px', padding: '7px 13px', fontSize: '12px', fontWeight: 800, cursor: 'pointer',
+            flexShrink: 0,
+          }}
+        >
+          ☰ Tarkib
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '10px', fontWeight: 800, color: accent, letterSpacing: '.05em', textTransform: 'uppercase' }}>
+            {dars.kategoriya}{dars.bepulNamuna ? ' · 🎁 Bepul namuna' : ''}
           </div>
-          <h1 style={{ margin: '6px 0 0', fontSize: '22px', fontWeight: 800, lineHeight: 1.3 }}>{dars.sarlavha}</h1>
-          <p style={{ margin: '10px 0 0', fontSize: '13.5px', opacity: 0.92 }}>⏱ {dars.daqiqa} daqiqa o&apos;qish</p>
+          <div style={{ fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {dars.sarlavha}
+          </div>
         </div>
-
-        <div className="rise" style={{ display: 'flex', gap: '8px', marginBottom: '22px', flexWrap: 'wrap' }}>
-          {(Object.keys(TAB_NOMI) as Tab[]).filter((t) => tabMavjud[t]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="soft-press"
-              style={{
-                background: tab === t ? 'var(--accent)' : 'var(--surface-2)',
-                color: tab === t ? 'white' : 'var(--ink-soft)',
-                border: tab === t ? 'none' : '1px solid var(--line)',
-                borderRadius: '10px', padding: '9px 16px', fontSize: '13px', fontWeight: 700,
-                cursor: 'pointer', transition: 'all .18s ease', whiteSpace: 'nowrap',
-              }}
-            >
-              {TAB_NOMI[t]}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <div style={{ width: '90px', height: '6px', background: 'var(--surface-2)', borderRadius: '999px', overflow: 'hidden' }} className="hidden sm:block">
+            <div style={{ width: `${progress}%`, height: '100%', background: `linear-gradient(90deg,${accent},${accent2})`, borderRadius: '999px', transition: 'width .4s ease' }} />
+          </div>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: accent }}>{progress}%</span>
         </div>
+      </div>
 
-        {tab === 'nazariya' && !yuklandi && <BoshUlash matn="Yuklanmoqda..." />}
-        {tab === 'nazariya' && yuklandi && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
-        {tab === 'video' && <VideoBolimi asosiyVideo={asosiyVideo} linklar={videoLinklar} />}
-        {tab === 'yuklab' && <YuklabOlishBolimi konspektYoli={konspektYoli} prezentatsiyaYoli={prezentatsiyaYoli} />}
-        {tab === 'amaliy' && (
-          <AmaliyTestBolimi
-            darsSlug={dars.slug}
-            darsNomi={dars.sarlavha}
-            bank={amaliyBank}
-            savolSoni={amaliySavolSoni}
-          />
+      <div className="mx-auto max-w-[1140px]" style={{ display: 'flex' }}>
+        {/* Chap panel — desktop */}
+        <aside className="hidden lg:block" style={{
+          width: '300px', flexShrink: 0,
+          borderRight: '1px solid var(--line)',
+          position: 'sticky', top: '57px', height: 'calc(100vh - 57px)', overflowY: 'auto',
+          background: 'var(--surface)',
+        }}>
+          {Tarkib}
+        </aside>
+
+        {/* Mobil drawer */}
+        {tarkibOchiq && (
+          <div className="lg:hidden" style={{ position: 'fixed', inset: 0, zIndex: 50 }}>
+            <div onClick={() => setTarkibOchiq(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.45)' }} />
+            <div style={{
+              position: 'absolute', top: 0, left: 0, bottom: 0, width: 'min(320px, 85vw)',
+              background: 'var(--surface)', overflowY: 'auto', boxShadow: '8px 0 30px rgba(0,0,0,.2)',
+            }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 900, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dars.sarlavha}</span>
+                <button onClick={() => setTarkibOchiq(false)} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--muted)', flexShrink: 0 }}>✕</button>
+              </div>
+              {Tarkib}
+            </div>
+          </div>
         )}
-        {tab === 'usmle' && (usmleBank.length > 0
-          ? <UsmleTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={usmleBank} />
-          : <BoshUlash matn="USMLE savollari tez orada qo'shiladi." />
-        )}
-        {tab === 'nazorat' && (nazoratBank.length > 0
-          ? <NazoratTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={nazoratBank} savolSoni={nazoratSavolSoni} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />
-          : <BoshUlash matn="Nazorat testi tez orada qo'shiladi." />
-        )}
-        {tab === 'klinik' && (klinikHolatlar.length > 0
-          ? <KlinikHolatlarBolimi holatlar={klinikHolatlar} />
-          : <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
-        )}
-        {tab === 'interaktiv' && (interaktivCaselar.length > 0
-          ? <InteraktivCaseBolimi caselar={interaktivCaselar} />
-          : <BoshUlash matn="Interaktiv case tez orada qo'shiladi." />
-        )}
-        {tab === 'vaziyatli' && (vaziyatliMasalalar.length > 0
-          ? <VaziyatliMasalaBolimi masalalar={vaziyatliMasalalar} />
-          : <BoshUlash matn="Vaziyatli masalalar tez orada qo'shiladi." />
-        )}
-        {tab === 'xatolar' && (xatolarTahlili.length > 0
-          ? <XatolarTahlilyBolimi tahlillar={xatolarTahlili} />
-          : <BoshUlash matn="Xatolar tahlili tez orada qo'shiladi." />
-        )}
-        {tab === 'flashcard' && <FlashcardBolimi kartalar={flashcardlar} />}
+
+        {/* Asosiy kontent */}
+        <main style={{ flex: 1, minWidth: 0, padding: '24px 16px 120px' }}>
+          <div className="mx-auto max-w-[760px]">
+            {/* Qadam sarlavhasi */}
+            <div className="rise" style={{ marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '11px', fontWeight: 900, color: accent, background: accent + '14',
+                  borderRadius: '999px', padding: '4px 12px',
+                }}>QADAM {joriy + 1}/{qadamlar.length}</span>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700 }}>{QADAM_NOMI[qadam].turi}</span>
+              </div>
+              <h1 style={{ margin: '8px 0 0', fontSize: '22px', fontWeight: 900 }}>{QADAM_NOMI[qadam].emoji} {QADAM_NOMI[qadam].nom}</h1>
+            </div>
+
+            {qadam === 'nazariya' && !yuklandi && <BoshUlash matn="Yuklanmoqda..." />}
+            {qadam === 'nazariya' && yuklandi && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
+            {qadam === 'video' && <VideoBolimi asosiyVideo={asosiyVideo} linklar={videoLinklar} />}
+            {qadam === 'yuklab' && <YuklabOlishBolimi konspektYoli={konspektYoli} prezentatsiyaYoli={prezentatsiyaYoli} />}
+            {qadam === 'amaliy' && (
+              <AmaliyTestBolimi
+                darsSlug={dars.slug}
+                darsNomi={dars.sarlavha}
+                bank={amaliyBank}
+                savolSoni={amaliySavolSoni}
+              />
+            )}
+            {qadam === 'usmle' && (usmleBank.length > 0
+              ? <UsmleTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={usmleBank} />
+              : <BoshUlash matn="USMLE savollari tez orada qo'shiladi." />
+            )}
+            {qadam === 'nazorat' && (nazoratBank.length > 0
+              ? <NazoratTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={nazoratBank} savolSoni={nazoratSavolSoni} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />
+              : <BoshUlash matn="Nazorat testi tez orada qo'shiladi." />
+            )}
+            {qadam === 'klinik' && (klinikHolatlar.length > 0
+              ? <KlinikHolatlarBolimi holatlar={klinikHolatlar} />
+              : <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
+            )}
+            {qadam === 'interaktiv' && (interaktivCaselar.length > 0
+              ? <InteraktivCaseBolimi caselar={interaktivCaselar} />
+              : <BoshUlash matn="Interaktiv case tez orada qo'shiladi." />
+            )}
+            {qadam === 'vaziyatli' && (vaziyatliMasalalar.length > 0
+              ? <VaziyatliMasalaBolimi masalalar={vaziyatliMasalalar} />
+              : <BoshUlash matn="Vaziyatli masalalar tez orada qo'shiladi." />
+            )}
+            {qadam === 'xatolar' && (xatolarTahlili.length > 0
+              ? <XatolarTahlilyBolimi tahlillar={xatolarTahlili} />
+              : <BoshUlash matn="Xatolar tahlili tez orada qo'shiladi." />
+            )}
+            {qadam === 'flashcard' && <FlashcardBolimi kartalar={flashcardlar} />}
+          </div>
+        </main>
+      </div>
+
+      {/* Pastki navigatsiya paneli */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
+        background: 'var(--surface)', borderTop: '1px solid var(--line)',
+        padding: '12px 16px',
+      }}>
+        <div className="mx-auto max-w-[1140px]" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => qadamgaOt(joriy - 1)}
+            disabled={joriy === 0}
+            className="soft-press"
+            style={{
+              background: 'var(--surface-2)', color: joriy === 0 ? 'var(--muted)' : 'var(--ink)',
+              border: '1px solid var(--line)', borderRadius: '12px', padding: '11px 18px',
+              fontSize: '13px', fontWeight: 800, cursor: joriy === 0 ? 'default' : 'pointer', opacity: joriy === 0 ? .5 : 1,
+            }}
+          >← Oldingi</button>
+
+          <div style={{ flex: 1, textAlign: 'center', fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700 }} className="hidden sm:block">
+            {tugallangan.has(qadam) ? '✅ Bu qadam tugallangan' : `${QADAM_NOMI[qadam].emoji} ${QADAM_NOMI[qadam].nom}`}
+          </div>
+
+          <button
+            onClick={yakunlaVaDavom}
+            className="soft-press"
+            style={{
+              background: tugallangan.has(qadam)
+                ? 'var(--surface-2)'
+                : `linear-gradient(135deg,${accent},${accent2})`,
+              color: tugallangan.has(qadam) ? 'var(--ink-soft)' : 'white',
+              border: tugallangan.has(qadam) ? '1px solid var(--line)' : 'none',
+              borderRadius: '12px', padding: '11px 20px', fontSize: '13px', fontWeight: 800, cursor: 'pointer',
+              flexShrink: 0, marginLeft: 'auto',
+            }}
+          >
+            {joriy === qadamlar.length - 1
+              ? (tugallangan.has(qadam) ? '🎉 Dars tugallandi' : 'Darsni yakunlash 🎉')
+              : (tugallangan.has(qadam) ? 'Keyingisi →' : '✓ Yakunlash va davom etish')}
+          </button>
+        </div>
       </div>
     </div>
   )

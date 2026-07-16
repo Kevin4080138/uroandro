@@ -34,7 +34,8 @@ export function useMeningObunalarim() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const egami = (bosqich: Bosqich) => adminmi || (obunalar?.has(bosqich) ?? false)
+  // Oson bosqich hamma uchun bepul — obuna talab qilinmaydi.
+  const egami = (bosqich: Bosqich) => bosqich === 'oson' || adminmi || (obunalar?.has(bosqich) ?? false)
 
   return { obunalar, egami, adminmi, yuklandi }
 }
