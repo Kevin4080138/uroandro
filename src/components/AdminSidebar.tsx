@@ -23,6 +23,7 @@ const GROUPS: NavGroup[] = [
     id: 'talim', icon: '📚', label: "Ta'lim",
     items: [
       { href: '/admin/darslar', icon: '🎥', label: 'Darslar tarkibi' },
+      { href: '/admin/talabalar-nazorati', icon: '📈', label: 'Talabalar nazorati' },
       { href: '/admin/yonalishlari', icon: '🗂️', label: "Yo'nalishlari", tezOrada: true },
       { href: '/admin/testbank', icon: '❓', label: 'Test banki', tezOrada: true },
       { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar', tezOrada: true },
