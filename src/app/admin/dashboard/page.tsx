@@ -7,6 +7,7 @@ import { Header } from '@/components/Header'
 import Link from 'next/link'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { ObunaEtibor } from '@/components/admin/ObunaEtibor'
+import { TalimTahlil } from '@/components/admin/TalimTahlil'
 
 type FaollikMa = {
   bugunKirganlar: number
@@ -122,6 +123,9 @@ export default function AdminDashboard() {
 
         {/* Obuna e'tibor talab qiladi: xavf zonasi + tugaydigan obunalar */}
         <ObunaEtibor />
+
+        {/* Ta'lim tahlili: faollik grafigi, top talabalar, qiyin darslar, voronka */}
+        <TalimTahlil />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
           {/* Tezkor havolalar */}
