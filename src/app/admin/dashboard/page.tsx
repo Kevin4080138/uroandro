@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import Link from 'next/link'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { ObunaEtibor } from '@/components/admin/ObunaEtibor'
 
 type FaollikMa = {
   bugunKirganlar: number
@@ -118,6 +119,9 @@ export default function AdminDashboard() {
             ))}
           </div>
         )}
+
+        {/* Obuna e'tibor talab qiladi: xavf zonasi + tugaydigan obunalar */}
+        <ObunaEtibor />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
           {/* Tezkor havolalar */}
