@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { darsTop, shuffleVaTanla, variantlarniAralashtir, BOSQICHLAR, type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { useDarsProgress, BOSQICH_QADAMLARI } from '@/lib/talim/useDarsProgress'
+import { useTariflar, narxFmt } from '@/lib/talim/tariflar'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktivCaselar'
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
@@ -116,6 +117,7 @@ export default function DarsDetailPage() {
   const [joriy, setJoriy] = useState(0)
   const [tarkibOchiq, setTarkibOchiq] = useState(false)
   const { tugallangan, yakunla } = useDarsProgress(slug)
+  const { bosqichniki: bosqichTariflari } = useTariflar()
 
   const qadam = qadamlar[Math.min(joriy, qadamlar.length - 1)]
   const progress = qadamlar.length ? Math.round((qadamlar.filter((t) => tugallangan.has(t)).length / qadamlar.length) * 100) : 0
@@ -164,6 +166,26 @@ export default function DarsDetailPage() {
             <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)' }}>
               Bu dars <strong>{bosqichMa?.emoji} {bosqichMa?.nom}</strong> bosqichiga tegishli — uni ko&apos;rish uchun shu bosqichni sotib olishingiz kerak.
             </p>
+            {bosqichTariflari(dars.bosqich).length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+                {bosqichTariflari(dars.bosqich).map((t) => (
+                  <div key={t.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
+                    background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '12px',
+                    padding: '11px 16px', textAlign: 'left',
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 800 }}>{t.nom}</div>
+                      {t.tavsif && <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{t.tavsif}</div>}
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '13.5px', fontWeight: 900, color: 'var(--accent)' }}>{narxFmt(t.narx)}</div>
+                      <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 600 }}>{t.muddat_oy ? `${t.muddat_oy} oy` : 'Muddatsiz'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             <a href="https://t.me/urolog_arabboyev" target="_blank" rel="noopener noreferrer" className="btn-animated soft-press" style={{
               display: 'inline-block', background: 'var(--accent)', color: 'white', textDecoration: 'none',
               borderRadius: '12px', padding: '12px 26px', fontSize: '14px', fontWeight: 700,

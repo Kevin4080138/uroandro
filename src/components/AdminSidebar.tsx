@@ -32,9 +32,9 @@ const GROUPS: NavGroup[] = [
   {
     id: 'savdo', icon: '💰', label: "To'lovlar & Savdo",
     items: [
-      { href: '/admin/tariflar', icon: '💎', label: 'Tariflar', tezOrada: true },
+      { href: '/admin/tariflar', icon: '💎', label: 'Tariflar' },
       { href: '/admin/buyurtmalar', icon: '🛒', label: 'Buyurtmalar', tezOrada: true },
-      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar', tezOrada: true },
+      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar' },
       { href: '/admin/promokodlar', icon: '🎟️', label: 'Promokodlar', tezOrada: true },
     ],
   },
@@ -45,15 +45,15 @@ const GROUPS: NavGroup[] = [
       { href: '/admin/bannerlar', icon: '🎠', label: 'Bannerlar & E\'lonlar' },
       { href: '/admin/maqolalar', icon: '📰', label: 'Maqolalar' },
       { href: '/admin/adabiyotlar', icon: '📖', label: 'Adabiyotlar & Darsliklar' },
-      { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar', tezOrada: true },
-      { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda', tezOrada: true },
+      { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar' },
+      { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda' },
     ],
   },
   {
     id: 'muloqot', icon: '💬', label: 'Muloqot',
     items: [
       { href: '/admin/fikrlar', icon: '💭', label: 'Fikrlar' },
-      { href: '/admin/push', icon: '🔔', label: 'Push bildirishnoma', tezOrada: true },
+      { href: '/admin/push', icon: '🔔', label: 'Push bildirishnoma' },
     ],
   },
   {

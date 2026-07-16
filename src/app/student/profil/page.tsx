@@ -26,6 +26,7 @@ const BANDLAR = [
   { icon: '📩', label: 'Adminga yozish', href: 'https://t.me/urolog_arabboyev', tashqi: true },
   { icon: '📞', label: "Qo'ng'iroq qilish", href: 'tel:+998904080138', tashqi: true },
   { icon: '📖', label: "Yo'riqnoma", href: '/student/profil/yoriqnoma' },
+  { icon: '❔', label: 'Savol-Javoblar', href: '/student/profil/faq' },
   { icon: '📄', label: 'Ommaviy oferta', href: '/student/profil/oferta' },
 ]
 

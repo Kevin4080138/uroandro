@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICH_YOLI } from '@/lib/talim/darslar'
+import { useTariflar, narxFmt } from '@/lib/talim/tariflar'
 
 type BolimQatori = { emoji: string; nom: string; yangi?: boolean }
 
@@ -56,6 +57,9 @@ export default function DarslarPage() {
   const router = useRouter()
   const soni = (b: string) => DARSLAR.filter((d) => d.bosqich === b).length
   const och = (b: 'oson' | "o'rta" | 'qiyin') => router.push(`/student/darslar/bosqich/${BOSQICH_YOLI[b]}`)
+  const { engArzon } = useTariflar()
+  const ortaTarif = engArzon("o'rta")
+  const qiyinTarif = engArzon('qiyin')
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -229,7 +233,7 @@ export default function DarslarPage() {
                 cursor: 'pointer', width: '100%', marginBlockStart: '18px',
                 boxShadow: '0 6px 18px rgba(217,119,6,.35)',
               }}>
-                Bosqichni ochish 🔓
+                {ortaTarif ? `Bosqichni ochish — ${narxFmt(ortaTarif.narx)}${ortaTarif.muddat_oy ? ` / ${ortaTarif.muddat_oy} oy` : ''}` : 'Bosqichni ochish 🔓'}
               </button>
               <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--muted)', marginTop: '8px' }}>
                 Avval bepul namuna darslarni sinab ko&apos;ring
@@ -317,7 +321,7 @@ export default function DarslarPage() {
                 cursor: 'pointer', width: '100%', marginBlockStart: '18px',
                 boxShadow: '0 6px 18px rgba(220,38,38,.4)',
               }}>
-                PRO darajaga o&apos;tish ⚡
+                {qiyinTarif ? `PRO darajaga o'tish — ${narxFmt(qiyinTarif.narx)}${qiyinTarif.muddat_oy ? ` / ${qiyinTarif.muddat_oy} oy` : ''}` : "PRO darajaga o'tish ⚡"}
               </button>
               <div style={{ textAlign: 'center', fontSize: '11px', opacity: .5, marginTop: '8px' }}>
                 Avval bepul namuna darslarni sinab ko&apos;ring
