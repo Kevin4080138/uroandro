@@ -14,6 +14,8 @@ type FaollikMa = {
   haftaYangilar: number
   korilmagan: number
   yangiMurojaatlar: number
+  obunaliTalabalar: number
+  faolTalabalar: number
 }
 
 const ROLE_COLOR: Record<string, string> = {
@@ -42,7 +44,7 @@ export default function AdminDashboard() {
       const hafta = new Date(); hafta.setDate(hafta.getDate() - 7); hafta.setHours(0, 0, 0, 0)
       const yettikun = new Date(); yettikun.setDate(yettikun.getDate() - 6); yettikun.setHours(0, 0, 0, 0)
 
-      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes] = await Promise.all([
+      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes, obunaRes, qadamFaolRes, testFaolRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', bugun.toISOString()),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', hafta.toISOString()),
@@ -50,6 +52,21 @@ export default function AdminDashboard() {
         supabase.from('tashriflar').select('id', { count: 'exact', head: true }).eq('holat', 'yangi'),
         supabase.from('profiles').select('full_name, role, created_at').order('created_at', { ascending: false }).limit(5),
         supabase.from('profiles').select('created_at').gte('created_at', yettikun.toISOString()),
+        supabase.from('obunalar').select('student_id, tugash_sanasi').eq('faol', true),
+        supabase.from('dars_qadam_progress').select('student_id').gte('created_at', hafta.toISOString()),
+        supabase.from('talim_natijalari').select('student_id').gte('created_at', hafta.toISOString()),
+      ])
+
+      // Obunali talabalar — muddati o'tmagan faol obunalar bo'yicha unikal talabalar
+      const obunalilar = new Set(
+        ((obunaRes.data ?? []) as { student_id: string; tugash_sanasi: string | null }[])
+          .filter((o) => !o.tugash_sanasi || new Date(o.tugash_sanasi) > new Date())
+          .map((o) => o.student_id)
+      )
+      // 7 kunda faol talabalar — qadam yoki test urinishi qilganlar (unikal)
+      const faollar = new Set([
+        ...((qadamFaolRes.data ?? []) as { student_id: string }[]).map((r) => r.student_id),
+        ...((testFaolRes.data ?? []) as { student_id: string }[]).map((r) => r.student_id),
       ])
 
       setProfile(profileRes.data)
@@ -58,6 +75,8 @@ export default function AdminDashboard() {
         haftaYangilar: haftaRes.count ?? 0,
         korilmagan: fikrRes.count ?? 0,
         yangiMurojaatlar: murojaatRes.count ?? 0,
+        obunaliTalabalar: obunalilar.size,
+        faolTalabalar: faollar.size,
       })
       setRecentUsers((recentRes.data as Recent[]) ?? [])
 
@@ -113,6 +132,8 @@ export default function AdminDashboard() {
             {[
               { label: 'Bugun qo\'shildi', value: faollik.bugunKirganlar, icon: '🆕', color: 'var(--accent)', href: '/admin/users' },
               { label: 'Haftalik yangilar', value: faollik.haftaYangilar, icon: '📅', color: 'var(--good)', href: '/admin/users' },
+              { label: 'Obunali talabalar', value: faollik.obunaliTalabalar, icon: '💳', color: 'var(--good)', href: '/admin/obunalar' },
+              { label: '7 kunda faol talabalar', value: faollik.faolTalabalar, icon: '🔥', color: faollik.faolTalabalar > 0 ? 'var(--accent)' : 'var(--muted)', href: '/admin/talabalar-nazorati' },
               { label: 'Ko\'rilmagan fikrlar', value: faollik.korilmagan, icon: '💬', color: faollik.korilmagan > 0 ? 'var(--warn)' : 'var(--muted)', href: '/admin/fikrlar' },
               { label: 'Yangi murojaatlar', value: faollik.yangiMurojaatlar, icon: '📋', color: faollik.yangiMurojaatlar > 0 ? 'var(--danger)' : 'var(--muted)', href: '/admin/statistika' },
             ].map((k) => (
