@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
                 <XAxis dataKey="kun" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} formatter={(v: number) => [v, "Yangi a'zo"]} />
+                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} formatter={(v) => [v, "Yangi a'zo"]} />
                 <Area type="monotone" dataKey="soni" stroke="#2563eb" fill="url(#miniGrad)" strokeWidth={2} dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>
