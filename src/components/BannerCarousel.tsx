@@ -149,7 +149,10 @@ export function BannerCarousel({ role }: { role?: string }) {
               {b.sarlavha}
             </p>
             {b.tavsif && (
-              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
+              <p style={{
+                margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4,
+                overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              }}>
                 {b.tavsif}
               </p>
             )}

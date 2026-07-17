@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { DARSLAR } from '@/lib/talim/darslar'
+import { DARSLAR, darsTop, type Bosqich } from '@/lib/talim/darslar'
+import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard } from '@/components/RankBadge'
@@ -13,8 +14,10 @@ import { getRank, getProgressData } from '@/lib/rank'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
-  const [bajarilganSoni, setBajarilganSoni] = useState(0)
   const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
+  // Qadam progressi: slug -> tugallangan qadamlar; oxirgi faollik darsi "Davom ettirish" uchun
+  const [qadamProgress, setQadamProgress] = useState<Map<string, Set<string>>>(new Map())
+  const [oxirgiSlug, setOxirgiSlug] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -24,10 +27,19 @@ export default function StudentDashboard() {
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
-      const { data: natijalar } = await supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id)
-      const list = natijalar ?? []
-      setNatijalarList(list)
-      setBajarilganSoni(new Set(list.map((n: any) => n.dars_slug)).size)
+      const [{ data: natijalar }, { data: qadamlar }] = await Promise.all([
+        supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id),
+        supabase.from('dars_qadam_progress').select('dars_slug, qadam, created_at').eq('student_id', user.id).order('created_at', { ascending: false }),
+      ])
+      setNatijalarList(natijalar ?? [])
+      const m = new Map<string, Set<string>>()
+      for (const r of qadamlar ?? []) {
+        const s = m.get(r.dars_slug) ?? new Set<string>()
+        s.add(r.qadam)
+        m.set(r.dars_slug, s)
+      }
+      setQadamProgress(m)
+      setOxirgiSlug(qadamlar?.[0]?.dars_slug ?? null)
     }
     getProfile()
   }, [])
@@ -38,17 +50,39 @@ export default function StudentDashboard() {
     </div>
   )
 
-  const jamiDars = DARSLAR.length
-  const progress = jamiDars ? Math.round((bajarilganSoni / jamiDars) * 100) : 0
   const rank = getRank(getProgressData(natijalarList))
+
+  // Bosqich kesimidagi progress: tugallangan (nazariya+amaliy) darslar soni
+  const BOSQICH_MA: { id: Bosqich; nom: string; emoji: string; rang: string }[] = [
+    { id: 'oson', nom: 'Oson', emoji: '🟢', rang: '#16a34a' },
+    { id: "o'rta", nom: "O'rta", emoji: '🟡', rang: '#d97706' },
+    { id: 'qiyin', nom: 'Qiyin', emoji: '🔴', rang: '#dc2626' },
+  ]
+  const bosqichProgress = BOSQICH_MA.map((b) => {
+    const jami = DARSLAR.filter((d) => d.bosqich === b.id).length
+    let tugadi = 0
+    qadamProgress.forEach((s, slug) => {
+      if (darsTop(slug)?.bosqich === b.id && darsTugadimi(s)) tugadi++
+    })
+    return { ...b, tugadi, jami }
+  })
+  const jamiTugadi = bosqichProgress.reduce((s, b) => s + b.tugadi, 0)
+
+  // "Davom ettirish": oxirgi faollik bo'lgan dars va uning qadam progressi
+  const oxirgiDars = oxirgiSlug ? darsTop(oxirgiSlug) : null
+  const oxirgiQadamlar = oxirgiDars ? (BOSQICH_QADAMLARI[oxirgiDars.bosqich] ?? []) : []
+  const oxirgiTugallangan = oxirgiSlug
+    ? oxirgiQadamlar.filter((q) => qadamProgress.get(oxirgiSlug)?.has(q)).length
+    : 0
+  const oxirgiTugadi = oxirgiQadamlar.length > 0 && oxirgiTugallangan >= oxirgiQadamlar.length
 
   const KARTALAR = [
     { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
-    { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
     { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
     { icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
+    { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
   ]
 
   const NAZAR_KARTALAR = [
@@ -64,7 +98,12 @@ export default function StudentDashboard() {
         .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 680px) {
           .db-hero { grid-template-columns: 1fr; }
-          .db-cards { grid-template-columns: repeat(2, 1fr); }
+          .db-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          /* Telefonda kartalar ixcham: kichik ikonka, tavsifsiz — bir ekranga ko'proq sig'adi */
+          .db-cards .dash-card { padding: 14px; }
+          .db-cards .dash-icon { width: 38px; height: 38px; font-size: 19px; margin-bottom: 8px; border-radius: 10px; }
+          .db-cards .dash-title { font-size: 14px; }
+          .db-cards .dash-desc { display: none; }
         }
         @media (max-width: 420px) {
           .db-wrap { padding: 16px 16px 0; }
@@ -86,6 +125,44 @@ export default function StudentDashboard() {
             </h1>
           </div>
 
+          {/* Davom ettirish — talabaning keyingi harakati doim birinchi ko'rinadi */}
+          <div
+            onClick={() => router.push(oxirgiDars && !oxirgiTugadi ? `/student/darslar/${oxirgiDars.slug}` : '/student/darslar')}
+            className="rise soft-press"
+            style={{
+              background: 'linear-gradient(120deg, var(--accent), var(--accent-2))', color: 'white',
+              borderRadius: '16px', padding: '16px 18px', marginBottom: '20px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '14px', animationDelay: '.04s',
+            }}
+          >
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '13px', flexShrink: 0,
+              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '21px',
+            }}>
+              {oxirgiDars ? (oxirgiTugadi ? '🎉' : '▶️') : '🚀'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, opacity: .85, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                {oxirgiDars ? (oxirgiTugadi ? 'Dars tugallandi — keyingisiga o\'ting' : 'Davom ettirish') : 'Boshlash vaqti keldi'}
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '2px 0 4px' }}>
+                {oxirgiDars ? oxirgiDars.sarlavha : 'Birinchi darsni bepul boshlang'}
+              </div>
+              {oxirgiDars && !oxirgiTugadi && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ flex: 1, maxWidth: '160px', height: '5px', background: 'rgba(255,255,255,.25)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${oxirgiQadamlar.length ? Math.round((oxirgiTugallangan / oxirgiQadamlar.length) * 100) : 0}%`,
+                      height: '100%', background: 'white', borderRadius: '999px',
+                    }} />
+                  </div>
+                  <span style={{ fontSize: '11px', fontWeight: 800, opacity: .9 }}>{oxirgiTugallangan}/{oxirgiQadamlar.length} qadam</span>
+                </div>
+              )}
+            </div>
+            <span style={{ fontSize: '18px', flexShrink: 0 }}>→</span>
+          </div>
+
           {/* HERO: chap — rank+progress, o'ng — banner */}
           <div className="db-hero">
 
@@ -99,38 +176,27 @@ export default function StudentDashboard() {
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
                 padding: '16px 18px', animationDelay: '.08s',
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{bajarilganSoni}/{jamiDars}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{jamiTugadi} ta dars tugallandi</span>
                 </div>
-                <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '10px' }}>
-                  <div style={{
-                    height: '100%', borderRadius: '999px', width: `${progress}%`,
-                    background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .5s ease',
-                  }} />
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <div style={{
-                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
-                    padding: '10px 12px', textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--good)' }}>{bajarilganSoni}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Bajarildi</div>
-                  </div>
-                  <div style={{
-                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
-                    padding: '10px 12px', textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--warn)' }}>{jamiDars - bajarilganSoni}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Qoldi</div>
-                  </div>
-                  <div style={{
-                    flex: 1, background: 'var(--surface-2)', borderRadius: '12px',
-                    padding: '10px 12px', textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent)' }}>{progress}%</div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Daraja</div>
-                  </div>
+                {/* Bosqich kesimida — "7/106" o'rniga har bosqich alohida (motivatsiya uchun) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {bosqichProgress.map((b) => (
+                    <div key={b.id}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink-soft)' }}>{b.emoji} {b.nom}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: b.rang }}>{b.tugadi}/{b.jami}</span>
+                      </div>
+                      <div style={{ height: '6px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', borderRadius: '999px',
+                          width: `${b.jami ? Math.round((b.tugadi / b.jami) * 100) : 0}%`,
+                          background: b.rang, transition: 'width .5s ease',
+                        }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
