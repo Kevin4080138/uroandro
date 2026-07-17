@@ -89,6 +89,20 @@ export default function AdminDashboard() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header />
 
+      {/* 12 ustunli boshqaruv tartibi: har karta o'z enini biladi, bo'sh joy qolmaydi */}
+      <style>{`
+        .adm-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+        .adm-span-4 { grid-column: span 4; min-width: 0; }
+        .adm-span-8 { grid-column: span 8; min-width: 0; }
+        @media (max-width: 1100px) {
+          .adm-span-4 { grid-column: span 6; }
+          .adm-span-8 { grid-column: span 12; }
+        }
+        @media (max-width: 720px) {
+          .adm-span-4, .adm-span-8 { grid-column: span 12; }
+        }
+      `}</style>
+
       <div style={{ padding: '32px' }}>
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
         <h1 className="rise" style={{ fontSize: '32px', marginBottom: '24px' }}>{profile.full_name}</h1>
@@ -124,14 +138,38 @@ export default function AdminDashboard() {
         {/* Obuna e'tibor talab qiladi: xavf zonasi + tugaydigan obunalar */}
         <ObunaEtibor />
 
-        {/* Ta'lim tahlili: faollik grafigi, top talabalar, qiyin darslar, voronka */}
-        <TalimTahlil />
+        {/* 12 ustunli tartib: grafik 8 + top 4 / qiyin 4 + voronka 4 + a'zolar grafigi 4 / panel 8 + so'nggi a'zolar 4 */}
+        <div className="adm-grid" style={{ marginBottom: '32px' }}>
+          {/* Ta'lim tahlili kartalari */}
+          <TalimTahlil />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          {/* Mini grafik: 7 kunlik yangi a'zolar */}
+          <div className="adm-span-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0, fontWeight: 600 }}>7 kunlik yangi a&apos;zolar</h3>
+              <Link href="/admin/statistika" style={{ fontSize: '12px', color: 'var(--accent)', textDecoration: 'none' }}>Batafsil →</Link>
+            </div>
+            <ResponsiveContainer width="100%" height={190}>
+              <AreaChart data={miniChart} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="miniGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                <XAxis dataKey="kun" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} formatter={(v: number) => [v, "Yangi a'zo"]} />
+                <Area type="monotone" dataKey="soni" stroke="#2563eb" fill="url(#miniGrad)" strokeWidth={2} dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
           {/* Tezkor havolalar */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
+          <div className="adm-span-8" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
             <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '0 0 14px 0', fontWeight: 600 }}>Boshqaruv paneli</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
               {[
                 { icon: '👥', title: 'Foydalanuvchilar', href: '/admin/users', c: 'var(--accent)' },
                 { icon: '🏥', title: 'Klinikalar', href: '/admin/klinikalar', c: 'var(--good)' },
@@ -154,31 +192,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Mini grafik */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0, fontWeight: 600 }}>7 kunlik yangi a'zolar</h3>
-              <Link href="/admin/statistika" style={{ fontSize: '12px', color: 'var(--accent)', textDecoration: 'none' }}>Batafsil →</Link>
-            </div>
-            <ResponsiveContainer width="100%" height={140}>
-              <AreaChart data={miniChart} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="miniGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
-                <XAxis dataKey="kun" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} formatter={(v: any) => [v, "Yangi a'zo"]} />
-                <Area type="monotone" dataKey="soni" stroke="#2563eb" fill="url(#miniGrad)" strokeWidth={2} dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
           {/* So'nggi ro'yxatdan o'tganlar */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
+          <div className="adm-span-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0, fontWeight: 600 }}>So'nggi a'zolar</h3>
               <Link href="/admin/users" style={{ fontSize: '12px', color: 'var(--accent)', textDecoration: 'none' }}>Barchasini ko'rish →</Link>

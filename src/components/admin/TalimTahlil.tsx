@@ -156,15 +156,16 @@ export function TalimTahlil() {
     letterSpacing: '.05em', margin: '0 0 14px 0', fontWeight: 600,
   }
 
+  // Fragment qaytaradi — har karta dashboard'dagi .adm-grid ning to'g'ridan-to'g'ri
+  // katagi bo'ladi (grafik 8 ustun, qolganlari 4 tadan; mobil'da hammasi to'liq qator).
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-
+    <>
       {/* 1) 7 kunlik ta'lim faolligi */}
-      <div style={kartaStil}>
+      <div className="adm-span-8" style={kartaStil}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={sarlavhaStil}>📚 7 kunlik ta&apos;lim faolligi</h3>
         </div>
-        <ResponsiveContainer width="100%" height={170}>
+        <ResponsiveContainer width="100%" height={190}>
           <BarChart data={grafik} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
             <XAxis dataKey="kun" tick={{ fontSize: 11, fill: 'var(--muted)' }} tickLine={false} axisLine={false} />
@@ -178,7 +179,7 @@ export function TalimTahlil() {
       </div>
 
       {/* 2) TOP-5 faol talabalar */}
-      <div style={kartaStil}>
+      <div className="adm-span-4" style={kartaStil}>
         <h3 style={sarlavhaStil}>🏆 Haftaning eng faol talabalari</h3>
         {topTalabalar.length === 0 ? (
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>7 kun ichida faollik bo&apos;lmadi.</p>
@@ -212,7 +213,7 @@ export function TalimTahlil() {
       </div>
 
       {/* 3) Eng qiyin darslar */}
-      <div style={kartaStil}>
+      <div className="adm-span-4" style={kartaStil}>
         <h3 style={sarlavhaStil}>🧗 Eng qiyin darslar (past o&apos;rtacha foiz)</h3>
         {qiyinDarslar.length === 0 ? (
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
@@ -245,7 +246,7 @@ export function TalimTahlil() {
       </div>
 
       {/* 4) Konversiya voronkasi */}
-      <div style={kartaStil}>
+      <div className="adm-span-4" style={kartaStil}>
         <h3 style={sarlavhaStil}>🎯 Konversiya voronkasi</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
           {voronka.map((v, i) => {
@@ -275,6 +276,6 @@ export function TalimTahlil() {
           Foizlar oldingi bosqichdan o&apos;tishni ko&apos;rsatadi — qaysi bo&apos;g&apos;inda talabalar &quot;to&apos;xtab qolayotganini&quot; kuzating.
         </p>
       </div>
-    </div>
+    </>
   )
 }
