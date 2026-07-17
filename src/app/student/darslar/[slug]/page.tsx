@@ -156,7 +156,7 @@ export default function DarsDetailPage() {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
         <Header backHref="/student/darslar" backLabel="Darslar" />
-        <div className="mx-auto max-w-[600px] px-8 py-12">
+        <div className="mx-auto max-w-[600px] px-5 py-10 sm:px-8 sm:py-12">
           <div className="rise" style={{
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '18px',
             padding: '40px 32px', textAlign: 'center',

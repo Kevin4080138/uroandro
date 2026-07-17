@@ -122,9 +122,9 @@ export default function AdminDashboard() {
         }
       `}</style>
 
-      <div style={{ padding: '32px' }}>
+      <div className="p-4 sm:p-8">
         <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise" style={{ fontSize: '32px', marginBottom: '24px' }}>{profile.full_name}</h1>
+        <h1 className="rise text-2xl sm:text-[32px]" style={{ marginBottom: '24px' }}>{profile.full_name}</h1>
 
         {/* Faollik ko'rsatkichlari */}
         {faollik && (
