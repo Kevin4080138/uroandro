@@ -8,6 +8,7 @@ import { DoriEslatmaKartasi } from '@/components/DoriEslatmaKartasi'
 import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 import { Onboarding } from '@/components/Onboarding'
 import { BannerHero } from '@/components/BannerHero'
+import { BannerCarousel } from '@/components/BannerCarousel'
 
 type HolatKarta = { emoji: string; sarlavha: string; matn: string; href: string }
 
@@ -63,6 +64,11 @@ export default function PatientDashboard() {
       {/* Banner tepada, kontent varaq bo'lib ustidan scroll bo'ladi */}
       <BannerHero role={profile.role} maxWidth={680}>
       <div className="mx-auto max-w-[680px] px-4 pb-12 pt-5 sm:px-6">
+
+        {/* Banner — faqat desktopda oqim ichida (telefonda BannerHero tepada ko'rsatadi) */}
+        <div className="hidden min-[681px]:block">
+          <BannerCarousel role={profile.role} />
+        </div>
 
         {/* Salom */}
         <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>

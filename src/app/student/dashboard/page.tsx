@@ -8,6 +8,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, darsTop, BOSQICH_YOLI, type Bosqich } from '@/lib/talim/darslar'
 import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import { BannerHero } from '@/components/BannerHero'
+import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
@@ -94,10 +95,12 @@ export default function StudentDashboard() {
     <>
       <style>{`
         .db-wrap { max-width: 1000px; margin: 0 auto; padding: 20px 24px; }
-        .db-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
+        .db-hero { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
         .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 680px) {
           .db-hero { grid-template-columns: 1fr; }
+          /* Telefonda banner BannerHero orqali tepada — hero ichidagisi yashirinadi */
+          .db-banner { display: none; }
           .db-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
           /* Telefonda kartalar ixcham: kichik ikonka, tavsifsiz — bir ekranga ko'proq sig'adi */
           .db-cards .dash-card { padding: 14px; }
@@ -165,8 +168,9 @@ export default function StudentDashboard() {
             <span style={{ fontSize: '18px', flexShrink: 0 }}>→</span>
           </div>
 
-          {/* HERO: rank va bosqich progressi yonma-yon (banner endi tepada) */}
+          {/* HERO: chap — rank+progress; o'ng — banner (faqat desktop, telefonda tepada) */}
           <div className="db-hero">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between' }}>
             <div className="rise" style={{ animationDelay: '.05s' }}>
               <RankCard rank={rank} />
             </div>
@@ -202,6 +206,12 @@ export default function StudentDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+            </div>
+
+            {/* O'ng: banner — faqat desktopda (telefonda BannerHero tepada ko'rsatadi) */}
+            <div className="rise db-banner" style={{ animationDelay: '.04s' }}>
+              <BannerCarousel role={profile.role} />
             </div>
           </div>
 
