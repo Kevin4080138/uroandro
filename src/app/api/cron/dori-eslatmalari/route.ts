@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 import { vaqtJadvali, faolKunMi } from '@/lib/doriEslatma'
 
 function tashkentVaqt() {
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
     tugashKuni.setDate(tugashKuni.getDate() + r.muddat_kun - 1)
     const oxirgiKun = kunFarqi(tugashKuni.toISOString().slice(0, 10), sana) === 0
 
-    yuborildi += await foydalanuvchigaPushYubor(r.bemor_user_id, {
+    yuborildi += await xabarYubor(r.bemor_user_id, {
       title: oxirgiKun ? '💊 Dorining oxirgi kuni!' : '💊 Dori vaqti keldi',
       body: `${r.nomi}${r.dozasi ? ' — ' + r.dozasi : ''} ichish vaqti keldi${oxirgiKun ? " (kursning so'nggi kuni)" : ''}`,
       url: '/patient/dorilarim',
@@ -87,7 +87,7 @@ export async function GET(req: Request) {
       })
       if (insertError) continue
 
-      tugashEslatmasi += await foydalanuvchigaPushYubor(r.bemor_user_id, {
+      tugashEslatmasi += await xabarYubor(r.bemor_user_id, {
         title: '⏳ Dori kursi ertaga tugaydi',
         body: `${r.nomi} kursi ertaga (${tugashSanaStr}) tugaydi`,
         url: '/patient/dorilarim',

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createServerSupabase } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
+import { telegramChatgaYubor, SAYT_URL } from '@/lib/telegramSend'
 
 // Admin tomonidan ommaviy push yuborish: auditoriya bo'yicha (hammasi/student/doctor/patient)
 // barcha push obunachilarga xabar jo'natadi va tarixga yozadi.
@@ -56,14 +57,34 @@ export async function POST(req: Request) {
     }
   }
 
+  // Telegram: bot bilan bog'langan foydalanuvchilarga ham yuboramiz
+  let telegramQuery = admin.from('profiles').select('telegram_chat_id').not('telegram_chat_id', 'is', null)
+  if (aud !== 'hammasi') telegramQuery = telegramQuery.eq('role', aud)
+  const { data: tgProfillar } = await telegramQuery
+
+  const tgMatn = `<b>${title.trim()}</b>\n\n${body.trim()}`
+  const tgExtra = url?.trim()
+    ? { reply_markup: { inline_keyboard: [[{ text: '👀 Ochish', web_app: { url: `${SAYT_URL}${url.trim()}` } }]] } }
+    : undefined
+
+  let telegramYuborildi = 0
+  for (const p of tgProfillar ?? []) {
+    if (await telegramChatgaYubor(p.telegram_chat_id as string, tgMatn, tgExtra)) telegramYuborildi++
+  }
+
   await admin.from('push_xabarlar').insert({
     admin_id: user.id,
     title: title.trim(),
     body: body.trim(),
     url: url?.trim() || null,
     auditoriya: aud,
-    yuborildi,
+    yuborildi: yuborildi + telegramYuborildi,
   })
 
-  return NextResponse.json({ ok: true, yuborildi, qurilmalar: obunalar?.length ?? 0 })
+  return NextResponse.json({
+    ok: true,
+    yuborildi: yuborildi + telegramYuborildi,
+    qurilmalar: obunalar?.length ?? 0,
+    telegram: telegramYuborildi,
+  })
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabase()
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Ruxsat yo\'q' }, { status: 403 })
   }
 
-  const yuborildi = await foydalanuvchigaPushYubor(m.patient_id, {
+  const yuborildi = await xabarYubor(m.patient_id, {
     title: '💬 Shifokoringiz javob berdi',
     body: 'Murojaatingizga javob keldi — ko\'rish uchun bosing',
     url: '/patient/murojaatlarim',

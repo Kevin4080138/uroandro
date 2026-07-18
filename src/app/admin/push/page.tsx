@@ -60,7 +60,7 @@ export default function AdminPushPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Xatolik')
-      setNatija(`✅ ${json.yuborildi} ta qurilmaga yuborildi (jami ${json.qurilmalar} ta obunachi qurilma)`)
+      setNatija(`✅ Yuborildi — 📲 ${json.yuborildi - (json.telegram ?? 0)} ta qurilmaga (push), ✈️ ${json.telegram ?? 0} ta Telegram'ga`)
       setTitle(''); setBody(''); setUrl('')
       tarixYukla()
     } catch (e) {
@@ -77,7 +77,7 @@ export default function AdminPushPage() {
       <div className="mx-auto max-w-[760px] px-6 py-8">
         <h1 style={{ margin: '0 0 6px', fontSize: '23px', fontWeight: 900 }}>🔔 Push bildirishnoma</h1>
         <p style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '13px' }}>
-          Tanlangan auditoriyaning push obunachi qurilmalariga ommaviy xabar yuboriladi
+          Xabar ikki kanal orqali ketadi: 📲 brauzer push va ✈️ Telegram bot (bog&apos;langan foydalanuvchilarga)
         </p>
 
         {/* Forma */}

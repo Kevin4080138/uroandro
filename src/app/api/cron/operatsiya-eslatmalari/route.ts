@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 import { POSTOP_JADVALI } from '@/lib/operatsiyalar'
 
 function tashkentSana() {
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
       .insert({ kuzatuv_id: k.id, bosqich: bosqich.kalit })
     if (insertError) continue // allaqachon yuborilgan
 
-    yuborildi += await foydalanuvchigaPushYubor(k.bemor_user_id, {
+    yuborildi += await xabarYubor(k.bemor_user_id, {
       title: `🩹 ${bosqich.sarlavha}`,
       body: `${k.operatsiya_nomi}: ${bosqich.matn}`,
       url: '/patient/operatsiya-kuzatuvim',

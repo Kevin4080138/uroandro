@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabase()
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
   let jamiYuborildi = 0
   for (const docId of qabulQiluvchilar) {
-    jamiYuborildi += await foydalanuvchigaPushYubor(docId, {
+    jamiYuborildi += await xabarYubor(docId, {
       title: m.shoshilinch ? '🚨 Shoshilinch murojaat!' : '📨 Yangi murojaat',
       body: 'Bemordan yangi shikoyat keldi — ko\'rish uchun bosing',
       url: '/doctor/murojaatlar',

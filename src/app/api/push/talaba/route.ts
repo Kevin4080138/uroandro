@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 
 // Admin bitta talabaga push yuboradi (masalan, xavf zonasidagi sust talabaga eslatma).
 export async function POST(req: Request) {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "userId, title va body majburiy" }, { status: 400 })
   }
 
-  const yuborildi = await foydalanuvchigaPushYubor(userId, {
+  const yuborildi = await xabarYubor(userId, {
     title: title.trim(),
     body: body.trim(),
     url: url?.trim() || undefined,

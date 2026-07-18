@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabase()
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, yuborildi: 0 })
   }
 
-  const yuborildi = await foydalanuvchigaPushYubor(kuzatuv.bemor_user_id, {
+  const yuborildi = await xabarYubor(kuzatuv.bemor_user_id, {
     title: '🩹 Operatsiyadan keyingi kuzatuv boshlandi',
     body: `${kuzatuv.operatsiya_nomi}: shifokoringiz tiklanish rejasini biriktirdi. Har bosqichda eslatma yuboramiz.`,
     url: '/patient/operatsiya-kuzatuvim',

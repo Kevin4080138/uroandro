@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
-import { foydalanuvchigaPushYubor } from '@/lib/pushSend'
+import { xabarYubor } from '@/lib/xabarYubor'
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabase()
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const bemorUserId = ozimniki[0].bemor_user_id
   const nomlar = ozimniki.map((r) => r.nomi).join(', ')
 
-  const yuborildi = await foydalanuvchigaPushYubor(bemorUserId, {
+  const yuborildi = await xabarYubor(bemorUserId, {
     title: '💊 Yangi dori retsepti',
     body: `Shifokoringiz sizga yangi dori tayinladi: ${nomlar}`,
     url: '/patient/dorilarim',
