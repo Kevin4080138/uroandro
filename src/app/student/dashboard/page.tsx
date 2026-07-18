@@ -5,9 +5,9 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { DARSLAR, darsTop, type Bosqich } from '@/lib/talim/darslar'
+import { DARSLAR, darsTop, BOSQICH_YOLI, type Bosqich } from '@/lib/talim/darslar'
 import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
-import { BannerCarousel } from '@/components/BannerCarousel'
+import { BannerHero } from '@/components/BannerHero'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
@@ -93,8 +93,8 @@ export default function StudentDashboard() {
   return (
     <>
       <style>{`
-        .db-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 24px; }
-        .db-hero { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
+        .db-wrap { max-width: 1000px; margin: 0 auto; padding: 20px 24px; }
+        .db-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; margin-bottom: 28px; }
         .db-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 680px) {
           .db-hero { grid-template-columns: 1fr; }
@@ -113,6 +113,8 @@ export default function StudentDashboard() {
       <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
         <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
+        {/* Banner tepada, kontent varaq bo'lib ustidan scroll bo'ladi */}
+        <BannerHero role={profile.role}>
         <div className="db-wrap">
 
           {/* Salom + ism — griddan tashqarida */}
@@ -163,49 +165,44 @@ export default function StudentDashboard() {
             <span style={{ fontSize: '18px', flexShrink: 0 }}>→</span>
           </div>
 
-          {/* HERO: chap — rank+progress, o'ng — banner */}
+          {/* HERO: rank va bosqich progressi yonma-yon (banner endi tepada) */}
           <div className="db-hero">
+            <div className="rise" style={{ animationDelay: '.05s' }}>
+              <RankCard rank={rank} />
+            </div>
 
-            {/* Chap: rank + progress */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between' }}>
-              <div className="rise" style={{ animationDelay: '.05s' }}>
-                <RankCard rank={rank} />
+            <div className="rise" style={{
+              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+              padding: '16px 18px', animationDelay: '.08s',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{jamiTugadi} ta dars tugallandi</span>
               </div>
-
-              <div className="rise" style={{
-                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-                padding: '16px 18px', animationDelay: '.08s',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{jamiTugadi} ta dars tugallandi</span>
-                </div>
-                {/* Bosqich kesimida — "7/106" o'rniga har bosqich alohida (motivatsiya uchun) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {bosqichProgress.map((b) => (
-                    <div key={b.id}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink-soft)' }}>{b.emoji} {b.nom}</span>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: b.rang }}>{b.tugadi}/{b.jami}</span>
-                      </div>
-                      <div style={{ height: '6px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
-                        <div style={{
-                          height: '100%', borderRadius: '999px',
-                          width: `${b.jami ? Math.round((b.tugadi / b.jami) * 100) : 0}%`,
-                          background: b.rang, transition: 'width .5s ease',
-                        }} />
-                      </div>
+              {/* Har qator bosilsa o'sha bosqich sahifasiga o'tadi */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {bosqichProgress.map((b) => (
+                  <div
+                    key={b.id}
+                    onClick={() => router.push(`/student/darslar/bosqich/${BOSQICH_YOLI[b.id]}`)}
+                    className="soft-press"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink-soft)' }}>{b.emoji} {b.nom}</span>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: b.rang }}>{b.tugadi}/{b.jami} →</span>
                     </div>
-                  ))}
-                </div>
+                    <div style={{ height: '6px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', borderRadius: '999px',
+                        width: `${b.jami ? Math.round((b.tugadi / b.jami) * 100) : 0}%`,
+                        background: b.rang, transition: 'width .5s ease',
+                      }} />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* O'ng: banner */}
-            <div className="rise db-banner" style={{ animationDelay: '.04s' }}>
-              <BannerCarousel role={profile.role} />
-            </div>
-
           </div>
 
           {/* Bo'limlar */}
@@ -257,6 +254,7 @@ export default function StudentDashboard() {
           </div>
 
         </div>
+        </BannerHero>
         <BottomNav />
       </div>
     </>

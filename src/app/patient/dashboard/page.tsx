@@ -7,7 +7,7 @@ import { Header } from '@/components/Header'
 import { DoriEslatmaKartasi } from '@/components/DoriEslatmaKartasi'
 import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 import { Onboarding } from '@/components/Onboarding'
-import { BannerCarousel } from '@/components/BannerCarousel'
+import { BannerHero } from '@/components/BannerHero'
 
 type HolatKarta = { emoji: string; sarlavha: string; matn: string; href: string }
 
@@ -60,8 +60,9 @@ export default function PatientDashboard() {
       <Onboarding ism={profile.full_name} />
       <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
-      <div className="mx-auto max-w-[680px] px-4 pb-12 pt-6 sm:px-6 sm:pt-7">
-        <BannerCarousel role={profile.role} />
+      {/* Banner tepada, kontent varaq bo'lib ustidan scroll bo'ladi */}
+      <BannerHero role={profile.role} maxWidth={680}>
+      <div className="mx-auto max-w-[680px] px-4 pb-12 pt-5 sm:px-6">
 
         {/* Salom */}
         <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>
@@ -188,6 +189,7 @@ export default function PatientDashboard() {
         </div>
 
       </div>
+      </BannerHero>
     </div>
   )
 }
