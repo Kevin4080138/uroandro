@@ -9,8 +9,11 @@ import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 import { Onboarding } from '@/components/Onboarding'
 import { BannerCarousel } from '@/components/BannerCarousel'
 
+type HolatKarta = { emoji: string; sarlavha: string; matn: string; href: string }
+
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null)
+  const [holatKarta, setHolatKarta] = useState<HolatKarta | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -20,6 +23,26 @@ export default function PatientDashboard() {
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
+
+      // Holat kartasi: bemor uchun eng muhim keyingi harakatni aniqlaymiz.
+      // Ustuvorlik: shifokor javobi > yaqin navbat > kutilayotgan murojaat > yangi murojaat taklifi.
+      const bugun = new Date().toISOString().slice(0, 10)
+      const [{ data: murojaatlar }, { data: navbatlar }] = await Promise.all([
+        supabase.from('murojaatlar').select('javob, holat, created_at').order('created_at', { ascending: false }).limit(1),
+        supabase.from('navbatlar').select('sana, vaqt, holat').gte('sana', bugun).neq('holat', 'bekor').order('sana').order('vaqt').limit(1),
+      ])
+      const m = murojaatlar?.[0]
+      const n = navbatlar?.[0]
+      if (m?.javob) {
+        setHolatKarta({ emoji: '💬', sarlavha: 'Shifokordan javob keldi', matn: "Murojaatingizga javob yozildi — o'qib chiqing", href: '/patient/murojaatlarim' })
+      } else if (n) {
+        const sana = new Date(n.sana).toLocaleDateString('uz-UZ', { month: 'long', day: 'numeric' })
+        setHolatKarta({ emoji: '🗓', sarlavha: 'Yaqin navbatingiz', matn: `${sana}, soat ${String(n.vaqt).slice(0, 5)} — unutmang!`, href: '/patient/navbat' })
+      } else if (m) {
+        setHolatKarta({ emoji: '⏳', sarlavha: "Murojaatingiz ko'rib chiqilmoqda", matn: 'Shifokor javob yozishi bilan xabar beramiz', href: '/patient/murojaatlarim' })
+      } else {
+        setHolatKarta({ emoji: '🩺', sarlavha: 'Shikoyatingiz bormi?', matn: 'Shifokorga yozing — tez orada javob olasiz', href: '/patient/murojaat' })
+      }
     }
     getProfile()
   }, [])
@@ -37,16 +60,39 @@ export default function PatientDashboard() {
       <Onboarding ism={profile.full_name} />
       <Header {...(profile.role === 'admin' ? { backHref: '/admin/dashboard', backLabel: 'Admin paneli' } : {})} />
 
-      <div style={{ padding: '28px 24px 48px', maxWidth: 680, margin: '0 auto' }}>
+      <div className="mx-auto max-w-[680px] px-4 pb-12 pt-6 sm:px-6 sm:pt-7">
         <BannerCarousel role={profile.role} />
 
         {/* Salom */}
         <p className="rise" style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '4px', fontWeight: 500 }}>
           Salom 👋
         </p>
-        <h1 className="rise" style={{ fontSize: '28px', marginBottom: '24px', lineHeight: 1.2 }}>
+        <h1 className="rise text-2xl sm:text-[28px]" style={{ marginBottom: '20px', lineHeight: 1.2 }}>
           {profile.full_name}
         </h1>
+
+        {/* Holat kartasi — bemorning keyingi harakati doim birinchi ko'rinadi */}
+        {holatKarta && (
+          <div
+            onClick={() => nav(holatKarta.href)}
+            className="rise soft-press"
+            style={{
+              background: 'linear-gradient(120deg, var(--accent), var(--accent-2))', color: 'white',
+              borderRadius: 16, padding: '15px 17px', marginBottom: 14, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 13,
+            }}
+          >
+            <div style={{
+              width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+            }}>{holatKarta.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 800 }}>{holatKarta.sarlavha}</div>
+              <div style={{ fontSize: 12, opacity: .85, lineHeight: 1.4 }}>{holatKarta.matn}</div>
+            </div>
+            <span style={{ fontSize: 17, flexShrink: 0 }}>→</span>
+          </div>
+        )}
 
         {/* Bildirishnomalar */}
         <BildirishnomalarPaneli />
@@ -112,6 +158,8 @@ export default function PatientDashboard() {
                 cursor: 'pointer', textAlign: 'left',
                 animationDelay: `${0.1 + i * 0.05}s`,
                 transition: 'transform .2s, border-color .2s, box-shadow .2s',
+                // Kartalar soni toq — oxirgisi ikki ustunni egallab, yetim katak qolmaydi
+                gridColumn: i === 6 ? 'span 2' : undefined,
               }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement
