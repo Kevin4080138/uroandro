@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { SAYT_URL } from '@/lib/saytUrl'
 import { Header } from '@/components/Header'
 
 type Friend = {
@@ -35,7 +36,9 @@ export default function TaklifPage() {
   const [friends, setFriends] = useState<Friend[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [origin, setOrigin] = useState('https://urosfera.uz')
+  // Boshlang'ich qiymat kanonik domen bo'lsin — aks holda havola www'siz
+  // manzilga tushib, har ochilganda 308 yo'naltirishga uchraydi.
+  const [origin, setOrigin] = useState(SAYT_URL)
 
   useEffect(() => {
     setOrigin(window.location.origin)
