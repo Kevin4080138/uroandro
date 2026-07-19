@@ -110,6 +110,17 @@ darslikdan darrov ajratib turadi:
 
 O'RTA va QIYIN da klassik ilmiy sarlavhalar ishlatiladi.
 
+### Uzun darsni qisqartirish — matn yo'qolmaydi
+
+Mavjud dars normadan uzun bo'lsa, ortiqcha qism **o'chirilmaydi** — u yuqori
+bosqichdagi o'sha mavzu darsiga ko'chiriladi. EASY darsdan olingan diagnostika
+va davolash qismi aynan O'RTA darsining mazmuni bo'ladi.
+
+> EASY darsni normaga tushirish → olingan matn bilan O'RTA darsini to'ldirish
+
+Shu tartibda ishlanganda bitta ish ikki bosqichni to'ldiradi. Qaysi mavzu
+qaysi bosqichda borligi `MAVZULAR-XARITASI.md` da.
+
 ### Progressni ko'rinadigan qilish
 
 Talaba bosqichlar orasida o'sishni **his qilishi** uchun har bir darsda

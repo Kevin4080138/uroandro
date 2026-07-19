@@ -8,13 +8,30 @@ Belgilar: ✅ mazmuni yozilgan · ⬜ skelet (nomi bor, mazmuni yo'q) · — yo'
 
 ---
 
-## ⚠️ Asosiy muammo: O'RTA da ikki nusxa
+## Holat: 21 dars EASY ga qaytarildi
 
-EASY dan ko'chirilgan 21 dars O'RTA ga tushdi, lekin O'RTA da **o'sha
-mavzular uchun allaqachon skelet darslar bor edi**. Natijada bir bosqichda
-bir mavzu ikki marta — bu `AGENTS.md` qoidasini buzadi.
+Dastlab EASY darslari mazmuni chuqurligi sababli O'RTA ga ko'chirilgan edi.
+Xarita tuzilgach ma'lum bo'ldiki, O'RTA da **o'sha mavzular uchun allaqachon
+skelet darslar bor** — ya'ni ko'chirish bir bosqichda takror yaratdi.
 
-Quyidagi jadvalda O'RTA ustunida ikkita dars turgan har bir qator — shu muammo.
+Shuning uchun 19 dars EASY ga qaytarildi. Ularning **mavzusi** EASY niki
+(`-asoslari` nomi ham shuni aytadi), faqat **matni** uzun — norma 600–900
+so'z, ularniki 1300–2000. Muammo bosqichda emas, matn hajmida edi.
+
+**Qisqartirilgan matn yo'qolmaydi.** Darsni EASY normasiga tushirganda olib
+tashlangan qism (diagnostika, davolash) — o'sha mavzuning **O'RTA darsi uchun
+tayyor qoralama**. Ya'ni bu ish ikki bosqichni bir vaqtda to'ldiradi.
+
+O'RTA da qoldirilgan ikkitasi:
+- `urologiya-predmeti` — EASY da o'rniga `urologiya-asoslari` yozildi
+- `prostata-adenomasi-asosiy-belgilar` — EASY da o'rniga `prostata-adenomasi-asoslari` yozildi
+
+Ikkalasining matni (IPSS, diagnostika, davolash) haqiqatan O'RTA darajasida,
+shuning uchun ular o'sha yerda o'z o'rnida turibdi.
+
+⚠️ **Qolgan bitta takror:** O'RTA da `prostata-adenomasi-asosiy-belgilar` va
+`bph-diagnostika-nostatsionar-davolash` (skelet) bir xil mavzuda. Skeletga
+mazmun yozilganda ikkisi birlashtirilishi kerak.
 
 ---
 
@@ -23,31 +40,31 @@ Quyidagi jadvalda O'RTA ustunida ikkita dars turgan har bir qator — shu muammo
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
 | Urologiyaga kirish | ✅ `urologiya-asoslari` | ✅ `urologiya-predmeti` | ⬜ `h-urologiyaga-kirish` |
-| Simptomlar, semiotika | — | ✅ `urologik-simptomlar` + ⬜ `urologik-anamnez-fizik-tekshuruv` + ⬜ `siydik-ushlanish-kolika-anuriya-farqlari` | ⬜ `h-semiotika-sindromlar-simptomlar` |
-| Siydik tahlili, laborator | — | ✅ `siydik-tahlili-asoslari` + ⬜ `siydik-tahlili-posev-biomarkerlar` | ⬜ `h-laborator-tekshirish-usullari` |
-| Tasvirlash (UTT, KT, MRT) | — | ✅ `utt-asosiy-tekshiruv` + ⬜ `tasvirlash-usullarini-tanlash` | ⬜ `h-instrumental-tekshiruv-usullari` |
+| Simptomlar, semiotika | ✅ `urologik-simptomlar` | ⬜ `urologik-anamnez-fizik-tekshuruv` + ⬜ `siydik-ushlanish-kolika-anuriya-farqlari` | ⬜ `h-semiotika-sindromlar-simptomlar` |
+| Siydik tahlili, laborator | ✅ `siydik-tahlili-asoslari` | ⬜ `siydik-tahlili-posev-biomarkerlar` | ⬜ `h-laborator-tekshirish-usullari` |
+| Tasvirlash (UTT, KT, MRT) | ✅ `utt-asosiy-tekshiruv` | ⬜ `tasvirlash-usullarini-tanlash` | ⬜ `h-instrumental-tekshiruv-usullari` |
 | Gematuriya | — | ⬜ `gematuriyani-baholash-algoritmi` | ⬜ `h-gematuriyani-baholash` |
 
 ## II. Anatomiya va fiziologiya
 
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
-| Buyrak anatomiya/fiziologiya | — | ✅ `buyrak-siydik-yollari-anatomiyasi` + ⬜ `buyrak-fiziologiyasi-qon-aylanishi` | ⬜ `h-buyrak-anatomiya-fiziologiya` |
-| Qovuq va uretra | — | ✅ `qovuq-uretra-tuzilishi` + ⬜ `qovuq-uretra-urodinamikasi` | ⬜ `h-ureter-qovuq-uretra-anatomiya` |
-| Erkak jinsiy a'zolari | — | ✅ `erkak-jinsiy-azolari-tuzilishi` + ⬜ `prostata-urug-moyak-fiziologiyasi` | ⬜ `h-erkak-jinsiy-azolari-tuzilishi` |
+| Buyrak anatomiya/fiziologiya | ✅ `buyrak-siydik-yollari-anatomiyasi` | ⬜ `buyrak-fiziologiyasi-qon-aylanishi` | ⬜ `h-buyrak-anatomiya-fiziologiya` |
+| Qovuq va uretra | ✅ `qovuq-uretra-tuzilishi` | ⬜ `qovuq-uretra-urodinamikasi` | ⬜ `h-ureter-qovuq-uretra-anatomiya` |
+| Erkak jinsiy a'zolari | ✅ `erkak-jinsiy-azolari-tuzilishi` | ⬜ `prostata-urug-moyak-fiziologiyasi` | ⬜ `h-erkak-jinsiy-azolari-tuzilishi` |
 | Ayol kichik chanog'i | — | ⬜ `ayol-kichik-chanoq-anatomiyasi` | ⬜ `h-ayol-kichik-chanoq-anatomiyasi` |
 | Embriologiya | — | ⬜ `siydik-tanosil-embriologiyasi` | ⬜ `h-siydik-tanosil-embriologiyasi` |
-| Tug'ma anomaliyalar | — | ✅ `siydik-tanosil-tugma-anomaliyalar` + ⬜ `tugma-anomaliyalar-tasniflash` | ⬜ `h-tugma-rivojlanish-anomaliyalari` |
+| Tug'ma anomaliyalar | ✅ `siydik-tanosil-tugma-anomaliyalar` | ⬜ `tugma-anomaliyalar-tasniflash` | ⬜ `h-tugma-rivojlanish-anomaliyalari` |
 
 ## III. Yallig'lanish va infeksion kasalliklar
 
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
-| Sistit | — | ✅ `sistit-asoslari` + ⬜ `sistit-asoratlanmagan-asoratlangan` | ⬜ `h-sistit-asoratlanmagan-asoratlangan` |
-| Pielonefrit | — | ✅ `pielonefrit-asoslari` + ⬜ `pielonefrit-asoratlanmagan-asoratlangan` | ⬜ `h-pielonefrit-...` · ⬜ `h-otkir-pielonefrit-urosepsis` |
-| Uretrit | — | ✅ `uretrit-asoslari` + ⬜ `gonokokkli-uretrit-protokol` + ⬜ `nogonokokkli-noinfeksion-uretritlar` | ⬜ `h-gonokokkli-uretrit-gonoreya` · ⬜ `h-nogonokokkli-noinfeksion-uretritlar` |
-| Prostatit | — | ✅ `prostatit-umumiy-tasniflash` + ⬜ `surunkali-prostatit-nih-tasnifi` + ⬜ `asoratlanmagan-prostatit-davolash` | ⬜ `prostatit-cpps` · ⬜ `h-asoratlanmagan-prostatit` |
-| Orxoepididimit | — | ✅ `orxoepididimit-asoslari` + ⬜ `otkir-orxoepididimit-diagnostika` | ⬜ `h-otkir-yorgoq-sindromi` |
+| Sistit | ✅ `sistit-asoslari` | ⬜ `sistit-asoratlanmagan-asoratlangan` | ⬜ `h-sistit-asoratlanmagan-asoratlangan` |
+| Pielonefrit | ✅ `pielonefrit-asoslari` | ⬜ `pielonefrit-asoratlanmagan-asoratlangan` | ⬜ `h-pielonefrit-...` · ⬜ `h-otkir-pielonefrit-urosepsis` |
+| Uretrit | ✅ `uretrit-asoslari` | ⬜ `gonokokkli-uretrit-protokol` + ⬜ `nogonokokkli-noinfeksion-uretritlar` | ⬜ `h-gonokokkli-uretrit-gonoreya` · ⬜ `h-nogonokokkli-noinfeksion-uretritlar` |
+| Prostatit | ✅ `prostatit-umumiy-tasniflash` | ⬜ `surunkali-prostatit-nih-tasnifi` + ⬜ `asoratlanmagan-prostatit-davolash` | ⬜ `prostatit-cpps` · ⬜ `h-asoratlanmagan-prostatit` |
+| Orxoepididimit | ✅ `orxoepididimit-asoslari` | ⬜ `otkir-orxoepididimit-diagnostika` | ⬜ `h-otkir-yorgoq-sindromi` |
 | Interstitsial sistit | — | ⬜ `interstitsial-sistit-ogriq-sindromi` | — |
 | Urogenital tuberkulez | — | ⬜ `urogenital-tuberkulez` | ⬜ `h-spesifik-nospesifik-yallirlanish-tuberkulez` |
 
@@ -55,11 +72,11 @@ Quyidagi jadvalda O'RTA ustunida ikkita dars turgan har bir qator — shu muammo
 
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
-| Siydik tosh kasalligi | — | ✅ `siydik-tosh-kasalligi-asoslari` + ⬜ `siydik-tosh-etiologiya-metabolik` + ⬜ `siydik-tosh-zamonaviy-davolash` | ⬜ `urolitiaz` |
-| Gidronefroz | — | ✅ `gidronefroz-asoslari` + ⬜ `gidronefrotik-transformatsiya` | ⬜ `h-gidronefrotik-transformatsiya` |
+| Siydik tosh kasalligi | ✅ `siydik-tosh-kasalligi-asoslari` | ⬜ `siydik-tosh-etiologiya-metabolik` + ⬜ `siydik-tosh-zamonaviy-davolash` | ⬜ `urolitiaz` |
+| Gidronefroz | ✅ `gidronefroz-asoslari` | ⬜ `gidronefrotik-transformatsiya` | ⬜ `h-gidronefrotik-transformatsiya` |
 | Nefroptoz | — | ⬜ `nefroptoz-klinikasi` | ⬜ `h-nefroptoz` |
 | Sistoureteral reflyuks | — | ⬜ `sistoureteral-reflyuks-tasniflash` | ⬜ `h-sistoureteral-reflyuks-kasalligi` |
-| Siydik tutolmaslik | — | ✅ `siydik-tutolmaslik-turlari` + ⬜ `siydik-tutolmaslik-diagnostika-prinsiplari` | ⬜ `h-siydik-tutolmaslik-prinsiplari` |
+| Siydik tutolmaslik | ✅ `siydik-tutolmaslik-turlari` | ⬜ `siydik-tutolmaslik-diagnostika-prinsiplari` | ⬜ `h-siydik-tutolmaslik-prinsiplari` |
 | Nefrogen gipertenziya | — | ⬜ `nefrogen-arterial-gipertenziya` | ⬜ `h-nefrogen-arterial-gipertenziya` |
 
 ## V. Prostata va erkak jinsiy a'zolari
@@ -67,16 +84,16 @@ Quyidagi jadvalda O'RTA ustunida ikkita dars turgan har bir qator — shu muammo
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
 | Prostata adenomasi (BPH) | ✅ `prostata-adenomasi-asoslari` | ✅ `prostata-adenomasi-asosiy-belgilar` + ⬜ `bph-diagnostika-nostatsionar-davolash` | ⬜ `bph-luts` |
-| Fimoz, parafimoz | — | ✅ `fimoz-parafimoz-asoslari` + ⬜ `fimoz-parafimoz-sirkumsizio` | ⬜ `h-fimoz-parafimoz-sirkumsizio` |
-| Varikotsele | — | ✅ `varikotsele-gidrotsele-farqi` + ⬜ `varikotsele-klinik-bosqichlari` | ✅ `h-varikotsele-kasalligi` |
+| Fimoz, parafimoz | ✅ `fimoz-parafimoz-asoslari` | ⬜ `fimoz-parafimoz-sirkumsizio` | ⬜ `h-fimoz-parafimoz-sirkumsizio` |
+| Varikotsele | ✅ `varikotsele-gidrotsele-farqi` | ⬜ `varikotsele-klinik-bosqichlari` | ✅ `h-varikotsele-kasalligi` |
 | Gidrotsele, spermatotsele | — | (yuqoridagi darsda) + ⬜ `gidrotsele-spermatotsele-differensial` | ⬜ `h-gidrotsele-spermatotsele` |
-| Kriptorxizm | — | ✅ `kriptorxizm-asoslari` + ⬜ `kriptorxizm-operativ-davolash` | ⬜ `h-kriptorxizm-operativ-davolash` |
+| Kriptorxizm | ✅ `kriptorxizm-asoslari` | ⬜ `kriptorxizm-operativ-davolash` | ⬜ `h-kriptorxizm-operativ-davolash` |
 
 ## VI. Shoshilinch urologiya
 
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
-| Moyak burilishi (torsiya) | — | ✅ `moyak-torsiyasi-asoslari` + ⬜ `moyak-burilishi-shoshilinch-jarrohlik` | ⬜ `h-otkir-moyak-burilishi-differensial` |
+| Moyak burilishi (torsiya) | ✅ `moyak-torsiyasi-asoslari` | ⬜ `moyak-burilishi-shoshilinch-jarrohlik` | ⬜ `h-otkir-moyak-burilishi-differensial` |
 | O'tkir siydik ushlanishi | — | ⬜ `otkir-siydik-ushlanishi-birinchi-yordam` | ⬜ `h-otkir-siydik-ushlanishi` |
 | Travma (shikastlanishlar) | — | ⬜ `siydik-tanosil-shikastlanishlari` | ⬜ `h-siydik-tanosil-shikastlanishlari-travma` |
 | Priapizm | — | — | ⬜ `h-priapizm` · ⬜ `h-parafimoz-priapizm-shoshilinch` |
@@ -111,16 +128,30 @@ Quyidagi jadvalda O'RTA ustunida ikkita dars turgan har bir qator — shu muammo
 mavzuda O'RTA (diagnostika) va QIYIN (jarrohlik) skeletlari juft bo'lib turibdi.
 Ya'ni reja bor edi — u faqat yozib qo'yilmagan.
 
-**2. Ko'chirish takror yaratdi.** EASY dan ko'chirilgan 21 darsning ~20 tasida
-O'RTA da o'sha mavzu bo'yicha skelet bor. Bir bosqichda bir mavzu ikki marta.
+**2. Ko'chirish takror yaratgan edi** — 21 darsning deyarli hammasida O'RTA da
+o'sha mavzu bo'yicha skelet bor edi. Shuning uchun 19 tasi qaytarildi.
 
-**3. Ko'chirilgan darslarning nomi ham EASY niki.** `sistit-asoslari`,
-`kriptorxizm-asoslari`, `gidronefroz-asoslari` — `-asoslari` suffiksi EASY
-qoidasi. Ular O'RTA da nomiga qarshi turibdi.
+**3. Mazmun chuqurligi — alohida masala.** Qaytarilgan darslarning matni
+1300–2000 so'z, EASY normasi 600–900. Ya'ni **mavzusi EASY niki, hajmi
+O'RTA niki.** Bu shoshilinch emas: dars ishlab turibdi, qisqartirish
+navbat bilan qilinadi.
 
-**4. Mazmun chuqurligi — alohida masala.** Ularning matni 1300–2000 so'z,
-EASY normasi 600–900. Ya'ni **mavzusi EASY niki, hajmi O'RTA niki.**
-Muammo bosqichda emas, matnda edi.
+**4. Qisqartirish — yo'qotish emas, ko'chirish.** Darsdan olib tashlangan
+diagnostika/davolash qismi o'sha mavzuning O'RTA skeletiga tushadi. Bitta ish
+ikki bosqichni to'ldiradi, shuning uchun qayta yozish tartibi shunday bo'lsin:
 
-**5. Bo'shliqlar.** Onkourologiya, Peyroni, priapizm, androgen yetishmovchiligi
-faqat QIYIN da — bu to'g'ri, ularning EASY darajasi yo'q.
+> EASY darsni qisqartirish → olingan matn bilan O'RTA skeletini to'ldirish
+
+**5. EASY da hali yo'q, lekin juda mos mavzular.** Bular O'RTA/QIYIN da bor,
+EASY da esa bo'sh — va reklama uchun eng kuchlilari, chunki "qachon xavfli"
+savoliga javob beradi:
+
+| Mavzu | Nega EASY uchun kuchli |
+|---|---|
+| Gematuriya | "Siydikda qon ko'rdim" — eng ko'p qo'rqitadigan belgi |
+| O'tkir siydik ushlanishi | Shoshilinch holat, darrov tanib olish kerak |
+| Travma (shikastlanishlar) | Aniq, esda qoladigan holatlar |
+
+**6. Haqiqiy bo'shliqlar.** Onkourologiya (7 ta mavzu), Peyroni, priapizm,
+ejakulyatsiya buzilishlari, androgen yetishmovchiligi — faqat QIYIN da.
+Bu to'g'ri: ularning EASY darajasi yo'q va `AGENTS.md` shunga ruxsat beradi.
