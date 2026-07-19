@@ -362,6 +362,19 @@ h1, h2, h3, h4 {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .maqola-html .steps li strong { display: block; color: var(--m-navy); margin-bottom: 2px; }
+/* Sxema hali chizilmagan joy. Nazariya matni yozilib bo'lgach rasm keyin
+   qo'shiladi — o'rni nomi bilan turadi, muallif nima chizilishi kerakligini
+   ko'rib turadi va bo'sh joy matn oqimida yo'qolib ketmaydi. */
+.maqola-html .rasm-orni {
+  margin: 18px 0; padding: 20px 18px; text-align: center;
+  border: 2px dashed var(--m-bdr); border-radius: 12px; background: #f6fafd;
+}
+.maqola-html .rasm-orni__belgi {
+  display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--m-acc); margin-bottom: 6px;
+}
+.maqola-html .rasm-orni__nom { font-size: 0.9rem; font-weight: 700; color: var(--m-navy); }
+.maqola-html .rasm-orni__izoh { font-size: 0.82rem; color: #5a6b80; margin-top: 4px; }
 .maqola-html .pill {
   display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 10px;
   border-radius: 20px; margin-right: 4px; background: var(--m-navy); color: var(--m-gold);

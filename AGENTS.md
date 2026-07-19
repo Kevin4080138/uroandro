@@ -82,8 +82,9 @@ EASY — "kamroq ma'lumot" emas, **boshqa turdagi** ma'lumot: bemor kelganda
 | Rasm/sxema    | 2–3     | 3–5         | 5–8         |
 | O'qish vaqti  | 5–7 daq | 12–15 daq   | 25–35 daq   |
 
-`daqiqa` maydoni haqiqiy o'qish vaqtiga mos bo'lsin (~180 so'z/daqiqa) —
-talabaga aytilgan vaqt yolg'on bo'lmasin.
+`daqiqa` maydoni haqiqiy o'qish vaqtiga mos bo'lsin — talabaga aytilgan
+vaqt yolg'on bo'lmasin. Hisob **~130 so'z/daqiqa**: tibbiy matn oddiy
+matndan sekin o'qiladi va sxema/jadvalni ko'zdan kechirish ham vaqt oladi.
 
 ### Taqiqlangan elementlar
 

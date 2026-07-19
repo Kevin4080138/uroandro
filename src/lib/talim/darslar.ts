@@ -130,6 +130,22 @@ export const DARS_KATEGORIYALARI = [
 // (slug, sarlavha, bosqich, iframe yo'li) qoladi, aks holda hammasi client bundle'ga yuklanadi.
 // Yangi dars tarkibi ham to'g'ridan-to'g'ri bazaga yoziladi (seed migratsiya yoki admin orqali).
 export const DARSLAR: Dars[] = [
+  // EASY bosqichning namunaviy darsi — yangi qoidalar bo'yicha yozilgan
+  // (AGENTS.md, "Nazariya yozish qoidalari"). Qolgan EASY darslari shu
+  // qolipda qayta yoziladi. Nazariyasi `dars_tarkibi` jadvalida.
+  {
+    slug: 'prostata-adenomasi-asoslari',
+    sarlavha: 'Prostata adenomasi — bu nima?',
+    kategoriya: "Prostata va erkak jinsiy a'zolari",
+    bosqich: 'oson',
+    qisqa: "Prostata nima uchun kattayadi, buni qanday tanib olish mumkin va qachon shoshilinch yordam kerak.",
+    daqiqa: 6,
+    bolimlar: [],
+    manbalar: [],
+    test: [],
+    amaliySavolSoni: 15,
+    bepulNamuna: true,
+  },
   {
     slug: 'bph-luts',
     sarlavha: "Benign prostata giperplaziyasi (BPH) va pastki siydik yo'llari simptomlari",
