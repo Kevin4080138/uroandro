@@ -5,7 +5,9 @@ import { createAdminClient } from '@/lib/supabaseAdmin'
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN
 
-export const SAYT_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://urosfera.uz'
+// Vercel'dagi Production domeni (www bilan). Domen o'zgarsa — Vercel'da
+// NEXT_PUBLIC_SITE_URL o'zgaruvchisini qo'shish kifoya, kodni tahrirlash shart emas.
+export const SAYT_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.urosfera.uz').replace(/\/$/, '')
 
 type Tugma = { matn: string; yol: string } // yol — sayt ichidagi yo'l: '/student/darslar'
 
