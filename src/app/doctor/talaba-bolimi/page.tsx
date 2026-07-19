@@ -83,7 +83,7 @@ export default function TalabaBolimiHaqida() {
               }}>
                 <span style={{ color: 'var(--muted)', fontWeight: 700, width: '20px' }}>{i + 1}.</span>
                 <span style={{ fontWeight: 600 }}>{d.sarlavha}</span>
-                <span style={{ marginLeft: 'auto', fontSize: '11px', color: 'var(--muted)' }}>{d.kategoriya} · {d.test.length} savol</span>
+                <span style={{ marginLeft: 'auto', fontSize: '11px', color: 'var(--muted)' }}>{d.kategoriya}</span>
               </div>
             ))}
           </div>

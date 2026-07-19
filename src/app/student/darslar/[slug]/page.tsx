@@ -461,6 +461,23 @@ function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<t
     return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: nazariyaHtml }} />
   }
 
+  // Tarkib `dars_tarkibi` jadvalidan keladi; hali to'ldirilmagan darslar uchun bo'sh sahifa
+  // o'rniga tushunarli holat ko'rsatiladi.
+  if (dars.bolimlar.length === 0) {
+    return (
+      <div className="rise" style={{
+        background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+        padding: '28px 24px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '30px', marginBottom: '8px' }}>📝</div>
+        <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800 }}>Nazariya tayyorlanmoqda</h3>
+        <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+          {"Bu darsning nazariy qismi hozir tayyorlanyapti. Tayyor bo'lgach shu yerda paydo bo'ladi — bosqichdagi boshqa darslar bilan davom etishingiz mumkin."}
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       {dars.bolimlar.map((b, i) => (
