@@ -46,6 +46,14 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  // Rol faqat shu uch holatda kerak: himoyalangan sahifaga ruxsatni tekshirish,
+  // yoki kirgan foydalanuvchini bosh/auth sahifasidan o'z kabinetiga yuborish.
+  // Boshqa yo'llarda `profiles` so'rovi behuda edi — har so'rovda bitta ortiqcha
+  // borib-kelish (O'zbekistondan ~150 ms) degani.
+  if (!isProtected && !isAuthPage && !isHome) {
+    return response
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -68,6 +76,20 @@ export async function proxy(request: NextRequest) {
   return response
 }
 
+// Middleware har bir so'rovda ishlaydi va ichida Supabase Auth'ga tarmoq
+// chaqiruvi bor (~150 ms). Shuning uchun u faqat haqiqatan kerak bo'lgan
+// yo'llarda ishlasin.
+//
+// Chetlashtirilganlar:
+//   · /darslar, /sertifikat — ochiq sahifalar. Middleware ular uchun hech narsa
+//     qilmaydi (himoyalangan ham, auth ham, bosh sahifa ham emas), faqat ikkita
+//     tarmoq chaqiruvi qo'shardi. Aynan shular Google'dan keladigan trafik.
+//   · statik fayllar va rasm/shrift kengaytmalari.
+//
+// DIQQAT: chetlashtirish faqat yo'l boshidan hisoblanadi. `/student/darslar/...`
+// "student" bilan boshlangani uchun middleware'da qoladi va himoya saqlanadi.
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|darslar|sertifikat|logolar|nazariyalar|robots.txt|sitemap.xml|manifest.json|sw.js|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|woff|woff2|ttf)$).*)',
+  ],
 }
