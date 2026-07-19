@@ -5,16 +5,24 @@ import Script from 'next/script'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { PwaRegistrar } from '@/components/PwaRegistrar'
 import { TelegramAutoLogin } from '@/components/TelegramAutoLogin'
+import { SAYT_URL } from '@/lib/saytUrl'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['600', '700', '800'], variable: '--font-display' })
 
 export const metadata: Metadata = {
-  title: 'Urosfera Platform',
-  description: 'Urologiya va Andrologiya platformasi',
+  metadataBase: new URL(SAYT_URL),
+  title: {
+    default: "Urosfera — urologiya va andrologiya platformasi",
+    template: '%s',
+  },
+  description:
+    "Urologiya va andrologiya bo'yicha o'zbek tilidagi ta'lim platformasi: talabalar uchun " +
+    "darslar va testlar, shifokorlar uchun kasbiy vositalar, bemorlar uchun konsultatsiya.",
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Urosfera', statusBarStyle: 'default' },
   icons: { icon: '/icon-192.png', apple: '/apple-touch-icon.png' },
+  openGraph: { siteName: 'Urosfera', locale: 'uz_UZ', type: 'website' },
 }
 
 export const viewport: Viewport = {

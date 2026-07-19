@@ -11,6 +11,8 @@ import { BannerHero } from '@/components/BannerHero'
 import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard } from '@/components/RankBadge'
+import { SeriyaKarta } from '@/components/SeriyaKarta'
+import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData } from '@/lib/rank'
 
 export default function StudentDashboard() {
@@ -21,6 +23,7 @@ export default function StudentDashboard() {
   const [oxirgiSlug, setOxirgiSlug] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  const { seriya } = useSeriya()
 
   useEffect(() => {
     const getProfile = async () => {
@@ -166,6 +169,15 @@ export default function StudentDashboard() {
               )}
             </div>
             <span style={{ fontSize: '18px', flexShrink: 0 }}>→</span>
+          </div>
+
+          {/* Kunlik seriya — "Davom ettirish"dan keyin, chunki seriyani saqlash uchun
+              qilinadigan harakat aynan o'sha darsni davom ettirish */}
+          <div style={{ marginBottom: '20px' }}>
+            <SeriyaKarta
+              seriya={seriya}
+              onClick={() => router.push(oxirgiDars && !oxirgiTugadi ? `/student/darslar/${oxirgiDars.slug}` : '/student/darslar')}
+            />
           </div>
 
           {/* HERO: chap — rank+progress; o'ng — banner (faqat desktop, telefonda tepada) */}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { seriyaBelgila } from '@/lib/talim/seriya'
 import type { Bosqich, Dars } from '@/lib/talim/darslar'
 
 // Dars ichidagi qadamlar ketma-ketligi bosqichga qarab farq qiladi.
@@ -57,6 +58,9 @@ export function useDarsProgress(slug: string) {
         { student_id: user.id, dars_slug: slug, qadam },
         { onConflict: 'student_id,dars_slug,qadam', ignoreDuplicates: true }
       )
+    // Kunlik seriya: qaysi qadam bo'lishidan qat'i nazar, bugungi kun faol deb belgilanadi.
+    // Takroriy qadamlar ham bo'ladi (upsert ignoreDuplicates) — seriya baribir kuniga bir marta sanaladi.
+    await seriyaBelgila()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
