@@ -165,6 +165,11 @@ export default function SertifikatlarPage() {
                       >
                         {sorayapti === kalit ? 'Beriladi...' : '🎉 Sertifikatni olish'}
                       </button>
+                    ) : b.tayyorlanmoqda ? (
+                      <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                        ⏳ Bu bosqich sertifikati tayyorlanmoqda — {b.nazoratsizSoni} ta darsning
+                        nazorat testi hali qo&apos;shilmagan. Tayyor bo&apos;lgach shu yerda ochiladi.
+                      </p>
                     ) : (
                       <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
                         Barcha {b.jami} ta darsning nazorat testidan o&apos;tganingizda ochiladi.

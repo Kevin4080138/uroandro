@@ -77,6 +77,8 @@ export type BosqichHolati = {
   jami: number
   otgan: number
   loyiqmi: boolean
+  tayyorlanmoqda: boolean   // nazorat banklari to'liq emas — sertifikat hali berilmaydi
+  nazoratsizSoni: number
   ortachaFoiz: number
 }
 
@@ -87,11 +89,21 @@ export function bosqichlarHolati(holatlar: Map<string, DarsHolati>): BosqichHola
     const foizlar = otganlar
       .map((d) => holatlar.get(d.slug)!.engYaxshiFoiz)
       .filter((f) => f > 0)
+
+    // Nazorat banki yo'q dars "tugatilgan" bo'lsa o'tilgan hisoblanadi (darsHolati'ga
+    // qarang). Agar bosqichdagi darslarning bank'i to'liq bo'lmasa, talaba bitta ham
+    // test topshirmasdan sertifikat olishi mumkin edi — bu hujjatning qadrini yo'qotadi.
+    // Shu sabab bank to'liq bo'lmaguncha bosqich sertifikati berilmaydi.
+    const nazoratsizSoni = darslar.filter((d) => !holatlar.get(d.slug)?.nazoratBormi).length
+    const tayyorlanmoqda = darslar.length > 0 && nazoratsizSoni > 0
+
     return {
       bosqich: b,
       jami: darslar.length,
       otgan: otganlar.length,
-      loyiqmi: darslar.length > 0 && otganlar.length === darslar.length,
+      loyiqmi: darslar.length > 0 && !tayyorlanmoqda && otganlar.length === darslar.length,
+      tayyorlanmoqda,
+      nazoratsizSoni,
       ortachaFoiz: foizlar.length ? Math.round(foizlar.reduce((s, f) => s + f, 0) / foizlar.length) : 0,
     }
   })

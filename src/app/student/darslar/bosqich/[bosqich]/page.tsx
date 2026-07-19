@@ -339,6 +339,22 @@ export default function BosqichDarslariPage() {
         )}
 
         {/* Darslar ro'yxati */}
+        {bosqichDarslari.length === 0 && (
+          <div style={{
+            background: 'var(--surface)', border: '1px dashed var(--line)', borderRadius: '16px',
+            padding: '28px 22px', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '30px', marginBottom: '10px' }}>🌱</div>
+            <p style={{ margin: '0 0 6px', fontWeight: 800, fontSize: '14.5px' }}>
+              Bu bosqich tayyorlanmoqda
+            </p>
+            <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
+              Darslar qayta ishlanmoqda va tez orada shu yerda paydo bo&apos;ladi.
+              Shu vaqtda O&apos;RTA bosqichdan boshlashingiz mumkin.
+            </p>
+          </div>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {royxat.map((d) => {
             const indeks = bosqichDarslari.indexOf(d)
