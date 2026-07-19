@@ -5,7 +5,17 @@ export type Flashcard = {
   yangi: string
 }
 
-const FLASHCARDLAR: Record<string, Flashcard[]> = {
+// TARIXIY MANBA — ish paytida ishlatilmaydi.
+//
+// Flashcardlar endi `dars_tarkibi.flashcardlar` ustunida saqlanadi va dars
+// sahifasiga faqat flashcard qadami ochilganda yuklanadi. Ilgari bu fayl
+// client komponentga to'g'ridan-to'g'ri import qilingani uchun BARCHA
+// darslarning kartalari (149 KB) har bir talabaning brauzeriga tushardi.
+//
+// Bu yerda ma'lumot bazaga ko'chirilgan holicha qoldirilgan (migratsiya:
+// 20260828000000_flashcardlar_bazaga.sql). Yangi karta qo'shish yoki
+// tahrirlash — admin panel orqali, bu faylga tegilmaydi.
+export const FLASHCARD_MANBA: Record<string, Flashcard[]> = {
   'h-varikotsele-kasalligi': [
     { id: 1, kategoriya: 'Epidemiologiya', old: 'Varikotsele umumiy tarqalishi qancha?', yangi: '15% umumiy populyatsiyada\n35–40% birlamchi bepushtlikda\n80% ikkilamchi bepushtlikda' },
     { id: 2, kategoriya: 'Epidemiologiya', old: 'Varikotsele qaysi tomonda ko\'proq uchraydi va nima uchun?', yangi: '80–90% — chap tomon\n\nSabab: chap v. testicularis chap buyrak venasiga to\'g\'ri burchak ostida quyiladi → venoz bosim yuqori → qon oqimi sekinlashadi' },
@@ -534,5 +544,5 @@ const FLASHCARDLAR: Record<string, Flashcard[]> = {
 }
 
 export function flashcardlarOl(darsSlug: string): Flashcard[] {
-  return FLASHCARDLAR[darsSlug] ?? []
+  return FLASHCARD_MANBA[darsSlug] ?? []
 }

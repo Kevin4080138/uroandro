@@ -10,7 +10,7 @@ import {
   type TestSavoli, type UsmleSavoli, type Bosqich,
 } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
-import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
+import { type Flashcard } from '@/lib/talim/flashcardlar'
 import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 
 // Kontent turlari
@@ -42,7 +42,7 @@ export default function OzingizniTekshiringPage() {
     const yukla = async () => {
       const { data } = await supabase
         .from('dars_tarkibi')
-        .select('dars_slug, savollar_banki, usmle_savollar, nazorat_savollar')
+        .select('dars_slug, savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
       const map: Record<string, any> = {}
       for (const r of data ?? []) map[(r as any).dars_slug] = r
       setDbMap(map)
@@ -67,7 +67,7 @@ export default function OzingizniTekshiringPage() {
       const nazorat = (t?.nazorat_savollar ?? dars.nazoratSavollar) ?? []
       for (const s of nazorat) res.push({ turi: 'nazorat', bosqich: b, dars: dn, savol: s })
       for (const h of klinikHolatlarOl(dars.slug)) res.push({ turi: 'klinik', bosqich: b, dars: dn, holat: h })
-      for (const k of flashcardlarOl(dars.slug)) res.push({ turi: 'flashcard', bosqich: b, dars: dn, karta: k })
+      for (const k of t?.flashcardlar ?? []) res.push({ turi: 'flashcard', bosqich: b, dars: dn, karta: k })
     }
     return res
     // eslint-disable-next-line react-hooks/exhaustive-deps

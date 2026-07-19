@@ -11,7 +11,7 @@ import { klinikHolatlarOl, type KlinikHolat } from '@/lib/talim/klinikHolatlar'
 import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktivCaselar'
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
 import { vaziyatliMasalalarOl, type VaziyatliMasala } from '@/lib/talim/vaziyatliMasalalar'
-import { flashcardlarOl, type Flashcard } from '@/lib/talim/flashcardlar'
+import { type Flashcard } from '@/lib/talim/flashcardlar'
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar' | 'nazorat'
 
@@ -29,19 +29,28 @@ export type DarsMatni = {
   sertifikat_otish_foizi: number | null
 }
 
-type SavolBanklari = {
+type DarsBanklari = {
   savollar_banki: TestSavoli[] | null
   usmle_savollar: UsmleSavoli[] | null
   nazorat_savollar: TestSavoli[] | null
+  flashcardlar: Flashcard[] | null
 }
 
-// Savol banklari og'ir (dars bo'yicha 100+ savol) va faqat test tabi ochilganda
-// kerak bo'ladi. Shuning uchun ular sahifa bilan birga emas, talaba testga
-// o'tganda yuklanadi — nazariyani o'qib chiqib ketadigan talaba ularni umuman
-// yuklab olmaydi.
-function useSavolBanklari(slug: string, kerakmi: boolean) {
+const BOSH_BANKLAR: DarsBanklari = {
+  savollar_banki: null, usmle_savollar: null, nazorat_savollar: null, flashcardlar: null,
+}
+
+// Savol banklari va flashcardlar og'ir (dars bo'yicha 100+ savol, 20-40 karta)
+// va faqat mashq qadamlari ochilganda kerak bo'ladi. Shuning uchun ular sahifa
+// bilan birga emas, talaba o'sha qadamga o'tganda yuklanadi — nazariyani o'qib
+// chiqib ketadigan talaba ularni umuman yuklab olmaydi.
+//
+// Flashcardlar ilgari `flashcardlar.ts` dan kelardi va u client komponentga
+// import qilingani uchun BARCHA darslarning kartalari (149 KB) har bir
+// talabaga tushardi. Endi ular ham shu yerdan, bittagina so'rov bilan keladi.
+function useDarsBanklari(slug: string, kerakmi: boolean) {
   const supabase = createClient()
-  const [banklar, setBanklar] = useState<SavolBanklari | null>(null)
+  const [banklar, setBanklar] = useState<DarsBanklari | null>(null)
   // Takroriy so'rovni to'sish uchun ref — state emas, chunki uni effekt ichida
   // sinxron o'zgartirish qayta render chaqiradi va keraksiz aylanish hosil qiladi.
   const sorovYuborildi = useRef<string | null>(null)
@@ -51,12 +60,12 @@ function useSavolBanklari(slug: string, kerakmi: boolean) {
     sorovYuborildi.current = slug
     supabase
       .from('dars_tarkibi')
-      .select('savollar_banki, usmle_savollar, nazorat_savollar')
+      .select('savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
       .eq('dars_slug', slug)
       .maybeSingle()
       .then(({ data }) => {
         // Qator topilmasa ham sahifa buzilmasin — bank bo'sh qoladi.
-        setBanklar((data as SavolBanklari) ?? { savollar_banki: null, usmle_savollar: null, nazorat_savollar: null })
+        setBanklar((data as DarsBanklari) ?? BOSH_BANKLAR)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, kerakmi])
@@ -83,7 +92,6 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const interaktivCaselar = interaktivCaselarOl(slug)
   const xatolarTahlili = xatolarTahliliOl(slug)
   const vaziyatliMasalalar = vaziyatliMasalalarOl(slug)
-  const flashcardlar = flashcardlarOl(slug)
 
   const tabMavjud: Record<Tab, boolean> = {
     nazariya: true,
@@ -127,13 +135,14 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const qadam = qadamlar[Math.min(joriy, qadamlar.length - 1)]
   const progress = qadamlar.length ? Math.round((qadamlar.filter((t) => tugallangan.has(t)).length / qadamlar.length) * 100) : 0
 
-  // Banklar faqat test qadamlaridan biri ochilganda yuklanadi.
-  const banklarKerak = qadam === 'amaliy' || qadam === 'usmle' || qadam === 'nazorat'
-  const { banklar, banklarYuklandi } = useSavolBanklari(slug, banklarKerak)
+  // Banklar faqat mashq qadamlaridan biri ochilganda yuklanadi.
+  const banklarKerak = qadam === 'flashcard' || qadam === 'amaliy' || qadam === 'usmle' || qadam === 'nazorat'
+  const { banklar, banklarYuklandi } = useDarsBanklari(slug, banklarKerak)
   const amaliyBank = banklar?.savollar_banki?.length ? banklar.savollar_banki
     : dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
   const usmleBank = banklar?.usmle_savollar ?? dars?.usmleSavollar ?? []
   const nazoratBank = banklar?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
+  const flashcardlar = banklar?.flashcardlar ?? []
 
   // Qadam ochiqmi: birinchisi har doim; keyingilari oldingi qadam yakunlangach
   const ochiqMi = (i: number) => i === 0 || tugallangan.has(qadamlar[i - 1]) || tugallangan.has(qadamlar[i])
@@ -407,7 +416,12 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               ? <XatolarTahlilyBolimi tahlillar={xatolarTahlili} />
               : <BoshUlash matn="Xatolar tahlili tez orada qo'shiladi." />
             )}
-            {qadam === 'flashcard' && <FlashcardBolimi kartalar={flashcardlar} />}
+            {qadam === 'flashcard' && (!banklarYuklandi
+              ? <BoshUlash matn="Kartalar yuklanmoqda..." />
+              : flashcardlar.length > 0
+              ? <FlashcardBolimi kartalar={flashcardlar} />
+              : <BoshUlash matn="Flashcardlar tez orada qo'shiladi." />
+            )}
           </div>
         </main>
       </div>

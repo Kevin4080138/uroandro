@@ -8,13 +8,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, type Bosqich } from '@/lib/talim/darslar'
-import { flashcardlarOl } from '@/lib/talim/flashcardlar'
 
 type TarkibQator = {
   dars_slug: string
   savollar_banki: unknown[] | null
   usmle_savollar: unknown[] | null
   nazorat_savollar: unknown[] | null
+  flashcardlar: unknown[] | null
 }
 
 const AMALIY_MAQSAD: Record<Bosqich, number> = { oson: 40, "o'rta": 45, qiyin: 50 }
@@ -47,7 +47,7 @@ export default function AdminTestbankPage() {
   useEffect(() => {
     supabase
       .from('dars_tarkibi')
-      .select('dars_slug, savollar_banki, usmle_savollar, nazorat_savollar')
+      .select('dars_slug, savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
       .then(({ data }) => {
         setTarkiblar(new Map(((data as TarkibQator[]) ?? []).map((r) => [r.dars_slug, r])))
         setYuklandi(true)
@@ -61,7 +61,7 @@ export default function AdminTestbankPage() {
     const amaliy = db?.savollar_banki?.length ?? (d.savollarBanki?.length || d.test.length)
     const usmle = db?.usmle_savollar?.length ?? (d.usmleSavollar?.length ?? 0)
     const nazorat = db?.nazorat_savollar?.length ?? (d.nazoratSavollar?.length ?? 0)
-    const flash = flashcardlarOl(d.slug).length
+    const flash = db?.flashcardlar?.length ?? 0
     const usmleKerak = d.bosqich !== 'oson'
     const nazoratKerak = d.bosqich !== 'oson'
     const kamlik =

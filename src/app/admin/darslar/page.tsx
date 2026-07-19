@@ -11,6 +11,38 @@ type DarsTarkibi = {
   video_linklar: string[] | null
   konspekt_url: string | null
   prezentatsiya_url: string | null
+  nazariya_html: string | null
+  savollar_banki: unknown[] | null
+  usmle_savollar: unknown[] | null
+  nazorat_savollar: unknown[] | null
+  flashcardlar: unknown[] | null
+}
+
+// Nazariya HTML platformaning `.maqola-html` uslubi ichida ko'rsatiladi va
+// sahifa shablonida logotip allaqachon bor. Shu sabab quyidagilar HTML ichida
+// bo'lmasligi kerak — ular darsni 25 KB dan 300 KB ga ko'taradi va telefonda
+// sekinlashtiradi. Saqlashga to'sqinlik qilmaymiz, faqat ogohlantiramiz.
+function htmlOgohlantirishlari(html: string): string[] {
+  const ogoh: string[] = []
+  if (/<style[\s>]/i.test(html)) ogoh.push('<style> bloki bor — uslub globals.css da turadi')
+  if (/data:image\/[a-z]+;base64/i.test(html)) ogoh.push('base64 rasm bor — brauzer keshini buzadi')
+  if (/<html[\s>]|<!DOCTYPE/i.test(html)) ogoh.push("<html>/<!DOCTYPE> bor — bu to'liq sahifa emas, bo'lak bo'lishi kerak")
+  if (/<link[^>]+stylesheet/i.test(html)) ogoh.push('tashqi CSS havolasi bor')
+  return ogoh
+}
+
+// JSON maydonlarni tahrirlash uchun: matnni massivga aylantiradi.
+// Bo'sh matn — bo'sh massiv (maydonni tozalash uchun).
+function jsonMassivOqi(matn: string): { qiymat: unknown[]; xato: string | null } {
+  const t = matn.trim()
+  if (!t) return { qiymat: [], xato: null }
+  try {
+    const p = JSON.parse(t)
+    if (!Array.isArray(p)) return { qiymat: [], xato: 'JSON massiv bo\'lishi kerak — [ ] bilan boshlanadi' }
+    return { qiymat: p, xato: null }
+  } catch (e) {
+    return { qiymat: [], xato: e instanceof Error ? e.message : 'JSON o\'qib bo\'lmadi' }
+  }
 }
 
 const inputStyle = {
@@ -18,6 +50,35 @@ const inputStyle = {
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px' }
+
+// JSON massiv maydoni — element sonini ko'rsatadi va xatoni darhol aytadi,
+// admin saqlash tugmasini bosishdan oldin bilib turadi.
+function JsonMaydon({ nom, izoh, qiymat, ozgartir }: {
+  nom: string; izoh: string; qiymat: string; ozgartir: (v: string) => void
+}) {
+  const { qiymat: massiv, xato } = jsonMassivOqi(qiymat)
+  return (
+    <div style={{ marginBottom: '18px' }}>
+      <label style={labelStyle}>
+        {nom}
+        <span style={{ color: xato ? 'var(--danger)' : 'var(--muted)', marginLeft: '8px', fontSize: '11.5px' }}>
+          {xato ? 'JSON xato' : qiymat.trim() ? `${massiv.length} ta` : "bo'sh"}
+        </span>
+      </label>
+      <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: 'var(--muted)' }}>{izoh}</p>
+      <textarea
+        style={{
+          ...inputStyle, minHeight: '120px', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '12px',
+          borderColor: xato ? 'var(--danger)' : 'var(--line)',
+        }}
+        value={qiymat}
+        onChange={(e) => ozgartir(e.target.value)}
+        placeholder="[]"
+      />
+      {xato && <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--danger)' }}>⚠️ {xato}</p>}
+    </div>
+  )
+}
 
 export default function AdminDarslarPage() {
   const supabase = createClient()
@@ -31,6 +92,11 @@ export default function AdminDarslarPage() {
 
   const [asosiyVideoUrl, setAsosiyVideoUrl] = useState('')
   const [videoLinklarMatn, setVideoLinklarMatn] = useState('')
+  const [nazariyaHtml, setNazariyaHtml] = useState('')
+  const [amaliyMatn, setAmaliyMatn] = useState('')
+  const [usmleMatn, setUsmleMatn] = useState('')
+  const [nazoratMatn, setNazoratMatn] = useState('')
+  const [flashcardMatn, setFlashcardMatn] = useState('')
   const [konspektFayl, setKonspektFayl] = useState<File | null>(null)
   const [prezentatsiyaFayl, setPrezentatsiyaFayl] = useState<File | null>(null)
   const konspektInput = useRef<HTMLInputElement>(null)
@@ -49,10 +115,21 @@ export default function AdminDarslarPage() {
     if (konspektInput.current) konspektInput.current.value = ''
     if (prezentatsiyaInput.current) prezentatsiyaInput.current.value = ''
     setYuklanmoqda(true)
-    const { data } = await supabase.from('dars_tarkibi').select('dars_slug, asosiy_video_url, video_linklar, konspekt_url, prezentatsiya_url').eq('dars_slug', slug).maybeSingle()
+    const { data } = await supabase
+      .from('dars_tarkibi')
+      .select('dars_slug, asosiy_video_url, video_linklar, konspekt_url, prezentatsiya_url, nazariya_html, savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
+      .eq('dars_slug', slug)
+      .maybeSingle()
     setTarkib((data as DarsTarkibi) ?? null)
     setAsosiyVideoUrl(data?.asosiy_video_url ?? '')
     setVideoLinklarMatn((data?.video_linklar ?? []).join('\n'))
+    setNazariyaHtml(data?.nazariya_html ?? '')
+    // JSON'ni o'qishga qulay ko'rinishda ochamiz — admin uni qo'lda ham tahrirlashi mumkin.
+    const chiroyli = (v: unknown[] | null | undefined) => (v?.length ? JSON.stringify(v, null, 2) : '')
+    setAmaliyMatn(chiroyli(data?.savollar_banki))
+    setUsmleMatn(chiroyli(data?.usmle_savollar))
+    setNazoratMatn(chiroyli(data?.nazorat_savollar))
+    setFlashcardMatn(chiroyli(data?.flashcardlar))
     setYuklanmoqda(false)
   }
 
@@ -96,13 +173,43 @@ export default function AdminDarslarPage() {
       const bosqich = darsMa?.bosqich ?? null
       const bepulNamuna = darsMa?.bepulNamuna ?? false
 
+      // JSON maydonlarni saqlashdan OLDIN tekshiramiz — bittasi buzuq bo'lsa
+      // hech narsa saqlanmasin, aks holda dars yarim holatda qolib ketadi.
+      const maydonlar = [
+        { nom: 'Amaliy test banki', matn: amaliyMatn },
+        { nom: 'USMLE savollari', matn: usmleMatn },
+        { nom: 'Nazorat savollari', matn: nazoratMatn },
+        { nom: 'Flashcardlar', matn: flashcardMatn },
+      ].map((m) => ({ ...m, ...jsonMassivOqi(m.matn) }))
+
+      const buzuq = maydonlar.find((m) => m.xato)
+      if (buzuq) {
+        setXabar(`Xato: ${buzuq.nom} — ${buzuq.xato}`)
+        setSaqlanmoqda(false)
+        return
+      }
+      const [amaliy, usmle, nazorat, flashcard] = maydonlar.map((m) => m.qiymat)
+
       const { error } = await supabase.from('dars_tarkibi').upsert(
-        { dars_slug: tanlanganSlug, bosqich, bepul_namuna: bepulNamuna, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl },
+        {
+          dars_slug: tanlanganSlug, bosqich, bepul_namuna: bepulNamuna,
+          asosiy_video_url: asosiyVideo, video_linklar: videoLinklar,
+          konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl,
+          nazariya_html: nazariyaHtml.trim() || null,
+          savollar_banki: amaliy, usmle_savollar: usmle,
+          nazorat_savollar: nazorat, flashcardlar: flashcard,
+        },
         { onConflict: 'dars_slug' }
       )
       if (error) throw error
 
-      setTarkib({ dars_slug: tanlanganSlug, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar, konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl })
+      setTarkib({
+        dars_slug: tanlanganSlug, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar,
+        konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl,
+        nazariya_html: nazariyaHtml.trim() || null,
+        savollar_banki: amaliy, usmle_savollar: usmle,
+        nazorat_savollar: nazorat, flashcardlar: flashcard,
+      })
       setKonspektFayl(null)
       setPrezentatsiyaFayl(null)
       if (konspektInput.current) konspektInput.current.value = ''
@@ -161,6 +268,54 @@ export default function AdminDarslarPage() {
               <h3 style={{ margin: '0 0 18px 0', fontSize: '16px', color: 'var(--accent)' }}>
                 {DARSLAR.find((d) => d.slug === tanlanganSlug)?.sarlavha}
               </h3>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>
+                  Nazariya HTML
+                  <span style={{ color: 'var(--muted)', marginLeft: '8px', fontSize: '11.5px' }}>
+                    {nazariyaHtml ? `${(new Blob([nazariyaHtml]).size / 1024).toFixed(1)} KB` : "bo'sh"}
+                  </span>
+                </label>
+                <textarea
+                  style={{ ...inputStyle, minHeight: '220px', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '12px' }}
+                  value={nazariyaHtml}
+                  onChange={(e) => setNazariyaHtml(e.target.value)}
+                  placeholder={'<div class="article-hero">…</div>\n<section class="section" id="…">…</section>'}
+                />
+                {nazariyaHtml && htmlOgohlantirishlari(nazariyaHtml).map((o) => (
+                  <p key={o} style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--warn, #d98324)' }}>⚠️ {o}</p>
+                ))}
+                {nazariyaHtml && new Blob([nazariyaHtml]).size > 120_000 && (
+                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--warn, #d98324)' }}>
+                    ⚠️ Dars 120 KB dan katta — odatda bu uslub, logotip yoki base64 rasmdan bo&apos;ladi
+                  </p>
+                )}
+              </div>
+
+              <JsonMaydon
+                nom="Amaliy test banki"
+                izoh="Savollar massivi: savol, variantlar, togri, izoh"
+                qiymat={amaliyMatn}
+                ozgartir={setAmaliyMatn}
+              />
+              <JsonMaydon
+                nom="USMLE savollari"
+                izoh="Amaliy test formatiga qo'shimcha: vinyetka (klinik holat matni)"
+                qiymat={usmleMatn}
+                ozgartir={setUsmleMatn}
+              />
+              <JsonMaydon
+                nom="Nazorat savollari"
+                izoh="Sertifikat uchun — bo'sh bo'lsa bosqich sertifikati berilmaydi"
+                qiymat={nazoratMatn}
+                ozgartir={setNazoratMatn}
+              />
+              <JsonMaydon
+                nom="Flashcardlar"
+                izoh="Kartalar massivi: id, kategoriya, old (savol), yangi (javob)"
+                qiymat={flashcardMatn}
+                ozgartir={setFlashcardMatn}
+              />
 
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Asosiy dars videosi (YouTube, Instagram yoki Facebook havolasi)</label>
