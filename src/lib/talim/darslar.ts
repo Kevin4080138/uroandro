@@ -130,9 +130,21 @@ export const DARS_KATEGORIYALARI = [
 // (slug, sarlavha, bosqich, iframe yo'li) qoladi, aks holda hammasi client bundle'ga yuklanadi.
 // Yangi dars tarkibi ham to'g'ridan-to'g'ri bazaga yoziladi (seed migratsiya yoki admin orqali).
 export const DARSLAR: Dars[] = [
-  // EASY bosqichning namunaviy darsi — yangi qoidalar bo'yicha yozilgan
-  // (AGENTS.md, "Nazariya yozish qoidalari"). Qolgan EASY darslari shu
-  // qolipda qayta yoziladi. Nazariyasi `dars_tarkibi` jadvalida.
+  // EASY bosqich yangi qoidalar bo'yicha qaytadan yozilmoqda
+  // (AGENTS.md, "Nazariya yozish qoidalari"). Nazariya `dars_tarkibi` jadvalida.
+  {
+    slug: 'urologiya-asoslari',
+    sarlavha: "Urologiya nimani o'rganadi?",
+    kategoriya: 'Kirish va semiotika',
+    bosqich: 'oson',
+    qisqa: "Sohaning chegaralari, urolog ishlaydigan a'zolar va bemorlar keladigan asosiy shikoyat guruhlari.",
+    daqiqa: 5,
+    bolimlar: [],
+    manbalar: [],
+    test: [],
+    amaliySavolSoni: 15,
+    bepulNamuna: true,
+  },
   {
     slug: 'prostata-adenomasi-asoslari',
     sarlavha: 'Prostata adenomasi — bu nima?',
