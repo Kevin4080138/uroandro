@@ -32,14 +32,29 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // `getUser()` emas, `getClaims()`: loyihada asimmetrik JWT kalitlari (ES256)
+  // yoqilgani uchun token Supabase'ga borilmasdan, WebCrypto orqali joyida
+  // tekshiriladi. Imzo baribir tekshirilgani uchun xavfsizlik pasaymaydi —
+  // `getSession()` dan farqi shu. JWKS bir marta olinib keshlanadi.
+  const { data: claimsData, error: claimsXato } = await supabase.auth.getClaims()
+  let userId = claimsData?.claims?.sub ?? null
+
+  // Ehtiyot chorasi: sessiya umuman yo'q bo'lsa `data` ham, `error` ham bo'sh
+  // keladi — bu oddiy mehmon, qo'shimcha tekshiruv kerak emas. Lekin `error`
+  // to'lgan bo'lsa (kalit olinmadi, kutilmagan format va h.k.) — tarmoq orqali
+  // qayta tekshiramiz. Aks holda mahalliy tekshiruvdagi bitta nosozlik barcha
+  // kirgan foydalanuvchini login sahifasiga uloqtirib yuborardi.
+  if (!userId && claimsXato) {
+    const { data: { user } } = await supabase.auth.getUser()
+    userId = user?.id ?? null
+  }
   const { pathname } = request.nextUrl
 
   const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
   const isAuthPage = pathname.startsWith('/auth')
   const isHome = pathname === '/'
 
-  if (!user) {
+  if (!userId) {
     if (isProtected) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
@@ -57,7 +72,7 @@ export async function proxy(request: NextRequest) {
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single()
 
   const home = profile?.role ? roleHome[profile.role] : null
