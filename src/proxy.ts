@@ -81,7 +81,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(home, request.url))
   }
 
-  if (isProtected && profile?.role !== 'admin') {
+  // Kalkulyatorlar — o'quv vositasi, bemor ma'lumoti yo'q. Talaba bo'limidagi
+  // "Kalkulyatorlar" sahifasi ham shu sahifalarga havola qiladi, shuning uchun
+  // ular rol tekshiruvidan chetlashtiriladi (kirish baribir talab qilinadi).
+  // TODO: keyinchalik /kalkulyatorlar ga ko'chirilsa, bu istisno kerak bo'lmaydi.
+  const rolgaBoglanmagan = pathname.startsWith('/doctor/calculators')
+
+  if (isProtected && !rolgaBoglanmagan && profile?.role !== 'admin') {
     const allowedPrefix = home?.replace('/dashboard', '')
     if (!allowedPrefix || !pathname.startsWith(allowedPrefix)) {
       return NextResponse.redirect(new URL(home ?? '/auth/login', request.url))

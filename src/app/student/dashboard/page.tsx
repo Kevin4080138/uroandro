@@ -85,6 +85,10 @@ export default function StudentDashboard() {
     { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
     { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
+    { icon: '🧬', title: 'Exclusive Andrologiya', desc: 'Faqat andrologiya yo\'nalishi', c: 'var(--accent-2)', href: '/student/andrologiya' },
+    { icon: '🧮', title: 'Kalkulyatorlar', desc: 'Shkala va formulalar — ma\'nosi bilan', c: 'var(--accent)', href: '/student/kalkulyatorlar' },
+    { icon: '🔪', title: 'Operativ urologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--danger)', href: '/student/operativ-urologiya' },
+    { icon: '🗂️', title: 'Klassifikatsiyalar', desc: 'Urologik tasniflar ma\'lumotnomasi', c: 'var(--good)', href: '/student/klassifikatsiyalar' },
     { icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
     { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
   ]

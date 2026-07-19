@@ -3,133 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
-
-type Kalk = {
-  href: string
-  icon: string
-  title: string
-  desc: string
-  kategoriya: string
-  faol: boolean
-  gradient: string
-}
-
-const KATEGORIYALAR = ['Hammasi', 'Prostata', 'Erektil funksiya', 'Erkak bepushtligi', 'Buyrak', 'Siydik pufagi', 'Jarrohlik'] as const
-
-const KALKULYATORLAR: Kalk[] = [
-  // --- Tartib: IPSS, IIEF-5, NIH-CPSI, EHS, PSA, PCPT, CAPRA, Charlson, Clavien-Dindo, AMS, ADAM, PEDT, WHO Spermogramma, eGFR, RENAL ---
-  {
-    href: '/doctor/calculators/ipss', icon: '📊', title: 'IPSS / AUA-SS',
-    desc: 'Xalqaro prostata simptomlari indeksi — 7 savol bo\'yicha og\'irlik darajasini baholash',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #2563eb, #0891b2)',
-  },
-  {
-    href: '/doctor/calculators/iief5', icon: '💙', title: 'IIEF-5 (SHIM)',
-    desc: 'Erektil disfunksiyani 5 savollik anketa orqali baholash',
-    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #db2777, #f43f5e)',
-  },
-  {
-    href: '/doctor/calculators/nih-cpsi', icon: '🔥', title: 'NIH-CPSI',
-    desc: 'Surunkali prostatit / chanoq og\'rig\'i sindromi indeksi',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #b91c1c, #ea580c)',
-  },
-  {
-    href: '/doctor/calculators/ehs', icon: '💎', title: 'EHS — Ereksiya Qattiqligi',
-    desc: '4 bosqichli shkala orqali ereksiya sifatini tezkor baholash (EAU tavsiyasi)',
-    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #7c3aed, #db2777)',
-  },
-  {
-    href: '/doctor/calculators/psa', icon: '🩸', title: 'PSA kalkulyatori',
-    desc: 'Yoshga moslashgan me\'zonlar, PSA zichligi va erkin/umumiy PSA nisbati',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #dc2626, #f97316)',
-  },
-  {
-    href: '/doctor/calculators/pcpt', icon: '🔬', title: 'PCPT Risk Kalkulyatori',
-    desc: 'PSA, yosh, irq, DRE va anamnez asosida prostata saratoni xavfini hisoblash',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #b91c1c, #7c3aed)',
-  },
-  {
-    href: '/doctor/calculators/capra', icon: '🎯', title: 'CAPRA Score',
-    desc: 'PSA, Gleason, bosqich, yosh va biyopsiya asosida prostata saratoni prognozini baholash',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #dc2626, #9333ea)',
-  },
-  {
-    href: '/doctor/calculators/charlson', icon: '🏥', title: 'Charlson Comorbidity Index',
-    desc: '19 kasallik va yosh asosida operatsiya xavfi va 10 yillik tiriklikni hisoblash',
-    kategoriya: 'Jarrohlik', faol: true, gradient: 'linear-gradient(135deg, #0369a1, #6366f1)',
-  },
-  {
-    href: '/doctor/calculators/clavien-dindo', icon: '⚕️', title: 'Clavien-Dindo Klassifikatsiyasi',
-    desc: 'Jarrohlik asoratlari og\'irligini I–V darajali standartlashtirilgan shkala bilan baholash',
-    kategoriya: 'Jarrohlik', faol: true, gradient: 'linear-gradient(135deg, #1d4ed8, #dc2626)',
-  },
-  {
-    href: '/doctor/calculators/ams', icon: '🧬', title: 'AMS Score',
-    desc: 'Erkaklar qarilik simptomlari (somatik, psixologik, jinsiy) — 17 savollik anketa',
-    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #7c3aed, #db2777)',
-  },
-  {
-    href: '/doctor/calculators/adam', icon: '🧪', title: 'Testosteron tanqisligi (ADAM)',
-    desc: 'Erkaklarda androgen yetishmovchiligi anketasi orqali dastlabki baholash',
-    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #4338ca, #6366f1)',
-  },
-  {
-    href: '/doctor/calculators/pedt', icon: '⏱️', title: 'PEDT',
-    desc: 'Erta eyakulyatsiyani 5 savollik diagnostik anketa orqali aniqlash',
-    kategoriya: 'Erektil funksiya', faol: true, gradient: 'linear-gradient(135deg, #0891b2, #6366f1)',
-  },
-  {
-    href: '/doctor/calculators/spermogramma', icon: '🔭', title: 'WHO 2021 spermogramma',
-    desc: 'Sperma tahlili ko\'rsatkichlarini WHO 6-nashr me\'zonlari bilan solishtirish',
-    kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #0d9488, #22c55e)',
-  },
-  {
-    href: '/doctor/calculators/egfr', icon: '🫘', title: 'eGFR (CKD-EPI)',
-    desc: 'Kreatinin, yosh va jins asosida buyrak filtratsiya tezligini hisoblash',
-    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0369a1, #38bdf8)',
-  },
-  {
-    href: '/doctor/calculators/renal', icon: '🗺️', title: 'R.E.N.A.L. nefrometriya',
-    desc: 'Buyrak o\'smasi murakkabligini USI/KT o\'lchamlari bo\'yicha ballash',
-    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #15803d, #84cc16)',
-  },
-  // Qolgan kalkulyatorlar
-  {
-    href: '/doctor/calculators/prostata-hajmi', icon: '🍈', title: 'Prostata hajmi',
-    desc: 'USI o\'lchamlari (uzunlik × kenglik × balandlik) asosida ellipsoid formula bo\'yicha hajm',
-    kategoriya: 'Prostata', faol: true, gradient: 'linear-gradient(135deg, #ea580c, #facc15)',
-  },
-  {
-    href: '/doctor/calculators/varikotsele', icon: '🧮', title: 'Varikotsele solishtirish',
-    desc: 'Laparoskopik, Marmar, Skleroterapiya, Palomo, Ivanissevich usullarini qiyosiy tahlil qilish',
-    kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-  },
-  {
-    href: '/doctor/calculators/dubin-amelar', icon: '🔬', title: 'Dubin-Amelar darajasi',
-    desc: 'Varikotsele klinik darajasini (I–III) tekshiruv natijalari bo\'yicha aniqlash',
-    kategoriya: 'Erkak bepushtligi', faol: true, gradient: 'linear-gradient(135deg, #7c3aed, #c026d3)',
-  },
-  {
-    href: '/doctor/calculators/cockcroft-gault', icon: '⚗️', title: 'Kreatinin klirensi (Cockcroft-Gault)',
-    desc: 'Tana vazni, yosh va kreatinin asosida klirensni baholash',
-    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #0e7490, #06b6d4)',
-  },
-  {
-    href: '/doctor/calculators/stone', icon: '🪨', title: 'STONE skor',
-    desc: 'Siydik yo\'li toshi ehtimolini klinik belgilar bo\'yicha bashorat qilish',
-    kategoriya: 'Buyrak', faol: true, gradient: 'linear-gradient(135deg, #57534e, #a8a29e)',
-  },
-  {
-    href: '/doctor/calculators/uroflowmetriya', icon: '💧', title: 'Uroflowmetriya baholash',
-    desc: 'Siydik oqimi tezligi (Qmax) natijalarini yosh me\'zonlari bilan izohlash',
-    kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #1d4ed8, #06b6d4)',
-  },
-  {
-    href: '/doctor/calculators/oab-v8', icon: '🚻', title: 'OAB-V8',
-    desc: 'Giperaktiv siydik pufagi simptomlarini skrining anketasi orqali baholash',
-    kategoriya: 'Siydik pufagi', faol: true, gradient: 'linear-gradient(135deg, #9333ea, #d946ef)',
-  },
-]
+import { KALKULYATORLAR, KALK_KATEGORIYALARI as KATEGORIYALAR } from '@/lib/kalkulyatorlar'
 
 export default function CalculatorsHubPage() {
   const router = useRouter()
@@ -174,7 +48,7 @@ export default function CalculatorsHubPage() {
           {royxat.map((k, i) => (
             <div
               key={k.title}
-              onClick={() => k.faol && router.push(k.href)}
+              onClick={() => k.faol && router.push(`/doctor/calculators/${k.slug}`)}
               className={`rise ${k.faol ? 'lift' : ''}`}
               style={{
                 animationDelay: `${Math.min(i * 0.05, 0.5)}s`,
