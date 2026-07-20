@@ -11,15 +11,29 @@
 
 export type Skrinshot = { src: string; izoh: string }
 
-const KARTA_KENGLIK = 220
-const KARTA_BALAND = 380
+/**
+ * Balandlik qat'iy, kenglik esa rasmning o'z nisbatiga qarab o'zgaradi.
+ *
+ * Ilgari kenglik qat'iy edi va `object-fit: cover` ishlatilardi — natijada
+ * nisbati mos kelmagan rasmlar kesilib qolardi (11 qadamdan 8 tasi ko'rinardi,
+ * "QADAM" yozuvi "ADAM" bo'lib qolardi). Endi hech narsa kesilmaydi:
+ * tasmaning tepa va past chizig'i tekis, kengliklar tabiiy farq qiladi.
+ */
+const KARTA_BALAND = 420
+const IZOH_KENGLIK = 230
 
 function Karta({ s }: { s: Skrinshot }) {
   return (
-    <figure style={{ margin: 0, width: KARTA_KENGLIK, flexShrink: 0 }}>
+    <figure
+      style={{
+        margin: 0, flexShrink: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}
+    >
       <div
         style={{
           height: KARTA_BALAND,
+          width: 'fit-content',
           borderRadius: 18,
           overflow: 'hidden',
           border: '1px solid var(--line)',
@@ -33,19 +47,13 @@ function Karta({ s }: { s: Skrinshot }) {
           loading="lazy"
           decoding="async"
           draggable={false}
-          style={{
-            width: '100%',
-            height: '100%',
-            // Yuqoridan tekislash — har kartada sarlavha ko'rinib tursin
-            objectFit: 'cover',
-            objectPosition: 'top',
-            display: 'block',
-          }}
+          style={{ height: '100%', width: 'auto', display: 'block' }}
         />
       </div>
       <figcaption
         style={{
           marginTop: 9,
+          maxWidth: IZOH_KENGLIK,
           fontSize: 12,
           color: 'var(--muted)',
           textAlign: 'center',

@@ -18,14 +18,16 @@ const NATIJA = path.join(__dirname, '..', 'public', 'landing')
 // y1..y2 — original 1080x2400 koordinatalarida mazmun chegarasi
 const RASMLAR = [
   // ── TALABA ──
-  { fayl: 'photo_2026-07-20_13-52-10.jpg',     nom: 'talaba-bolimlar',    y1: 380,  y2: 1960 },
+  // "NAZAR SOLISH" sarlavhasi yarim chiqmasligi uchun Reyting kartasida tugaydi
+  { fayl: 'photo_2026-07-20_13-52-10.jpg',     nom: 'talaba-bolimlar',    y1: 380,  y2: 1900 },
   { fayl: 'photo_2026-07-20_13-52-11.jpg',     nom: 'talaba-bosqich-oson', y1: 390, y2: 1860 },
   { fayl: 'photo_2026-07-20_13-52-12.jpg',     nom: 'talaba-bosqich-pro', y1: 470,  y2: 2000 },
-  // Boshqa kartalar bilan bir xil nisbatda bo'lishi uchun 11 qadamning
-  // sarlavhasi + birinchi qismi olinadi (to'liq ro'yxat juda cho'ziq chiqadi)
-  { fayl: 'photo_2026-07-20_13-52-15.jpg',     nom: 'talaba-dars-qadamlar', y1: 100, y2: 1560, x1: 0, x2: 880 },
-  { fayl: 'photo_2026-07-20_13-52-14 (2).jpg', nom: 'talaba-nazariya',    y1: 500,  y2: 1990 },
-  { fayl: 'photo_2026-07-20_13-52-16.jpg',     nom: 'talaba-kalkulyator', y1: 320,  y2: 2050 },
+  // 11 qadamning HAMMASI ko'rinsin — tasmada balandlik qat'iy, kenglik erkin,
+  // shuning uchun cho'ziq bo'lgani muammo emas
+  { fayl: 'photo_2026-07-20_13-52-15.jpg',     nom: 'talaba-dars-qadamlar', y1: 100, y2: 2090, x1: 0, x2: 880 },
+  { fayl: 'photo_2026-07-20_13-52-14 (2).jpg', nom: 'talaba-nazariya',    y1: 500,  y2: 1950 },
+  // IPSS kartasidan keyin to'xtaydi — keyingi karta yarim chiqmasin
+  { fayl: 'photo_2026-07-20_13-52-16.jpg',     nom: 'talaba-kalkulyator', y1: 320,  y2: 1790 },
 
   // ── BEMOR ──
   { fayl: 'photo_2026-07-20_13-52-22.jpg',     nom: 'bemor-bolimlar',     y1: 350,  y2: 2150 },
