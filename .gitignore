@@ -27,6 +27,7 @@
 # landing uchun xom skrinshotlar — optimallashtirilgani public/landing/ ga tushadi
 /skrinshotlar/*
 !/skrinshotlar/README.md
+!/skrinshotlar/qirq.js
 
 # debug
 npm-debug.log*

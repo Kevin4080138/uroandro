@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { ScreenshotMarquee, BEMOR_SKRINSHOTLAR } from '@/components/landing/ScreenshotMarquee'
 
 const HARAKATLAR = [
   {
@@ -109,6 +110,20 @@ export default function BemorEshigiPage() {
           ))}
         </div>
 
+      </div>
+
+      {/* Ilova ko'rinishi — tasma ekran chetigacha cho'zilsin */}
+      <section style={{ padding: '10px 0 4px' }}>
+        <p style={{
+          textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)',
+          textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 16px',
+        }}>
+          Ilova ichida shunday
+        </p>
+        <ScreenshotMarquee rasmlar={BEMOR_SKRINSHOTLAR} tezlik="62s" />
+      </section>
+
+      <div style={{ maxWidth: 560, margin: '0 auto', padding: '20px 20px 48px' }}>
         {/* Hisob eslatmasi */}
         <div className="rise" style={{
           marginTop: 24, background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: 14,

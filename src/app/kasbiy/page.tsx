@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { ScreenshotMarquee, TALABA_SKRINSHOTLAR } from '@/components/landing/ScreenshotMarquee'
 
 type Rol = 'shifokor' | 'talaba'
 
@@ -123,6 +124,24 @@ function KasbiyLanding() {
             <button onClick={() => router.push('/auth/login')} className="lift" style={{ background: 'var(--surface)', color: 'var(--ink)', border: '1.5px solid var(--line)', borderRadius: 14, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>Kirish</button>
           </div>
         </section>
+
+      </div>
+
+      {/* Ilova ko'rinishi — hozircha faqat talaba bo'limining skrinshotlari bor.
+          Shifokor bo'limi uchun rasm tayyorlangach, shu yerga qo'shiladi. */}
+      {rol === 'talaba' && (
+        <section style={{ padding: '20px 0 8px' }}>
+          <p style={{
+            textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)',
+            textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 16px',
+          }}>
+            Ilova ichida shunday
+          </p>
+          <ScreenshotMarquee rasmlar={TALABA_SKRINSHOTLAR} tezlik="58s" />
+        </section>
+      )}
+
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 20px' }}>
 
         {/* Imkoniyatlar */}
         <section style={{ padding: '44px 0 12px' }}>
