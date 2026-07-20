@@ -15,15 +15,35 @@ Har bosqich uchun raqamlar boshqacha — pastdagi jadvaldan oling.
 
 ---
 
+## Boshlashdan oldin uchta narsani tayyorlang
+
+Promptni to'ldirish uchun shular kerak — ularsiz natija yomon chiqadi.
+
+**1. Adabiyot — aniq bob va sahifagacha.**
+"Campbell-Walsh" deb yozish yetarli emas. Qaysi nashr, qaysi bob —
+shuni yozing. Model kitobning butunini emas, o'sha bo'limni o'qiydi va
+darsda qaysi manbadan olingani ko'rinib turadi.
+
+**2. Quyi bosqichdagi (EASY) darsning uchta asosiy punkti.**
+O'RTA darsi boshida "asosiy bosqichda o'rganilgan edi" izohi bo'ladi.
+Model EASY darsini ko'rmaydi — uchta punktni siz berasiz. Bermasangiz,
+u o'zi o'ylab topadi va EASY darsi bilan mos kelmaydi.
+
+**3. Dars slug'i — `MAVZULAR-XARITASI.md` dan.**
+U yerda O'RTA uchun 33 ta mavzu belgilangan, har birining slug'i tayyor.
+Yangi slug o'ylab topmang.
+
+---
+
 ## PROMPT (shu yerdan nusxa oling)
 
 ```
 Urosfera platformasi uchun urologiya darsining nazariya qismini yoz.
 
 DARS
-  Mavzu:    {mavzu nomi}
-  Slug:     {dars-slug}
-  Bosqich:  O'RTA
+  Mavzu:      {mavzu nomi}
+  Slug:       {dars-slug}
+  Bosqich:    O'RTA
   Kategoriya: {kategoriya}
 
 BOSQICHNING VAZIFASI
@@ -32,12 +52,36 @@ Dars tugagach talaba tekshiruv buyura olishi va boshlang'ich davolashni
 boshlay olishi kerak. Bu darslik bobining qisqartmasi EMAS — u boshqa
 savolga javob beradi.
 
+ADABIYOT — faqat men yuklagan fayllardan
+  Asosiy manba:  {kitob nomi, nashr — qaysi boblar}
+  Qo'shimcha:    {gayd yoki maqola, yil — qaysi bo'lim}
+
+  · Faktni faqat shu manbalardan ol. O'zing eslab qolganingdan yozma:
+    manbada yo'q raqam, chegara qiymat yoki doza kiritilmasin.
+  · Manbalar zid bo'lsa: gayd (EAU/AUA) darslikdan ustun turadi.
+    Zidlikning O'ZINI darsda muhokama qilma — u QIYIN bosqichniki.
+  · Manbada topilmagan narsani to'qib yozma.
+  · Hero chiplarida qaysi kitob va qaysi boblardan foydalanganingni yoz.
+
+AVVALGI BOSQICH (dars boshidagi eslatma uchun)
+  EASY darsi: {slug} — {sarlavha}
+  Unda o'rganilgan:
+    · {punkt 1}
+    · {punkt 2}
+    · {punkt 3}
+  Shu uchtasini qisqa takrorlab, ustiga yangi klinik qatlam qur.
+  Ularni qaytadan tushuntirma — talaba bilishini nazarda tut.
+
 HAJM (qat'iy)
-  So'z:      1500–2200
-  Bo'lim H2: 6–8
-  Jadval:    2–3
+  So'z:       1500–2200
+  Bo'lim H2:  6–8
+  Jadval:     2–3
   Rasm o'rni: 3–5
-  O'qish:    12–15 daqiqa
+  O'qish:     12–15 daqiqa
+
+  Daqiqani so'z sonidan hisobla: so'z ÷ 130. Tibbiy matn sekin o'qiladi,
+  jadval va sxemani ko'zdan kechirish ham vaqt oladi. Hero chipidagi
+  daqiqa haqiqiy hajmga mos bo'lsin — talabaga yolg'on vaqt aytilmasin.
 
 BO'LMASIN
   · operatsiya texnikasi bosqichlari
@@ -73,15 +117,18 @@ o'rniga 300 KB bo'lib ketadi va telefonda sekin ochiladi.
 ISHLATILADIGAN KLASSLAR (boshqasini o'ylab topma)
 
 <div class="article-hero">
-  <span class="article-hero__eyebrow">🟡 O'rta bosqich · {kategoriya}</span>
+  <div class="article-hero__eyebrow">🟡 {N}-mavzu · {kategoriya} · O'rta bosqich</div>
   <h1>{sarlavha}</h1>
-  <p>{2-3 jumlalik kirish}</p>
+  <p class="article-hero__lead">{3-4 jumlalik kirish}</p>
   <div class="article-hero__meta">
-    <span>⏱️ {N} daqiqa</span><span>🎯 {maqsad}</span><span>🎓 O'rta bosqich</span>
+    <span class="pill">⏱ ~{N} daqiqa</span>
+    <span class="pill">📚 {kitob nomi, nashr}</span>
+    <span class="pill">📖 {boblar}</span>
+    <span class="pill">🎓 Talabalar va rezidentlar uchun</span>
   </div>
 </div>
 
-<nav class="toc" aria-label="Mavzu ichidagi navigatsiya">
+<nav class="toc">
   <p class="toc__title">📑 Mavzu xaritasi</p>
   <ol><li><a href="#id">Bo'lim nomi</a></li>…</ol>
 </nav>
@@ -128,7 +175,7 @@ MAJBURIY IKKI IZOH (progressni ko'rsatish uchun)
 1) Dars BOSHIDA — quyi bosqich eslatmasi:
 <div class="callout callout--note">
   <strong class="callout-title">Asosiy bosqichda o'rganilgan edi</strong>
-  {uchta punkt — EASY darsida nima bo'lgani}
+  {yuqorida berilgan uchta punkt}
 </div>
 
 2) Dars OXIRIDA — keyingi bosqich va'dasi:
@@ -147,21 +194,34 @@ Faqat HTML bo'lagini qaytar, boshqa izohsiz.
 
 ---
 
+## Yozilgandan keyin — tekshiruv ro'yxati
+
+Joylashdan oldin shu beshtasini ko'ring:
+
+1. **Hajm 25–40 KB.** 100 KB dan katta bo'lsa ichida `<style>`, logotip
+   yoki base64 rasm bor. Tez tekshiruv: faylda `base64`, `<style`,
+   `<html` so'zlari bo'lmasin.
+2. **So'z soni 1500–2200.** Kam bo'lsa — EASY ga o'xshab qolgan.
+   Ko'p bo'lsa — QIYIN mazmuni aralashgan, ortiqchasini o'sha bosqichga
+   ajratib qo'ying.
+3. **Taqiqlangan mazmun yo'qmi.** Matnda operatsiya texnikasi
+   bosqichlari yoki intraoperatsion asorat tilga olinmasin.
+4. **Daqiqa mos.** Hero chipidagi daqiqa `darslar.ts` dagi `daqiqa`
+   maydoniga ham yozilsin — ikkalasi bir xil bo'lsin.
+5. **Ikkita majburiy izoh bormi** — dars boshida "asosiy bosqichda" va
+   oxirida "qiyin bosqichda".
+
+---
+
 ## Joylashtirish
 
 Nazariya `dars_tarkibi.nazariya_html` ustuniga tushadi. Ikki yo'l:
 
-1. **Admin panel** (tavsiya, agar qo'shilgan bo'lsa) — `/admin/darslar`
-   sahifasidan darsni tanlab, HTML ni qo'yib saqlash. Deploy kerak emas.
+1. **Admin panel** (tavsiya) — `/admin/darslar` sahifasidan darsni
+   tanlab, HTML ni qo'yib saqlash. Deploy kerak emas.
 2. **Migratsiya fayli** — `supabase/migrations/` ga
    `INSERT ... ON CONFLICT (dars_slug) DO UPDATE` bilan.
 
-## Hajm nazorati
-
-Yozilgan HTML ni joylashdan oldin tekshiring:
-
-- **25–40 KB** — normal (O'RTA darsi uchun)
-- **100 KB dan katta** — ichida `<style>`, logotip yoki base64 rasm bor,
-  ularni olib tashlang
-
-Tez tekshiruv: faylda `base64`, `<style`, `<html` so'zlari bo'lmasin.
+Dars `darslar.ts` da hali yo'q bo'lsa, avval o'sha yerga qo'shiladi
+(slug, sarlavha, kategoriya, bosqich, qisqa, daqiqa) — aks holda
+tarkib bazaga tushsa ham ro'yxatda ko'rinmaydi.
