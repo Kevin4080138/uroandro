@@ -26,6 +26,7 @@ const INTERVAL_MS = 6000
 export function BannerCarousel({
   role,
   faqatShuRol = false,
+  fallback = null,
 }: {
   role?: string
   /**
@@ -35,6 +36,11 @@ export function BannerCarousel({
    * rolga belgilangan bannerlarni chiqaradi.
    */
   faqatShuRol?: boolean
+  /**
+   * Banner bo'lmaganda ko'rsatiladigan mazmun. Kirish sahifasining
+   * hero qismida ishlatiladi — u yer hech qachon bo'sh qolmasin.
+   */
+  fallback?: React.ReactNode
 }) {
   const supabase = createClient()
   const router = useRouter()
@@ -105,7 +111,7 @@ export function BannerCarousel({
     if (!didDrag.current && banners[idx]?.link_href) router.push(banners[idx].link_href!)
   }
 
-  if (banners.length === 0) return null
+  if (banners.length === 0) return <>{fallback}</>
 
   const b = banners[idx]
   const tl = TYPE_LABEL[b.type] ?? TYPE_LABEL['yangilik']

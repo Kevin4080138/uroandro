@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { BannerCarousel } from '@/components/BannerCarousel'
-import { HeroMock } from '@/components/landing/HeroMock'
+import { HeroVisual } from '@/components/landing/HeroVisual'
 import { ProductMarquee } from '@/components/landing/ProductMarquee'
 import { ScreenshotMarquee, ARALASH_SKRINSHOTLAR } from '@/components/landing/ScreenshotMarquee'
 import { Reveal } from '@/components/landing/Reveal'
@@ -151,9 +151,24 @@ function Landing() {
           maxWidth: 1140, margin: '0 auto', padding: '13px 20px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
         }}>
-          <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.02em', flexShrink: 0 }}>
-            Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
-          </span>
+          <a
+            href="/"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0,
+              textDecoration: 'none', color: 'var(--ink)',
+            }}
+          >
+            <img
+              src="/landing/logo.webp"
+              alt=""
+              width={34}
+              height={34}
+              style={{ borderRadius: 9, display: 'block' }}
+            />
+            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.02em' }}>
+              Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
+            </span>
+          </a>
 
           <div className="nav-havolalar" style={{ gap: 26, alignItems: 'center' }}>
             <a href="#imkoniyatlar" style={{ fontSize: 13.5, color: 'var(--ink-soft)', textDecoration: 'none', fontWeight: 600 }}>Imkoniyatlar</a>
@@ -243,9 +258,11 @@ function Landing() {
               </p>
             </div>
 
-            {/* O'ng: mahsulot maketi (faqat desktopda) */}
+            {/* O'ng: e'lon/reklama joyi — admin boshqaradi.
+                Telefonda ham ko'rinadi (matn ostida) — trafikning katta qismi
+                telefondan keladi, e'lonni u yerda yashirish ma'nosiz. */}
             <div className="rise" style={{ animationDelay: '.2s' }}>
-              <HeroMock />
+              <HeroVisual />
             </div>
           </div>
         </div>
