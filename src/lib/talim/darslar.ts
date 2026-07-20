@@ -132,18 +132,26 @@ export const DARS_KATEGORIYALARI = [
 export const DARSLAR: Dars[] = [
   // EASY bosqich yangi qoidalar bo'yicha qaytadan yozilmoqda
   // (AGENTS.md, "Nazariya yozish qoidalari"). Nazariya `dars_tarkibi` jadvalida.
+  // EASY ning birinchi darsi. Ilgari O'RTA bosqichda turgan, 2026-07-20 da
+  // shu yerga ko'chirildi: kirish mazmuni O'RTA darajasiga tegishli emas.
+  // Slug o'zgartirilmadi (AGENTS.md) — talaba progressi va sertifikat
+  // yozuvlari shunga bog'langan.
+  //
+  // ESLATMA: hajmi ~1850 so'z, EASY normasi esa 600–900. Bu ataylab
+  // qabul qilingan istisno — bu dars o'rnini bosgan qisqa versiya
+  // (urologiya-asoslari) ro'yxatdan olib tashlandi.
   {
-    slug: 'urologiya-asoslari',
-    sarlavha: "Urologiya nimani o'rganadi?",
+    slug: 'urologiya-predmeti',
+    sarlavha: 'Urologiyaning predmeti va asosiy tushunchalari',
     kategoriya: 'Kirish va semiotika',
     bosqich: 'oson',
-    qisqa: "Sohaning chegaralari, urolog ishlaydigan a'zolar va bemorlar keladigan asosiy shikoyat guruhlari.",
-    daqiqa: 5,
+    bepulNamuna: true,
+    qisqa: "Urologiya nimani o'rganadi va uning ichki yo'nalishlari haqida umumiy tushuncha.",
+    daqiqa: 10,
     bolimlar: [],
     manbalar: [],
     test: [],
     amaliySavolSoni: 15,
-    bepulNamuna: true,
   },
   {
     slug: 'prostata-adenomasi-asoslari',
@@ -220,19 +228,6 @@ export const DARSLAR: Dars[] = [
   // ============================================================
 
   // I. Kirish va semiotika
-  {
-    slug: 'urologiya-predmeti',
-    sarlavha: 'Urologiyaning predmeti va asosiy tushunchalari',
-    kategoriya: 'Kirish va semiotika',
-    bosqich: "o'rta",
-    bepulNamuna: true,
-    qisqa: "Urologiya nimani o'rganadi va uning ichki yo'nalishlari haqida umumiy tushuncha.",
-    daqiqa: 10,
-    bolimlar: [],
-    manbalar: [],
-    test: [],
-    amaliySavolSoni: 15,
-    },
   {
     slug: 'urologik-simptomlar',
     sarlavha: 'Asosiy urologik simptomlar: dizuriya, gematuriya, og\'riq, siydik ushlanishi',

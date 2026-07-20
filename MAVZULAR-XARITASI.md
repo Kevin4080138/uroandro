@@ -22,12 +22,21 @@ so'z, ularniki 1300–2000. Muammo bosqichda emas, matn hajmida edi.
 tashlangan qism (diagnostika, davolash) — o'sha mavzuning **O'RTA darsi uchun
 tayyor qoralama**. Ya'ni bu ish ikki bosqichni bir vaqtda to'ldiradi.
 
-O'RTA da qoldirilgan ikkitasi:
-- `urologiya-predmeti` — EASY da o'rniga `urologiya-asoslari` yozildi
+O'RTA da qoldirilgani:
 - `prostata-adenomasi-asosiy-belgilar` — EASY da o'rniga `prostata-adenomasi-asoslari` yozildi
 
-Ikkalasining matni (IPSS, diagnostika, davolash) haqiqatan O'RTA darajasida,
-shuning uchun ular o'sha yerda o'z o'rnida turibdi.
+Uning matni (IPSS, diagnostika, davolash) haqiqatan O'RTA darajasida,
+shuning uchun o'sha yerda o'z o'rnida turibdi.
+
+**2026-07-20 o'zgarishi.** `urologiya-predmeti` EASY ga ko'chirildi va
+bosqichning 1-darsi bo'ldi. Uning qisqa o'rnini bosuvchisi
+(`urologiya-asoslari`, 602 so'z) ro'yxatdan olib tashlandi — bir bosqichda
+ikkita kirish darsi turishi mumkin emas.
+
+⚠️ Ko'chirilgan dars ~1850 so'z, EASY normasi esa 600–900. Bu ataylab
+qabul qilingan istisno: mazmuni boy va u kirish darsi sifatida
+O'RTA darajasiga tegishli emas edi. Keyinchalik qisqartirilsa,
+olib tashlangan qism O'RTA uchun qoralama bo'ladi.
 
 ⚠️ **Qolgan bitta takror:** O'RTA da `prostata-adenomasi-asosiy-belgilar` va
 `bph-diagnostika-nostatsionar-davolash` (skelet) bir xil mavzuda. Skeletga
@@ -39,7 +48,7 @@ mazmun yozilganda ikkisi birlashtirilishi kerak.
 
 | Mavzu | EASY | O'RTA | QIYIN |
 |---|---|---|---|
-| Urologiyaga kirish | ✅ `urologiya-asoslari` | ✅ `urologiya-predmeti` | ⬜ `h-urologiyaga-kirish` |
+| Urologiyaga kirish | ✅ `urologiya-predmeti` | — | ⬜ `h-urologiyaga-kirish` |
 | Simptomlar, semiotika | ✅ `urologik-simptomlar` | ⬜ `urologik-anamnez-fizik-tekshuruv` + ⬜ `siydik-ushlanish-kolika-anuriya-farqlari` | ⬜ `h-semiotika-sindromlar-simptomlar` |
 | Siydik tahlili, laborator | ✅ `siydik-tahlili-asoslari` | ⬜ `siydik-tahlili-posev-biomarkerlar` | ⬜ `h-laborator-tekshirish-usullari` |
 | Tasvirlash (UTT, KT, MRT) | ✅ `utt-asosiy-tekshiruv` | ⬜ `tasvirlash-usullarini-tanlash` | ⬜ `h-instrumental-tekshiruv-usullari` |
