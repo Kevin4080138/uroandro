@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# landing uchun xom skrinshotlar — optimallashtirilgani public/landing/ ga tushadi
+/skrinshotlar/*
+!/skrinshotlar/README.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*

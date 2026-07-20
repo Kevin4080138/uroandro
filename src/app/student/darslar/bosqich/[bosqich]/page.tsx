@@ -202,7 +202,7 @@ export default function BosqichDarslariPage() {
   const { bosqich: bosqichYoli } = useParams<{ bosqich: string }>()
   const bosqich = bosqichYolidanTop(bosqichYoli)
   const [filtr, setFiltr] = useState<string>('Hammasi')
-  const { egami, yuklandi } = useMeningObunalarim()
+  const { egami, yuklandi, adminmi } = useMeningObunalarim()
   const { progress } = useUmumiyProgress()
 
   const bosqichMa = BOSQICHLAR.find((b) => b.id === bosqich)
@@ -360,7 +360,8 @@ export default function BosqichDarslariPage() {
             const indeks = bosqichDarslari.indexOf(d)
             // Oson bosqich bepul, lekin darslar ketma-ket ochiladi — oldingi darsning
             // asosiy qadamlari (nazariya + amaliy) tugagach keyingisi ochiladi.
-            const ketmaKetYopiq = bosqich === 'oson' && !darsOchiqmi(bosqichDarslari, indeks, progress)
+            // Admin bundan mustasno: darslarni tekshirish uchun istalganiga kira olsin.
+            const ketmaKetYopiq = !adminmi && bosqich === 'oson' && !darsOchiqmi(bosqichDarslari, indeks, progress)
             return (
               <DarsKartasi
                 key={d.slug}

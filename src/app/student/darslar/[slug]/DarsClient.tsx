@@ -75,7 +75,7 @@ function useDarsBanklari(slug: string, kerakmi: boolean) {
 
 export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni | null }) {
   const dars = darsTop(slug)
-  const { egami, yuklandi: obunaYuklandi } = useMeningObunalarim()
+  const { egami, yuklandi: obunaYuklandi, adminmi } = useMeningObunalarim()
 
   const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
   const asosiyVideo = tarkib?.asosiy_video_url ?? dars?.asosiyVideoUrl ?? null
@@ -144,8 +144,11 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const nazoratBank = banklar?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
   const flashcardlar = banklar?.flashcardlar ?? []
 
-  // Qadam ochiqmi: birinchisi har doim; keyingilari oldingi qadam yakunlangach
-  const ochiqMi = (i: number) => i === 0 || tugallangan.has(qadamlar[i - 1]) || tugallangan.has(qadamlar[i])
+  // Qadam ochiqmi: birinchisi har doim; keyingilari oldingi qadam yakunlangach.
+  // Admin — istisno: tarkibni tekshirish uchun qadamlarni ketma-ket
+  // bosib o'tishga majbur bo'lmasin, istalgan bo'limni darrov ocha olsin.
+  const ochiqMi = (i: number) =>
+    adminmi || i === 0 || tugallangan.has(qadamlar[i - 1]) || tugallangan.has(qadamlar[i])
 
   const qadamgaOt = (i: number) => {
     if (i < 0 || i >= qadamlar.length || !ochiqMi(i)) return
