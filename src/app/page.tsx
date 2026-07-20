@@ -72,6 +72,26 @@ const SABABLAR = [
     izoh: "Materiallar Farg'ona urologlari amaliyotidan — kitobdan ko'chirilgan quruq nazariya emas.",
   },
   {
+    belgi: '✍️',
+    nom: 'Faqat o\'qish emas',
+    izoh: "Har dars ichida flashcard, amaliy test va USMLE savollari — bilim darrov mustahkamlanadi.",
+  },
+  {
+    belgi: '🧩',
+    nom: 'Klinik qaror mashqi',
+    izoh: "Qiyin bosqichda interaktiv case va vaziyatli masalalar: qaror qabul qilasiz, oqibatini ko'rasiz.",
+  },
+  {
+    belgi: '🔍',
+    nom: 'Xatolar ustida ish',
+    izoh: "Amaliyotdagi tipik xatolar alohida tahlil qilinadi — ularni bemorda emas, darsda uchratasiz.",
+  },
+  {
+    belgi: '🏅',
+    nom: 'Sertifikat — tekin emas',
+    izoh: "Bosqich sertifikati faqat barcha nazorat testlaridan o'tgandan keyin ochiladi.",
+  },
+  {
     belgi: '🔒',
     nom: 'Ma\'lumot himoyada',
     izoh: "Har foydalanuvchi faqat o'ziga tegishli ma'lumotni ko'radi.",

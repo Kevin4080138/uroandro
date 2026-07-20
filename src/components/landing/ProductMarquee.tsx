@@ -12,14 +12,18 @@ const QATOR_1: Karta[] = [
   { belgi: '🎬', nom: 'Video darslar', izoh: 'Bosqichma-bosqich, oson→qiyin', rang: 'var(--accent)' },
   { belgi: '🧮', nom: 'Kalkulyatorlar', izoh: 'IPSS, PSA, eGFR, IIEF-5', rang: 'var(--accent-2)' },
   { belgi: '🃏', nom: 'Flashcardlar', izoh: 'Tez yodlash uchun kartochkalar', rang: 'var(--good)' },
+  { belgi: '🧩', nom: 'Interaktiv case', izoh: 'Qaror qabul qilib, oqibatini ko‘rish', rang: 'var(--accent)' },
   { belgi: '🗓', nom: 'Onlayn navbat', izoh: "Bemor o'zi qulay vaqtga yoziladi", rang: 'var(--warn)' },
   { belgi: '✍️', nom: 'Amaliy testlar', izoh: 'Har mavzu uchun savol banki', rang: 'var(--accent)' },
+  { belgi: '🗂', nom: 'Klassifikatsiyalar', izoh: 'Urologik tasniflar bir joyda', rang: 'var(--good)' },
 ]
 
 const QATOR_2: Karta[] = [
   { belgi: '🧑‍🤝‍🧑', nom: 'Bemorlar reestri', izoh: 'Tashriflar va tarix tartibli', rang: 'var(--good)' },
   { belgi: '🏅', nom: 'Sertifikat', izoh: 'Bosqich nazoratidan o‘tgach', rang: 'var(--warn)' },
   { belgi: '🌐', nom: 'USMLE savollari', izoh: 'Xalqaro format bo‘yicha mashq', rang: 'var(--accent-2)' },
+  { belgi: '🔍', nom: 'Xatolar tahlili', izoh: 'Tipik xatolar va ularning sabablari', rang: 'var(--danger)' },
+  { belgi: '🏥', nom: 'Vaziyatli masalalar', izoh: 'Real klinik holatlar ustida ish', rang: 'var(--accent-2)' },
   { belgi: '🩹', nom: 'Operatsiya kuzatuvi', izoh: 'Avtomatik eslatmalar', rang: 'var(--danger)' },
   { belgi: '📚', nom: 'Kutubxona', izoh: "O'zbek tilidagi manbalar", rang: 'var(--accent)' },
 ]

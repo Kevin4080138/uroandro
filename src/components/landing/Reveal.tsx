@@ -24,10 +24,12 @@ export function Reveal({
     const el = ref.current
     if (!el) return
 
-    // IntersectionObserver bo'lmasa (juda eski brauzer) — darrov ko'rsatiladi
+    // IntersectionObserver bo'lmasa (juda eski brauzer) — mazmun baribir ochiladi,
+    // aks holda bo'lim abadiy ko'rinmay qoladi. Keyingi kadrda, ya'ni render
+    // zanjirini uzmasdan qo'yiladi.
     if (typeof IntersectionObserver === 'undefined') {
-      setKorindi(true)
-      return
+      const kadr = requestAnimationFrame(() => setKorindi(true))
+      return () => cancelAnimationFrame(kadr)
     }
 
     const kuzatuvchi = new IntersectionObserver(
