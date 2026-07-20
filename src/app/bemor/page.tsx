@@ -116,7 +116,7 @@ export default function BemorEshigiPage() {
         }}>
           💡 Navbat olish va shifokor bilan yozishmalar uchun bir marta ro&apos;yxatdan o&apos;ting — telefon raqamingiz yetarli.{' '}
           <button
-            onClick={() => router.push('/auth/register')}
+            onClick={() => router.push('/auth/register?rol=bemor')}
             style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}
           >
             Ro&apos;yxatdan o&apos;tish ›

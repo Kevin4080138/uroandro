@@ -51,35 +51,22 @@ const FAQ = [
   { s: 'Ma\'lumotlarim xavfsizmi?', j: "Ha. Har bir foydalanuvchi faqat o'ziga tegishli ma'lumotni ko'radi, tibbiy ma'lumotlar himoyalangan." },
 ]
 
-function raqamFormat(n: number) {
-  return new Intl.NumberFormat('uz-UZ').format(n)
-}
-
 function KasbiyLanding() {
   const router = useRouter()
   const params = useSearchParams()
   const supabase = createClient()
   const rol: Rol = params.get('rol') === 'talaba' ? 'talaba' : 'shifokor'
 
-  const [shifokorSoni, setShifokorSoni] = useState<number | null>(null)
-  const [klinikaSoni, setKlinikaSoni] = useState<number | null>(null)
-  const [ortachaReyting, setOrtachaReyting] = useState<number | null>(null)
   const [topShifokorlar, setTopShifokorlar] = useState<{ nom: string; mutaxassislik: string | null; tajriba: number | null; reyting: number | null }[]>([])
 
   useEffect(() => {
     const yukla = async () => {
-      const [{ data: profillar, count }, { count: kSoni }, { data: baholar }] = await Promise.all([
-        supabase.from('shifokor_profillari').select('doctor_id, full_name, mutaxassislik, tajriba_yil', { count: 'exact' }).eq('ochiq', true),
-        supabase.from('klinikalar').select('id', { count: 'exact', head: true }),
+      const [{ data: profillar }, { data: baholar }] = await Promise.all([
+        supabase.from('shifokor_profillari').select('doctor_id, full_name, mutaxassislik, tajriba_yil').eq('ochiq', true),
         supabase.from('baholar').select('doctor_id, muomala, samara, tushuntirish, kutish'),
       ])
-      setShifokorSoni(count ?? (profillar?.length ?? 0))
-      setKlinikaSoni(kSoni ?? 0)
 
       const bh = baholar ?? []
-      if (bh.length > 0) {
-        setOrtachaReyting(bh.reduce((s: number, b: any) => s + (b.muomala + b.samara + b.tushuntirish + b.kutish) / 4, 0) / bh.length)
-      }
       // Reyting bo'yicha top shifokorlar
       const reytingMap: Record<string, number[]> = {}
       for (const b of bh as any[]) {
@@ -105,12 +92,6 @@ function KasbiyLanding() {
   const hero = HERO[rol]
   const imkoniyatlar = IMKONIYATLAR[rol]
 
-  const raqamlar = [
-    { qiymat: shifokorSoni != null ? `${raqamFormat(shifokorSoni)}+` : '—', label: 'Katalogdagi shifokorlar' },
-    { qiymat: klinikaSoni != null ? `${raqamFormat(klinikaSoni)}+` : '—', label: 'Hamkor klinikalar' },
-    { qiymat: ortachaReyting != null ? `${ortachaReyting.toFixed(1)}★` : 'Yangi', label: "O'rtacha bemor bahosi" },
-  ]
-
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--ink)' }}>
       {/* Top nav */}
@@ -132,19 +113,9 @@ function KasbiyLanding() {
           <h1 className="rise" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.15, margin: '0 0 16px', letterSpacing: '-.02em', animationDelay: '.05s' }}>{hero.h1}</h1>
           <p className="rise" style={{ fontSize: 16, color: 'var(--ink-soft)', lineHeight: 1.6, margin: '0 0 28px', animationDelay: '.1s' }}>{hero.sub}</p>
           <div className="rise" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', animationDelay: '.15s' }}>
-            <button onClick={() => router.push('/auth/register')} className="lift" style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 14, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 10px 28px rgba(37,99,235,.28)' }}>Ro&apos;yxatdan o&apos;tish →</button>
+            <button onClick={() => router.push(`/auth/register?rol=${rol}`)} className="lift" style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 14, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 10px 28px rgba(37,99,235,.28)' }}>Ro&apos;yxatdan o&apos;tish →</button>
             <button onClick={() => router.push('/auth/login')} className="lift" style={{ background: 'var(--surface)', color: 'var(--ink)', border: '1.5px solid var(--line)', borderRadius: 14, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>Kirish</button>
           </div>
-        </section>
-
-        {/* Ishonch raqamlari */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 12 }}>
-          {raqamlar.map((r) => (
-            <div key={r.label} className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 14px', textAlign: 'center' }}>
-              <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--accent)', fontFamily: 'monospace' }}>{r.qiymat}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4, lineHeight: 1.3 }}>{r.label}</div>
-            </div>
-          ))}
         </section>
 
         {/* Imkoniyatlar */}
@@ -229,7 +200,7 @@ function KasbiyLanding() {
               {rol === 'shifokor' ? 'Ishingizni bugundan tartibga soling' : "Bugun o'rganishni boshlang"}
             </h2>
             <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.85)', margin: '0 0 24px', lineHeight: 1.5 }}>Ro&apos;yxatdan o&apos;tish bepul va bir daqiqa vaqt oladi.</p>
-            <button onClick={() => router.push('/auth/register')} className="lift" style={{ background: '#fff', color: 'var(--accent)', border: 'none', borderRadius: 14, padding: '14px 32px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>Boshlash →</button>
+            <button onClick={() => router.push(`/auth/register?rol=${rol}`)} className="lift" style={{ background: '#fff', color: 'var(--accent)', border: 'none', borderRadius: 14, padding: '14px 32px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>Boshlash →</button>
           </div>
         </section>
       </div>

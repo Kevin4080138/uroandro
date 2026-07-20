@@ -1,14 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTheme } from '@/components/ThemeProvider'
 import { telefonToEmail } from '@/lib/patientAuth'
 import Hero, { MobileHero } from '@/components/Hero'
 
 type Role = 'doctor' | 'student' | 'patient'
 type Step = 'role' | 'info' | 'otp' | 'password' | 'done'
+
+// Ostona (`/`) va landing sahifalaridagi rol kalitlari → ichki Role
+const ROL_MAP: Record<string, Role> = {
+  bemor: 'patient',
+  shifokor: 'doctor',
+  talaba: 'student',
+  // to'g'ridan-to'g'ri ichki nom bilan kelsa ham ishlasin
+  patient: 'patient',
+  doctor: 'doctor',
+  student: 'student',
+}
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -29,9 +40,13 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '6px',
 }
 
-export default function RegisterPage() {
-  const [step, setStep] = useState<Step>('role')
-  const [role, setRole] = useState<Role | null>(null)
+function RegisterForm() {
+  const params = useSearchParams()
+  // Rol oldingi sahifada tanlangan bo'lsa — qayta so'ralmaydi, to'g'ridan ma'lumot qadamiga
+  const boshlangichRol = ROL_MAP[params.get('rol') ?? ''] ?? null
+
+  const [step, setStep] = useState<Step>(boshlangichRol ? 'info' : 'role')
+  const [role, setRole] = useState<Role | null>(boshlangichRol)
 
   // Info step
   const [fullName, setFullName] = useState('')
@@ -51,18 +66,11 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [refCode, setRefCode] = useState('')
+  const refCode = params.get('ref') ?? ''
 
   const router = useRouter()
   const supabase = createClient()
   const { theme, toggle } = useTheme()
-
-  useState(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      setRefCode(params.get('ref') ?? '')
-    }
-  })
 
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'UrosferaBot'
   const BOT_LINK = `https://t.me/${botUsername}`
@@ -529,5 +537,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg)' }} />}>
+      <RegisterForm />
+    </Suspense>
   )
 }
