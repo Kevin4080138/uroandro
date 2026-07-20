@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { BannerCarousel } from '@/components/BannerCarousel'
 import { HeroMock } from '@/components/landing/HeroMock'
 import { ProductMarquee } from '@/components/landing/ProductMarquee'
+import { ScreenshotMarquee, ARALASH_SKRINSHOTLAR } from '@/components/landing/ScreenshotMarquee'
 import { Reveal } from '@/components/landing/Reveal'
 
 const ROL_DASHBOARD: Record<string, string> = {
@@ -260,7 +261,12 @@ function Landing() {
             Platforma ichida nima bor
           </p>
         </Reveal>
-        <ProductMarquee />
+
+        {/* Tepada haqiqiy ekranlar, pastda imkoniyat nomlari — qarama-qarshi yo'nalishda */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+          <ScreenshotMarquee rasmlar={ARALASH_SKRINSHOTLAR} tezlik="76s" />
+          <ProductMarquee />
+        </div>
       </section>
 
       <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 20px' }}>

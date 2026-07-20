@@ -95,6 +95,24 @@ export const TALABA_SKRINSHOTLAR: Skrinshot[] = [
   { src: '/landing/talaba-kalkulyator.webp',   izoh: 'Kalkulyatorlar' },
 ]
 
+/**
+ * Kirish sahifasi uchun — ikkala bo'lim aralash.
+ * Mehmon rolini hali tanlamagani uchun platforma har ikkalasi uchun
+ * ishlashini bir qarashda ko'rsatadi. Izohda bo'lim nomi turadi.
+ */
+export const ARALASH_SKRINSHOTLAR: Skrinshot[] = [
+  { src: '/landing/talaba-bolimlar.webp',      izoh: "Talaba — bo'limlar" },
+  { src: '/landing/bemor-qayeringiz.webp',     izoh: 'Bemor — shikoyatni belgilash' },
+  { src: '/landing/talaba-nazariya.webp',      izoh: 'Talaba — nazariya' },
+  { src: '/landing/bemor-yonalish.webp',       izoh: "Bemor — taxminiy yo'nalish" },
+  { src: '/landing/talaba-dars-qadamlar.webp', izoh: 'Talaba — bir dars, 11 qadam' },
+  { src: '/landing/bemor-operatsiya.webp',     izoh: 'Bemor — operatsiyalar' },
+  { src: '/landing/talaba-bosqich-pro.webp',   izoh: 'Talaba — qiyin bosqich' },
+  { src: '/landing/bemor-oz-tekshiruv.webp',   izoh: "Bemor — o'z-o'zini tekshirish" },
+  { src: '/landing/talaba-kalkulyator.webp',   izoh: 'Talaba — kalkulyatorlar' },
+  { src: '/landing/bemor-bolimlar.webp',       izoh: "Bemor — bo'limlar" },
+]
+
 export const BEMOR_SKRINSHOTLAR: Skrinshot[] = [
   { src: '/landing/bemor-bolimlar.webp',     izoh: "Bemor bo'limi" },
   { src: '/landing/bemor-qayeringiz.webp',   izoh: 'Qayeringiz bezovta qilyapti?' },

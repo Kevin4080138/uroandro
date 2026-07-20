@@ -76,11 +76,11 @@ function Qator({ kartalar, teskari, tezlik }: { kartalar: Karta[]; teskari?: boo
   )
 }
 
+/**
+ * Bitta qator — kirish sahifasida skrinshot tasmasi bilan birga turadi,
+ * shuning uchun ikki qator ortiqcha bo'lardi. Yo'nalishi teskari:
+ * rasmlar chapga, matn kartalari o'ngga suriladi.
+ */
 export function ProductMarquee() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Qator kartalar={QATOR_1} tezlik="52s" />
-      <Qator kartalar={QATOR_2} tezlik="64s" teskari />
-    </div>
-  )
+  return <Qator kartalar={[...QATOR_1, ...QATOR_2]} tezlik="88s" teskari />
 }
