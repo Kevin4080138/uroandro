@@ -223,6 +223,86 @@ h1, h2, h3, h4 {
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+
+  /* MUHIM: quyidagi sinflar `opacity: 0` dan boshlanib, ko'rinishi uchun
+     animatsiya/o'tishga tayanadi. Yuqoridagi qoida animatsiyani o'chirgani
+     uchun ular abadiy ko'rinmay qolardi — shuning uchun bu yerda majburan
+     ochiladi. Aks holda harakatni kamaytirgan foydalanuvchi bo'sh sahifa ko'radi. */
+  .rise,
+  .reveal,
+  .fade-in,
+  .banner-anim {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   Kirish sahifasi (landing) — ochiq, ro'yxatdan o'tmagan mehmon uchun.
+   Barcha animatsiyalar sof CSS: mobil trafikda JS yuklamaydi va
+   yuqoridagi prefers-reduced-motion qoidasi ularni avtomatik to'xtatadi.
+   ============================================================ */
+
+/* ── Gorizontal aylanma tasma (o'ngdan chapga) ── */
+.marquee {
+  overflow: hidden;
+  /* Chekkalarda yumshoq so'nish — kartalar keskin kesilmaydi */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marqueeSurish var(--tezlik, 46s) linear infinite;
+}
+/* Ustiga sichqoncha kelganda to'xtaydi — o'qimoqchi bo'lgan odam ulgursin */
+.marquee:hover .marquee-track { animation-play-state: paused; }
+/* Ikkinchi qator qarama-qarshi yo'nalishda — ko'z uchun jonli qatlam hosil qiladi */
+.marquee-track.teskari { animation-direction: reverse; }
+@keyframes marqueeSurish {
+  from { transform: translateX(0); }
+  /* Tasma ikki marta takrorlanadi, shuning uchun -50% da uzilishsiz qaytadi */
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Scroll bilan ochiladigan bo'lim ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1);
+}
+.reveal.korindi { opacity: 1; transform: none; }
+
+/* ── Hero: desktopda ikki ustun, telefonda bitta ── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.hero-mock { display: none; }
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: 1.05fr .95fr; gap: 56px; }
+  .hero-mock { display: block; }
+  .hero-matn { text-align: left !important; }
+  .hero-tugmalar { justify-content: flex-start !important; }
+}
+
+/* Faqat kattaroq ekranda ko'rinadigan nav havolalari */
+.nav-havolalar { display: none; }
+@media (min-width: 820px) { .nav-havolalar { display: flex; } }
+
+/* ── Hero orqa fonidagi yumshoq yorug'lik ── */
+.hero-nur {
+  position: absolute;
+  inset: -20% 0 auto 0;
+  height: 620px;
+  pointer-events: none;
+  background:
+    radial-gradient(620px 320px at 22% 18%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    radial-gradient(520px 300px at 82% 8%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 70%);
+  filter: blur(10px);
 }
 
 /* Telefon ekranlarida moslashuvchanlik */

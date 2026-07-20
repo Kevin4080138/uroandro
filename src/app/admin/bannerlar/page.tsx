@@ -26,10 +26,13 @@ const TYPE_OPTS = [
   { value: 'bildirishnoma', label: '🔔 Bildirishnoma',  color: '#dc2626' },
 ]
 const ROLE_OPTS = [
-  { value: '',        label: '👥 Hammaga' },
+  { value: '',        label: '👥 Hammaga (tizim ichida)' },
   { value: 'student', label: '🎓 Talabalar' },
   { value: 'doctor',  label: '👨‍⚕️ Shifokorlar' },
   { value: 'patient', label: '🧑 Bemorlar' },
+  // Kirish sahifasi ochiq — bu banner ro'yxatdan o'tmagan mehmonga ham ko'rinadi.
+  // "Hammaga" bannerlari bu yerga tushmaydi (BannerCarousel faqatShuRol).
+  { value: 'landing', label: '🌐 Kirish sahifasi (ochiq)' },
 ]
 const RANG_OPTS = [
   '#2563eb', '#7c3aed', '#dc2626', '#16a34a', '#ca8a04', '#0891b2', '#db2777',

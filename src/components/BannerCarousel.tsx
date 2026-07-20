@@ -23,7 +23,19 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
 
 const INTERVAL_MS = 6000
 
-export function BannerCarousel({ role }: { role?: string }) {
+export function BannerCarousel({
+  role,
+  faqatShuRol = false,
+}: {
+  role?: string
+  /**
+   * Odatda "Hammaga" (target_role = null) bannerlari ham qo'shiladi.
+   * Ochiq kirish sahifasida bu xavfli — ichki e'lonlar ro'yxatdan
+   * o'tmagan mehmonga ko'rinib qoladi. Shu bayroq faqat aynan shu
+   * rolga belgilangan bannerlarni chiqaradi.
+   */
+  faqatShuRol?: boolean
+}) {
   const supabase = createClient()
   const router = useRouter()
   const [banners, setBanners] = useState<Banner[]>([])
@@ -42,13 +54,17 @@ export function BannerCarousel({ role }: { role?: string }) {
         .eq('faol', true)
         .order('sort_order', { ascending: true })
         .limit(5)
-      if (role) query = query.or(`target_role.is.null,target_role.eq.${role}`)
+      if (role) {
+        query = faqatShuRol
+          ? query.eq('target_role', role)
+          : query.or(`target_role.is.null,target_role.eq.${role}`)
+      }
       const { data } = await query
       if (data && data.length > 0) setBanners(data)
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role])
+  }, [role, faqatShuRol])
 
   useEffect(() => {
     if (banners.length <= 1) return
