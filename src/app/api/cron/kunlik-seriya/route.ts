@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { xabarYubor } from '@/lib/xabarYubor'
+import { sozlamaYoqilganmi } from '@/lib/bildirishnoma'
 
 // Kunlik seriya eslatmasi: kechqurun (Toshkent vaqti bilan ~19:00) hali bugun
 // faol bo'lmagan, lekin seriyasi tirik talabalarga "seriyangiz xavf ostida" xabari.
@@ -41,6 +42,9 @@ export async function GET(req: Request) {
 
   let yuborildi = 0
   for (const s of nomzodlar ?? []) {
+    // Talaba seriya eslatmasini o'chirgan bo'lsa — yubormaymiz
+    if (!(await sozlamaYoqilganmi(s.student_id, 'seriya'))) continue
+
     // Avval belgilaymiz — xabar yuborish qisman muvaffaqiyatli bo'lsa ham takror yuborilmasin.
     const { error } = await supabase.rpc('seriya_eslatma_belgila', {
       p_student_id: s.student_id, p_sana: bugun,

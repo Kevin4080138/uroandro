@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { xabarYubor } from '@/lib/xabarYubor'
+import { sozlamaYoqilganmi } from '@/lib/bildirishnoma'
 import { POSTOP_JADVALI } from '@/lib/operatsiyalar'
 
 function tashkentSana() {
@@ -43,6 +44,9 @@ export async function GET(req: Request) {
     const bosqich = POSTOP_JADVALI.find((b) => b.kun === otganKun)
     if (!bosqich) continue
     mosBosqich++
+
+    // Bemor operatsiya eslatmalarini o'chirgan bo'lsa — yubormaymiz
+    if (!(await sozlamaYoqilganmi(k.bemor_user_id, 'operatsiya'))) continue
 
     // Bir martalik yuborishni kafolatlash (UNIQUE constraint orqali himoyalangan)
     const { error: insertError } = await supabase

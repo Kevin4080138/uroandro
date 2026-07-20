@@ -90,6 +90,18 @@ export function ProfileMenu() {
               👤 Mening profilim
             </button>
           )}
+          {/* Barcha rollar uchun — bemor va shifokorda profil sahifasi yo'q,
+              lekin bildirishnomani boshqarish imkoni hammaga kerak */}
+          <button
+            onClick={() => { setOchiq(false); router.push('/bildirishnoma-sozlamalari') }}
+            className="soft-press"
+            style={{
+              width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--ink)', fontSize: '13px', fontWeight: 600, padding: '8px 4px', borderRadius: '8px',
+            }}
+          >
+            🔔 Bildirishnoma sozlamalari
+          </button>
           <button
             onClick={chiqish}
             className="soft-press"

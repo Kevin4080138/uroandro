@@ -1,7 +1,10 @@
 {
   "crons": [
+    { "path": "/api/cron/javobsiz-murojaat", "schedule": "0 5 * * *" },
     { "path": "/api/cron/dori-eslatmalari", "schedule": "0 9 * * *" },
     { "path": "/api/cron/operatsiya-eslatmalari", "schedule": "30 9 * * *" },
+    { "path": "/api/cron/talaba-eslatmalari", "schedule": "0 12 * * *" },
+    { "path": "/api/cron/navbat-eslatmalari", "schedule": "0 13 * * *" },
     { "path": "/api/cron/kunlik-seriya", "schedule": "0 14 * * *" }
   ]
 }

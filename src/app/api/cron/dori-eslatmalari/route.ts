@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { xabarYubor } from '@/lib/xabarYubor'
+import { sozlamaYoqilganmi } from '@/lib/bildirishnoma'
 import { vaqtJadvali, faolKunMi } from '@/lib/doriEslatma'
 
 function tashkentVaqt() {
@@ -54,6 +55,9 @@ export async function GET(req: Request) {
       .maybeSingle()
     if (qabul) continue
 
+    // Bemor dori eslatmasini o'chirgan bo'lsa — yubormaymiz
+    if (!(await sozlamaYoqilganmi(r.bemor_user_id, 'dori'))) continue
+
     // Bir martalik yuborishni kafolatlash (unique constraint orqali himoyalangan)
     const { error: insertError } = await supabase.from('dori_eslatma_yuborilgan').insert({
       retsept_id: r.id, sana, vaqt_tartibi: vaqtTartibi,
@@ -81,6 +85,7 @@ export async function GET(req: Request) {
       const ertangiSana = new Date(sana)
       ertangiSana.setDate(ertangiSana.getDate() + 1)
       if (tugashSanaStr !== ertangiSana.toISOString().slice(0, 10)) continue
+      if (!(await sozlamaYoqilganmi(r.bemor_user_id, 'dori'))) continue
 
       const { error: insertError } = await supabase.from('dori_eslatma_yuborilgan').insert({
         retsept_id: r.id, sana, vaqt_tartibi: 0, // 0 — "ertaga tugaydi" eslatmasi belgisi
