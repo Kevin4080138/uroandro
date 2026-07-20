@@ -51,10 +51,14 @@ export function TelegramAutoLogin() {
       }
 
       setHolat('kirilmoqda')
+      // DIQQAT: token_hash bilan tekshirganda faqat `token_hash` va `type`
+      // yuboriladi. `email` ham qo'shilsa Supabase quyidagi xatoni qaytaradi:
+      // "Only the token_hash and type should be provided".
+      // `type` server yaratgan havola turiga mos bo'lishi kerak — shuning
+      // uchun server generateLink'ning verification_type'ini qaytaradi.
       const { error } = await supabase.auth.verifyOtp({
-        email: json.email,
         token_hash: json.token_hash,
-        type: 'email',
+        type: json.type ?? 'magiclink',
       })
       if (error) {
         setXato('Sessiya ochilmadi: ' + error.message)

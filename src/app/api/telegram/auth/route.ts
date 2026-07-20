@@ -81,6 +81,10 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     token_hash: link.properties.hashed_token,
+    // Klient verifyOtp'da aynan shu turni yuborishi kerak. Serverdan
+    // qaytarilyapti, chunki yuqoridagi generateLink turi o'zgarsa,
+    // klientdagi qattiq yozilgan qiymat unutilib qolardi.
+    type: link.properties.verification_type,
     email: profil.email ?? telegramEmail(tgId),
     role: profil.role,
   })
