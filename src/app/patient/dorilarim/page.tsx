@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi, vaqtKelmadiMi } from '@/lib/doriEslatma'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 import { HaftalikIntizom } from '@/components/HaftalikIntizom'
+import { Pill, CalendarDays, Bell, BellOff, CheckCircle2, Lock, RefreshCw, StickyNote, Clock, Hourglass } from 'lucide-react'
 
 const HAFTA_KUNLARI = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
 const OYLAR = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr']
@@ -141,9 +142,9 @@ export default function DorilarimPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[700px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 800 }}>💊 Dorilarim</h2>
-        <p className="rise" style={{ margin: '0 0 20px', color: 'var(--accent)', fontSize: '13.5px', fontWeight: 700, animationDelay: '.03s' }}>
-          📅 Bugun — {bugungiSanaMatni()}
+        <h2 className="rise" style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><Pill size={24} strokeWidth={2} /> Dorilarim</h2>
+        <p className="rise" style={{ margin: '0 0 20px', color: 'var(--accent)', fontSize: '13.5px', fontWeight: 700, animationDelay: '.03s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <CalendarDays size={15} strokeWidth={2} /> Bugun — {bugungiSanaMatni()}
         </p>
 
         {pushHolati !== 'tekshirilmoqda' && pushHolati !== 'qollab-bolmaydi' && (
@@ -154,7 +155,7 @@ export default function DorilarimPage() {
             borderRadius: '14px', padding: '14px 18px', marginBottom: '18px', animationDelay: '.07s',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '18px' }}>{pushHolati === 'yoqilgan' ? '🔔' : pushHolati === 'rad-etilgan' ? '🔕' : '🔔'}</span>
+              <span style={{ display: 'flex', color: pushHolati === 'yoqilgan' ? 'var(--good)' : 'var(--accent)' }}>{pushHolati === 'rad-etilgan' ? <BellOff size={18} strokeWidth={2} /> : <Bell size={18} strokeWidth={2} />}</span>
               <div>
                 <div style={{ fontSize: '13.5px', fontWeight: 700 }}>
                   {pushHolati === 'yoqilgan' ? 'Push-bildirishnomalar yoqilgan' : pushHolati === 'rad-etilgan' ? 'Bildirishnomalar bloklangan' : 'Qabul vaqti kelganda eslatma olish'}
@@ -175,7 +176,7 @@ export default function DorilarimPage() {
                 border: pushHolati === 'yoqilgan' ? '1px solid var(--line)' : 'none',
                 borderRadius: '999px', padding: '8px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
               }}>
-                {pushSaving ? '...' : pushHolati === 'yoqilgan' ? "O'chirish" : '🔔 Yoqish'}
+                {pushSaving ? '...' : pushHolati === 'yoqilgan' ? "O'chirish" : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Bell size={14} strokeWidth={2} /> Yoqish</span>}
               </button>
             )}
             {pushXato && <span style={{ color: 'var(--danger)', fontSize: '12px', width: '100%' }}>{pushXato}</span>}
@@ -207,7 +208,7 @@ export default function DorilarimPage() {
           <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
         ) : retseptlar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>💊</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--muted)' }}><Pill size={38} strokeWidth={1.5} /></div>
             <p style={{ margin: 0 }}>Hozircha sizga retsept yozilmagan.</p>
           </div>
         ) : (
@@ -216,10 +217,10 @@ export default function DorilarimPage() {
             {jamiDozalarBugun > 0 && (
               <div style={{ marginBottom: '28px' }}>
                 <h3 style={{ fontSize: '13px', color: 'var(--danger)', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  ⏳ Hali ichilmagan ({ichilmagan.length})
+                  <Hourglass size={14} strokeWidth={2} /> Hali ichilmagan ({ichilmagan.length})
                 </h3>
                 {ichilmagan.length === 0 ? (
-                  <p style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 700, margin: '0 0 18px' }}>✅ Bugungi barcha dozalar qabul qilindi!</p>
+                  <p style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 700, margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={15} strokeWidth={2} /> Bugungi barcha dozalar qabul qilindi!</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
                     {ichilmaganGuruhlar.map((g) => {
@@ -238,7 +239,7 @@ export default function DorilarimPage() {
                               {g.vaqt}
                             </span>
                             {kelmadi && (
-                              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>⏰ Vaqti hali kelmadi</span>
+                              <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Clock size={12} strokeWidth={2} /> Vaqti hali kelmadi</span>
                             )}
                             {g.dozalar.length > 1 && (
                               <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: 'auto' }}>{g.dozalar.length} ta dori</span>
@@ -268,7 +269,7 @@ export default function DorilarimPage() {
                                       padding: '7px 14px', cursor: kelmadi ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 700, flexShrink: 0,
                                     }}
                                   >
-                                    {belgilanmoqda === kalit ? '...' : kelmadi ? '🔒' : '✓ Ichdim'}
+                                    {belgilanmoqda === kalit ? '...' : kelmadi ? <Lock size={14} strokeWidth={2} /> : '✓ Ichdim'}
                                   </button>
                                 </div>
                               )
@@ -283,7 +284,7 @@ export default function DorilarimPage() {
                 {ichilgan.length > 0 && (
                   <>
                     <h3 style={{ fontSize: '13px', color: 'var(--good)', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      ✅ Ichilgan ({ichilgan.length})
+                      <CheckCircle2 size={14} strokeWidth={2} /> Ichilgan ({ichilgan.length})
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {ichilgan.map((d) => (
@@ -326,9 +327,9 @@ export default function DorilarimPage() {
                         {qolgan} kun qoldi
                       </span>
                     </div>
-                    {r.izoh && <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>📝 {r.izoh}</p>}
-                    <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--muted)' }}>
-                      📅 {r.boshlanish_sanasi} — {tugashSanasi(r.boshlanish_sanasi, r.muddat_kun)} · kuniga {r.kuniga_marta} marta
+                    {r.izoh && <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '5px' }}><StickyNote size={13} strokeWidth={2} style={{ flexShrink: 0 }} /> {r.izoh}</p>}
+                    <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <CalendarDays size={13} strokeWidth={2} style={{ flexShrink: 0 }} /> {r.boshlanish_sanasi} — {tugashSanasi(r.boshlanish_sanasi, r.muddat_kun)} · kuniga {r.kuniga_marta} marta
                     </p>
 
                     {qolgan <= 1 && (
@@ -339,8 +340,9 @@ export default function DorilarimPage() {
                           <button onClick={() => sorovYubor(r.id)} className="soft-press" style={{
                             background: 'var(--warn)', color: 'white', border: 'none', borderRadius: '999px',
                             padding: '6px 14px', cursor: 'pointer', fontSize: '12px', fontWeight: 700,
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
                           }}>
-                            🔄 {qolgan === 0 ? 'Kurs tugadi' : 'Kurs ertaga tugaydi'} — davom ettirishni so&apos;rash
+                            <RefreshCw size={13} strokeWidth={2} /> {qolgan === 0 ? 'Kurs tugadi' : 'Kurs ertaga tugaydi'} — davom ettirishni so&apos;rash
                           </button>
                         )}
                       </div>
@@ -369,8 +371,9 @@ export default function DorilarimPage() {
                         <button onClick={() => sorovYubor(r.id)} className="soft-press" style={{
                           background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', borderRadius: '999px',
                           padding: '4px 12px', cursor: 'pointer', fontSize: '11.5px', fontWeight: 700,
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
                         }}>
-                          🔄 Davom ettirishni so&apos;rash
+                          <RefreshCw size={12} strokeWidth={2} /> Davom ettirishni so&apos;rash
                         </button>
                       )}
                     </div>

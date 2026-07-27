@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { yoriqnomaTop } from '@/lib/ozTekshiruv'
 import { OzTekshiruvIkon } from '@/components/OzTekshiruvIkon'
 import { useState } from 'react'
+import { Lightbulb, AlertTriangle, Repeat } from 'lucide-react'
 
 // ── IIEF-5 kalkulyatori ────────────────────────────────────────────
 const IIEF5_SAVOLLAR = [
@@ -523,8 +524,9 @@ function JinsiyZaiflikKalkulator({ onMurojaat }: { onMurojaat: () => void }) {
           <div style={{
             background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: '14px',
             padding: '14px 18px', marginBottom: '16px', fontSize: '13px', color: 'var(--ink-soft)',
+            display: 'flex', alignItems: 'flex-start', gap: '8px',
           }}>
-            💡 Ereksiya zaifligi bo&apos;lgani uchun <strong>IIEF-5 testi</strong>ni ham to&apos;ldirishingiz tavsiya etiladi.
+            <Lightbulb size={15} strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }} /> <span>Ereksiya zaifligi bo&apos;lgani uchun <strong>IIEF-5 testi</strong>ni ham to&apos;ldirishingiz tavsiya etiladi.</span>
           </div>
         )}
 
@@ -532,8 +534,9 @@ function JinsiyZaiflikKalkulator({ onMurojaat }: { onMurojaat: () => void }) {
           <div style={{
             background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: '14px',
             padding: '14px 18px', marginBottom: '16px', fontSize: '13px', color: 'var(--ink-soft)',
+            display: 'flex', alignItems: 'flex-start', gap: '8px',
           }}>
-            💡 Tez bo&apos;shanish bo&apos;lgani uchun <strong>PEDT testi</strong>ni ham to&apos;ldirishingiz tavsiya etiladi.
+            <Lightbulb size={15} strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }} /> <span>Tez bo&apos;shanish bo&apos;lgani uchun <strong>PEDT testi</strong>ni ham to&apos;ldirishingiz tavsiya etiladi.</span>
           </div>
         )}
 
@@ -720,7 +723,7 @@ export default function YoriqnomaDetailPage() {
             marginTop: '24px', background: 'var(--surface)', border: '2px solid #dc262633', borderRadius: '16px',
             padding: '20px 22px',
           }}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: '#dc2626' }}>⚠ Diqqat</h3>
+            <h3 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}><AlertTriangle size={15} strokeWidth={2} /> Diqqat</h3>
             <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
               {y.ogohlantiruvchiBelgilar.map(b => (
                 <li key={b} style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{b}</li>
@@ -748,7 +751,7 @@ export default function YoriqnomaDetailPage() {
           <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '.04em' }}>{y.organ}</span>
           <h1 style={{ margin: '6px 0 0', fontSize: '21px', fontWeight: 800, lineHeight: 1.3 }}>{y.sarlavha}</h1>
           <p style={{ margin: '10px 0 0', fontSize: '13.5px', opacity: 0.92 }}>{y.qisqa}</p>
-          <p style={{ margin: '8px 0 0', fontSize: '12.5px', opacity: 0.85 }}>🔁 {y.davriylik}</p>
+          <p style={{ margin: '8px 0 0', fontSize: '12.5px', opacity: 0.85, display: 'flex', alignItems: 'center', gap: '5px' }}><Repeat size={13} strokeWidth={2} /> {y.davriylik}</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -776,7 +779,7 @@ export default function YoriqnomaDetailPage() {
           marginTop: '20px', background: 'var(--surface)', border: '2px solid #dc262633', borderRadius: '16px',
           padding: '20px 22px',
         }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 800, color: '#dc2626' }}>⚠ Qachon shifokorga murojaat qilish kerak</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}><AlertTriangle size={15} strokeWidth={2} /> Qachon shifokorga murojaat qilish kerak</h3>
           <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {y.ogohlantiruvchiBelgilar.map((belgi) => (
               <li key={belgi} style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{belgi}</li>

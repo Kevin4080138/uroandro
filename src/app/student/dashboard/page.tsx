@@ -14,6 +14,10 @@ import { RankCard } from '@/components/RankBadge'
 import { SeriyaKarta } from '@/components/SeriyaKarta'
 import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData } from '@/lib/rank'
+import {
+  BookOpen, BarChart3, Library, Target, Dna, Calculator, Scissors, FolderTree,
+  Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye,
+} from 'lucide-react'
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -57,10 +61,10 @@ export default function StudentDashboard() {
   const rank = getRank(getProgressData(natijalarList))
 
   // Bosqich kesimidagi progress: tugallangan (nazariya+amaliy) darslar soni
-  const BOSQICH_MA: { id: Bosqich; nom: string; emoji: string; rang: string }[] = [
-    { id: 'oson', nom: 'Oson', emoji: '🟢', rang: '#16a34a' },
-    { id: "o'rta", nom: "O'rta", emoji: '🟡', rang: '#d97706' },
-    { id: 'qiyin', nom: 'Qiyin', emoji: '🔴', rang: '#dc2626' },
+  const BOSQICH_MA: { id: Bosqich; nom: string; rang: string }[] = [
+    { id: 'oson', nom: 'Oson', rang: '#16a34a' },
+    { id: "o'rta", nom: "O'rta", rang: '#d97706' },
+    { id: 'qiyin', nom: 'Qiyin', rang: '#dc2626' },
   ]
   const bosqichProgress = BOSQICH_MA.map((b) => {
     const jami = DARSLAR.filter((d) => d.bosqich === b.id).length
@@ -81,21 +85,21 @@ export default function StudentDashboard() {
   const oxirgiTugadi = oxirgiQadamlar.length > 0 && oxirgiTugallangan >= oxirgiQadamlar.length
 
   const KARTALAR = [
-    { icon: '📖', title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
-    { icon: '📊', title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
-    { icon: '📚', title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
-    { icon: '🎯', title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
-    { icon: '🧬', title: 'Exclusive Andrologiya', desc: 'Faqat andrologiya yo\'nalishi', c: 'var(--accent-2)', href: '/student/andrologiya' },
-    { icon: '🧮', title: 'Kalkulyatorlar', desc: 'Shkala va formulalar — ma\'nosi bilan', c: 'var(--accent)', href: '/student/kalkulyatorlar' },
-    { icon: '🔪', title: 'Operativ urologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--danger)', href: '/student/operativ-urologiya' },
-    { icon: '🗂️', title: 'Klassifikatsiyalar', desc: 'Urologik tasniflar ma\'lumotnomasi', c: 'var(--good)', href: '/student/klassifikatsiyalar' },
-    { icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
-    { icon: '🏆', title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
+    { Icon: BookOpen, title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
+    { Icon: BarChart3, title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
+    { Icon: Library, title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
+    { Icon: Target, title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },
+    { Icon: Dna, title: 'Exclusive Andrologiya', desc: 'Faqat andrologiya yo\'nalishi', c: 'var(--accent-2)', href: '/student/andrologiya' },
+    { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar — ma\'nosi bilan', c: 'var(--accent)', href: '/student/kalkulyatorlar' },
+    { Icon: Scissors, title: 'Operativ urologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--danger)', href: '/student/operativ-urologiya' },
+    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Urologik tasniflar ma\'lumotnomasi', c: 'var(--good)', href: '/student/klassifikatsiyalar' },
+    { Icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
+    { Icon: Trophy, title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
   ]
 
   const NAZAR_KARTALAR = [
-    { icon: '🧑‍🤝‍🧑', title: "Bemor bo'limi", desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
-    { icon: '👨‍⚕️', title: "Shifokor bo'limi", desc: 'Tanishish uchun', href: '/student/shifokor-bolimi' },
+    { Icon: Users, title: "Bemor bo'limi", desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
+    { Icon: Stethoscope, title: "Shifokor bo'limi", desc: 'Tanishish uchun', href: '/student/shifokor-bolimi' },
   ]
 
   return (
@@ -149,9 +153,11 @@ export default function StudentDashboard() {
           >
             <div style={{
               width: '44px', height: '44px', borderRadius: '13px', flexShrink: 0,
-              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '21px',
+              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              {oxirgiDars ? (oxirgiTugadi ? '🎉' : '▶️') : '🚀'}
+              {oxirgiDars
+                ? (oxirgiTugadi ? <PartyPopper size={22} strokeWidth={2} /> : <Play size={22} strokeWidth={2} fill="currentColor" />)
+                : <Rocket size={22} strokeWidth={2} />}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: 800, opacity: .85, letterSpacing: '.04em', textTransform: 'uppercase' }}>
@@ -172,7 +178,7 @@ export default function StudentDashboard() {
                 </div>
               )}
             </div>
-            <span style={{ fontSize: '18px', flexShrink: 0 }}>→</span>
+            <ArrowRight size={19} strokeWidth={2.2} style={{ flexShrink: 0 }} />
           </div>
 
           {/* Kunlik seriya — "Davom ettirish"dan keyin, chunki seriyani saqlash uchun
@@ -209,8 +215,13 @@ export default function StudentDashboard() {
                     style={{ cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink-soft)' }}>{b.emoji} {b.nom}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: b.rang }}>{b.tugadi}/{b.jami} →</span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ink-soft)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: b.rang, flexShrink: 0 }} />
+                        {b.nom}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: b.rang, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        {b.tugadi}/{b.jami} <ArrowRight size={13} strokeWidth={2.4} />
+                      </span>
                     </div>
                     <div style={{ height: '6px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden' }}>
                       <div style={{
@@ -232,8 +243,8 @@ export default function StudentDashboard() {
           </div>
 
           {/* Bo'limlar */}
-          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s' }}>
-            📌 Bo&apos;limlar
+          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <LayoutGrid size={13} strokeWidth={2.2} /> Bo&apos;limlar
           </p>
           <div className="db-cards">
             {KARTALAR.map((item, i) => (
@@ -243,10 +254,10 @@ export default function StudentDashboard() {
                 className="dash-card rise"
                 style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: 'pointer' }}
               >
-                <div className="dash-icon">
+                <div className="dash-icon" style={{ color: item.c }}>
                   {(item as any).imgSrc
                     ? <img src={(item as any).imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
-                    : item.icon}
+                    : item.Icon ? <item.Icon size={22} strokeWidth={2} /> : null}
                 </div>
                 <h3 className="dash-title">{item.title}</h3>
                 <p className="dash-desc">{item.desc}</p>
@@ -255,8 +266,8 @@ export default function StudentDashboard() {
           </div>
 
           {/* Nazar solish */}
-          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 10px', animationDelay: '.26s' }}>
-            👁️ Nazar solish
+          <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 10px', animationDelay: '.26s', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Eye size={13} strokeWidth={2.2} /> Nazar solish
           </p>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {NAZAR_KARTALAR.map((item, i) => (
@@ -270,7 +281,7 @@ export default function StudentDashboard() {
                   padding: '10px 16px', opacity: 0.8, animationDelay: `${0.28 + i * 0.04}s`,
                 }}
               >
-                <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                <span style={{ display: 'inline-flex', color: 'var(--muted)', flexShrink: 0 }}><item.Icon size={18} strokeWidth={2} /></span>
                 <div>
                   <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--ink-soft)' }}>{item.title}</div>
                   <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{item.desc}</div>

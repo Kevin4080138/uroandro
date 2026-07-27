@@ -6,12 +6,16 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import Image from 'next/image'
 import { getCamuSemestrDarslar } from '@/lib/camu/darslar'
+import {
+  GraduationCap, Library, Trophy, BarChart3, FolderOpen,
+  Newspaper, BookMarked, Video, FileText, type LucideIcon,
+} from 'lucide-react'
 
-const IMKONIYATLAR = [
-  { icon: '🎓', sarlavha: 'Bepul kurslar', izoh: 'CAMU talabalari uchun barcha asosiy kurslar bepul', rang: 'var(--accent)' },
-  { icon: '📚', sarlavha: 'Kutubxona', izoh: 'Darsliklar, qo\'llanmalar va rasmiy protokollar', rang: 'var(--good)' },
-  { icon: '🏆', sarlavha: 'Sertifikat', izoh: 'Kursni tugatgandan so\'ng elektron sertifikat', rang: 'var(--accent-2)' },
-  { icon: '📊', sarlavha: 'Test banklar', izoh: '500+ USMLE va klinik savol', rang: 'var(--danger)' },
+const IMKONIYATLAR: { Icon: LucideIcon; sarlavha: string; izoh: string; rang: string }[] = [
+  { Icon: GraduationCap, sarlavha: 'Bepul kurslar', izoh: 'CAMU talabalari uchun barcha asosiy kurslar bepul', rang: 'var(--accent)' },
+  { Icon: Library, sarlavha: 'Kutubxona', izoh: 'Darsliklar, qo\'llanmalar va rasmiy protokollar', rang: 'var(--good)' },
+  { Icon: Trophy, sarlavha: 'Sertifikat', izoh: 'Kursni tugatgandan so\'ng elektron sertifikat', rang: 'var(--accent-2)' },
+  { Icon: BarChart3, sarlavha: 'Test banklar', izoh: '500+ USMLE va klinik savol', rang: 'var(--danger)' },
 ]
 
 const SEMESTR_META: Record<number, { rang: string; soat: number }> = {
@@ -74,7 +78,7 @@ export default function CamuPage() {
               background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
               padding: '14px 14px', animationDelay: `${0.06 + i * 0.04}s`,
             }}>
-              <div style={{ fontSize: '20px', marginBottom: '5px' }}>{item.icon}</div>
+              <div style={{ marginBottom: '5px', color: item.rang }}><item.Icon size={20} strokeWidth={2} /></div>
               <div style={{ fontSize: '12.5px', fontWeight: 700, color: item.rang, marginBottom: '3px' }}>{item.sarlavha}</div>
               <div style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4 }}>{item.izoh}</div>
             </div>
@@ -165,15 +169,15 @@ export default function CamuPage() {
         </div>
 
         {/* Qo'shimcha bo'limlar */}
-        <h2 className="rise" style={{ fontSize: '15px', fontWeight: 800, marginBottom: '12px' }}>
-          📂 Qo&apos;shimcha materiallar
+        <h2 className="rise" style={{ fontSize: '15px', fontWeight: 800, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FolderOpen size={17} strokeWidth={2} /> Qo&apos;shimcha materiallar
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {[
-            { icon: '📰', label: 'Maqolalar', desc: 'Ilmiy va klinik maqolalar', color: 'var(--accent)', soon: true },
-            { icon: '📖', label: 'Adabiyotlar', desc: 'Darsliklar va qo\'llanmalar', color: 'var(--good)', soon: true },
-            { icon: '🎥', label: 'Video darslar', desc: 'Amaliy ko\'rsatmali videolar', color: '#7c3aed', soon: true },
-            { icon: '📝', label: 'Konspektlar', desc: 'Mavzu bo\'yicha qisqacha xulosalar', color: 'var(--warn)', soon: true },
+            { Icon: Newspaper, label: 'Maqolalar', desc: 'Ilmiy va klinik maqolalar', color: 'var(--accent)', soon: true },
+            { Icon: BookMarked, label: 'Adabiyotlar', desc: 'Darsliklar va qo\'llanmalar', color: 'var(--good)', soon: true },
+            { Icon: Video, label: 'Video darslar', desc: 'Amaliy ko\'rsatmali videolar', color: '#7c3aed', soon: true },
+            { Icon: FileText, label: 'Konspektlar', desc: 'Mavzu bo\'yicha qisqacha xulosalar', color: 'var(--warn)', soon: true },
           ].map((item) => (
             <div key={item.label} style={{
               display: 'flex', alignItems: 'center', gap: '14px',
@@ -183,8 +187,8 @@ export default function CamuPage() {
               <div style={{
                 width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
                 background: item.color + '18', color: item.color,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-              }}>{item.icon}</div>
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}><item.Icon size={19} strokeWidth={2} /></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{item.label}</div>
                 <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px' }}>{item.desc}</div>

@@ -3,9 +3,10 @@
 import { useMemo, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SAVOLLAR, SAVOL_KATEGORIYALARI, savolQidir } from '@/lib/savollar'
+import { Stethoscope, CircleDot, Dna, Microscope, Building2, Smartphone, Search, HelpCircle, type LucideIcon } from 'lucide-react'
 
-const KATEGORIYA_IKON: Record<string, string> = {
-  Umumiy: '🩺', Prostata: '🍈', 'Erkak salomatligi': '🧬', Tekshiruvlar: '🔬', Operatsiya: '🏥', 'Ilova haqida': '📱',
+const KATEGORIYA_IKON: Record<string, LucideIcon> = {
+  Umumiy: Stethoscope, Prostata: CircleDot, 'Erkak salomatligi': Dna, Tekshiruvlar: Microscope, Operatsiya: Building2, 'Ilova haqida': Smartphone,
 }
 
 export default function SavollarPage() {
@@ -22,7 +23,7 @@ export default function SavollarPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>❓ Ko&apos;p beriladigan savollar</h2>
+        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><HelpCircle size={24} strokeWidth={2} /> Ko&apos;p beriladigan savollar</h2>
         <p className="rise" style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Urologik shikoyatlar, tekshiruvlar va davolanish bo&apos;yicha tez-tez so&apos;raladigan savollarga aniq javoblar.
         </p>
@@ -51,16 +52,17 @@ export default function SavollarPage() {
                 border: filtr === kat ? 'none' : '1px solid var(--line)',
                 borderRadius: '999px', padding: '7px 15px', fontSize: '12.5px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all .18s ease', whiteSpace: 'nowrap',
+                display: 'inline-flex', alignItems: 'center', gap: '5px',
               }}
             >
-              {kat !== 'Hammasi' && KATEGORIYA_IKON[kat]} {kat}
+              {kat !== 'Hammasi' && KATEGORIYA_IKON[kat] && (() => { const KI = KATEGORIYA_IKON[kat]; return <KI size={13} strokeWidth={2} /> })()} {kat}
             </button>
           ))}
         </div>
 
         {royxat.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>🔍</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--muted)' }}><Search size={36} strokeWidth={1.5} /></div>
             <p style={{ margin: 0 }}>Hech narsa topilmadi.</p>
           </div>
         ) : (
@@ -80,7 +82,7 @@ export default function SavollarPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                      <span style={{ fontSize: '16px', flexShrink: 0 }}>{KATEGORIYA_IKON[s.kategoriya]}</span>
+                      <span style={{ flexShrink: 0, color: 'var(--accent)', display: 'flex' }}>{KATEGORIYA_IKON[s.kategoriya] && (() => { const KI = KATEGORIYA_IKON[s.kategoriya]; return <KI size={16} strokeWidth={2} /> })()}</span>
                       <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ink)' }}>{s.savol}</span>
                     </div>
                     <span className="chevron" style={{

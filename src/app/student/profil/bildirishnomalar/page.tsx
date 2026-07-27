@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { Info, CheckCircle2, AlertTriangle, Siren, type LucideIcon } from 'lucide-react'
 
 type Notification = {
   id: string
@@ -14,11 +15,11 @@ type Notification = {
   read: boolean
 }
 
-const TYPE_STYLE: Record<string, { icon: string; accent: string }> = {
-  info:    { icon: 'ℹ️', accent: '#2563eb' },
-  success: { icon: '✅', accent: '#16a34a' },
-  warning: { icon: '⚠️', accent: '#ca8a04' },
-  urgent:  { icon: '🚨', accent: '#dc2626' },
+const TYPE_STYLE: Record<string, { Icon: LucideIcon; accent: string }> = {
+  info:    { Icon: Info, accent: '#2563eb' },
+  success: { Icon: CheckCircle2, accent: '#16a34a' },
+  warning: { Icon: AlertTriangle, accent: '#ca8a04' },
+  urgent:  { Icon: Siren, accent: '#dc2626' },
 }
 
 function formatSana(iso: string) {
@@ -155,7 +156,7 @@ export default function BildirishnomalarPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                    <span style={{ fontSize: '22px', flexShrink: 0, marginTop: '1px' }}>{s.icon}</span>
+                    <span style={{ display: 'flex', flexShrink: 0, marginTop: '1px', color: s.accent }}><s.Icon size={21} strokeWidth={2} /></span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                         <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: 'var(--ink)' }}>{n.title}</p>

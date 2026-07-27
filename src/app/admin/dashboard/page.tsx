@@ -8,6 +8,11 @@ import Link from 'next/link'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { ObunaEtibor } from '@/components/admin/ObunaEtibor'
 import { TalimTahlil } from '@/components/admin/TalimTahlil'
+import {
+  UserPlus, CalendarDays, CreditCard, Flame, MessageSquare, ClipboardList,
+  Users, Building2, Globe, FileText, GraduationCap, TrendingUp, Shield, Megaphone,
+  Images, Stethoscope, UserRound, Wrench,
+} from 'lucide-react'
 
 type FaollikMa = {
   bugunKirganlar: number
@@ -22,7 +27,7 @@ const ROLE_COLOR: Record<string, string> = {
   doctor: 'var(--danger)', student: 'var(--accent)', patient: 'var(--good)', admin: 'var(--warn)',
 }
 const ROLE_LABEL: Record<string, string> = {
-  doctor: '👨‍⚕️ Shifokor', student: '🎓 Talaba', patient: '🧑 Bemor', admin: '🛠️ Admin',
+  doctor: 'Shifokor', student: 'Talaba', patient: 'Bemor', admin: 'Admin',
 }
 
 type Recent = { full_name: string; role: string; created_at: string }
@@ -130,19 +135,19 @@ export default function AdminDashboard() {
         {faollik && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '32px' }}>
             {[
-              { label: 'Bugun qo\'shildi', value: faollik.bugunKirganlar, icon: '🆕', color: 'var(--accent)', href: '/admin/users' },
-              { label: 'Haftalik yangilar', value: faollik.haftaYangilar, icon: '📅', color: 'var(--good)', href: '/admin/users' },
-              { label: 'Obunali talabalar', value: faollik.obunaliTalabalar, icon: '💳', color: 'var(--good)', href: '/admin/obunalar' },
-              { label: '7 kunda faol talabalar', value: faollik.faolTalabalar, icon: '🔥', color: faollik.faolTalabalar > 0 ? 'var(--accent)' : 'var(--muted)', href: '/admin/talabalar-nazorati' },
-              { label: 'Ko\'rilmagan fikrlar', value: faollik.korilmagan, icon: '💬', color: faollik.korilmagan > 0 ? 'var(--warn)' : 'var(--muted)', href: '/admin/fikrlar' },
-              { label: 'Yangi murojaatlar', value: faollik.yangiMurojaatlar, icon: '📋', color: faollik.yangiMurojaatlar > 0 ? 'var(--danger)' : 'var(--muted)', href: '/admin/statistika' },
+              { label: 'Bugun qo\'shildi', value: faollik.bugunKirganlar, Icon: UserPlus, color: 'var(--accent)', href: '/admin/users' },
+              { label: 'Haftalik yangilar', value: faollik.haftaYangilar, Icon: CalendarDays, color: 'var(--good)', href: '/admin/users' },
+              { label: 'Obunali talabalar', value: faollik.obunaliTalabalar, Icon: CreditCard, color: 'var(--good)', href: '/admin/obunalar' },
+              { label: '7 kunda faol talabalar', value: faollik.faolTalabalar, Icon: Flame, color: faollik.faolTalabalar > 0 ? 'var(--accent)' : 'var(--muted)', href: '/admin/talabalar-nazorati' },
+              { label: 'Ko\'rilmagan fikrlar', value: faollik.korilmagan, Icon: MessageSquare, color: faollik.korilmagan > 0 ? 'var(--warn)' : 'var(--muted)', href: '/admin/fikrlar' },
+              { label: 'Yangi murojaatlar', value: faollik.yangiMurojaatlar, Icon: ClipboardList, color: faollik.yangiMurojaatlar > 0 ? 'var(--danger)' : 'var(--muted)', href: '/admin/statistika' },
             ].map((k) => (
               <div key={k.label} onClick={() => router.push(k.href)} className="rise" style={{
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
                 padding: '16px 18px', cursor: 'pointer', transition: 'border-color .15s',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>{k.icon}</span>
+                  <span style={{ display: 'flex', color: k.color }}><k.Icon size={20} strokeWidth={2} /></span>
                   {k.value > 0 && (
                     <span style={{ fontSize: '11px', fontWeight: 700, color: k.color, background: `${k.color}20`, padding: '2px 8px', borderRadius: 20 }}>
                       {k.value}
@@ -192,21 +197,21 @@ export default function AdminDashboard() {
             <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '0 0 14px 0', fontWeight: 600 }}>Boshqaruv paneli</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
               {[
-                { icon: '👥', title: 'Foydalanuvchilar', href: '/admin/users', c: 'var(--accent)' },
-                { icon: '🏥', title: 'Klinikalar', href: '/admin/klinikalar', c: 'var(--good)' },
-                { icon: '🌐', title: 'Katalog nazorati', href: '/admin/katalog', c: 'var(--accent)' },
-                { icon: '📝', title: 'Kontent', href: '/admin/content', c: 'var(--accent-2)' },
-                { icon: '📚', title: 'Darslar', href: '/admin/darslar', c: 'var(--warn)' },
-                { icon: '💬', title: 'Fikrlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
-                { icon: '📈', title: 'Statistika', href: '/admin/statistika', c: 'var(--good)' },
-                { icon: '🛡️', title: 'Audit log', href: '/admin/audit', c: 'var(--danger)' },
-                { icon: '📢', title: 'Bildirishnoma', href: '/admin/bildirishnomalar', c: 'var(--warn)' },
-                { icon: '🎠', title: 'Bannerlar', href: '/admin/bannerlar', c: 'var(--accent-2)' },
+                { Icon: Users, title: 'Foydalanuvchilar', href: '/admin/users', c: 'var(--accent)' },
+                { Icon: Building2, title: 'Klinikalar', href: '/admin/klinikalar', c: 'var(--good)' },
+                { Icon: Globe, title: 'Katalog nazorati', href: '/admin/katalog', c: 'var(--accent)' },
+                { Icon: FileText, title: 'Kontent', href: '/admin/content', c: 'var(--accent-2)' },
+                { Icon: GraduationCap, title: 'Darslar', href: '/admin/darslar', c: 'var(--warn)' },
+                { Icon: MessageSquare, title: 'Fikrlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
+                { Icon: TrendingUp, title: 'Statistika', href: '/admin/statistika', c: 'var(--good)' },
+                { Icon: Shield, title: 'Audit log', href: '/admin/audit', c: 'var(--danger)' },
+                { Icon: Megaphone, title: 'Bildirishnoma', href: '/admin/bildirishnomalar', c: 'var(--warn)' },
+                { Icon: Images, title: 'Bannerlar', href: '/admin/bannerlar', c: 'var(--accent-2)' },
               ].map((item) => (
                 <div key={item.title} onClick={() => router.push(item.href)}
                   className="dash-card rise"
                   style={{ ['--c' as any]: item.c, cursor: 'pointer', padding: '14px' }}>
-                  <div className="dash-icon" style={{ fontSize: '20px', marginBottom: '6px' }}>{item.icon}</div>
+                  <div className="dash-icon" style={{ marginBottom: '6px', color: item.c }}><item.Icon size={20} strokeWidth={2} /></div>
                   <h3 className="dash-title" style={{ fontSize: '13px', margin: 0 }}>{item.title}</h3>
                 </div>
               ))}
@@ -254,14 +259,14 @@ export default function AdminDashboard() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
           {[
-            { icon: '🎓', title: 'Talaba', href: '/student/dashboard', c: 'var(--accent)' },
-            { icon: '👨‍⚕️', title: 'Shifokor', href: '/doctor/dashboard', c: 'var(--good)' },
-            { icon: '🧑', title: 'Bemor', href: '/patient/dashboard', c: 'var(--accent-2)' },
-            { icon: '🛠️', title: 'Admin', href: '/admin/dashboard', c: 'var(--warn)' },
+            { Icon: GraduationCap, title: 'Talaba', href: '/student/dashboard', c: 'var(--accent)' },
+            { Icon: Stethoscope, title: 'Shifokor', href: '/doctor/dashboard', c: 'var(--good)' },
+            { Icon: UserRound, title: 'Bemor', href: '/patient/dashboard', c: 'var(--accent-2)' },
+            { Icon: Wrench, title: 'Admin', href: '/admin/dashboard', c: 'var(--warn)' },
           ].map((item) => (
             <Link key={item.title} href={item.href} style={{ textDecoration: 'none' }}>
               <div className="dash-card" style={{ ['--c' as any]: item.c, padding: '14px' }}>
-                <div className="dash-icon" style={{ fontSize: '20px', marginBottom: '6px' }}>{item.icon}</div>
+                <div className="dash-icon" style={{ marginBottom: '6px', color: item.c }}><item.Icon size={20} strokeWidth={2} /></div>
                 <h3 className="dash-title" style={{ margin: 0, fontSize: '13px' }}>{item.title}</h3>
               </div>
             </Link>

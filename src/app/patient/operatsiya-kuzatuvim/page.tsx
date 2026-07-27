@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { postOpHolat, POSTOP_JADVALI } from '@/lib/operatsiyalar'
+import { Bandage, CalendarClock, Building2, StickyNote } from 'lucide-react'
 
 type Kuzatuv = {
   id: string
@@ -44,7 +45,7 @@ export default function OperatsiyaKuzatuvimPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>🩹 Operatsiya kuzatuvim</h2>
+        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><Bandage size={24} strokeWidth={2} /> Operatsiya kuzatuvim</h2>
         <p className="rise" style={{ margin: '0 0 24px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Operatsiyadan keyingi tiklanish bosqichlari va eslatmalar. Ilova har bosqichda sizga bildirishnoma yuboradi.
         </p>
@@ -56,7 +57,7 @@ export default function OperatsiyaKuzatuvimPage() {
             background: 'var(--surface)', border: '1px dashed var(--line)', borderRadius: '16px',
             padding: '28px 22px', textAlign: 'center',
           }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>🗓</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--muted)' }}><CalendarClock size={38} strokeWidth={1.5} /></div>
             <p style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700 }}>Hozircha kuzatuv yo&apos;q</p>
             <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)', lineHeight: 1.5 }}>
               Shifokoringiz operatsiyani biriktirgach, tiklanish jadvali shu yerda paydo bo&apos;ladi.
@@ -66,9 +67,10 @@ export default function OperatsiyaKuzatuvimPage() {
               style={{
                 marginTop: '16px', background: 'var(--accent)', color: 'white', border: 'none',
                 borderRadius: '12px', padding: '11px 20px', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
               }}
             >
-              🏥 Operatsiyalar haqida o&apos;qish
+              <Building2 size={16} strokeWidth={2} /> Operatsiyalar haqida o&apos;qish
             </button>
           </div>
         ) : (
@@ -134,8 +136,9 @@ export default function OperatsiyaKuzatuvimPage() {
                     <div style={{
                       marginTop: '8px', padding: '10px 14px', background: 'var(--surface-2)', borderRadius: '10px',
                       fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.5,
+                      display: 'flex', alignItems: 'flex-start', gap: '6px',
                     }}>
-                      📝 Shifokor izohi: {k.izoh}
+                      <StickyNote size={14} strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }} /> <span>Shifokor izohi: {k.izoh}</span>
                     </div>
                   )}
                 </div>

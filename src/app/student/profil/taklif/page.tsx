@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { SAYT_URL } from '@/lib/saytUrl'
 import { Header } from '@/components/Header'
+import { Users, CalendarDays } from 'lucide-react'
 
 type Friend = {
   id: string
@@ -188,14 +189,14 @@ export default function TaklifPage() {
         {/* Statistika */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           {[
-            { icon: '👥', label: 'Jami do\'stlar', value: friends.length, color: '#7c3aed' },
-            { icon: '🗓️', label: 'Bu oy', value: buOy, color: '#2563eb' },
+            { Icon: Users, label: 'Jami do\'stlar', value: friends.length, color: '#7c3aed' },
+            { Icon: CalendarDays, label: 'Bu oy', value: buOy, color: '#2563eb' },
           ].map(k => (
             <div key={k.label} style={{
               background: 'var(--surface)', border: '1px solid var(--line)',
               borderRadius: '14px', padding: '18px',
             }}>
-              <p style={{ margin: 0, fontSize: '24px' }}>{k.icon}</p>
+              <p style={{ margin: 0, color: k.color }}><k.Icon size={24} strokeWidth={2} /></p>
               <p style={{ margin: '8px 0 2px', fontSize: '28px', fontWeight: 800, color: k.color }}>{k.value}</p>
               <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>{k.label}</p>
             </div>

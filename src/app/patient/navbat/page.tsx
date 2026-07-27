@@ -8,6 +8,7 @@ import {
   HAFTA_KUNLARI, haftaKuni, kunSlotlari, otganSlotmi, qabulKunlari, sanaISO,
   type IshJadvali,
 } from '@/lib/navbatSlotlar'
+import { CalendarCheck, CalendarClock, Stethoscope, Building2, CreditCard, AlertTriangle } from 'lucide-react'
 
 type Shifokor = IshJadvali & {
   doctor_id: string; full_name: string; mutaxassislik: string | null
@@ -123,7 +124,7 @@ export default function NavbatOlishPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="fade-in mx-auto max-w-[560px] px-8 py-16 text-center">
-        <div style={{ fontSize: '56px', marginBottom: '16px' }}>🗓✅</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: 'var(--good)' }}><CalendarCheck size={56} strokeWidth={1.5} /></div>
         <h2 style={{ fontSize: '22px', marginBottom: '8px' }}>Navbatingiz band qilindi</h2>
         <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
           {tanlangan.full_name} — {sanaChiroyli(kun)}, soat <strong style={{ color: 'var(--ink)' }}>{slot}</strong>.
@@ -144,7 +145,7 @@ export default function NavbatOlishPage() {
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
 
       <div className="fade-in mx-auto max-w-[640px] px-4 py-8 sm:px-8">
-        <h2 style={{ margin: '0 0 4px', fontSize: '24px' }}>🗓 Navbat olish</h2>
+        <h2 style={{ margin: '0 0 4px', fontSize: '24px', display: 'flex', alignItems: 'center', gap: '9px' }}><CalendarClock size={24} strokeWidth={2} /> Navbat olish</h2>
         <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '20px' }}>
           Shifokorni tanlang, qulay kun va vaqtni band qiling.
         </p>
@@ -191,11 +192,11 @@ export default function NavbatOlishPage() {
                       background: faol ? 'var(--accent-soft)' : 'var(--surface-2)',
                       borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', color: 'var(--ink)',
                     }}>
-                      <div style={{ fontSize: '14.5px', fontWeight: 700 }}>👨‍⚕️ {s.full_name}</div>
+                      <div style={{ fontSize: '14.5px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px' }}><Stethoscope size={16} strokeWidth={2} style={{ flexShrink: 0 }} /> {s.full_name}</div>
                       <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                         {s.mutaxassislik && <span>{s.mutaxassislik}</span>}
-                        {kl && <span>🏥 {kl.nom}</span>}
-                        {s.qabul_narxi && <span>💳 {s.qabul_narxi}</span>}
+                        {kl && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Building2 size={12} strokeWidth={2} /> {kl.nom}</span>}
+                        {s.qabul_narxi && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CreditCard size={12} strokeWidth={2} /> {s.qabul_narxi}</span>}
                       </div>
                     </button>
                   )
@@ -269,7 +270,7 @@ export default function NavbatOlishPage() {
                     outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', marginBottom: '12px',
                   }}
                 />
-                {xato && <p style={{ color: 'var(--danger)', fontSize: '13px', margin: '0 0 10px' }}>⚠️ {xato}</p>}
+                {xato && <p style={{ color: 'var(--danger)', fontSize: '13px', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}><AlertTriangle size={14} strokeWidth={2} style={{ flexShrink: 0 }} /> {xato}</p>}
                 <button onClick={bandQil} disabled={saving} className="btn-animated soft-press" style={{
                   width: '100%', background: 'var(--good)', color: 'white', border: 'none', borderRadius: '12px',
                   padding: '14px', cursor: 'pointer', fontSize: '15px', fontWeight: 700, opacity: saving ? 0.7 : 1,

@@ -8,27 +8,32 @@ import { useTheme } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase'
 import { RankMini } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
+import {
+  User, BarChart3, Award, Bell, Settings, Gift, Info, MessageSquare, Send,
+  Phone, BookOpen, HelpCircle, FileText, Sun, Moon, ChevronRight, LogOut, Trash2,
+  type LucideIcon,
+} from 'lucide-react'
 
 type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
 
 const ROL_NOMI: Record<string, string> = {
-  student: '🎓 Talaba', doctor: '👨‍⚕️ Shifokor', patient: '🧑 Bemor', admin: '🛠️ Admin',
+  student: 'Talaba', doctor: 'Shifokor', patient: 'Bemor', admin: 'Admin',
 }
 
-const BANDLAR = [
-  { icon: '👤', label: 'Profil ma\'lumotlari', href: '/student/profil/tahrirlash' },
-  { icon: '📊', label: 'Faolligingiz', href: '/student/profil/faollik' },
-  { icon: '🏅', label: 'Sertifikatlar', href: '/student/profil/sertifikatlar' },
-  { icon: '🔔', label: 'Bildirishnomalar', href: '/student/profil/bildirishnomalar' },
-  { icon: '⚙️', label: 'Bildirishnoma sozlamalari', href: '/bildirishnoma-sozlamalari' },
-  { icon: '🎁', label: "Do'stlarni taklif qilish", href: '/student/profil/taklif' },
-  { icon: 'ℹ️', label: 'Biz haqimizda', href: '/student/profil/biz-haqimizda' },
-  { icon: '💬', label: 'Izoh (feedback)', href: '/student/profil/feedback' },
-  { icon: '📩', label: 'Adminga yozish', href: 'https://t.me/urolog_arabboyev', tashqi: true },
-  { icon: '📞', label: "Qo'ng'iroq qilish", href: 'tel:+998904080138', tashqi: true },
-  { icon: '📖', label: "Yo'riqnoma", href: '/student/profil/yoriqnoma' },
-  { icon: '❔', label: 'Savol-Javoblar', href: '/student/profil/faq' },
-  { icon: '📄', label: 'Ommaviy oferta', href: '/student/profil/oferta' },
+const BANDLAR: { Icon: LucideIcon; label: string; href: string; tashqi?: boolean }[] = [
+  { Icon: User, label: 'Profil ma\'lumotlari', href: '/student/profil/tahrirlash' },
+  { Icon: BarChart3, label: 'Faolligingiz', href: '/student/profil/faollik' },
+  { Icon: Award, label: 'Sertifikatlar', href: '/student/profil/sertifikatlar' },
+  { Icon: Bell, label: 'Bildirishnomalar', href: '/student/profil/bildirishnomalar' },
+  { Icon: Settings, label: 'Bildirishnoma sozlamalari', href: '/bildirishnoma-sozlamalari' },
+  { Icon: Gift, label: "Do'stlarni taklif qilish", href: '/student/profil/taklif' },
+  { Icon: Info, label: 'Biz haqimizda', href: '/student/profil/biz-haqimizda' },
+  { Icon: MessageSquare, label: 'Izoh (feedback)', href: '/student/profil/feedback' },
+  { Icon: Send, label: 'Adminga yozish', href: 'https://t.me/urolog_arabboyev', tashqi: true },
+  { Icon: Phone, label: "Qo'ng'iroq qilish", href: 'tel:+998904080138', tashqi: true },
+  { Icon: BookOpen, label: "Yo'riqnoma", href: '/student/profil/yoriqnoma' },
+  { Icon: HelpCircle, label: 'Savol-Javoblar', href: '/student/profil/faq' },
+  { Icon: FileText, label: 'Ommaviy oferta', href: '/student/profil/oferta' },
 ]
 
 export default function ProfilPage() {
@@ -131,7 +136,7 @@ export default function ProfilPage() {
           padding: '14px 18px', marginBottom: '16px',
         }}>
           <span style={{ fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {theme === 'dark' ? '🌙' : '☀️'} Tungi rejim
+            {theme === 'dark' ? <Moon size={16} strokeWidth={2} /> : <Sun size={16} strokeWidth={2} />} Tungi rejim
           </span>
           <button
             onClick={toggle}
@@ -164,9 +169,9 @@ export default function ProfilPage() {
                 borderTop: i === 0 ? 'none' : '1px solid var(--line)', textDecoration: 'none', color: 'var(--ink)',
               }}
             >
-              <span style={{ fontSize: '17px' }}>{b.icon}</span>
+              <span style={{ display: 'flex', color: 'var(--ink-soft)' }}><b.Icon size={18} strokeWidth={2} /></span>
               <span style={{ fontSize: '14px', fontWeight: 600, flex: 1 }}>{b.label}</span>
-              <span style={{ color: 'var(--muted)' }}>›</span>
+              <ChevronRight size={17} strokeWidth={2} style={{ color: 'var(--muted)' }} />
             </a>
           ))}
         </div>
@@ -178,7 +183,7 @@ export default function ProfilPage() {
             display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', width: '100%',
             background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)',
           }}>
-            <span style={{ fontSize: '17px' }}>↩️</span>
+            <LogOut size={18} strokeWidth={2} />
             <span style={{ fontSize: '14px', fontWeight: 700 }}>Hisobdan chiqish</span>
           </button>
           <button onClick={hisobniOchir} disabled={ochirilmoqda} className="row-hover" style={{
@@ -186,7 +191,7 @@ export default function ProfilPage() {
             background: 'none', border: 'none', borderTop: '1px solid var(--line)', cursor: ochirilmoqda ? 'wait' : 'pointer',
             textAlign: 'left', color: 'var(--danger)', opacity: ochirilmoqda ? .6 : 1,
           }}>
-            <span style={{ fontSize: '17px' }}>🗑️</span>
+            <Trash2 size={18} strokeWidth={2} />
             <span style={{ fontSize: '14px', fontWeight: 700 }}>{ochirilmoqda ? "O'chirilmoqda..." : "Hisobni o'chirish"}</span>
           </button>
         </div>

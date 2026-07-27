@@ -12,6 +12,11 @@ import { interaktivCaselarOl, type InteraktivCase } from '@/lib/talim/interaktiv
 import { xatolarTahliliOl, type XatoTahlil } from '@/lib/talim/xatolarTahlili'
 import { vaziyatliMasalalarOl, type VaziyatliMasala } from '@/lib/talim/vaziyatliMasalalar'
 import { type Flashcard } from '@/lib/talim/flashcardlar'
+import {
+  BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, Building2, Puzzle,
+  ClipboardList, Search, GraduationCap, CheckCircle2, Lock, Play, FileText, BarChart3,
+  type LucideIcon,
+} from 'lucide-react'
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar' | 'nazorat'
 
@@ -106,18 +111,18 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
     vaziyatli: dars?.bosqich === 'qiyin',
     xatolar: dars?.bosqich === 'qiyin',
   }
-  const QADAM_NOMI: Record<Tab, { emoji: string; nom: string; turi: string }> = {
-    nazariya:   { emoji: '📖', nom: 'Nazariya',         turi: "O'qish" },
-    video:      { emoji: '🎥', nom: 'Video',            turi: 'Video' },
-    yuklab:     { emoji: '📂', nom: 'Materiallar',      turi: 'Fayllar' },
-    flashcard:  { emoji: '🃏', nom: 'Flashcard',        turi: 'Takrorlash' },
-    amaliy:     { emoji: '✅', nom: 'Amaliy test',      turi: 'Mashq' },
-    usmle:      { emoji: '🏅', nom: 'USMLE',            turi: 'Mashq' },
-    klinik:     { emoji: '🏥', nom: 'Klinik holat',     turi: 'Klinika' },
-    interaktiv: { emoji: '🧩', nom: 'Interaktiv case',  turi: 'Simulyatsiya' },
-    vaziyatli:  { emoji: '📋', nom: 'Vaziyatli masala', turi: 'Masala' },
-    xatolar:    { emoji: '🔍', nom: 'Xatolar tahlili',  turi: 'Tahlil' },
-    nazorat:    { emoji: '🎓', nom: 'Nazorat',          turi: 'Imtihon' },
+  const QADAM_NOMI: Record<Tab, { Icon: LucideIcon; nom: string; turi: string }> = {
+    nazariya:   { Icon: BookOpen,       nom: 'Nazariya',         turi: "O'qish" },
+    video:      { Icon: Video,          nom: 'Video',            turi: 'Video' },
+    yuklab:     { Icon: FolderDown,     nom: 'Materiallar',      turi: 'Fayllar' },
+    flashcard:  { Icon: Layers,         nom: 'Flashcard',        turi: 'Takrorlash' },
+    amaliy:     { Icon: ClipboardCheck, nom: 'Amaliy test',      turi: 'Mashq' },
+    usmle:      { Icon: Award,          nom: 'USMLE',            turi: 'Mashq' },
+    klinik:     { Icon: Building2,      nom: 'Klinik holat',     turi: 'Klinika' },
+    interaktiv: { Icon: Puzzle,         nom: 'Interaktiv case',  turi: 'Simulyatsiya' },
+    vaziyatli:  { Icon: ClipboardList,  nom: 'Vaziyatli masala', turi: 'Masala' },
+    xatolar:    { Icon: Search,         nom: 'Xatolar tahlili',  turi: 'Tahlil' },
+    nazorat:    { Icon: GraduationCap,  nom: 'Nazorat',          turi: 'Imtihon' },
   }
 
   const BOSQICH_ACCENT: Record<string, string> = { oson: '#16a34a', "o'rta": '#d97706', qiyin: '#dc2626' }
@@ -266,11 +271,12 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
           >
             <div style={{
               width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: tugadi ? '#16a34a1a' : faol ? accent + '1c' : 'var(--surface-2)',
               border: tugadi ? '1.5px solid #16a34a' : faol ? `1.5px solid ${accent}` : '1px solid var(--line)',
+              color: tugadi ? '#16a34a' : faol ? accent : 'var(--muted)',
             }}>
-              {tugadi ? '✅' : ochiq ? ma.emoji : '🔒'}
+              {tugadi ? <CheckCircle2 size={17} strokeWidth={2} /> : ochiq ? <ma.Icon size={17} strokeWidth={2} /> : <Lock size={15} strokeWidth={2} />}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '12.5px', fontWeight: faol ? 800 : 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -278,7 +284,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               </div>
               <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 600 }}>{ma.turi}</div>
             </div>
-            {faol && !tugadi && <span style={{ fontSize: '10px', fontWeight: 900, color: accent }}>▶</span>}
+            {faol && !tugadi && <Play size={12} strokeWidth={2} fill={accent} style={{ color: accent }} />}
           </div>
         )
       })}
@@ -372,7 +378,10 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
                 }}>QADAM {joriy + 1}/{qadamlar.length}</span>
                 <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700 }}>{QADAM_NOMI[qadam].turi}</span>
               </div>
-              <h1 style={{ margin: '8px 0 0', fontSize: '22px', fontWeight: 900 }}>{QADAM_NOMI[qadam].emoji} {QADAM_NOMI[qadam].nom}</h1>
+              <h1 style={{ margin: '8px 0 0', fontSize: '22px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '9px' }}>
+                {(() => { const QI = QADAM_NOMI[qadam].Icon; return <QI size={22} strokeWidth={2.2} style={{ color: accent, flexShrink: 0 }} /> })()}
+                {QADAM_NOMI[qadam].nom}
+              </h1>
             </div>
 
             {/* Nazariya serverdan tayyor keladi — kutish holati kerak emas. */}
@@ -447,8 +456,10 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
             }}
           >← Oldingi</button>
 
-          <div style={{ flex: 1, textAlign: 'center', fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700 }} className="hidden sm:block">
-            {tugallangan.has(qadam) ? '✅ Bu qadam tugallangan' : `${QADAM_NOMI[qadam].emoji} ${QADAM_NOMI[qadam].nom}`}
+          <div style={{ flex: 1, textAlign: 'center', fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} className="hidden sm:flex">
+            {tugallangan.has(qadam)
+              ? <><CheckCircle2 size={14} strokeWidth={2} style={{ color: '#16a34a' }} /> Bu qadam tugallangan</>
+              : <>{(() => { const QI = QADAM_NOMI[qadam].Icon; return <QI size={14} strokeWidth={2} /> })()} {QADAM_NOMI[qadam].nom}</>}
           </div>
 
           <button
@@ -625,9 +636,9 @@ function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?:
   const [xato, setXato] = useState<string | null>(null)
 
   const fayllar = [
-    konspektYoli && { yol: konspektYoli, nom: 'Konspekt (PDF)', icon: '📄' },
-    prezentatsiyaYoli && { yol: prezentatsiyaYoli, nom: 'Prezentatsiya', icon: '📊' },
-  ].filter(Boolean) as { yol: string; nom: string; icon: string }[]
+    konspektYoli && { yol: konspektYoli, nom: 'Konspekt (PDF)', Icon: FileText },
+    prezentatsiyaYoli && { yol: prezentatsiyaYoli, nom: 'Prezentatsiya', Icon: BarChart3 },
+  ].filter(Boolean) as { yol: string; nom: string; Icon: LucideIcon }[]
 
   if (fayllar.length === 0) {
     return <BoshUlash matn="Yuklab olinadigan materiallar tez orada qo'shiladi." />
@@ -686,8 +697,8 @@ function YuklabOlishBolimi({ konspektYoli, prezentatsiyaYoli }: { konspektYoli?:
         >
           <span style={{
             width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
-          }}>{f.icon}</span>
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}><f.Icon size={19} strokeWidth={2} /></span>
           <span style={{ fontSize: '14px', fontWeight: 700, flex: 1 }}>{f.nom}</span>
           <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}>{ochilmoqda ? 'Ochilmoqda...' : 'Ochish →'}</span>
         </button>

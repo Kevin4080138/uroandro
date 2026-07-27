@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { TrendingUp, ClipboardCheck, Trophy, ClipboardList } from 'lucide-react'
 
 type Natija = {
   id: string
@@ -159,16 +160,16 @@ export default function FaollikPage() {
             {/* Kartalar */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {[
-                { label: "O'rtacha natija", value: stat!.ortacha_foiz + '%', icon: '📈', rang: stat!.ortacha_foiz >= 70 ? '#34d399' : stat!.ortacha_foiz >= 50 ? '#f59e0b' : '#f87171' },
-                { label: 'Testlar soni', value: stat!.jami_test + ' ta', icon: '✅', rang: '#3b82f6' },
-                { label: 'Eng yaxshi natija', value: stat!.eng_yaxshi ? stat!.eng_yaxshi.foiz + '%' : '—', icon: '🏆', rang: '#f59e0b' },
-                { label: 'Nazorat testlari', value: stat!.nazorat + ' ta', icon: '📋', rang: '#8b5cf6' },
+                { label: "O'rtacha natija", value: stat!.ortacha_foiz + '%', Icon: TrendingUp, rang: stat!.ortacha_foiz >= 70 ? '#34d399' : stat!.ortacha_foiz >= 50 ? '#f59e0b' : '#f87171' },
+                { label: 'Testlar soni', value: stat!.jami_test + ' ta', Icon: ClipboardCheck, rang: '#3b82f6' },
+                { label: 'Eng yaxshi natija', value: stat!.eng_yaxshi ? stat!.eng_yaxshi.foiz + '%' : '—', Icon: Trophy, rang: '#f59e0b' },
+                { label: 'Nazorat testlari', value: stat!.nazorat + ' ta', Icon: ClipboardList, rang: '#8b5cf6' },
               ].map(k => (
                 <div key={k.label} style={{
                   background: 'var(--surface)', border: '1px solid var(--line)',
                   borderRadius: '14px', padding: '16px',
                 }}>
-                  <p style={{ margin: 0, fontSize: '22px' }}>{k.icon}</p>
+                  <p style={{ margin: 0, color: k.rang }}><k.Icon size={22} strokeWidth={2} /></p>
                   <p style={{ margin: '8px 0 2px', fontSize: '22px', fontWeight: 800, color: k.rang }}>{k.value}</p>
                   <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>{k.label}</p>
                 </div>

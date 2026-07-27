@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { shikoyatToifalari } from '@/lib/shikoyatlar'
 import { BEMOR_TASHXIS, SHOSHILINCH_SHIKOYATLAR } from '@/lib/bemorTashxis'
+import { CheckCircle2, AlertTriangle, Zap, Stethoscope } from 'lucide-react'
 
 const card = {
   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '24px',
@@ -85,7 +86,7 @@ export default function MurojaatYuborishPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="fade-in mx-auto max-w-[560px] px-8 py-16 text-center">
-        <div style={{ fontSize: '56px', marginBottom: '16px' }}>✅</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: 'var(--good)' }}><CheckCircle2 size={56} strokeWidth={1.5} /></div>
         <h2 style={{ fontSize: '22px', marginBottom: '8px' }}>Murojaatingiz yuborildi</h2>
         <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
           Shifokor tez orada ko&apos;rib chiqadi va javob beradi. Javobni &quot;Mening murojaatlarim&quot; bo&apos;limida ko&apos;rishingiz mumkin.
@@ -181,8 +182,8 @@ export default function MurojaatYuborishPage() {
             </p>
 
             {shoshilinch && (
-              <div style={{ background: 'rgba(220,38,38,.12)', border: '1px solid var(--danger)', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '13.5px', color: 'var(--danger)' }}>
-                ⚠️ Belgilagan shikoyatlaringiz orasida shoshilinch e&apos;tibor talab qiladigan belgilar bor. Iloji boricha tezroq shifokorga murojaat qiling.
+              <div style={{ background: 'rgba(220,38,38,.12)', border: '1px solid var(--danger)', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '13.5px', color: 'var(--danger)', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <AlertTriangle size={16} strokeWidth={2} style={{ flexShrink: 0, marginTop: '2px' }} /> <span>Belgilagan shikoyatlaringiz orasida shoshilinch e&apos;tibor talab qiladigan belgilar bor. Iloji boricha tezroq shifokorga murojaat qiling.</span>
               </div>
             )}
 
@@ -225,8 +226,9 @@ export default function MurojaatYuborishPage() {
             <button onClick={() => yuborish(null)} disabled={saving} className="btn-animated" style={{
               width: '100%', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
               padding: '14px', cursor: 'pointer', fontSize: '15px', fontWeight: 600, marginBottom: '20px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}>
-              ⚡ Menga mos shifokor toping
+              <Zap size={17} strokeWidth={2} /> Menga mos shifokor toping
             </button>
 
             <p style={{ fontSize: '12.5px', color: 'var(--muted)', textTransform: 'uppercase', margin: '0 0 10px 0' }}>Yoki o&apos;zim tanlayman</p>
@@ -236,8 +238,9 @@ export default function MurojaatYuborishPage() {
                   textAlign: 'left', border: tanlanganShifokor === d.id ? '1.5px solid var(--accent)' : '1px solid var(--line)',
                   background: tanlanganShifokor === d.id ? 'var(--accent-soft)' : 'var(--surface-2)',
                   borderRadius: '10px', padding: '12px 16px', cursor: 'pointer', fontSize: '14px', color: 'var(--ink)',
+                  display: 'flex', alignItems: 'center', gap: '8px',
                 }}>
-                  👨‍⚕️ {d.full_name}
+                  <Stethoscope size={16} strokeWidth={2} style={{ flexShrink: 0 }} /> {d.full_name}
                 </button>
               ))}
               {doctors.length === 0 && <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Hozircha shifokorlar ro&apos;yxati bo&apos;sh.</p>}

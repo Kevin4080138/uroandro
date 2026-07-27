@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { Bell } from 'lucide-react'
 
 export function NotificationBell() {
   const [unread, setUnread] = useState(0)
@@ -53,11 +54,11 @@ export function NotificationBell() {
       className="btn-animated"
       style={{
         position: 'relative', background: 'var(--surface-2)', border: '1px solid var(--line)',
-        borderRadius: '8px', padding: '8px 10px', cursor: 'pointer', fontSize: '16px',
+        borderRadius: '8px', padding: '8px 10px', cursor: 'pointer', color: 'var(--ink-soft)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
     >
-      🔔
+      <Bell size={17} strokeWidth={2} />
       {unread > 0 && (
         <span style={{
           position: 'absolute', top: '-4px', right: '-4px',

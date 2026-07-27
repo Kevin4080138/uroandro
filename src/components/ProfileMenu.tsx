@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { User, Bell, LogOut, GraduationCap, Stethoscope, UserRound, Wrench, type LucideIcon } from 'lucide-react'
 
 type Profile = { full_name: string; role: string; avatar_url: string | null }
 
 const ROL_NOMI: Record<string, string> = {
-  student: '🎓 Talaba', doctor: '👨‍⚕️ Shifokor', patient: '🧑 Bemor', admin: '🛠️ Admin',
+  student: 'Talaba', doctor: 'Shifokor', patient: 'Bemor', admin: 'Admin',
+}
+const ROL_ICON: Record<string, LucideIcon> = {
+  student: GraduationCap, doctor: Stethoscope, patient: UserRound, admin: Wrench,
 }
 
 export function ProfileMenu() {
@@ -74,7 +78,8 @@ export function ProfileMenu() {
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {profile.full_name}
             </p>
-            <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+            <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              {(() => { const RI = ROL_ICON[profile.role]; return RI ? <RI size={13} strokeWidth={2} /> : null })()}
               {ROL_NOMI[profile.role] ?? profile.role}
             </p>
           </div>
@@ -85,9 +90,10 @@ export function ProfileMenu() {
               style={{
                 width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
                 color: 'var(--ink)', fontSize: '13px', fontWeight: 600, padding: '8px 4px', borderRadius: '8px',
+                display: 'flex', alignItems: 'center', gap: '8px',
               }}
             >
-              👤 Mening profilim
+              <User size={15} strokeWidth={2} /> Mening profilim
             </button>
           )}
           {/* Barcha rollar uchun — bemor va shifokorda profil sahifasi yo'q,
@@ -98,9 +104,10 @@ export function ProfileMenu() {
             style={{
               width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
               color: 'var(--ink)', fontSize: '13px', fontWeight: 600, padding: '8px 4px', borderRadius: '8px',
+              display: 'flex', alignItems: 'center', gap: '8px',
             }}
           >
-            🔔 Bildirishnoma sozlamalari
+            <Bell size={15} strokeWidth={2} /> Bildirishnoma sozlamalari
           </button>
           <button
             onClick={chiqish}
@@ -108,9 +115,10 @@ export function ProfileMenu() {
             style={{
               width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
               color: 'var(--danger)', fontSize: '13px', fontWeight: 600, padding: '8px 4px', borderRadius: '8px',
+              display: 'flex', alignItems: 'center', gap: '8px',
             }}
           >
-            ↩ Chiqish
+            <LogOut size={15} strokeWidth={2} /> Chiqish
           </button>
         </div>
       )}

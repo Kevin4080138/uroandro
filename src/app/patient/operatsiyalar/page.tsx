@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { OPERATSIYALAR } from '@/lib/operatsiyalar'
+import { Building2, Timer, CreditCard } from 'lucide-react'
 
 export default function OperatsiyalarPage() {
   const router = useRouter()
@@ -11,7 +12,7 @@ export default function OperatsiyalarPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>🏥 Operatsiyalar haqida</h2>
+        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><Building2 size={24} strokeWidth={2} /> Operatsiyalar haqida</h2>
         <p className="rise" style={{ margin: '0 0 24px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Operatsiya nima uchun qilinadi, qancha davom etadi, taxminan qancha turadi va qancha vaqtda tuzalasiz — oddiy tilda.
         </p>
@@ -44,8 +45,8 @@ export default function OperatsiyalarPage() {
                 <h3 style={{ margin: '2px 0 6px', fontSize: '16px', fontWeight: 700 }}>{op.nom}</h3>
                 <p style={{ margin: '0 0 8px', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{op.qisqa}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '11.5px', color: 'var(--muted)' }}>
-                  <span>⏱ {op.davomiyligi}</span>
-                  <span>💳 {op.narxOraliq}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Timer size={12} strokeWidth={2} /> {op.davomiyligi}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CreditCard size={12} strokeWidth={2} /> {op.narxOraliq}</span>
                 </div>
               </div>
             </div>

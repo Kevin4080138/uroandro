@@ -9,8 +9,12 @@ import { BildirishnomalarPaneli } from '@/components/BildirishnomalarPaneli'
 import { Onboarding } from '@/components/Onboarding'
 import { BannerHero } from '@/components/BannerHero'
 import { BannerCarousel } from '@/components/BannerCarousel'
+import {
+  MessageSquare, CalendarClock, Hourglass, Stethoscope, Inbox, Building2,
+  Bandage, Pill, TestTube, Activity, HelpCircle, ArrowRight, type LucideIcon,
+} from 'lucide-react'
 
-type HolatKarta = { emoji: string; sarlavha: string; matn: string; href: string }
+type HolatKarta = { Icon: LucideIcon; sarlavha: string; matn: string; href: string }
 
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -35,14 +39,14 @@ export default function PatientDashboard() {
       const m = murojaatlar?.[0]
       const n = navbatlar?.[0]
       if (m?.javob) {
-        setHolatKarta({ emoji: '💬', sarlavha: 'Shifokordan javob keldi', matn: "Murojaatingizga javob yozildi — o'qib chiqing", href: '/patient/murojaatlarim' })
+        setHolatKarta({ Icon: MessageSquare, sarlavha: 'Shifokordan javob keldi', matn: "Murojaatingizga javob yozildi — o'qib chiqing", href: '/patient/murojaatlarim' })
       } else if (n) {
         const sana = new Date(n.sana).toLocaleDateString('uz-UZ', { month: 'long', day: 'numeric' })
-        setHolatKarta({ emoji: '🗓', sarlavha: 'Yaqin navbatingiz', matn: `${sana}, soat ${String(n.vaqt).slice(0, 5)} — unutmang!`, href: '/patient/navbat' })
+        setHolatKarta({ Icon: CalendarClock, sarlavha: 'Yaqin navbatingiz', matn: `${sana}, soat ${String(n.vaqt).slice(0, 5)} — unutmang!`, href: '/patient/navbat' })
       } else if (m) {
-        setHolatKarta({ emoji: '⏳', sarlavha: "Murojaatingiz ko'rib chiqilmoqda", matn: 'Shifokor javob yozishi bilan xabar beramiz', href: '/patient/murojaatlarim' })
+        setHolatKarta({ Icon: Hourglass, sarlavha: "Murojaatingiz ko'rib chiqilmoqda", matn: 'Shifokor javob yozishi bilan xabar beramiz', href: '/patient/murojaatlarim' })
       } else {
-        setHolatKarta({ emoji: '🩺', sarlavha: 'Shikoyatingiz bormi?', matn: 'Shifokorga yozing — tez orada javob olasiz', href: '/patient/murojaat' })
+        setHolatKarta({ Icon: Stethoscope, sarlavha: 'Shikoyatingiz bormi?', matn: 'Shifokorga yozing — tez orada javob olasiz', href: '/patient/murojaat' })
       }
     }
     getProfile()
@@ -91,13 +95,13 @@ export default function PatientDashboard() {
           >
             <div style={{
               width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-            }}>{holatKarta.emoji}</div>
+              background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}><holatKarta.Icon size={21} strokeWidth={2} /></div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 800 }}>{holatKarta.sarlavha}</div>
               <div style={{ fontSize: 12, opacity: .85, lineHeight: 1.4 }}>{holatKarta.matn}</div>
             </div>
-            <span style={{ fontSize: 17, flexShrink: 0 }}>→</span>
+            <ArrowRight size={18} strokeWidth={2.2} style={{ flexShrink: 0 }} />
           </div>
         )}
 
@@ -120,7 +124,7 @@ export default function PatientDashboard() {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 28px rgba(37,99,235,.35)' }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }}
           >
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🩺</div>
+            <div style={{ marginBottom: 10 }}><Stethoscope size={28} strokeWidth={2} /></div>
             <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, lineHeight: 1.2 }}>Yangi murojaat</div>
             <div style={{ fontSize: 12, opacity: .8, lineHeight: 1.4 }}>Shikoyatingizni shifokorga yuboring</div>
           </button>
@@ -138,7 +142,7 @@ export default function PatientDashboard() {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow)' }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }}
           >
-            <div style={{ fontSize: 28, marginBottom: 10 }}>📨</div>
+            <div style={{ marginBottom: 10, color: 'var(--accent)' }}><Inbox size={28} strokeWidth={2} /></div>
             <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, lineHeight: 1.2 }}>Murojaatlarim</div>
             <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.4 }}>Javoblar va holat</div>
           </button>
@@ -147,13 +151,13 @@ export default function PatientDashboard() {
         {/* ── Kichik 4 ta karta ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 12 }}>
           {[
-            { icon: '🗓', title: 'Navbat olish', desc: 'Shifokorga onlayn yozilish', href: '/patient/navbat', c: '#059669' },
-            { icon: '🏥', title: 'Operatsiyalar', desc: 'Oddiy tilda tushuntirish', href: '/patient/operatsiyalar', c: '#0d9488' },
-            { icon: '🩹', title: 'Operatsiya kuzatuvim', desc: 'Tiklanish bosqichlari', href: '/patient/operatsiya-kuzatuvim', c: '#e11d48' },
-            { icon: '💊', title: 'Dorilarim', desc: 'Retsept va eslatmalar', href: '/patient/dorilarim', c: '#8b5cf6' },
-            { icon: '🧪', title: 'Qaysi tahlil?', desc: 'Shikoyatga qarab', href: '/patient/qaysi-tahlil', c: '#0891b2' },
-            { icon: '🩻', title: 'O\'z-o\'zini tekshirish', desc: 'Yo\'riqnoma + kalkulyator', href: '/patient/oz-tekshiruv', c: '#2563eb' },
-            { icon: '❓', title: 'Savol-javob', desc: 'Ko\'p so\'raladigan savollar', href: '/patient/savollar', c: '#d97706' },
+            { Icon: CalendarClock, title: 'Navbat olish', desc: 'Shifokorga onlayn yozilish', href: '/patient/navbat', c: '#059669' },
+            { Icon: Building2, title: 'Operatsiyalar', desc: 'Oddiy tilda tushuntirish', href: '/patient/operatsiyalar', c: '#0d9488' },
+            { Icon: Bandage, title: 'Operatsiya kuzatuvim', desc: 'Tiklanish bosqichlari', href: '/patient/operatsiya-kuzatuvim', c: '#e11d48' },
+            { Icon: Pill, title: 'Dorilarim', desc: 'Retsept va eslatmalar', href: '/patient/dorilarim', c: '#8b5cf6' },
+            { Icon: TestTube, title: 'Qaysi tahlil?', desc: 'Shikoyatga qarab', href: '/patient/qaysi-tahlil', c: '#0891b2' },
+            { Icon: Activity, title: 'O\'z-o\'zini tekshirish', desc: 'Yo\'riqnoma + kalkulyator', href: '/patient/oz-tekshiruv', c: '#2563eb' },
+            { Icon: HelpCircle, title: 'Savol-javob', desc: 'Ko\'p so\'raladigan savollar', href: '/patient/savollar', c: '#d97706' },
           ].map((item, i) => (
             <button
               key={item.title}
@@ -183,10 +187,10 @@ export default function PatientDashboard() {
             >
               <div style={{
                 width: 36, height: 36, borderRadius: 10, marginBottom: 10,
-                background: `${item.c}18`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                background: `${item.c}18`, color: item.c,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                {item.icon}
+                <item.Icon size={19} strokeWidth={2} />
               </div>
               <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 2, lineHeight: 1.25 }}>{item.title}</div>
               <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.35 }}>{item.desc}</div>

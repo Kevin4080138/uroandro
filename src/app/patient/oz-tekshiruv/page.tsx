@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { OZ_TEKSHIRUV_YORIQNOMALARI } from '@/lib/ozTekshiruv'
 import { OzTekshiruvIkon } from '@/components/OzTekshiruvIkon'
+import { Activity, Repeat } from 'lucide-react'
 
 const KALKULYATOR_IKON: Record<string, 'kalkulyator' | 'yurak' | 'vaqt'> = {
   'erektil-disfunksiya': 'kalkulyator',
@@ -18,7 +19,7 @@ export default function OzTekshiruvPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800 }}>🩻 O&apos;z-o&apos;zini tekshirish</h2>
+        <h2 className="rise" style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><Activity size={24} strokeWidth={2} /> O&apos;z-o&apos;zini tekshirish</h2>
         <p className="rise" style={{ margin: '0 0 24px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Erta aniqlash uchun uyda bajarishingiz mumkin bo&apos;lgan yo&apos;riqnomalar va kalkulyatorlar.
         </p>
@@ -64,7 +65,7 @@ export default function OzTekshiruvPage() {
                   </div>
                   <h3 style={{ margin: '2px 0 6px', fontSize: '16px', fontWeight: 700 }}>{y.sarlavha}</h3>
                   <p style={{ margin: '0 0 8px', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{y.qisqa}</p>
-                  <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>🔁 {y.davriylik}</span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Repeat size={12} strokeWidth={2} /> {y.davriylik}</span>
                 </div>
               </div>
             )

@@ -4,23 +4,27 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import {
+  Home, Users, Inbox, ClipboardList, Calculator, BarChart3, Library, Globe,
+  Eye, Menu, X, PanelLeftClose, type LucideIcon,
+} from 'lucide-react'
 
-const NAV = [
-  { href: '/doctor/dashboard', icon: '🏠', label: 'Bosh sahifa' },
-  { href: '/doctor/patients', icon: '🧑‍🤝‍🧑', label: 'Bemorlar' },
-  { href: '/doctor/murojaatlar', icon: '📨', label: 'Murojaatlar' },
-  { href: '/doctor/protokollar', icon: '📋', label: 'Protokollar' },
-  { href: '/doctor/calculators', icon: '🧮', label: 'Kalkulatorlar' },
-  { href: '/doctor/statistika', icon: '📊', label: 'Statistika' },
-  { href: '/doctor/kutubxona', icon: '📚', label: 'Kutubxona' },
-  { href: '/doctor/qollanmalar', icon: '🌐', label: "Qo'llanmalar" },
+const NAV: { href: string; Icon: LucideIcon; label: string }[] = [
+  { href: '/doctor/dashboard', Icon: Home, label: 'Bosh sahifa' },
+  { href: '/doctor/patients', Icon: Users, label: 'Bemorlar' },
+  { href: '/doctor/murojaatlar', Icon: Inbox, label: 'Murojaatlar' },
+  { href: '/doctor/protokollar', Icon: ClipboardList, label: 'Protokollar' },
+  { href: '/doctor/calculators', Icon: Calculator, label: 'Kalkulatorlar' },
+  { href: '/doctor/statistika', Icon: BarChart3, label: 'Statistika' },
+  { href: '/doctor/kutubxona', Icon: Library, label: 'Kutubxona' },
+  { href: '/doctor/qollanmalar', Icon: Globe, label: "Qo'llanmalar" },
 ]
 
 // Boshqa rollarga "nazar solish" uchun statik ko'rinish sahifalari — qolgan bo'limlardan
 // ajratib, kichikroq va xira ko'rinishda chiqariladi
-const NAV_NAZAR = [
-  { href: '/doctor/bemor-bolimi', icon: '👁️', label: 'Bemor bo\'limi' },
-  { href: '/doctor/talaba-bolimi', icon: '👁️', label: 'Talaba bo\'limi' },
+const NAV_NAZAR: { href: string; Icon: LucideIcon; label: string }[] = [
+  { href: '/doctor/bemor-bolimi', Icon: Eye, label: 'Bemor bo\'limi' },
+  { href: '/doctor/talaba-bolimi', Icon: Eye, label: 'Talaba bo\'limi' },
 ]
 
 function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
@@ -44,8 +48,8 @@ function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
                 justifyContent: collapsed ? 'center' : 'flex-start',
               }}
             >
-              <span style={{ fontSize: 18, position: 'relative' }}>
-                {item.icon}
+              <span style={{ display: 'flex', position: 'relative' }}>
+                <item.Icon size={18} strokeWidth={2} />
                 {badge > 0 && collapsed && (
                   <span style={{ position: 'absolute', top: '-4px', right: '-6px', minWidth: '16px', height: '16px', background: 'var(--danger)', color: '#fff', borderRadius: '999px', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{badge}</span>
                 )}
@@ -90,7 +94,7 @@ function NavRoyxati({ pathname, yangiMurojaat, collapsed, onNavigate }: {
                 justifyContent: collapsed ? 'center' : 'flex-start',
               }}
             >
-              <span style={{ fontSize: 14 }}>{item.icon}</span>
+              <span style={{ display: 'flex' }}><item.Icon size={14} strokeWidth={2} /></span>
               {!collapsed && <span style={{ flex: 1 }}>{item.label}</span>}
             </Link>
             {collapsed && (
@@ -160,7 +164,7 @@ export function Sidebar() {
           boxShadow: 'var(--shadow)',
         }}
       >
-        ☰
+        <Menu size={18} strokeWidth={2} />
       </button>
 
       {/* Mobil orqa fon (drawer ochiq bo'lganda) */}
@@ -190,7 +194,7 @@ export function Sidebar() {
             className="btn-animated flex items-center justify-center rounded-lg"
             style={{ width: 32, height: 32, color: 'var(--muted)' }}
           >
-            ✕
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-2.5 overflow-y-auto">
@@ -215,7 +219,7 @@ export function Sidebar() {
             className="btn-animated flex items-center justify-center rounded-lg"
             style={{ width: 32, height: 32, color: 'var(--muted)' }}
           >
-            {collapsed ? '☰' : '⮜'}
+            {collapsed ? <Menu size={18} strokeWidth={2} /> : <PanelLeftClose size={18} strokeWidth={2} />}
           </button>
         </div>
 

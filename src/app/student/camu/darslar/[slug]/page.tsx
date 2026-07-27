@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { getCamuDars, type CamuDars } from '@/lib/camu/darslar'
+import { BookOpen, Library, Target, type LucideIcon } from 'lucide-react'
 
 type Tab = 'nazariya' | 'adabiyot' | 'testlar'
 
@@ -32,10 +33,10 @@ export default function CamuDarsPage() {
     </div>
   )
 
-  const TABS: { key: Tab; label: string; icon: string }[] = [
-    { key: 'nazariya', label: 'Nazariya', icon: '📖' },
-    { key: 'adabiyot', label: 'Adabiyot', icon: '📚' },
-    { key: 'testlar', label: 'Testlar', icon: '🎯' },
+  const TABS: { key: Tab; label: string; Icon: LucideIcon }[] = [
+    { key: 'nazariya', label: 'Nazariya', Icon: BookOpen },
+    { key: 'adabiyot', label: 'Adabiyot', Icon: Library },
+    { key: 'testlar', label: 'Testlar', Icon: Target },
   ]
 
   const semestrRang = dars.semestr === 7 ? 'var(--accent)' : '#7c3aed'
@@ -111,9 +112,10 @@ export default function CamuDarsPage() {
                 fontWeight: 700, fontSize: '12.5px', transition: 'all .18s',
                 background: tab === t.key ? semestrRang : 'transparent',
                 color: tab === t.key ? '#fff' : 'var(--muted)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
               }}
             >
-              {t.icon} {t.label}
+              <t.Icon size={14} strokeWidth={2} /> {t.label}
             </button>
           ))}
         </div>

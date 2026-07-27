@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { SHIKOYATLAR, KATEGORIYALAR, type Tahlil } from '@/lib/qaysiTahlil'
+import { TestTube, AlertTriangle, Siren, Stethoscope } from 'lucide-react'
 
 export default function QaysiTahlilPage() {
   const router = useRouter()
@@ -27,7 +28,7 @@ export default function QaysiTahlilPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/patient/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[760px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 6px', fontSize: '24px', fontWeight: 800 }}>🧪 Qaysi tahlil kerak?</h2>
+        <h2 className="rise" style={{ margin: '0 0 6px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><TestTube size={24} strokeWidth={2} /> Qaysi tahlil kerak?</h2>
         <p className="rise" style={{ margin: '0 0 16px', color: 'var(--muted)', fontSize: '13.5px', animationDelay: '.05s' }}>
           Shikoyatlaringizni belgilang — qanday tahlil topshirishingiz mumkinligi va nima uchun kerakligi ko&apos;rsatiladi.
         </p>
@@ -36,8 +37,9 @@ export default function QaysiTahlilPage() {
         <div className="rise" style={{
           background: 'var(--warn-soft, #fff7ed)', border: '1px solid var(--warn, #f59e0b)', borderRadius: '12px',
           padding: '12px 14px', marginBottom: '22px', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.55,
+          display: 'flex', alignItems: 'flex-start', gap: '8px',
         }}>
-          ⚠️ Bu <strong>tibbiy tashxis emas</strong> — faqat umumiy yo&apos;l-yo&apos;riq. Aniq tashxis va davolash uchun albatta <strong>shifokorga murojaat qiling</strong>.
+          <AlertTriangle size={15} strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }} /> <span>Bu <strong>tibbiy tashxis emas</strong> — faqat umumiy yo&apos;l-yo&apos;riq. Aniq tashxis va davolash uchun albatta <strong>shifokorga murojaat qiling</strong>.</span>
         </div>
 
         {/* Shikoyatlarni tanlash */}
@@ -56,8 +58,9 @@ export default function QaysiTahlilPage() {
                         background: faol ? 'var(--accent)' : 'var(--surface)', color: faol ? 'white' : 'var(--ink-soft)',
                         border: `1.5px solid ${faol ? 'var(--accent)' : 'var(--line)'}`, borderRadius: '999px',
                         padding: '8px 14px', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
                       }}>
-                      {s.shoshilinch ? '⚠️ ' : ''}{s.matn}
+                      {s.shoshilinch && <AlertTriangle size={13} strokeWidth={2} style={{ flexShrink: 0 }} />}{s.matn}
                     </button>
                   )
                 })}
@@ -75,7 +78,7 @@ export default function QaysiTahlilPage() {
                 background: '#fef2f2', border: '1.5px solid #dc2626', borderRadius: '14px',
                 padding: '16px 18px', marginBottom: '18px',
               }}>
-                <div style={{ fontSize: '14px', fontWeight: 800, color: '#b91c1c', marginBottom: '8px' }}>🚨 Shoshilinch e&apos;tibor</div>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: '#b91c1c', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><Siren size={16} strokeWidth={2} /> Shoshilinch e&apos;tibor</div>
                 <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {ogohlar.map((o, i) => (
                     <li key={i} style={{ fontSize: '13px', color: '#7f1d1d', lineHeight: 1.55 }}>{o}</li>
@@ -91,7 +94,7 @@ export default function QaysiTahlilPage() {
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
                   padding: '14px 16px', animationDelay: `${Math.min(i * 0.05, 0.3)}s`,
                 }}>
-                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>🧪 {t.nom}</div>
+                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '7px' }}><TestTube size={16} strokeWidth={2} style={{ flexShrink: 0, color: 'var(--accent)' }} /> {t.nom}</div>
                   <div style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.55 }}>{t.nima_uchun}</div>
                 </div>
               ))}
@@ -108,8 +111,9 @@ export default function QaysiTahlilPage() {
               <button onClick={() => router.push('/patient/murojaat')} className="btn-animated soft-press" style={{
                 background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
                 padding: '12px 26px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
               }}>
-                🩺 Shifokorga murojaat qilish →
+                <Stethoscope size={16} strokeWidth={2} /> Shifokorga murojaat qilish →
               </button>
             </div>
           </div>

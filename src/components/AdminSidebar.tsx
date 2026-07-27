@@ -5,62 +5,69 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Users, GraduationCap, Wallet, FileText, MessageCircle, TrendingUp,
+  UserCheck, School, Stethoscope, Video, LineChart, FolderTree, ListChecks, Award,
+  Gem, ShoppingCart, CreditCard, Ticket, ClipboardList, Images, Newspaper,
+  BookMarked, HelpCircle, Building2, MessageSquareText, Bell, BarChart3, Shield,
+  LayoutDashboard, LogOut, X, Menu, ChevronRight, ChevronLeft, type LucideIcon,
+} from 'lucide-react'
 
-type NavItem = { href: string; icon: string; label: string; tezOrada?: boolean }
-type NavGroup = { id: string; icon: string; label: string; items: NavItem[] }
+type NavItem = { href: string; Icon: LucideIcon; label: string; tezOrada?: boolean }
+type NavGroup = { id: string; Icon: LucideIcon; label: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   {
-    id: 'foydalanuvchilar', icon: '👥', label: 'Foydalanuvchilar',
+    id: 'foydalanuvchilar', Icon: Users, label: 'Foydalanuvchilar',
     items: [
-      { href: '/admin/users', icon: '👤', label: "Ro'yxat va aktivatsiya" },
-      { href: '/admin/oquvchilar', icon: '🎓', label: "O'quvchilar reytingi" },
-      { href: '/admin/oqituvchilar', icon: '👨‍🏫', label: "O'qituvchilar", tezOrada: true },
-      { href: '/admin/shifokorlar', icon: '👨‍⚕️', label: 'Shifokorlar tasdiqlash' },
+      { href: '/admin/users', Icon: UserCheck, label: "Ro'yxat va aktivatsiya" },
+      { href: '/admin/oquvchilar', Icon: GraduationCap, label: "O'quvchilar reytingi" },
+      { href: '/admin/oqituvchilar', Icon: School, label: "O'qituvchilar", tezOrada: true },
+      { href: '/admin/shifokorlar', Icon: Stethoscope, label: 'Shifokorlar tasdiqlash' },
     ],
   },
   {
-    id: 'talim', icon: '📚', label: "Ta'lim",
+    id: 'talim', Icon: GraduationCap, label: "Ta'lim",
     items: [
-      { href: '/admin/darslar', icon: '🎥', label: 'Darslar tarkibi' },
-      { href: '/admin/talabalar-nazorati', icon: '📈', label: 'Talabalar nazorati' },
-      { href: '/admin/yonalishlari', icon: '🗂️', label: "Yo'nalishlari", tezOrada: true },
-      { href: '/admin/testbank', icon: '❓', label: 'Test banki' },
-      { href: '/admin/sertifikatlar', icon: '🏅', label: 'Sertifikatlar' },
+      { href: '/admin/darslar', Icon: Video, label: 'Darslar tarkibi' },
+      { href: '/admin/talabalar-nazorati', Icon: LineChart, label: 'Talabalar nazorati' },
+      { href: '/admin/yonalishlari', Icon: FolderTree, label: "Yo'nalishlari", tezOrada: true },
+      { href: '/admin/testbank', Icon: ListChecks, label: 'Test banki' },
+      { href: '/admin/sertifikatlar', Icon: Award, label: 'Sertifikatlar' },
     ],
   },
   {
-    id: 'savdo', icon: '💰', label: "To'lovlar & Savdo",
+    id: 'savdo', Icon: Wallet, label: "To'lovlar & Savdo",
     items: [
-      { href: '/admin/tariflar', icon: '💎', label: 'Tariflar' },
-      { href: '/admin/buyurtmalar', icon: '🛒', label: 'Buyurtmalar', tezOrada: true },
-      { href: '/admin/obunalar', icon: '💳', label: 'Obunalar' },
-      { href: '/admin/promokodlar', icon: '🎟️', label: 'Promokodlar', tezOrada: true },
+      { href: '/admin/tariflar', Icon: Gem, label: 'Tariflar' },
+      { href: '/admin/buyurtmalar', Icon: ShoppingCart, label: 'Buyurtmalar', tezOrada: true },
+      { href: '/admin/obunalar', Icon: CreditCard, label: 'Obunalar' },
+      { href: '/admin/promokodlar', Icon: Ticket, label: 'Promokodlar', tezOrada: true },
     ],
   },
   {
-    id: 'kontent', icon: '📄', label: 'Kontent',
+    id: 'kontent', Icon: FileText, label: 'Kontent',
     items: [
-      { href: '/admin/content', icon: '📋', label: 'Protokollar & Kutubxona' },
-      { href: '/admin/bannerlar', icon: '🎠', label: 'Bannerlar & E\'lonlar' },
-      { href: '/admin/maqolalar', icon: '📰', label: 'Maqolalar' },
-      { href: '/admin/adabiyotlar', icon: '📖', label: 'Adabiyotlar & Darsliklar' },
-      { href: '/admin/faq', icon: '❔', label: 'Savol-Javoblar' },
-      { href: '/admin/biz-haqimizda', icon: '🏥', label: 'Biz haqimizda' },
+      { href: '/admin/content', Icon: ClipboardList, label: 'Protokollar & Kutubxona' },
+      { href: '/admin/bannerlar', Icon: Images, label: 'Bannerlar & E\'lonlar' },
+      { href: '/admin/maqolalar', Icon: Newspaper, label: 'Maqolalar' },
+      { href: '/admin/adabiyotlar', Icon: BookMarked, label: 'Adabiyotlar & Darsliklar' },
+      { href: '/admin/faq', Icon: HelpCircle, label: 'Savol-Javoblar' },
+      { href: '/admin/biz-haqimizda', Icon: Building2, label: 'Biz haqimizda' },
     ],
   },
   {
-    id: 'muloqot', icon: '💬', label: 'Muloqot',
+    id: 'muloqot', Icon: MessageCircle, label: 'Muloqot',
     items: [
-      { href: '/admin/fikrlar', icon: '💭', label: 'Fikrlar' },
-      { href: '/admin/push', icon: '🔔', label: 'Push bildirishnoma' },
+      { href: '/admin/fikrlar', Icon: MessageSquareText, label: 'Fikrlar' },
+      { href: '/admin/push', Icon: Bell, label: 'Push bildirishnoma' },
     ],
   },
   {
-    id: 'tahlil', icon: '📈', label: 'Tahlil',
+    id: 'tahlil', Icon: TrendingUp, label: 'Tahlil',
     items: [
-      { href: '/admin/statistika', icon: '📊', label: 'Statistika' },
-      { href: '/admin/audit', icon: '🛡️', label: 'Audit log' },
+      { href: '/admin/statistika', Icon: BarChart3, label: 'Statistika' },
+      { href: '/admin/audit', Icon: Shield, label: 'Audit log' },
     ],
   },
 ]
@@ -91,8 +98,8 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand, b
         transition: 'background .15s',
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
-          <span style={{ fontSize: 20, flexShrink: 0, position: 'relative' }}>
-            {group.icon}
+          <span style={{ display: 'flex', flexShrink: 0, position: 'relative' }}>
+            <group.Icon size={20} strokeWidth={2} />
             {collapsed && groupBadge > 0 && (
               <span style={{
                 position: 'absolute', top: -4, right: -6, minWidth: 16, height: 16,
@@ -113,7 +120,7 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand, b
               }}>{groupBadge}</span>
             )}
             <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.2 }}
-              style={{ fontSize: 11, color: 'var(--muted)', display: 'inline-block' }}>▶</motion.span>
+              style={{ color: 'var(--muted)', display: 'inline-flex' }}><ChevronRight size={15} strokeWidth={2.4} /></motion.span>
           </span>
         )}
       </button>
@@ -139,7 +146,7 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand, b
                         padding: '6px 10px', borderRadius: 8, fontSize: 12.5,
                         color: 'var(--muted)', opacity: 0.65,
                       }}>
-                        <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
+                        <span style={{ display: 'flex', flexShrink: 0 }}><item.Icon size={15} strokeWidth={2} /></span>
                         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{item.label}</span>
                         <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', flexShrink: 0, background: 'var(--line)', color: 'var(--muted)', borderRadius: 20 }}>Tez orada</span>
                       </div>
@@ -153,7 +160,7 @@ function DropdownGroup({ group, pathname, collapsed, open, onToggle, onExpand, b
                           fontWeight: active ? 600 : 400,
                           transition: 'background .15s',
                         }}>
-                          <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
+                          <span style={{ display: 'flex', flexShrink: 0 }}><item.Icon size={15} strokeWidth={2} /></span>
                           <span style={{ flex: 1 }}>{item.label}</span>
                           {(badges[item.href] ?? 0) > 0 && (
                             <span style={{
@@ -230,7 +237,7 @@ export function AdminSidebar() {
             fontWeight: pathname === '/admin/dashboard' ? 700 : 400,
             transition: 'background .15s',
           }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>🏠</span>
+            <span style={{ display: 'flex', flexShrink: 0 }}><LayoutDashboard size={20} strokeWidth={2} /></span>
             {!c && <span style={{ whiteSpace: 'nowrap' }}>Dashboard</span>}
           </div>
         </Link>
@@ -272,7 +279,7 @@ export function AdminSidebar() {
         </AnimatePresence>
         {!c && (
           <button onClick={async () => { await supabase.auth.signOut(); router.push('/auth/login') }}
-            title="Chiqish" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 17, padding: 4, lineHeight: 1 }}>⇥</button>
+            title="Chiqish" style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4, lineHeight: 1 }}><LogOut size={17} strokeWidth={2} /></button>
         )}
       </div>
     )
@@ -287,7 +294,7 @@ export function AdminSidebar() {
             Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
             <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500, marginLeft: 6 }}>Admin</span>
           </Link>
-          <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 20, padding: 4, lineHeight: 1 }}>✕</button>
+          <button onClick={() => setMobileOpen(false)} style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4, lineHeight: 1 }}><X size={20} strokeWidth={2} /></button>
         </div>
         <NavContent collapsed={false} />
         <Footer c={false} />
@@ -304,8 +311,8 @@ export function AdminSidebar() {
           width: 40, height: 40, background: 'var(--surface)',
           border: '1px solid var(--line)', borderRadius: 10, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--ink)', fontSize: 18, boxShadow: 'var(--shadow)',
-        }}>☰</button>
+          color: 'var(--ink)', boxShadow: 'var(--shadow)',
+        }}><Menu size={18} strokeWidth={2} /></button>
       )}
 
       {/* Mobil overlay */}
@@ -387,11 +394,9 @@ export function AdminSidebar() {
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             {collapsed ? (
-              <span style={{ fontSize: 16 }}>›</span>
+              <ChevronRight size={16} strokeWidth={2.2} />
             ) : (
-              <>
-                <span style={{ fontSize: 11 }}>‹ Yopish</span>
-              </>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11 }}><ChevronLeft size={13} strokeWidth={2.2} /> Yopish</span>
             )}
           </span>
         </button>

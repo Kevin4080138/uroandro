@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { Star } from 'lucide-react'
 
 type Murojaat = {
   id: string; shikoyatlar: string; taxminiy_tashxis: string | null; tavsiya: string | null
@@ -112,10 +113,12 @@ function BahoBerish({ doctorId, doctorNom, mavjud, saqlandi }: {
         color: mavjud ? 'var(--ink-soft)' : 'white',
         border: mavjud ? '1px solid var(--line)' : 'none',
         borderRadius: '999px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+        display: 'inline-flex', alignItems: 'center', gap: '6px',
       }}>
+        <Star size={14} strokeWidth={2} fill="currentColor" />
         {mavjud
-          ? `⭐ Bahoyingiz: ${(((mavjud.muomala + mavjud.samara + mavjud.tushuntirish + mavjud.kutish) / 4)).toFixed(1)} — o'zgartirish`
-          : '⭐ Shifokorga baho bering'}
+          ? `Bahoyingiz: ${(((mavjud.muomala + mavjud.samara + mavjud.tushuntirish + mavjud.kutish) / 4)).toFixed(1)} — o'zgartirish`
+          : 'Shifokorga baho bering'}
       </button>
     )
   }
@@ -129,9 +132,10 @@ function BahoBerish({ doctorId, doctorNom, mavjud, saqlandi }: {
           <span style={{ display: 'inline-flex', gap: '2px' }}>
             {[1, 2, 3, 4, 5].map((i) => (
               <button key={i} onClick={() => setQiymatlar((q) => ({ ...q, [m.kalit]: i }))} style={{
-                background: 'none', border: 'none', cursor: 'pointer', fontSize: '19px', padding: '0 1px',
-                opacity: qiymatlar[m.kalit] >= i ? 1 : 0.25,
-              }}>⭐</button>
+                background: 'none', border: 'none', cursor: 'pointer', padding: '0 1px', display: 'inline-flex',
+                color: qiymatlar[m.kalit] >= i ? '#f59e0b' : 'var(--muted)',
+                opacity: qiymatlar[m.kalit] >= i ? 1 : 0.4,
+              }}><Star size={19} strokeWidth={2} fill={qiymatlar[m.kalit] >= i ? 'currentColor' : 'none'} /></button>
             ))}
           </span>
         </div>

@@ -5,28 +5,32 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICH_YOLI } from '@/lib/talim/darslar'
 import { useTariflar, narxFmt } from '@/lib/talim/tariflar'
+import {
+  BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, GraduationCap,
+  Trophy, Building2, Puzzle, ClipboardList, Search, HelpCircle, type LucideIcon,
+} from 'lucide-react'
 
-type BolimQatori = { emoji: string; nom: string; yangi?: boolean }
+type BolimQatori = { Icon: LucideIcon; nom: string; yangi?: boolean }
 
 const OSON_BOLIMLAR: BolimQatori[] = [
-  { emoji: '📖', nom: 'Nazariya darslari' },
-  { emoji: '🎥', nom: 'Video darslar' },
-  { emoji: '📂', nom: 'Yuklab olinadigan materiallar' },
-  { emoji: '🃏', nom: 'Flashcard kartalari' },
-  { emoji: '✅', nom: 'Amaliy testlar' },
+  { Icon: BookOpen, nom: 'Nazariya darslari' },
+  { Icon: Video, nom: 'Video darslar' },
+  { Icon: FolderDown, nom: 'Yuklab olinadigan materiallar' },
+  { Icon: Layers, nom: 'Flashcard kartalari' },
+  { Icon: ClipboardCheck, nom: 'Amaliy testlar' },
 ]
 
 const ORTA_YANGI: BolimQatori[] = [
-  { emoji: '🏅', nom: 'USMLE formatidagi savollar', yangi: true },
-  { emoji: '🎓', nom: 'Nazorat imtihonlari', yangi: true },
-  { emoji: '🏆', nom: 'Rasmiy SERTIFIKAT', yangi: true },
+  { Icon: Award, nom: 'USMLE formatidagi savollar', yangi: true },
+  { Icon: GraduationCap, nom: 'Nazorat imtihonlari', yangi: true },
+  { Icon: Trophy, nom: 'Rasmiy SERTIFIKAT', yangi: true },
 ]
 
 const QIYIN_YANGI: BolimQatori[] = [
-  { emoji: '🏥', nom: 'Klinik holatlar tahlili' },
-  { emoji: '🧩', nom: 'Interaktiv case simulyatsiya' },
-  { emoji: '📋', nom: 'Vaziyatli masalalar' },
-  { emoji: '🔍', nom: 'Xatolar tahlili' },
+  { Icon: Building2, nom: 'Klinik holatlar tahlili' },
+  { Icon: Puzzle, nom: 'Interaktiv case simulyatsiya' },
+  { Icon: ClipboardList, nom: 'Vaziyatli masalalar' },
+  { Icon: Search, nom: 'Xatolar tahlili' },
 ]
 
 function Qator({ b, accent }: { b: BolimQatori; accent: string }) {
@@ -38,8 +42,8 @@ function Qator({ b, accent }: { b: BolimQatori; accent: string }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '11px', fontWeight: 900,
       }}>✓</span>
-      <span style={{ fontSize: '13px', fontWeight: b.yangi ? 800 : 600, color: 'var(--ink)' }}>
-        {b.emoji} {b.nom}
+      <span style={{ fontSize: '13px', fontWeight: b.yangi ? 800 : 600, color: 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+        <b.Icon size={15} strokeWidth={2} style={{ color: accent, flexShrink: 0 }} /> {b.nom}
       </span>
       {b.yangi && (
         <span style={{
@@ -82,9 +86,10 @@ export default function DarslarPage() {
               marginTop: '12px',
               background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--line)',
               borderRadius: '999px', padding: '7px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
             }}
           >
-            ❓ Qanday o&apos;zlashtirish kerak?
+            <HelpCircle size={14} strokeWidth={2} /> Qanday o&apos;zlashtirish kerak?
           </button>
         </div>
 
@@ -295,7 +300,7 @@ export default function DarslarPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '11px', fontWeight: 900,
                   }}>✓</span>
-                  <span style={{ fontSize: '13px', fontWeight: 800 }}>{b.emoji} {b.nom}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}><b.Icon size={15} strokeWidth={2} style={{ color: '#fbbf24', flexShrink: 0 }} /> {b.nom}</span>
                   <span style={{
                     fontSize: '9px', fontWeight: 900, letterSpacing: '.05em',
                     color: '#fbbf24', background: 'rgba(251,191,36,.12)',

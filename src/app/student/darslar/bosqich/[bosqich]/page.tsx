@@ -7,6 +7,10 @@ import { BottomNav } from '@/components/BottomNav'
 import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { useUmumiyProgress, darsOchiqmi, darsTugadimi } from '@/lib/talim/useDarsProgress'
+import {
+  BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, GraduationCap,
+  Building2, Puzzle, type LucideIcon,
+} from 'lucide-react'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
   oson:   'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)',
@@ -33,33 +37,33 @@ const KATEGORIYA_RANGI: Record<string, string> = {
   'Shoshilinch holatlar':         '#dc2626',
 }
 
-function bosqichBolimlar(bosqich: string): { emoji: string; nom: string }[] {
+function bosqichBolimlar(bosqich: string): { Icon: LucideIcon; nom: string }[] {
   if (bosqich === 'oson') return [
-    { emoji: '📖', nom: 'Nazariya' },
-    { emoji: '🎥', nom: 'Video' },
-    { emoji: '📂', nom: 'Materiallar' },
-    { emoji: '🃏', nom: 'Flashcard' },
-    { emoji: '✅', nom: 'Amaliy test' },
+    { Icon: BookOpen, nom: 'Nazariya' },
+    { Icon: Video, nom: 'Video' },
+    { Icon: FolderDown, nom: 'Materiallar' },
+    { Icon: Layers, nom: 'Flashcard' },
+    { Icon: ClipboardCheck, nom: 'Amaliy test' },
   ]
   if (bosqich === "o'rta") return [
-    { emoji: '📖', nom: 'Nazariya' },
-    { emoji: '🎥', nom: 'Video' },
-    { emoji: '📂', nom: 'Materiallar' },
-    { emoji: '🃏', nom: 'Flashcard' },
-    { emoji: '✅', nom: 'Amaliy test' },
-    { emoji: '🏅', nom: 'USMLE' },
-    { emoji: '🎓', nom: 'Nazorat' },
+    { Icon: BookOpen, nom: 'Nazariya' },
+    { Icon: Video, nom: 'Video' },
+    { Icon: FolderDown, nom: 'Materiallar' },
+    { Icon: Layers, nom: 'Flashcard' },
+    { Icon: ClipboardCheck, nom: 'Amaliy test' },
+    { Icon: Award, nom: 'USMLE' },
+    { Icon: GraduationCap, nom: 'Nazorat' },
   ]
   return [
-    { emoji: '📖', nom: 'Nazariya' },
-    { emoji: '🎥', nom: 'Video' },
-    { emoji: '📂', nom: 'Materiallar' },
-    { emoji: '🃏', nom: 'Flashcard' },
-    { emoji: '✅', nom: 'Amaliy test' },
-    { emoji: '🏅', nom: 'USMLE' },
-    { emoji: '🏥', nom: 'Klinik holat' },
-    { emoji: '🧩', nom: 'Interaktiv case' },
-    { emoji: '🎓', nom: 'Nazorat' },
+    { Icon: BookOpen, nom: 'Nazariya' },
+    { Icon: Video, nom: 'Video' },
+    { Icon: FolderDown, nom: 'Materiallar' },
+    { Icon: Layers, nom: 'Flashcard' },
+    { Icon: ClipboardCheck, nom: 'Amaliy test' },
+    { Icon: Award, nom: 'USMLE' },
+    { Icon: Building2, nom: 'Klinik holat' },
+    { Icon: Puzzle, nom: 'Interaktiv case' },
+    { Icon: GraduationCap, nom: 'Nazorat' },
   ]
 }
 
@@ -173,9 +177,9 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi,
               background: 'var(--surface-2)',
               border: '1px solid var(--line)',
               borderRadius: '999px', padding: '3px 10px',
-              display: 'flex', alignItems: 'center', gap: '4px',
+              display: 'flex', alignItems: 'center', gap: '5px',
             }}>
-              {b.emoji} {b.nom}
+              <b.Icon size={12} strokeWidth={2} /> {b.nom}
             </span>
           ))}
         </div>
@@ -307,7 +311,7 @@ export default function BosqichDarslariPage() {
                   fontSize: '12px', fontWeight: 700,
                   display: 'flex', alignItems: 'center', gap: '5px',
                 }}>
-                  {b.emoji} {b.nom}
+                  <b.Icon size={13} strokeWidth={2} /> {b.nom}
                 </span>
               ))}
             </div>

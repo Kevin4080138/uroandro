@@ -1,12 +1,13 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+import { Home, GraduationCap, Trophy, User } from 'lucide-react'
 
 const BANDLAR = [
-  { icon: '🏠', label: 'Bosh sahifa', href: '/student/dashboard' },
-  { icon: '🎓', label: 'Talim', href: '/student/darslar' },
-  { icon: '🏆', label: 'Reyting', href: '/student/reyting' },
-  { icon: '👤', label: 'Profil', href: '/student/profil' },
+  { Icon: Home, label: 'Bosh sahifa', href: '/student/dashboard' },
+  { Icon: GraduationCap, label: 'Talim', href: '/student/darslar' },
+  { Icon: Trophy, label: 'Reyting', href: '/student/reyting' },
+  { Icon: User, label: 'Profil', href: '/student/profil' },
 ]
 
 export function BottomNav() {
@@ -36,7 +37,7 @@ export function BottomNav() {
               color: faol ? 'var(--accent)' : 'var(--muted)',
             }}
           >
-            <span style={{ fontSize: '20px', lineHeight: 1 }}>{b.icon}</span>
+            <b.Icon size={21} strokeWidth={faol ? 2.4 : 2} aria-hidden />
             <span style={{ fontSize: '10.5px', fontWeight: faol ? 700 : 500 }}>{b.label}</span>
           </button>
         )

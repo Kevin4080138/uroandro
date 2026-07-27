@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 import { ProfileMenu } from './ProfileMenu'
 import { NotificationBell } from './NotificationBell'
+import { ArrowLeft, Sun, Moon } from 'lucide-react'
 
 export function Header({
   backHref, backLabel = 'Bosh sahifa', actions,
@@ -35,7 +36,7 @@ export function Header({
             className="btn-animated flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-sm font-semibold sm:px-3.5"
             style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
           >
-            <span aria-hidden>←</span>
+            <ArrowLeft size={17} strokeWidth={2.2} aria-hidden />
             <span className="hidden md:inline" style={{ whiteSpace: 'nowrap' }}>{backLabel}</span>
           </button>
         )}
@@ -57,10 +58,12 @@ export function Header({
         <button
           onClick={toggle}
           aria-label="Temani almashtirish"
-          className="btn-animated rounded-lg border px-3 py-2 text-sm"
+          className="btn-animated flex items-center rounded-lg border px-3 py-2"
           style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', borderColor: 'var(--line)' }}
         >
-          {theme === 'dark' ? '☀️' : '🌙'}
+          {theme === 'dark'
+            ? <Sun size={17} strokeWidth={2.2} aria-hidden />
+            : <Moon size={17} strokeWidth={2.2} aria-hidden />}
         </button>
         <ProfileMenu />
       </div>

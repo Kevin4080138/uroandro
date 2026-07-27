@@ -3,14 +3,18 @@
 import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { operatsiyaTop, POSTOP_JADVALI } from '@/lib/operatsiyalar'
+import {
+  Timer, Moon, BedDouble, CreditCard, Sprout, ClipboardList, Wrench, Home,
+  CalendarClock, Siren, Send,
+} from 'lucide-react'
 
-function InfoQator({ belgi, nom, qiymat }: { belgi: string; nom: string; qiymat: string }) {
+function InfoQator({ Belgi, nom, qiymat }: { Belgi: React.ComponentType<{ size?: number; strokeWidth?: number }>; nom: string; qiymat: string }) {
   return (
     <div style={{
       display: 'flex', gap: '12px', alignItems: 'flex-start',
       padding: '12px 14px', background: 'var(--surface-2)', borderRadius: '12px',
     }}>
-      <span style={{ fontSize: '20px', flexShrink: 0 }}>{belgi}</span>
+      <span style={{ flexShrink: 0, color: 'var(--accent)', display: 'flex' }}><Belgi size={20} strokeWidth={2} /></span>
       <div>
         <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em', marginBottom: '2px' }}>{nom}</div>
         <div style={{ fontSize: '13.5px', color: 'var(--ink)', lineHeight: 1.45 }}>{qiymat}</div>
@@ -19,10 +23,10 @@ function InfoQator({ belgi, nom, qiymat }: { belgi: string; nom: string; qiymat:
   )
 }
 
-function Bolim({ sarlavha, children }: { sarlavha: string; children: React.ReactNode }) {
+function Bolim({ sarlavha, children }: { sarlavha: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="rise" style={{ marginTop: '24px' }}>
-      <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 800 }}>{sarlavha}</h3>
+      <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>{sarlavha}</h3>
       {children}
     </div>
   )
@@ -75,15 +79,15 @@ export default function OperatsiyaTafsilotPage() {
 
         {/* Asosiy raqamlar */}
         <div className="rise" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginTop: '16px' }}>
-          <InfoQator belgi="⏱" nom="Davomiyligi" qiymat={op.davomiyligi} />
-          <InfoQator belgi="😴" nom="Og'riqsizlantirish" qiymat={op.anesteziya} />
-          <InfoQator belgi="🛏" nom="Klinikada yotish" qiymat={op.yotish} />
-          <InfoQator belgi="💳" nom="Taxminiy narx" qiymat={op.narxOraliq} />
-          <InfoQator belgi="🌿" nom="Tiklanish" qiymat={op.tiklanish} />
+          <InfoQator Belgi={Timer} nom="Davomiyligi" qiymat={op.davomiyligi} />
+          <InfoQator Belgi={Moon} nom="Og'riqsizlantirish" qiymat={op.anesteziya} />
+          <InfoQator Belgi={BedDouble} nom="Klinikada yotish" qiymat={op.yotish} />
+          <InfoQator Belgi={CreditCard} nom="Taxminiy narx" qiymat={op.narxOraliq} />
+          <InfoQator Belgi={Sprout} nom="Tiklanish" qiymat={op.tiklanish} />
         </div>
 
         {/* Tayyorgarlik */}
-        <Bolim sarlavha="🧾 Operatsiyaga tayyorgarlik">
+        <Bolim sarlavha={<><ClipboardList size={17} strokeWidth={2} /> Operatsiyaga tayyorgarlik</>}>
           <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {op.tayyorgarlik.map((t, i) => (
               <li key={i} style={{ fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{t}</li>
@@ -92,7 +96,7 @@ export default function OperatsiyaTafsilotPage() {
         </Bolim>
 
         {/* Qanday o'tadi */}
-        <Bolim sarlavha="🔧 Qanday o'tadi">
+        <Bolim sarlavha={<><Wrench size={17} strokeWidth={2} /> Qanday o&apos;tadi</>}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {op.jarayon.map((j, i) => (
               <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -111,7 +115,7 @@ export default function OperatsiyaTafsilotPage() {
         </Bolim>
 
         {/* Keyin */}
-        <Bolim sarlavha="🏠 Operatsiyadan keyin">
+        <Bolim sarlavha={<><Home size={17} strokeWidth={2} /> Operatsiyadan keyin</>}>
           <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {op.keyin.map((t, i) => (
               <li key={i} style={{ fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>{t}</li>
@@ -120,7 +124,7 @@ export default function OperatsiyaTafsilotPage() {
         </Bolim>
 
         {/* Kuzatuv jadvali */}
-        <Bolim sarlavha="🗓 Operatsiyadan keyingi kuzatuv">
+        <Bolim sarlavha={<><CalendarClock size={17} strokeWidth={2} /> Operatsiyadan keyingi kuzatuv</>}>
           <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--muted)', lineHeight: 1.5 }}>
             Shifokor operatsiyani biriktirgach, quyidagi bosqichlarda ilova sizga eslatma yuboradi:
           </p>
@@ -137,7 +141,7 @@ export default function OperatsiyaTafsilotPage() {
         </Bolim>
 
         {/* Ogohlantirish */}
-        <Bolim sarlavha="🚨 Qachon zudlik bilan shifokorga">
+        <Bolim sarlavha={<><Siren size={17} strokeWidth={2} /> Qachon zudlik bilan shifokorga</>}>
           <div style={{
             background: 'color-mix(in srgb, var(--danger) 8%, transparent)',
             border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)',
@@ -158,18 +162,20 @@ export default function OperatsiyaTafsilotPage() {
             style={{
               background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
               padding: '13px 22px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
             }}
           >
-            🗓 Shifokorga yozilish
+            <CalendarClock size={16} strokeWidth={2} /> Shifokorga yozilish
           </button>
           <button
             onClick={() => router.push('/patient/murojaat')}
             style={{
               background: 'var(--surface)', color: 'var(--ink)', border: '1.5px solid var(--accent)', borderRadius: '12px',
               padding: '13px 22px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
             }}
           >
-            📨 Savol berish
+            <Send size={16} strokeWidth={2} /> Savol berish
           </button>
         </div>
 
