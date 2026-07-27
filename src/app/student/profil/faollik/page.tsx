@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
-import { TrendingUp, ClipboardCheck, Trophy, ClipboardList } from 'lucide-react'
+import { TrendingUp, ClipboardCheck, Trophy, ClipboardList, BarChart3, BookOpen } from 'lucide-react'
 
 type Natija = {
   id: string
@@ -70,6 +70,48 @@ function TuriChip({ turi }: { turi: string }) {
   )
 }
 
+// Haftalik faollik — joriy hafta har kuni nechta test ishlangan (Elevate uslubi).
+// Kunlik "o'qish soati" o'lchanmagani uchun bu yerda faollik = test soni.
+function HaftalikFaollik({ natijalar }: { natijalar: Natija[] }) {
+  const KUN = ['DU', 'SE', 'CH', 'PA', 'JU', 'SH', 'YA']
+  const bugun = new Date()
+  const kunIdx = (bugun.getDay() + 6) % 7 // Dushanba = 0
+  const dushanba = new Date(bugun); dushanba.setDate(bugun.getDate() - kunIdx); dushanba.setHours(0, 0, 0, 0)
+  const sonlar = new Array(7).fill(0)
+  for (const n of natijalar) {
+    const dt = new Date(n.created_at); dt.setHours(0, 0, 0, 0)
+    const idx = Math.round((dt.getTime() - dushanba.getTime()) / 86400000)
+    if (idx >= 0 && idx < 7) sonlar[idx]++
+  }
+  const jami = sonlar.reduce((a, b) => a + b, 0)
+  const max = Math.max(1, ...sonlar)
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
+        <span style={{ fontSize: '14px', fontWeight: 800 }}>Haftalik faollik</span>
+        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{jami} ta test</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', height: '110px' }}>
+        {sonlar.map((s, i) => {
+          const bugunmi = i === kunIdx
+          const h = s === 0 ? 4 : Math.round((s / max) * 96) + 4
+          return (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
+              {s > 0 && <span style={{ fontSize: '10px', fontWeight: 800, color: bugunmi ? '#d97706' : 'var(--muted)' }}>{s}</span>}
+              <div style={{
+                width: '100%', maxWidth: '26px', height: `${h}%`, minHeight: '4px', borderRadius: '8px 8px 4px 4px',
+                background: bugunmi ? '#f59e0b' : 'var(--surface-2)',
+                border: bugunmi ? 'none' : '1px solid var(--line)', transition: 'height .5s ease',
+              }} />
+              <span style={{ fontSize: '10px', fontWeight: bugunmi ? 800 : 600, color: bugunmi ? 'var(--ink)' : 'var(--muted)' }}>{KUN[i]}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function FaollikPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -127,14 +169,14 @@ export default function FaollikPage() {
 
       <div className="mx-auto max-w-[600px] px-5 py-6" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>📊 Faolligingiz</h2>
+        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><BarChart3 size={22} strokeWidth={2} /> Faolligingiz</h2>
 
         {stat?.jami_test === 0 ? (
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--line)',
             borderRadius: '14px', padding: '40px 20px', textAlign: 'center',
           }}>
-            <p style={{ fontSize: '40px', margin: '0 0 12px' }}>📚</p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: 'var(--muted)' }}><BookOpen size={40} strokeWidth={1.5} /></div>
             <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>
               Hali birorta test ishlanmagan.<br />Darslarni boshlang!
             </p>
@@ -175,6 +217,8 @@ export default function FaollikPage() {
                 </div>
               ))}
             </div>
+
+            <HaftalikFaollik natijalar={natijalار} />
 
             {/* So'nggi faollik */}
             <div style={{
