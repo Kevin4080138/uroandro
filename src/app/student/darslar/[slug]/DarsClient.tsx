@@ -14,7 +14,7 @@ import { vaziyatliMasalalarOl, type VaziyatliMasala } from '@/lib/talim/vaziyatl
 import { type Flashcard } from '@/lib/talim/flashcardlar'
 import {
   BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, Building2, Puzzle,
-  ClipboardList, Search, GraduationCap, CheckCircle2, Lock, Play, FileText, BarChart3,
+  ClipboardList, Search, GraduationCap, CheckCircle2, Lock, FileText, BarChart3,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -228,6 +228,24 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
     )
   }
 
+  // Har qadam yonidagi vaqt/son chipi — talaba nima kutishini biladi (Elevate uslubi)
+  const FLASH_SONI: Record<string, number> = { oson: 10, "o'rta": 15, qiyin: 20 }
+  const qadamChip = (t: Tab): string => {
+    switch (t) {
+      case 'nazariya': return `${dars.daqiqa} daq`
+      case 'video': { const n = (dars.videoLinklar?.length ?? 0) + (dars.asosiyVideoUrl ? 1 : 0); return n ? `${n} video` : 'Video' }
+      case 'yuklab': { const n = (konspektYoli ? 1 : 0) + (prezentatsiyaYoli ? 1 : 0); return n ? `${n} fayl` : 'Fayl' }
+      case 'flashcard': return `${FLASH_SONI[dars.bosqich] ?? 10} karta`
+      case 'amaliy': return `${amaliySavolSoni} savol`
+      case 'usmle': return dars.usmleSavollar?.length ? `${dars.usmleSavollar.length} savol` : 'USMLE'
+      case 'klinik': return `${klinikHolatlar.length} holat`
+      case 'interaktiv': return `${interaktivCaselar.length} case`
+      case 'vaziyatli': return `${vaziyatliMasalalar.length} masala`
+      case 'xatolar': return `${xatolarTahlili.length} tahlil`
+      case 'nazorat': return `${nazoratVaqtDaqiqa} daq`
+    }
+  }
+
   const Tarkib = (
     <div>
       <div style={{ padding: '16px 16px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -259,20 +277,21 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
           <div
             key={t}
             onClick={() => qadamgaOt(i)}
+            className="soft-press"
             style={{
               display: 'flex', alignItems: 'center', gap: '11px',
-              padding: '11px 16px',
+              margin: '0 12px 8px', padding: '10px 12px', borderRadius: '14px',
               cursor: ochiq ? 'pointer' : 'not-allowed',
-              background: faol ? accent + '10' : 'transparent',
-              borderLeft: faol ? `3px solid ${accent}` : '3px solid transparent',
-              opacity: ochiq ? 1 : 0.45,
+              background: tugadi ? '#16a34a12' : faol ? accent + '14' : 'var(--surface-2)',
+              border: faol ? `1.5px solid ${accent}` : '1px solid transparent',
+              opacity: ochiq ? 1 : 0.5,
               transition: 'all .15s ease',
             }}
           >
             <div style={{
               width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: tugadi ? '#16a34a1a' : faol ? accent + '1c' : 'var(--surface-2)',
+              background: tugadi ? '#16a34a1f' : faol ? accent + '22' : 'var(--surface)',
               border: tugadi ? '1.5px solid #16a34a' : faol ? `1.5px solid ${accent}` : '1px solid var(--line)',
               color: tugadi ? '#16a34a' : faol ? accent : 'var(--muted)',
             }}>
@@ -284,7 +303,12 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               </div>
               <div style={{ fontSize: '10.5px', color: 'var(--muted)', fontWeight: 600 }}>{ma.turi}</div>
             </div>
-            {faol && !tugadi && <Play size={12} strokeWidth={2} fill={accent} style={{ color: accent }} />}
+            <span style={{
+              fontSize: '10px', fontWeight: 800, flexShrink: 0, whiteSpace: 'nowrap',
+              color: tugadi ? '#16a34a' : faol ? accent : 'var(--muted)',
+              background: 'var(--surface)', border: '1px solid var(--line)',
+              borderRadius: '999px', padding: '3px 8px',
+            }}>{qadamChip(t)}</span>
           </div>
         )
       })}
