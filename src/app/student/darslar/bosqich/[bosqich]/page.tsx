@@ -9,7 +9,7 @@ import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { useUmumiyProgress, darsOchiqmi, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import {
   BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, GraduationCap,
-  Building2, Puzzle, type LucideIcon,
+  Building2, Puzzle, CheckCircle2, Lock, Gift, Clock, type LucideIcon,
 } from 'lucide-react'
 
 const BOSQICH_GRADIENT: Record<string, string> = {
@@ -120,25 +120,29 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi,
                   <span style={{
                     fontSize: '10px', fontWeight: 800, color: '#16a34a',
                     background: '#16a34a18', borderRadius: '999px', padding: '2px 8px',
-                  }}>✅ Tugallangan</span>
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  }}><CheckCircle2 size={12} strokeWidth={2.2} /> Tugallangan</span>
                 )}
                 {ketmaKetYopiq && (
                   <span style={{
                     fontSize: '10px', fontWeight: 800, color: '#6b7280',
                     background: 'var(--surface-2)', borderRadius: '999px', padding: '2px 8px',
-                  }}>🔒 Oldingi darsni tugating</span>
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  }}><Lock size={11} strokeWidth={2.2} /> Oldingi darsni tugating</span>
                 )}
                 {dars.bepulNamuna && bosqich !== 'oson' && (
                   <span style={{
                     fontSize: '10px', fontWeight: 800, color: '#16a34a',
                     background: '#16a34a18', borderRadius: '999px', padding: '2px 8px',
-                  }}>🎁 BEPUL</span>
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  }}><Gift size={12} strokeWidth={2.2} /> BEPUL</span>
                 )}
                 {qulflangan && !dars.bepulNamuna && (
                   <span style={{
                     fontSize: '10px', fontWeight: 800, color: '#6b7280',
                     background: 'var(--surface-2)', borderRadius: '999px', padding: '2px 8px',
-                  }}>🔒 Qulflangan</span>
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  }}><Lock size={11} strokeWidth={2.2} /> Qulflangan</span>
                 )}
               </div>
               <h3 style={{
@@ -151,8 +155,8 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi,
               </h3>
             </div>
           </div>
-          <span style={{ fontSize: '11px', color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, paddingTop: '4px' }}>
-            ⏱ {dars.daqiqa} daqiqa
+          <span style={{ fontSize: '11px', color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, paddingTop: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Clock size={12} strokeWidth={2} /> {dars.daqiqa} daqiqa
           </span>
         </div>
 
@@ -192,8 +196,8 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi,
           }}>
             {dars.kategoriya}
           </span>
-          <span style={{ marginLeft: 'auto', fontSize: '12px', color: accent, fontWeight: 700 }}>
-            {ketmaKetYopiq ? '🔒 Yopiq' : qulflangan && !dars.bepulNamuna ? "Ko'rish →" : tugadi ? 'Takrorlash →' : 'Ochish →'}
+          <span style={{ marginLeft: 'auto', fontSize: '12px', color: accent, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            {ketmaKetYopiq ? <><Lock size={12} strokeWidth={2} /> Yopiq</> : qulflangan && !dars.bepulNamuna ? "Ko'rish →" : tugadi ? 'Takrorlash →' : 'Ochish →'}
           </span>
         </div>
       </div>
@@ -356,6 +360,16 @@ export default function BosqichDarslariPage() {
               Darslar qayta ishlanmoqda va tez orada shu yerda paydo bo&apos;ladi.
               Shu vaqtda O&apos;RTA bosqichdan boshlashingiz mumkin.
             </p>
+          </div>
+        )}
+
+        {royxat.length > 0 && (
+          <div className="rise" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 14px' }}>
+            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Darslar</h3>
+            <span style={{
+              minWidth: '24px', height: '24px', borderRadius: '999px', background: 'var(--ink)', color: 'var(--bg)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, padding: '0 7px',
+            }}>{royxat.length}</span>
           </div>
         )}
 
