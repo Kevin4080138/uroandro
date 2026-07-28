@@ -208,17 +208,25 @@ export default function NavbatOlishPage() {
             {tanlangan && (
               <div style={{ ...card, marginBottom: '16px' }}>
                 <p style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 700 }}>2. Kunni tanlang</p>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
                   {qabulKunlari(tanlangan).map((s) => {
                     const faol = kun && sanaISO(kun) === sanaISO(s)
+                    const kunNomi = HAFTA_KUNLARI[haftaKuni(s) - 1].slice(0, 2).toUpperCase()
                     return (
-                      <button key={sanaISO(s)} onClick={() => setKun(s)} style={{
-                        border: faol ? '2px solid var(--accent)' : '1px solid var(--line)',
-                        background: faol ? 'var(--accent-soft)' : 'var(--surface-2)',
-                        color: faol ? 'var(--accent)' : 'var(--ink)',
-                        borderRadius: '10px', padding: '9px 13px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+                      <button key={sanaISO(s)} onClick={() => setKun(s)} className="soft-press" style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                        border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0, padding: '2px',
                       }}>
-                        {sanaChiroyli(s)}
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: faol ? 'var(--accent)' : 'var(--muted)' }}>{kunNomi}</span>
+                        <span style={{
+                          width: '44px', height: '44px', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '15px', fontWeight: 800,
+                          background: faol ? 'var(--accent)' : 'var(--surface-2)',
+                          color: faol ? '#fff' : 'var(--ink)',
+                          border: faol ? 'none' : '1px solid var(--line)',
+                          transition: 'all .15s ease',
+                        }}>{s.getDate()}</span>
                       </button>
                     )
                   })}
