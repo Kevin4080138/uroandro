@@ -6,6 +6,7 @@ import { Header } from '@/components/Header'
 import { SkeletonRow } from '@/components/Skeleton'
 import { createClient } from '@/lib/supabase'
 import { DARSLAR, BOSQICHLAR } from '@/lib/talim/darslar'
+import { BarChart3, GraduationCap, Award, ClipboardList, Trophy } from 'lucide-react'
 
 type SertifikatHolati = {
   darsSlug: string; darsNomi: string; engYaxshiFoiz: number; otishFoizi: number; otdimi: boolean; sana: string
@@ -86,7 +87,7 @@ export default function NatijalarimPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[820px] px-8 py-8">
-        <h2 className="rise" style={{ margin: '0 0 22px', fontSize: '24px', fontWeight: 800 }}>📊 Natijalarim</h2>
+        <h2 className="rise" style={{ margin: '0 0 22px', fontSize: '24px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '9px' }}><BarChart3 size={24} strokeWidth={2} /> Natijalarim</h2>
 
         {/* Statistika kartalari */}
         <div className="rise" style={{
@@ -109,7 +110,7 @@ export default function NatijalarimPage() {
 
         {/* Bosqich sertifikatlari (umumiy) */}
         <div className="rise" style={{ marginBottom: '24px', animationDelay: '.06s' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🎓 Bosqich sertifikatlari</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}><GraduationCap size={17} strokeWidth={2} /> Bosqich sertifikatlari</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {bosqichSertifikatlari.map((b) => (
               <div key={b.id} className="rise" style={{
@@ -119,7 +120,7 @@ export default function NatijalarimPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
                   <strong style={{ fontSize: '14px' }}>{b.emoji} {b.nom}</strong>
                   {b.olindi ? (
-                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--good)' }}>🏆 Sertifikat olindi</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--good)', background: 'color-mix(in srgb, var(--good) 15%, transparent)', borderRadius: '999px', padding: '3px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Trophy size={12} strokeWidth={2.2} /> Sertifikat olindi</span>
                   ) : (
                     <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--warn)' }}>
                       {b.otgan}/{b.jami} mavzu bajarildi
@@ -141,7 +142,7 @@ export default function NatijalarimPage() {
         {/* Mavzu bo'yicha sertifikat tafsilotlari */}
         {sertifikatlar.length > 0 && (
           <div className="rise" style={{ marginBottom: '24px', animationDelay: '.08s' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>🏅 Mavzu sertifikatlari (tafsilot)</h3>
+            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}><Award size={17} strokeWidth={2} /> Mavzu sertifikatlari (tafsilot)</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {sertifikatlar.map((s) => (
                 <div key={s.darsSlug} className="rise" style={{
@@ -151,7 +152,7 @@ export default function NatijalarimPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: '14px' }}>{s.darsNomi}</strong>
                     {s.otdimi ? (
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--good)' }}>🏆 Sertifikat olindi</span>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--good)', background: 'color-mix(in srgb, var(--good) 15%, transparent)', borderRadius: '999px', padding: '3px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Trophy size={12} strokeWidth={2.2} /> Sertifikat olindi</span>
                     ) : (
                       <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--warn)' }}>
                         Yana {Math.max(0, s.otishFoizi - s.engYaxshiFoiz)}% kerak
@@ -181,7 +182,7 @@ export default function NatijalarimPage() {
           </div>
         ) : natijalar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--muted)' }}>
-            <div style={{ fontSize: '52px', marginBottom: '14px', lineHeight: 1 }}>📝</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px', color: 'var(--muted)' }}><ClipboardList size={48} strokeWidth={1.5} /></div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--ink)', marginBottom: '8px' }}>Natija yo&apos;q</div>
             <p style={{ margin: '0 0 20px', fontSize: '13.5px', lineHeight: 1.6, maxWidth: '260px', marginInline: 'auto' }}>
               Hali birorta ham test topshirmagansiz. Darslarni boshlang!
@@ -195,6 +196,13 @@ export default function NatijalarimPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="rise" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>So&apos;nggi natijalar</h3>
+              <span style={{
+                minWidth: '24px', height: '24px', borderRadius: '999px', background: 'var(--ink)', color: 'var(--bg)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, padding: '0 7px',
+              }}>{natijalar.length}</span>
+            </div>
             {natijalar.map((n, i) => (
               <div key={n.id} className="rise lift list-row" style={{
                 animationDelay: `${Math.min(i * 0.04, 0.3)}s`,
