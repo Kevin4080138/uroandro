@@ -38,6 +38,38 @@
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
 }
 
+/* Talaba bo'limi — Elevate ruhidagi pastel palitra (faqat /student/*).
+   Aksent o'qiladigan yashil: matn ham, oq-matnli to'ldirish ham ishlaydi.
+   Shifokor/bemor/admin ko'k palitrada qoladi (klinik jiddiylik). */
+.talaba-palitra {
+  --bg: #F4F3EE;
+  --surface: #FFFFFF;
+  --surface-2: #EDEBE3;
+  --ink: #202124;
+  --ink-soft: #4D4D47;
+  --muted: #8C8B81;
+  --line: #E6E3D9;
+  --accent: #4D7C0F;
+  --accent-soft: #EAF5D6;
+  --accent-2: #8A5BC7;
+  --header: #F4F3EE;
+  --shadow: 0 1px 3px rgba(32,33,36,.05), 0 12px 28px -12px rgba(32,33,36,.15);
+}
+[data-theme="dark"] .talaba-palitra {
+  --bg: #14140F;
+  --surface: #1C1C16;
+  --surface-2: #26261E;
+  --ink: #F3F2EC;
+  --ink-soft: #D4D2C8;
+  --muted: #9A988C;
+  --line: #2A2A20;
+  --accent: #7CB342;
+  --accent-soft: rgba(124,179,66,.15);
+  --accent-2: #9B6FD4;
+  --header: #1C1C16;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -8px rgba(0,0,0,.55);
+}
+
 html, body {
   background: var(--bg);
   color: var(--ink);
