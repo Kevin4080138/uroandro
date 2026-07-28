@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
-import { TrendingUp, ClipboardCheck, Trophy, ClipboardList, BarChart3, BookOpen } from 'lucide-react'
+import { TrendingUp, ClipboardCheck, Trophy, ClipboardList, BarChart3, BookOpen, ArrowUp, ArrowDown } from 'lucide-react'
 
 type Natija = {
   id: string
@@ -78,18 +78,35 @@ function HaftalikFaollik({ natijalar }: { natijalar: Natija[] }) {
   const kunIdx = (bugun.getDay() + 6) % 7 // Dushanba = 0
   const dushanba = new Date(bugun); dushanba.setDate(bugun.getDate() - kunIdx); dushanba.setHours(0, 0, 0, 0)
   const sonlar = new Array(7).fill(0)
+  let otganHafta = 0 // o'tgan hafta (delta uchun)
   for (const n of natijalar) {
     const dt = new Date(n.created_at); dt.setHours(0, 0, 0, 0)
     const idx = Math.round((dt.getTime() - dushanba.getTime()) / 86400000)
     if (idx >= 0 && idx < 7) sonlar[idx]++
+    else if (idx >= -7 && idx < 0) otganHafta++
   }
   const jami = sonlar.reduce((a, b) => a + b, 0)
   const max = Math.max(1, ...sonlar)
+  // Delta: o'tgan haftaga nisbatan (LeadNest uslubi). Bazaviy 0 bo'lsa foiz ko'rsatilmaydi.
+  const deltaFoiz = otganHafta > 0 ? Math.round(((jami - otganHafta) / otganHafta) * 100) : null
+  const oshdi = (deltaFoiz ?? 0) >= 0
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '18px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <span style={{ fontSize: '14px', fontWeight: 800 }}>Haftalik faollik</span>
-        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{jami} ta test</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {deltaFoiz !== null && (
+            <span style={{
+              fontSize: '11px', fontWeight: 800, borderRadius: '999px', padding: '3px 8px',
+              display: 'inline-flex', alignItems: 'center', gap: '3px',
+              color: oshdi ? '#16a34a' : '#dc2626', background: oshdi ? '#16a34a16' : '#dc262616',
+            }}>
+              {oshdi ? <ArrowUp size={11} strokeWidth={2.6} /> : <ArrowDown size={11} strokeWidth={2.6} />}
+              {oshdi ? '+' : ''}{deltaFoiz}%
+            </span>
+          )}
+          <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{jami} ta test</span>
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', height: '110px' }}>
         {sonlar.map((s, i) => {
