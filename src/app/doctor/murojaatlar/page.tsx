@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { AppShell } from '@/components/AppShell'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
+import {
+  Phone, Clock, AlertTriangle, Check, Bell, BellOff,
+  Archive, ArchiveRestore, ChevronUp, ChevronDown, Send, FolderOpen, UserPlus,
+} from 'lucide-react'
 
 type Murojaat = {
   id: string; patient_id: string; organlar: string | null; shikoyatlar: string; taxminiy_tashxis: string | null
@@ -49,8 +53,9 @@ function PushToggleTugmasi() {
       border: `1px solid ${holat === 'yoqilgan' ? 'var(--good)' : 'var(--accent)'}`,
       borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px',
     }}>
-      <span>
-        {holat === 'yoqilgan' ? '🔔 Yangi murojaatlar uchun bildirishnoma yoqilgan' : holat === 'rad-etilgan' ? '🔕 Bildirishnomalar brauzerda bloklangan' : '🔔 Yangi murojaat kelganda bildirishnoma olish'}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+        {holat === 'rad-etilgan' ? <BellOff size={15} strokeWidth={2} style={{ flexShrink: 0 }} /> : <Bell size={15} strokeWidth={2} style={{ flexShrink: 0 }} />}
+        {holat === 'yoqilgan' ? 'Yangi murojaatlar uchun bildirishnoma yoqilgan' : holat === 'rad-etilgan' ? 'Bildirishnomalar brauzerda bloklangan' : 'Yangi murojaat kelganda bildirishnoma olish'}
       </span>
       {holat !== 'rad-etilgan' && (
         <button onClick={bosildi} disabled={saving} className="soft-press" style={{
@@ -179,10 +184,13 @@ export default function DoctorMurojaatlarPage() {
   const arxivlar = murojaatlar.filter((m) => m.arxiv && (m.doctor_id === myId || m.target_doctor_id === myId))
 
   const sarlavha = (matn: string, son: number) => (
-    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '9px' }}>
       <span style={{ width: '3px', height: '16px', background: 'var(--accent)', borderRadius: '2px', display: 'inline-block' }} />
       {matn}
-      <span style={{ color: 'var(--muted)', fontFamily: 'monospace', fontSize: '13px', fontWeight: 400 }}>({son})</span>
+      <span style={{
+        minWidth: '22px', height: '22px', borderRadius: '999px', background: 'var(--ink)', color: 'var(--bg)',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11.5px', fontWeight: 800, padding: '0 6px',
+      }}>{son}</span>
     </h3>
   )
 
@@ -232,7 +240,7 @@ export default function DoctorMurojaatlarPage() {
                   marginTop: '28px', background: 'none', border: 'none', cursor: 'pointer',
                   color: 'var(--muted)', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
                 }}>
-                  🗄️ Arxiv ({arxivlar.length}) {arxivKorsat ? '▲' : '▼'}
+                  <Archive size={15} strokeWidth={2} /> Arxiv ({arxivlar.length}) {arxivKorsat ? <ChevronUp size={14} strokeWidth={2.4} /> : <ChevronDown size={14} strokeWidth={2.4} />}
                 </button>
                 {arxivKorsat && (
                   <div style={{ marginTop: '12px' }}>
@@ -276,15 +284,15 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '14.5px', fontWeight: 600 }}>{bemor?.name ?? 'Bemor'}</div>
             <div style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '1px' }}>
-              {bemor?.telefon && <span>📞 {bemor.telefon}</span>}
-              <span>🕐 {new Date(m.created_at).toLocaleString()}</span>
+              {bemor?.telefon && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Phone size={12} strokeWidth={2} /> {bemor.telefon}</span>}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Clock size={12} strokeWidth={2} /> {new Date(m.created_at).toLocaleString()}</span>
             </div>
           </div>
         </div>
         <span style={{ color: holat.color, fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap', background: `color-mix(in srgb, ${holat.color} 14%, transparent)`, padding: '4px 10px', borderRadius: '999px' }}>{holat.text}</span>
       </div>
 
-      {m.shoshilinch && <p style={{ margin: '0 0 6px 0', fontSize: '12.5px', color: 'var(--danger)', fontWeight: 600 }}>⚠️ Shoshilinch</p>}
+      {m.shoshilinch && <p style={{ margin: '0 0 6px 0', fontSize: '12.5px', color: 'var(--danger)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}><AlertTriangle size={14} strokeWidth={2} /> Shoshilinch</p>}
       <p style={{ margin: '0 0 6px 0', fontSize: '14px' }}><strong>Shikoyat:</strong> {m.shikoyatlar}</p>
       {m.taxminiy_tashxis && <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--accent)' }}>Taxminiy yo&apos;nalish: {m.taxminiy_tashxis}</p>}
 
@@ -292,8 +300,9 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
         <button onClick={() => qabulQil(m)} className="btn-animated soft-press" style={{
           background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '999px',
           padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
         }}>
-          ✋ Qabul qilish
+          <Check size={15} strokeWidth={2.4} /> Qabul qilish
         </button>
       ) : (
         <>
@@ -312,7 +321,7 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
               background: 'var(--good)', color: 'white', border: 'none', borderRadius: '999px',
               padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: saving ? 0.7 : 1,
             }}>
-              {saving ? 'Yuborilmoqda...' : m.javob ? '✓ Javobni yangilash' : '📤 Javobni yuborish'}
+              {saving ? 'Yuborilmoqda...' : m.javob ? '✓ Javobni yangilash' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Send size={14} strokeWidth={2} /> Javobni yuborish</span>}
             </button>
             <button onClick={() => qabulgaOlish(m)} disabled={qabulgaOlinmoqda} className="btn-animated soft-press" style={{
               background: m.bemor_id ? 'var(--surface-2)' : 'var(--accent)',
@@ -320,7 +329,7 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
               border: m.bemor_id ? '1px solid var(--line)' : 'none', borderRadius: '999px',
               padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, opacity: qabulgaOlinmoqda ? 0.7 : 1,
             }}>
-              {qabulgaOlinmoqda ? 'Ochilmoqda...' : m.bemor_id ? '📂 Bemor kartasi' : '🧑‍🤝‍🧑 Qabulga olish'}
+              {qabulgaOlinmoqda ? 'Ochilmoqda...' : m.bemor_id ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FolderOpen size={14} strokeWidth={2} /> Bemor kartasi</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><UserPlus size={14} strokeWidth={2} /> Qabulga olish</span>}
             </button>
             {/* Ko'rildi belgisi */}
             {m.javob && (
@@ -331,9 +340,9 @@ function MurojaatCard({ m, i, bemor, javobMatn, setJavob, qabulQil, javobYubor, 
             {/* Arxivlash */}
             <button onClick={() => arxivla(m, !m.arxiv)} className="soft-press" style={{
               marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', fontSize: '12.5px', fontWeight: 600,
+              color: 'var(--muted)', fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px',
             }}>
-              {m.arxiv ? '↩️ Arxivdan chiqarish' : '🗄️ Arxivlash'}
+              {m.arxiv ? <><ArchiveRestore size={13} strokeWidth={2} /> Arxivdan chiqarish</> : <><Archive size={13} strokeWidth={2} /> Arxivlash</>}
             </button>
           </div>
         </>
