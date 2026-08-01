@@ -9,6 +9,7 @@ import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 
 const card: React.CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px',
@@ -45,11 +46,23 @@ function sanaISO(d: Date) {
   return d.toISOString().slice(0, 10)
 }
 
-function StatCard({ label, value, color, suffix }: { label: string; value: number; color: string; suffix?: string }) {
+function StatCard({ label, value, color, suffix, delta }: { label: string; value: number; color: string; suffix?: string; delta?: number | null }) {
   return (
     <div style={{ ...card, borderTop: `3px solid ${color}` }}>
-      <div style={{ fontFamily: 'monospace', fontSize: '32px', fontWeight: 700, color }}>
-        <CountUp value={value} />{suffix}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: '32px', fontWeight: 700, color }}>
+          <CountUp value={value} />{suffix}
+        </div>
+        {delta != null && (
+          <span style={{
+            fontSize: '11px', fontWeight: 800, borderRadius: '999px', padding: '3px 8px',
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            color: delta >= 0 ? '#16a34a' : '#dc2626', background: delta >= 0 ? '#16a34a16' : '#dc262616',
+          }}>
+            {delta >= 0 ? <ArrowUp size={11} strokeWidth={2.6} /> : <ArrowDown size={11} strokeWidth={2.6} />}
+            {delta >= 0 ? '+' : ''}{delta}%
+          </span>
+        )}
       </div>
       <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '6px' }}>{label}</div>
     </div>
@@ -61,6 +74,7 @@ export default function DoctorFaoliyatPage() {
   const [loading, setLoading] = useState(true)
 
   const [buOyMurojaat, setBuOyMurojaat] = useState(0)
+  const [murojaatDelta, setMurojaatDelta] = useState<number | null>(null)
   const [kutayotgan, setKutayotgan] = useState(0)
   const [buHaftaNavbat, setBuHaftaNavbat] = useState(0)
   const [ortachaReyting, setOrtachaReyting] = useState(0)
@@ -102,6 +116,12 @@ export default function DoctorFaoliyatPage() {
         if (key in oyMap) oyMap[key]++
       }
       setOylikData(oylar.map((o) => ({ oy: oyLabel(o), soni: oyMap[`${o.getFullYear()}-${o.getMonth()}`] })))
+
+      // Bu oy vs o'tgan oy delta (Lordbank metrika+delta naqshi)
+      const oCur = oylar[oylar.length - 1], oPrev = oylar[oylar.length - 2]
+      const curSon = oCur ? oyMap[`${oCur.getFullYear()}-${oCur.getMonth()}`] : 0
+      const prevSon = oPrev ? oyMap[`${oPrev.getFullYear()}-${oPrev.getMonth()}`] : 0
+      setMurojaatDelta(prevSon > 0 ? Math.round(((curSon - prevSon) / prevSon) * 100) : null)
 
       // Navbatlar holati + bu hafta
       const nv = navbatlar ?? []
@@ -161,7 +181,7 @@ export default function DoctorFaoliyatPage() {
           <>
             {/* KPI kartalar */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px', marginBottom: '24px' }}>
-              <StatCard label="Bu oygi murojaatlar" value={buOyMurojaat} color="#3b82f6" />
+              <StatCard label="Bu oygi murojaatlar" value={buOyMurojaat} color="#3b82f6" delta={murojaatDelta} />
               <StatCard label="Javob kutayotgan" value={kutayotgan} color="#f59e0b" />
               <StatCard label="Bu hafta navbatlar" value={buHaftaNavbat} color="#10b981" />
               <div style={{ ...card, borderTop: '3px solid #8b5cf6' }}>
