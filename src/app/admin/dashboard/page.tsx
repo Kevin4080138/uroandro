@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import Link from 'next/link'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 import { ObunaEtibor } from '@/components/admin/ObunaEtibor'
 import { TalimTahlil } from '@/components/admin/TalimTahlil'
 import {
@@ -29,6 +29,11 @@ const ROLE_COLOR: Record<string, string> = {
 const ROLE_LABEL: Record<string, string> = {
   doctor: 'Shifokor', student: 'Talaba', patient: 'Bemor', admin: 'Admin',
 }
+// Donut uchun aniq hex (recharts SVG fill — CSS var'ga tayanmaymiz)
+const ROLE_HEX: Record<string, string> = {
+  student: '#2563EB', doctor: '#DC2626', patient: '#059669', admin: '#D97706',
+}
+const ROL_TARTIB = ['student', 'doctor', 'patient', 'admin']
 
 type Recent = { full_name: string; role: string; created_at: string }
 
@@ -37,6 +42,7 @@ export default function AdminDashboard() {
   const [faollik, setFaollik] = useState<FaollikMa | null>(null)
   const [recentUsers, setRecentUsers] = useState<Recent[]>([])
   const [miniChart, setMiniChart] = useState<{ kun: string; soni: number }[]>([])
+  const [rolTaqsimot, setRolTaqsimot] = useState<{ role: string; son: number }[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -49,7 +55,9 @@ export default function AdminDashboard() {
       const hafta = new Date(); hafta.setDate(hafta.getDate() - 7); hafta.setHours(0, 0, 0, 0)
       const yettikun = new Date(); yettikun.setDate(yettikun.getDate() - 6); yettikun.setHours(0, 0, 0, 0)
 
-      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes, obunaRes, qadamFaolRes, testFaolRes] = await Promise.all([
+      const rolSon = (r: string) => supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', r)
+      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes, obunaRes, qadamFaolRes, testFaolRes,
+        studentRes, doctorRes, patientRes, adminRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', bugun.toISOString()),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', hafta.toISOString()),
@@ -60,6 +68,14 @@ export default function AdminDashboard() {
         supabase.from('obunalar').select('student_id, tugash_sanasi').eq('faol', true),
         supabase.from('dars_qadam_progress').select('student_id').gte('created_at', hafta.toISOString()),
         supabase.from('talim_natijalari').select('student_id').gte('created_at', hafta.toISOString()),
+        rolSon('student'), rolSon('doctor'), rolSon('patient'), rolSon('admin'),
+      ])
+
+      setRolTaqsimot([
+        { role: 'student', son: studentRes.count ?? 0 },
+        { role: 'doctor', son: doctorRes.count ?? 0 },
+        { role: 'patient', son: patientRes.count ?? 0 },
+        { role: 'admin', son: adminRes.count ?? 0 },
       ])
 
       // Obunali talabalar — muddati o'tmagan faol obunalar bo'yicha unikal talabalar
@@ -190,6 +206,39 @@ export default function AdminDashboard() {
                 <Area type="monotone" dataKey="soni" stroke="#2563eb" fill="url(#miniGrad)" strokeWidth={2} dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Foydalanuvchi taqsimoti — donut + legenda (Lordbank referens) */}
+          <div className="adm-span-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px' }}>
+            <h3 style={{ fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '0 0 14px 0', fontWeight: 600 }}>Foydalanuvchilar</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+              <div style={{ position: 'relative', width: 150, height: 150, flexShrink: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={rolTaqsimot} dataKey="son" nameKey="role" cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={2} stroke="none">
+                      {rolTaqsimot.map((r) => <Cell key={r.role} fill={ROLE_HEX[r.role]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v, n) => [v, ROLE_LABEL[n as string] ?? n]} contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 13 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                  <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'monospace', lineHeight: 1 }}>{rolTaqsimot.reduce((s, r) => s + r.son, 0)}</span>
+                  <span style={{ fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>Jami</span>
+                </div>
+              </div>
+              <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                {ROL_TARTIB.map((role) => {
+                  const son = rolTaqsimot.find((r) => r.role === role)?.son ?? 0
+                  return (
+                    <div key={role} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: ROLE_HEX[role], flexShrink: 0 }} />
+                      <span style={{ fontSize: '13px', color: 'var(--ink-soft)', flex: 1 }}>{ROLE_LABEL[role]}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'monospace' }}>{son}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Tezkor havolalar */}
