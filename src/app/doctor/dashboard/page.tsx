@@ -7,7 +7,7 @@ import { AppShell } from '@/components/AppShell'
 import { DoctorBannerStrip } from '@/components/DoctorBannerStrip'
 import {
   TrendingUp, Users, Inbox, FileText, Globe, CalendarClock, Bandage,
-  ClipboardList, Calculator, Library, BookOpenCheck,
+  ClipboardList, Calculator, Library, BookOpenCheck, ChevronRight,
 } from 'lucide-react'
 
 export default function DoctorDashboard() {
@@ -41,9 +41,13 @@ export default function DoctorDashboard() {
     <AppShell title={profile.full_name}>
       <div className="px-8 py-8">
         <DoctorBannerStrip role={profile.role} />
-        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontFamily: 'var(--font-inter)', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
+        <div className="rise" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 600, marginBottom: '8px' }}>
+          <span>Bosh sahifa</span>
+          <ChevronRight size={13} strokeWidth={2} />
+          <span style={{ color: 'var(--ink-soft)' }}>Dashboard</span>
+        </div>
         <h1 className="rise" style={{ fontSize: '32px', marginBottom: '32px' }}>
-          Dr. {profile.full_name}
+          {(() => { const h = new Date().getHours(); return h < 12 ? 'Xayrli tong' : h < 18 ? 'Xayrli kun' : 'Xayrli kech' })()}, Dr. {profile.full_name} 👋
         </h1>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>

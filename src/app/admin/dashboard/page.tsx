@@ -11,7 +11,7 @@ import { TalimTahlil } from '@/components/admin/TalimTahlil'
 import {
   UserPlus, CalendarDays, CreditCard, Flame, MessageSquare, ClipboardList,
   Users, Building2, Globe, FileText, GraduationCap, TrendingUp, Shield, Megaphone,
-  Images, Stethoscope, UserRound, Wrench,
+  Images, Stethoscope, UserRound, Wrench, ChevronRight,
 } from 'lucide-react'
 
 type FaollikMa = {
@@ -144,8 +144,14 @@ export default function AdminDashboard() {
       `}</style>
 
       <div className="p-4 sm:p-8">
-        <h2 className="rise" style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '6px', fontWeight: 500, letterSpacing: 0 }}>Xush kelibsiz 👋</h2>
-        <h1 className="rise text-2xl sm:text-[32px]" style={{ marginBottom: '24px' }}>{profile.full_name}</h1>
+        <div className="rise" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 600, marginBottom: '8px' }}>
+          <span>Bosh sahifa</span>
+          <ChevronRight size={13} strokeWidth={2} />
+          <span style={{ color: 'var(--ink-soft)' }}>Dashboard</span>
+        </div>
+        <h1 className="rise text-2xl sm:text-[32px]" style={{ marginBottom: '24px' }}>
+          {(() => { const h = new Date().getHours(); return h < 12 ? 'Xayrli tong' : h < 18 ? 'Xayrli kun' : 'Xayrli kech' })()}, {profile.full_name} 👋
+        </h1>
 
         {/* Faollik ko'rsatkichlari */}
         {faollik && (
