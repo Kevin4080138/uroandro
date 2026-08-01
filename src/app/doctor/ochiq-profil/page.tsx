@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
+import { Globe, Briefcase, Star, Wallet, Eye, EyeOff, Trash2 } from 'lucide-react'
 
 type Xizmat = { nom: string; narx: string }
 type Klinika = { id: string; nom: string; manzil: string | null }
@@ -131,26 +132,38 @@ export default function OchiqProfilPage() {
   return (
     <AppShell title="Katalogdagi profilim">
       <div className="fade-in mx-auto max-w-[720px] px-4 py-6 sm:px-8">
-        <h1 style={{ fontSize: '24px', margin: '0 0 6px' }}>🌐 Katalogdagi profilim</h1>
+        <h1 style={{ fontSize: '24px', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '9px' }}><Globe size={24} strokeWidth={2} /> Katalogdagi profilim</h1>
         <p style={{ color: 'var(--muted)', fontSize: '13.5px', marginBottom: '18px' }}>
           Bu ma&apos;lumotlar <strong>/shifokorlar</strong> katalogida bemorlar uchun ochiq ko&apos;rinadi.
           Profil faqat &quot;Katalogda ko&apos;rsatish&quot; yoqilganda chiqadi.
         </p>
 
-        {/* Reyting ko'rsatkichi */}
-        <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={{ fontSize: '30px' }}>⭐</span>
-          <div>
-            {baho ? (
-              <>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: '18px' }}>{baho.ortacha.toFixed(1)} / 5</p>
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '12.5px' }}>{baho.soni} ta bemor bahosi asosida</p>
-              </>
-            ) : (
-              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13.5px' }}>Hali baho yo&apos;q — bemorlar javob olgach baho bera oladi.</p>
-            )}
-          </div>
-        </div>
+        {/* Profil hero — ko'rgazma karta (Lordbank referens) */}
+        {(() => {
+          const chip = { display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '999px', padding: '5px 11px', color: 'var(--ink-soft)' } as React.CSSProperties
+          const bosh = (fullName || 'Sh').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()
+          return (
+            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <span className="avatar" style={{ width: 60, height: 60, fontSize: 22, flexShrink: 0 }}>{bosh}</span>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ fontSize: '18px', fontWeight: 800 }}>{fullName || 'Ismingiz'}</div>
+                <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '2px' }}>
+                  {[mutaxassislik, ilmiyDaraja].filter(Boolean).join(' · ') || 'Mutaxassislik ko\'rsatilmagan'}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '11px' }}>
+                  {tajribaYil && <span style={chip}><Briefcase size={13} strokeWidth={2} /> {tajribaYil} yil tajriba</span>}
+                  <span style={{ ...chip, color: baho ? '#d97706' : 'var(--muted)' }}>
+                    <Star size={13} strokeWidth={2} fill={baho ? 'currentColor' : 'none'} /> {baho ? `${baho.ortacha.toFixed(1)} (${baho.soni})` : 'Baho yo\'q'}
+                  </span>
+                  {qabulNarxi && <span style={chip}><Wallet size={13} strokeWidth={2} /> {qabulNarxi}</span>}
+                  <span style={{ ...chip, color: ochiq ? 'var(--good)' : 'var(--muted)' }}>
+                    {ochiq ? <Eye size={13} strokeWidth={2} /> : <EyeOff size={13} strokeWidth={2} />} {ochiq ? 'Katalogda ko\'rinadi' : 'Yashirin'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Asosiy ma'lumotlar */}
         <div style={card}>
@@ -239,8 +252,8 @@ export default function OchiqProfilPage() {
                 onChange={(e) => setXizmatlar((arr) => arr.map((v, j) => (j === i ? { ...v, narx: e.target.value } : v)))} />
               <button onClick={() => setXizmatlar((arr) => arr.filter((_, j) => j !== i))} style={{
                 background: 'var(--surface-2)', color: 'var(--danger)', border: '1px solid var(--line)',
-                borderRadius: '8px', padding: '0 10px', cursor: 'pointer', fontSize: '13px',
-              }}>🗑️</button>
+                borderRadius: '8px', padding: '0 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+              }}><Trash2 size={15} strokeWidth={2} /></button>
             </div>
           ))}
         </div>
