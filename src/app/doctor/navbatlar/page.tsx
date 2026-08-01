@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { HAFTA_KUNLARI, sanaISO } from '@/lib/navbatSlotlar'
+import { Phone, MessageSquare, Calendar, Archive, ChevronUp, ChevronDown, CalendarClock, AlertTriangle } from 'lucide-react'
 
 type Navbat = {
   id: string; patient_id: string; sana: string; vaqt: string; holat: string; izoh: string | null
@@ -127,11 +128,11 @@ export default function DoctorNavbatlarPage() {
         <div style={{ flex: 1, minWidth: '140px' }}>
           <div style={{ fontSize: '13.5px', fontWeight: 600 }}>{bemor?.name ?? 'Bemor'}</div>
           <div style={{ fontSize: '11.5px', color: 'var(--muted)', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {bemor?.telefon && <span>📞 {bemor.telefon}</span>}
-            {n.izoh && <span>💬 {n.izoh}</span>}
+            {bemor?.telefon && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Phone size={12} strokeWidth={2} /> {bemor.telefon}</span>}
+            {n.izoh && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MessageSquare size={12} strokeWidth={2} /> {n.izoh}</span>}
           </div>
         </div>
-        <span style={{ color: h.color, fontSize: '12px', fontWeight: 700 }}>{h.text}</span>
+        <span style={{ color: h.color, fontSize: '11.5px', fontWeight: 800, background: `color-mix(in srgb, ${h.color} 15%, transparent)`, borderRadius: '999px', padding: '3px 10px', whiteSpace: 'nowrap' }}>{h.text}</span>
         {n.holat === 'kutilmoqda' && (
           <button onClick={() => holatOzgartir(n, 'tasdiqlandi')} className="btn-animated" style={{
             background: 'var(--good)', color: 'white', border: 'none', borderRadius: '999px',
@@ -157,7 +158,7 @@ export default function DoctorNavbatlarPage() {
   return (
     <AppShell title="Navbatlar">
       <div className="fade-in mx-auto max-w-[720px] px-4 py-6 sm:px-8">
-        <h1 style={{ fontSize: '24px', margin: '0 0 6px' }}>🗓 Navbatlar</h1>
+        <h1 style={{ fontSize: '24px', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '9px' }}><CalendarClock size={24} strokeWidth={2} /> Navbatlar</h1>
         <p style={{ color: 'var(--muted)', fontSize: '13.5px', marginBottom: '18px' }}>
           Bemorlar katalog orqali qabulingizga onlayn yoziladi. Ish jadvalingizni belgilang.
         </p>
@@ -200,9 +201,10 @@ export default function DoctorNavbatlarPage() {
             </button>
           </div>
           {!profilBor && (
-            <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--warn)' }}>
-              ⚠️ Katalog profilingiz hali yo&apos;q — jadvalni saqlasangiz profil yaratiladi, lekin bemorlarga ko&apos;rinishi uchun{' '}
-              <a href="/doctor/ochiq-profil" style={{ color: 'var(--accent)' }}>Katalogdagi profilim</a> sahifasida to&apos;ldirib, yoqib qo&apos;ying.
+            <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--warn)', display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+              <AlertTriangle size={14} strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>Katalog profilingiz hali yo&apos;q — jadvalni saqlasangiz profil yaratiladi, lekin bemorlarga ko&apos;rinishi uchun{' '}
+              <a href="/doctor/ochiq-profil" style={{ color: 'var(--accent)' }}>Katalogdagi profilim</a> sahifasida to&apos;ldirib, yoqib qo&apos;ying.</span>
             </p>
           )}
         </div>
@@ -212,14 +214,17 @@ export default function DoctorNavbatlarPage() {
           <>
             {guruhlar.length === 0 ? (
               <div style={{ ...card, textAlign: 'center', padding: '36px 20px' }}>
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🗓</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', color: 'var(--muted)' }}><CalendarClock size={36} strokeWidth={1.5} /></div>
                 <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13.5px' }}>Kelgusi navbatlar yo&apos;q.</p>
               </div>
             ) : guruhlar.map((g) => (
               <div key={g.sana} style={card}>
-                <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 800 }}>
-                  📅 {g.sana}{g.sana === bugun ? ' — bugun' : ''}
-                  <span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: '12.5px' }}> · {g.royxat.length} ta navbat</span>
+                <p style={{ margin: '0 0 8px', fontSize: '14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Calendar size={15} strokeWidth={2} /> {g.sana}{g.sana === bugun ? ' — bugun' : ''}
+                  <span style={{
+                    minWidth: '22px', height: '22px', borderRadius: '999px', background: 'var(--ink)', color: 'var(--bg)',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, padding: '0 6px',
+                  }}>{g.royxat.length}</span>
                 </p>
                 {g.royxat.map((n) => <NavbatQator key={n.id} n={n} />)}
               </div>
@@ -229,9 +234,9 @@ export default function DoctorNavbatlarPage() {
               <>
                 <button onClick={() => setOtganlarKorsat((v) => !v)} className="btn-animated" style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--muted)', fontSize: '13px', fontWeight: 600,
+                  color: 'var(--muted)', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px',
                 }}>
-                  🗄️ O&apos;tgan / bekor qilingan ({otganlar.length}) {otganlarKorsat ? '▲' : '▼'}
+                  <Archive size={15} strokeWidth={2} /> O&apos;tgan / bekor qilingan ({otganlar.length}) {otganlarKorsat ? <ChevronUp size={14} strokeWidth={2.4} /> : <ChevronDown size={14} strokeWidth={2.4} />}
                 </button>
                 {otganlarKorsat && (
                   <div style={{ ...card, marginTop: '10px' }}>
