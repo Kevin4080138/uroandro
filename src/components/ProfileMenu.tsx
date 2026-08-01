@@ -64,10 +64,12 @@ export function ProfileMenu() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 0,
         }}
       >
-        {profile.avatar_url
-          ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : (() => { const h = hayvonTop(avatarIkon); return h ? <h.Icon size={19} strokeWidth={2} /> : harf })()
-        }
+        {(() => {
+          const h = hayvonTop(avatarIkon)
+          if (h) return <h.Icon size={19} strokeWidth={2} />
+          if (profile.avatar_url) return <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          return harf
+        })()}
       </button>
 
       {ochiq && (

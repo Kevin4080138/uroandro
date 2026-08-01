@@ -124,7 +124,7 @@ export default function ProfilPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
-      <div className="mx-auto max-w-[600px] px-5 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto max-w-[900px] px-5 py-6 sm:px-8 sm:py-8">
 
         <div className="rise" style={{
           marginBottom: '20px',
@@ -137,10 +137,10 @@ export default function ProfilPage() {
               background: 'rgba(255,255,255,.2)', color: 'white', border: 'none', cursor: 'pointer', padding: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             }}>
-              {profile.avatar_url
-                ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : tanlanganHayvon
-                  ? <tanlanganHayvon.Icon size={32} strokeWidth={2} />
+              {tanlanganHayvon
+                ? <tanlanganHayvon.Icon size={32} strokeWidth={2} />
+                : profile.avatar_url
+                  ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <span style={{ fontSize: '24px', fontWeight: 800 }}>{harf}</span>}
               <span style={{
                 position: 'absolute', right: '-1px', bottom: '-1px', width: '22px', height: '22px', borderRadius: '50%',
@@ -159,25 +159,23 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          {/* Stat chiplar (Lordbank referens) */}
-          {profile.role === 'student' && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-              {([
-                { Icon: ClipboardCheck, nom: 'Testlar', qiymat: `${natijalarList.length}` },
-                { Icon: BarChart3, nom: "O'rtacha", qiymat: `${ortacha}%` },
-                { Icon: Flame, nom: 'Seriya', qiymat: `${seriyaKun} kun` },
-              ] as { Icon: LucideIcon; nom: string; qiymat: string }[]).map((s) => (
-                <div key={s.nom} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '7px',
-                  background: 'rgba(255,255,255,.18)', borderRadius: '999px', padding: '6px 12px',
-                }}>
-                  <s.Icon size={14} strokeWidth={2} />
-                  <span style={{ fontSize: '13px', fontWeight: 800 }}>{s.qiymat}</span>
-                  <span style={{ fontSize: '11px', opacity: .8 }}>{s.nom}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Stat chiplar (Lordbank referens) — barcha rollar uchun */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+            {([
+              { Icon: ClipboardCheck, nom: 'Testlar', qiymat: `${natijalarList.length}` },
+              { Icon: BarChart3, nom: "O'rtacha", qiymat: `${ortacha}%` },
+              { Icon: Flame, nom: 'Seriya', qiymat: `${seriyaKun} kun` },
+            ] as { Icon: LucideIcon; nom: string; qiymat: string }[]).map((s) => (
+              <div key={s.nom} style={{
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
+                background: 'rgba(255,255,255,.18)', borderRadius: '999px', padding: '6px 12px',
+              }}>
+                <s.Icon size={14} strokeWidth={2} />
+                <span style={{ fontSize: '13px', fontWeight: 800 }}>{s.qiymat}</span>
+                <span style={{ fontSize: '11px', opacity: .8 }}>{s.nom}</span>
+              </div>
+            ))}
+          </div>
 
           {/* Hayvon belgi tanlagich */}
           {ikonTanlash && (
@@ -229,20 +227,18 @@ export default function ProfilPage() {
           </button>
         </div>
 
-        <div className="rise" style={{
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-          overflow: 'hidden', marginBottom: '16px',
-        }}>
-          {BANDLAR.map((b, i) => (
+        <div className="rise grid grid-cols-1 min-[720px]:grid-cols-2 gap-2.5" style={{ marginBottom: '16px' }}>
+          {BANDLAR.map((b) => (
             <a
               key={b.label}
               href={b.href}
               target={b.tashqi ? '_blank' : undefined}
               rel={b.tashqi ? 'noopener noreferrer' : undefined}
-              className="row-hover"
+              className="row-hover lift"
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px',
-                borderTop: i === 0 ? 'none' : '1px solid var(--line)', textDecoration: 'none', color: 'var(--ink)',
+                background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+                textDecoration: 'none', color: 'var(--ink)',
               }}
             >
               <span style={{ display: 'flex', color: 'var(--ink-soft)' }}><b.Icon size={18} strokeWidth={2} /></span>
