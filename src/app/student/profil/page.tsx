@@ -8,13 +8,16 @@ import { useTheme } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase'
 import { RankMini } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
+import { useSeriya } from '@/lib/talim/seriya'
+import { HAYVONLAR, hayvonTop } from '@/lib/hayvonAvatar'
 import {
   User, BarChart3, Award, Bell, Settings, Gift, Info, MessageSquare, Send,
   Phone, BookOpen, HelpCircle, FileText, Sun, Moon, ChevronRight, LogOut, Trash2,
-  type LucideIcon,
+  Flame, ClipboardCheck, Check, Pencil, type LucideIcon,
 } from 'lucide-react'
 
 type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
+type NatijaQ = { dars_slug: string; foiz?: number }
 
 const ROL_NOMI: Record<string, string> = {
   student: 'Talaba', doctor: 'Shifokor', patient: 'Bemor', admin: 'Admin',
@@ -40,8 +43,11 @@ export default function ProfilPage() {
   const router = useRouter()
   const supabase = createClient()
   const { theme, toggle } = useTheme()
+  const { seriya } = useSeriya()
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
+  const [natijalarList, setNatijalarList] = useState<NatijaQ[]>([])
+  const [avatarIkon, setAvatarIkon] = useState<string | null>(null)
+  const [ikonTanlash, setIkonTanlash] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState(false)
   const [parolModal, setParolModal] = useState(false)
   const [parol, setParol] = useState('')
@@ -52,8 +58,11 @@ export default function ProfilPage() {
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('full_name, telefon, role, avatar_url').eq('id', user.id).maybeSingle()
       setProfile(data as Profile)
-      const { data: nat } = await supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id)
-      setNatijalarList(nat ?? [])
+      // avatar_ikon — yangi ustun; migratsiyadan oldin bo'lmasligi mumkin (xato bermaydi)
+      const { data: ikonData } = await supabase.from('profiles').select('avatar_ikon').eq('id', user.id).maybeSingle()
+      setAvatarIkon((ikonData as { avatar_ikon?: string | null } | null)?.avatar_ikon ?? null)
+      const { data: nat } = await supabase.from('talim_natijalari').select('dars_slug, foiz').eq('student_id', user.id)
+      setNatijalarList((nat as NatijaQ[]) ?? [])
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -61,6 +70,16 @@ export default function ProfilPage() {
   const chiqish = async () => {
     await supabase.auth.signOut()
     router.push('/auth/login')
+  }
+
+  // Hayvon avatarini tanlash/o'chirish (qayta bosilsa — bekor qiladi)
+  const hayvonTanla = async (key: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const yangi = avatarIkon === key ? null : key
+    setAvatarIkon(yangi)
+    setIkonTanlash(false)
+    await supabase.from('profiles').update({ avatar_ikon: yangi }).eq('id', user.id)
   }
 
   const hisobniOchir = () => {
@@ -98,6 +117,9 @@ export default function ProfilPage() {
   }
 
   const harf = (profile.full_name?.trim()?.[0] ?? '?').toUpperCase()
+  const tanlanganHayvon = hayvonTop(avatarIkon)
+  const ortacha = natijalarList.length ? Math.round(natijalarList.reduce((s, n) => s + (n.foiz ?? 0), 0) / natijalarList.length) : 0
+  const seriyaKun = seriya?.joriy ?? 0
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -105,29 +127,83 @@ export default function ProfilPage() {
       <div className="mx-auto max-w-[600px] px-5 py-6 sm:px-8 sm:py-8">
 
         <div className="rise" style={{
-          display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px',
-          background: 'linear-gradient(135deg, #2563eb, #0891b2)', borderRadius: '18px', padding: '22px 22px',
+          marginBottom: '20px',
+          background: 'linear-gradient(135deg, var(--accent), var(--accent-2))', borderRadius: '18px', padding: '22px',
           color: 'white',
         }}>
-          <div style={{
-            width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,.2)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 800, flexShrink: 0,
-            overflow: 'hidden',
-          }}>
-            {profile.avatar_url
-              ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : harf
-            }
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button onClick={() => setIkonTanlash((v) => !v)} aria-label="Avatar belgisini tanlash" style={{
+              position: 'relative', width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0,
+              background: 'rgba(255,255,255,.2)', color: 'white', border: 'none', cursor: 'pointer', padding: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+            }}>
+              {profile.avatar_url
+                ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : tanlanganHayvon
+                  ? <tanlanganHayvon.Icon size={32} strokeWidth={2} />
+                  : <span style={{ fontSize: '24px', fontWeight: 800 }}>{harf}</span>}
+              <span style={{
+                position: 'absolute', right: '-1px', bottom: '-1px', width: '22px', height: '22px', borderRadius: '50%',
+                background: 'white', color: 'var(--accent)', border: '2px solid var(--accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible',
+              }}><Pencil size={11} strokeWidth={2.4} /></span>
+            </button>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{profile.full_name}</h2>
+              <p style={{ margin: '3px 0 6px', fontSize: '13px', opacity: .85 }}>
+                {profile.telefon ?? ROL_NOMI[profile.role] ?? profile.role}
+              </p>
+              {profile.role === 'student' && (
+                <RankMini rank={getRank(getProgressData(natijalarList))} />
+              )}
+            </div>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{profile.full_name}</h2>
-            <p style={{ margin: '3px 0 6px', fontSize: '13px', opacity: .85 }}>
-              {profile.telefon ?? ROL_NOMI[profile.role] ?? profile.role}
-            </p>
-            {profile.role === 'student' && (
-              <RankMini rank={getRank(getProgressData(natijalarList))} />
-            )}
-          </div>
+
+          {/* Stat chiplar (Lordbank referens) */}
+          {profile.role === 'student' && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+              {([
+                { Icon: ClipboardCheck, nom: 'Testlar', qiymat: `${natijalarList.length}` },
+                { Icon: BarChart3, nom: "O'rtacha", qiymat: `${ortacha}%` },
+                { Icon: Flame, nom: 'Seriya', qiymat: `${seriyaKun} kun` },
+              ] as { Icon: LucideIcon; nom: string; qiymat: string }[]).map((s) => (
+                <div key={s.nom} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '7px',
+                  background: 'rgba(255,255,255,.18)', borderRadius: '999px', padding: '6px 12px',
+                }}>
+                  <s.Icon size={14} strokeWidth={2} />
+                  <span style={{ fontSize: '13px', fontWeight: 800 }}>{s.qiymat}</span>
+                  <span style={{ fontSize: '11px', opacity: .8 }}>{s.nom}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Hayvon belgi tanlagich */}
+          {ikonTanlash && (
+            <div className="rise" style={{ marginTop: '16px', background: 'rgba(255,255,255,.15)', borderRadius: '14px', padding: '14px' }}>
+              <p style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 700, opacity: .9 }}>
+                Belgi tanlang <span style={{ opacity: .7, fontWeight: 500 }}>— qayta bossangiz bekor bo'ladi</span>
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                {HAYVONLAR.map((h) => {
+                  const faol = avatarIkon === h.key
+                  return (
+                    <button key={h.key} onClick={() => hayvonTanla(h.key)} aria-label={h.nom} title={h.nom} style={{
+                      aspectRatio: '1', borderRadius: '12px', cursor: 'pointer',
+                      background: faol ? 'white' : 'rgba(255,255,255,.12)',
+                      color: faol ? 'var(--accent)' : 'white',
+                      border: faol ? 'none' : '1px solid rgba(255,255,255,.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                    }}>
+                      <h.Icon size={24} strokeWidth={2} />
+                      {faol && <span style={{ position: 'absolute', right: 3, top: 3 }}><Check size={12} strokeWidth={3} /></span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rise" style={{

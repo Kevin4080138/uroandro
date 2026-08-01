@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { User, Bell, LogOut, GraduationCap, Stethoscope, UserRound, Wrench, type LucideIcon } from 'lucide-react'
+import { hayvonTop } from '@/lib/hayvonAvatar'
 
 type Profile = { full_name: string; role: string; avatar_url: string | null }
 
@@ -18,6 +19,7 @@ export function ProfileMenu() {
   const router = useRouter()
   const supabase = createClient()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [avatarIkon, setAvatarIkon] = useState<string | null>(null)
   const [ochiq, setOchiq] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -26,6 +28,9 @@ export function ProfileMenu() {
       if (!user) return
       const { data } = await supabase.from('profiles').select('full_name, role, avatar_url').eq('id', user.id).maybeSingle()
       if (data) setProfile(data as Profile)
+      // avatar_ikon — yangi ustun; migratsiyadan oldin bo'lmasligi mumkin (alohida, tolerant)
+      const { data: ikonData } = await supabase.from('profiles').select('avatar_ikon').eq('id', user.id).maybeSingle()
+      setAvatarIkon((ikonData as { avatar_ikon?: string | null } | null)?.avatar_ikon ?? null)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -61,7 +66,7 @@ export function ProfileMenu() {
       >
         {profile.avatar_url
           ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : harf
+          : (() => { const h = hayvonTop(avatarIkon); return h ? <h.Icon size={19} strokeWidth={2} /> : harf })()
         }
       </button>
 
