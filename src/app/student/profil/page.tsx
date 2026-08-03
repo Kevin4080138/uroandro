@@ -10,6 +10,7 @@ import { RankMini } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
 import { useSeriya } from '@/lib/talim/seriya'
 import { HAYVONLAR, hayvonTop } from '@/lib/hayvonAvatar'
+import { ProfilStatistika } from '@/components/ProfilStatistika'
 import {
   User, BarChart3, Award, Bell, Settings, Gift, Info, MessageSquare, Send,
   Phone, BookOpen, HelpCircle, FileText, Sun, Moon, ChevronRight, LogOut, Trash2,
@@ -45,6 +46,7 @@ export default function ProfilPage() {
   const { theme, toggle } = useTheme()
   const { seriya } = useSeriya()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [myId, setMyId] = useState<string | null>(null)
   const [natijalarList, setNatijalarList] = useState<NatijaQ[]>([])
   const [avatarIkon, setAvatarIkon] = useState<string | null>(null)
   const [ikonTanlash, setIkonTanlash] = useState(false)
@@ -56,6 +58,7 @@ export default function ProfilPage() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/auth/login'); return }
+      setMyId(user.id)
       const { data } = await supabase.from('profiles').select('full_name, telefon, role, avatar_url').eq('id', user.id).maybeSingle()
       setProfile(data as Profile)
       // avatar_ikon — yangi ustun; migratsiyadan oldin bo'lmasligi mumkin (xato bermaydi)
@@ -203,6 +206,8 @@ export default function ProfilPage() {
             </div>
           )}
         </div>
+
+        {myId && <ProfilStatistika studentId={myId} />}
 
         <div className="rise" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
