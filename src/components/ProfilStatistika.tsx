@@ -82,7 +82,7 @@ export function ProfilStatistika({ studentId }: { studentId: string }) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={gaugeData} cx="50%" cy="82%" startAngle={180} endAngle={0} innerRadius={62} outerRadius={88} dataKey="v" stroke="none">
-                <Cell fill="#5f9e2e" />
+                <Cell fill="#2563EB" />
                 <Cell fill="rgba(130,130,130,.2)" />
               </Pie>
             </PieChart>

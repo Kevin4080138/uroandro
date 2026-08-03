@@ -38,9 +38,9 @@
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
 }
 
-/* Talaba bo'limi — Elevate ruhidagi pastel palitra (faqat /student/*).
-   Aksent o'qiladigan yashil: matn ham, oq-matnli to'ldirish ham ishlaydi.
-   Shifokor/bemor/admin ko'k palitrada qoladi (klinik jiddiylik). */
+/* Talaba bo'limi — iliq fon + havorang ko'k aksent (faqat /student/*).
+   Aksent login sahifasidagi ko'k oilasi; gradient ko'k→cyan (havorang).
+   Shifokor/bemor/admin ko'k palitrada qoladi. */
 .talaba-palitra {
   --bg: #F4F3EE;
   --surface: #FFFFFF;
@@ -49,9 +49,9 @@
   --ink-soft: #4D4D47;
   --muted: #8C8B81;
   --line: #E6E3D9;
-  --accent: #4D7C0F;
-  --accent-soft: #EAF5D6;
-  --accent-2: #8A5BC7;
+  --accent: #2563EB;
+  --accent-soft: #E0EAFE;
+  --accent-2: #0891B2;
   --header: #F4F3EE;
   --shadow: 0 1px 3px rgba(32,33,36,.05), 0 12px 28px -12px rgba(32,33,36,.15);
 }
@@ -63,9 +63,9 @@
   --ink-soft: #D4D2C8;
   --muted: #9A988C;
   --line: #2A2A20;
-  --accent: #7CB342;
-  --accent-soft: rgba(124,179,66,.15);
-  --accent-2: #9B6FD4;
+  --accent: #60A5FA;
+  --accent-soft: rgba(96,165,250,.15);
+  --accent-2: #22D3EE;
   --header: #1C1C16;
   --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -8px rgba(0,0,0,.55);
 }
