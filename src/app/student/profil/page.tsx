@@ -127,7 +127,7 @@ export default function ProfilPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
-      <div className="mx-auto max-w-[900px] px-5 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto max-w-[1000px] px-5 py-6 sm:px-8 sm:py-8">
 
         <div className="rise" style={{
           marginBottom: '20px',

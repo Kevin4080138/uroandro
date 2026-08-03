@@ -72,8 +72,7 @@ export function ProfilStatistika({ studentId }: { studentId: string }) {
   const gaugeData = [{ v: Math.max(foiz, 0.01) }, { v: Math.max(100 - foiz, 0.01) }]
 
   return (
-    <div className="prof-stat" style={{ display: 'grid', gap: '12px', marginBottom: '16px', gridTemplateColumns: '1fr' }}>
-      <style>{`@media (min-width: 720px) { .prof-stat { grid-template-columns: 1fr 1fr; } .prof-stat .prof-full { grid-column: 1 / -1; } }`}</style>
+    <div className="grid grid-cols-1 min-[720px]:grid-cols-2 gap-3" style={{ marginBottom: '16px' }}>
 
       {/* O'zlashtirish gauge */}
       <div style={karta}>
@@ -119,7 +118,7 @@ export function ProfilStatistika({ studentId }: { studentId: string }) {
       </div>
 
       {/* Bosqich breakdown — to'liq kenglik */}
-      <div className="prof-full" style={karta}>
+      <div className="min-[720px]:col-span-2" style={karta}>
         <h3 style={{ ...sarlavha, display: 'flex', alignItems: 'center', gap: '7px' }}>
           <TrendingUp size={15} strokeWidth={2} /> Bosqichlar bo&apos;yicha
         </h3>

@@ -55,6 +55,7 @@ export default function OchiqProfilPage() {
 
   const [baho, setBaho] = useState<{ ortacha: number; soni: number } | null>(null)
   const [mezonlar, setMezonlar] = useState<Mezon[]>([])
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -63,13 +64,14 @@ export default function OchiqProfilPage() {
       setMyId(user.id)
 
       const [{ data: prof }, { data: mavjud }, { data: kl }, { data: bah }] = await Promise.all([
-        supabase.from('profiles').select('full_name, telefon').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, telefon, avatar_url').eq('id', user.id).single(),
         supabase.from('shifokor_profillari').select('*').eq('doctor_id', user.id).maybeSingle(),
         supabase.from('klinikalar').select('id, nom, manzil').order('nom'),
         supabase.from('baholar').select('muomala, samara, tushuntirish, kutish').eq('doctor_id', user.id),
       ])
 
       setKlinikalar((kl as Klinika[]) ?? [])
+      setAvatarUrl((prof as { avatar_url?: string | null } | null)?.avatar_url ?? null)
       if (bah && bah.length > 0) {
         const jami = bah.reduce((s, b) => s + (b.muomala + b.samara + b.tushuntirish + b.kutish) / 4, 0)
         setBaho({ ortacha: jami / bah.length, soni: bah.length })
@@ -145,7 +147,7 @@ export default function OchiqProfilPage() {
 
   return (
     <AppShell title="Katalogdagi profilim">
-      <div className="fade-in mx-auto max-w-[720px] px-4 py-6 sm:px-8">
+      <div className="fade-in mx-auto max-w-[1000px] px-4 py-6 sm:px-8">
         <h1 style={{ fontSize: '24px', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '9px' }}><Globe size={24} strokeWidth={2} /> Katalogdagi profilim</h1>
         <p style={{ color: 'var(--muted)', fontSize: '13.5px', marginBottom: '18px' }}>
           Bu ma&apos;lumotlar <strong>/shifokorlar</strong> katalogida bemorlar uchun ochiq ko&apos;rinadi.
@@ -157,8 +159,10 @@ export default function OchiqProfilPage() {
           const chip = { display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '999px', padding: '5px 11px', color: 'var(--ink-soft)' } as React.CSSProperties
           const bosh = (fullName || 'Sh').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()
           return (
-            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <span className="avatar" style={{ width: 60, height: 60, fontSize: 22, flexShrink: 0 }}>{bosh}</span>
+            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt={fullName} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--line)' }} />
+                : <span className="avatar" style={{ width: 80, height: 80, fontSize: 26, flexShrink: 0 }}>{bosh}</span>}
               <div style={{ flex: 1, minWidth: 180 }}>
                 <div style={{ fontSize: '18px', fontWeight: 800 }}>{fullName || 'Ismingiz'}</div>
                 <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '2px' }}>
