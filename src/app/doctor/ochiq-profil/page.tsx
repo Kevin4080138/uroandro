@@ -5,8 +5,17 @@ import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { Globe, Briefcase, Star, Wallet, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 type Xizmat = { nom: string; narx: string }
+type Mezon = { nom: string; qiymat: number; rang: string }
+
+const REYTING_MEZON: { kalit: 'muomala' | 'samara' | 'tushuntirish' | 'kutish'; nom: string; rang: string }[] = [
+  { kalit: 'muomala', nom: 'Muomala', rang: '#3b82f6' },
+  { kalit: 'samara', nom: 'Samaradorlik', rang: '#10b981' },
+  { kalit: 'tushuntirish', nom: 'Tushuntirish', rang: '#8b5cf6' },
+  { kalit: 'kutish', nom: 'Kutish vaqti', rang: '#f59e0b' },
+]
 type Klinika = { id: string; nom: string; manzil: string | null }
 
 const input = {
@@ -45,6 +54,7 @@ export default function OchiqProfilPage() {
   const [klinikaManzil, setKlinikaManzil] = useState('')
 
   const [baho, setBaho] = useState<{ ortacha: number; soni: number } | null>(null)
+  const [mezonlar, setMezonlar] = useState<Mezon[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -63,6 +73,10 @@ export default function OchiqProfilPage() {
       if (bah && bah.length > 0) {
         const jami = bah.reduce((s, b) => s + (b.muomala + b.samara + b.tushuntirish + b.kutish) / 4, 0)
         setBaho({ ortacha: jami / bah.length, soni: bah.length })
+        setMezonlar(REYTING_MEZON.map((mz) => ({
+          nom: mz.nom, rang: mz.rang,
+          qiymat: bah.reduce((s, b: Record<string, number>) => s + (b[mz.kalit] ?? 0), 0) / bah.length,
+        })))
       }
 
       if (mavjud) {
@@ -164,6 +178,41 @@ export default function OchiqProfilPage() {
             </div>
           )
         })()}
+
+        {/* Reyting statistikasi (Lordbank referens) — gauge + mezonlar */}
+        {baho && mezonlar.length > 0 && (
+          <div style={{ ...card, display: 'grid', gap: '18px', gridTemplateColumns: '1fr' }} className="prof-reyting">
+            <style>{`@media (min-width: 640px) { .prof-reyting { grid-template-columns: 190px 1fr; align-items: center; } }`}</style>
+            <div style={{ position: 'relative', width: '100%', height: 140 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={[{ v: Math.max(baho.ortacha / 5 * 100, 0.01) }, { v: Math.max(100 - baho.ortacha / 5 * 100, 0.01) }]}
+                    cx="50%" cy="82%" startAngle={180} endAngle={0} innerRadius={58} outerRadius={82} dataKey="v" stroke="none">
+                    <Cell fill="#f59e0b" />
+                    <Cell fill="rgba(130,130,130,.2)" />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 4, textAlign: 'center', pointerEvents: 'none' }}>
+                <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: '#d97706' }}>{baho.ortacha.toFixed(1)}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>5 dan · {baho.soni} baho</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
+              {mezonlar.map((d) => (
+                <div key={d.nom}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--ink-soft)' }}>{d.nom}</span>
+                    <span style={{ fontWeight: 700, color: d.rang, fontVariantNumeric: 'tabular-nums' }}>{d.qiymat.toFixed(1)}</span>
+                  </div>
+                  <div style={{ background: 'var(--surface-2)', borderRadius: '6px', height: '9px', overflow: 'hidden' }}>
+                    <div style={{ width: `${(d.qiymat / 5) * 100}%`, height: '100%', background: d.rang, borderRadius: '6px', transition: 'width .4s' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Asosiy ma'lumotlar */}
         <div style={card}>
