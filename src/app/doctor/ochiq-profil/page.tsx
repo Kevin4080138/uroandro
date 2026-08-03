@@ -154,69 +154,87 @@ export default function OchiqProfilPage() {
           Profil faqat &quot;Katalogda ko&apos;rsatish&quot; yoqilganda chiqadi.
         </p>
 
-        {/* Profil hero — ko'rgazma karta (Lordbank referens) */}
+        {/* Bento: rasm kartasi + reyting widgetlari (Lordbank) */}
         {(() => {
-          const chip = { display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 700, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '999px', padding: '5px 11px', color: 'var(--ink-soft)' } as React.CSSProperties
           const bosh = (fullName || 'Sh').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()
+          const chip = { display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11.5px', fontWeight: 700, background: 'rgba(255,255,255,.2)', borderRadius: '999px', padding: '5px 10px', color: 'white' } as React.CSSProperties
+          const bor = !!(baho && mezonlar.length > 0)
+          const gaugeFoiz = baho ? baho.ortacha / 5 * 100 : 0
           return (
-            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
-              {avatarUrl
-                ? <img src={avatarUrl} alt={fullName} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--line)' }} />
-                : <span className="avatar" style={{ width: 80, height: 80, fontSize: 26, flexShrink: 0 }}>{bosh}</span>}
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ fontSize: '18px', fontWeight: 800 }}>{fullName || 'Ismingiz'}</div>
-                <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '2px' }}>
-                  {[mutaxassislik, ilmiyDaraja].filter(Boolean).join(' · ') || 'Mutaxassislik ko\'rsatilmagan'}
+            <div className="grid grid-cols-1 min-[760px]:grid-cols-[260px_1fr_1fr] gap-3" style={{ marginBottom: '14px' }}>
+              {/* Rasm kartasi */}
+              <div style={{ background: 'linear-gradient(160deg, var(--accent), var(--accent-2))', borderRadius: '18px', padding: '18px', color: 'white', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minHeight: '150px', borderRadius: '14px', background: 'rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {avatarUrl
+                    ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: '48px', fontWeight: 800 }}>{bosh}</span>}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '11px' }}>
-                  {tajribaYil && <span style={chip}><Briefcase size={13} strokeWidth={2} /> {tajribaYil} yil tajriba</span>}
-                  <span style={{ ...chip, color: baho ? '#d97706' : 'var(--muted)' }}>
-                    <Star size={13} strokeWidth={2} fill={baho ? 'currentColor' : 'none'} /> {baho ? `${baho.ortacha.toFixed(1)} (${baho.soni})` : 'Baho yo\'q'}
-                  </span>
-                  {qabulNarxi && <span style={chip}><Wallet size={13} strokeWidth={2} /> {qabulNarxi}</span>}
-                  <span style={{ ...chip, color: ochiq ? 'var(--good)' : 'var(--muted)' }}>
-                    {ochiq ? <Eye size={13} strokeWidth={2} /> : <EyeOff size={13} strokeWidth={2} />} {ochiq ? 'Katalogda ko\'rinadi' : 'Yashirin'}
-                  </span>
+                <div style={{ marginTop: '14px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 800, lineHeight: 1.25 }}>{fullName || 'Ismingiz'}</div>
+                  <div style={{ fontSize: '12.5px', opacity: .85, marginTop: '2px' }}>
+                    {[mutaxassislik, ilmiyDaraja].filter(Boolean).join(' · ') || 'Mutaxassislik ko\'rsatilmagan'}
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '11px' }}>
+                    {tajribaYil && <span style={chip}><Briefcase size={12} strokeWidth={2} /> {tajribaYil} yil</span>}
+                    {qabulNarxi && <span style={chip}><Wallet size={12} strokeWidth={2} /> {qabulNarxi}</span>}
+                    <span style={chip}>{ochiq ? <Eye size={12} strokeWidth={2} /> : <EyeOff size={12} strokeWidth={2} />} {ochiq ? 'Katalogda' : 'Yashirin'}</span>
+                  </div>
                 </div>
               </div>
+
+              {bor ? (
+                <>
+                  {/* Reyting gauge */}
+                  <div style={card}>
+                    <h3 style={{ fontSize: '13px', fontWeight: 800, margin: '0 0 6px' }}>Reyting</h3>
+                    <div style={{ position: 'relative', width: '100%', height: 140 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={[{ v: Math.max(gaugeFoiz, 0.01) }, { v: Math.max(100 - gaugeFoiz, 0.01) }]}
+                            cx="50%" cy="82%" startAngle={180} endAngle={0} innerRadius={58} outerRadius={82} dataKey="v" stroke="none">
+                            <Cell fill="#f59e0b" />
+                            <Cell fill="rgba(130,130,130,.2)" />
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 4, textAlign: 'center', pointerEvents: 'none' }}>
+                        <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: '#d97706' }}>{baho!.ortacha.toFixed(1)}</div>
+                        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>5 dan · {baho!.soni} baho</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mezonlar */}
+                  <div style={card}>
+                    <h3 style={{ fontSize: '13px', fontWeight: 800, margin: '0 0 14px' }}>Mezonlar bo&apos;yicha</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
+                      {mezonlar.map((d) => (
+                        <div key={d.nom}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--ink-soft)' }}>{d.nom}</span>
+                            <span style={{ fontWeight: 700, color: d.rang, fontVariantNumeric: 'tabular-nums' }}>{d.qiymat.toFixed(1)}</span>
+                          </div>
+                          <div style={{ background: 'var(--surface-2)', borderRadius: '6px', height: '9px', overflow: 'hidden' }}>
+                            <div style={{ width: `${(d.qiymat / 5) * 100}%`, height: '100%', background: d.rang, borderRadius: '6px', transition: 'width .4s' }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="min-[760px]:col-span-2" style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  <div>
+                    <Star size={28} strokeWidth={1.5} style={{ color: 'var(--muted)' }} />
+                    <p style={{ margin: '8px 0 0', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+                      Hali baho yo&apos;q — bemorlar javob olgach<br />reyting va mezonlar shu yerda ko&apos;rinadi.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )
         })()}
-
-        {/* Reyting statistikasi (Lordbank referens) — gauge + mezonlar */}
-        {baho && mezonlar.length > 0 && (
-          <div style={{ ...card, display: 'grid', gap: '18px', gridTemplateColumns: '1fr' }} className="prof-reyting">
-            <style>{`@media (min-width: 640px) { .prof-reyting { grid-template-columns: 190px 1fr; align-items: center; } }`}</style>
-            <div style={{ position: 'relative', width: '100%', height: 140 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={[{ v: Math.max(baho.ortacha / 5 * 100, 0.01) }, { v: Math.max(100 - baho.ortacha / 5 * 100, 0.01) }]}
-                    cx="50%" cy="82%" startAngle={180} endAngle={0} innerRadius={58} outerRadius={82} dataKey="v" stroke="none">
-                    <Cell fill="#f59e0b" />
-                    <Cell fill="rgba(130,130,130,.2)" />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 4, textAlign: 'center', pointerEvents: 'none' }}>
-                <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: '#d97706' }}>{baho.ortacha.toFixed(1)}</div>
-                <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>5 dan · {baho.soni} baho</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
-              {mezonlar.map((d) => (
-                <div key={d.nom}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--ink-soft)' }}>{d.nom}</span>
-                    <span style={{ fontWeight: 700, color: d.rang, fontVariantNumeric: 'tabular-nums' }}>{d.qiymat.toFixed(1)}</span>
-                  </div>
-                  <div style={{ background: 'var(--surface-2)', borderRadius: '6px', height: '9px', overflow: 'hidden' }}>
-                    <div style={{ width: `${(d.qiymat / 5) * 100}%`, height: '100%', background: d.rang, borderRadius: '6px', transition: 'width .4s' }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Asosiy ma'lumotlar */}
         <div style={card}>
