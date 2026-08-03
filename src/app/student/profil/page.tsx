@@ -14,7 +14,7 @@ import { ProfilStatistika } from '@/components/ProfilStatistika'
 import {
   User, BarChart3, Award, Bell, Settings, Gift, Info, MessageSquare, Send,
   Phone, BookOpen, HelpCircle, FileText, Sun, Moon, ChevronRight, LogOut, Trash2,
-  Flame, ClipboardCheck, Check, Pencil, type LucideIcon,
+  Check, Pencil, type LucideIcon,
 } from 'lucide-react'
 
 type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
@@ -129,85 +129,74 @@ export default function ProfilPage() {
       <Header backHref="/student/dashboard" backLabel="Bosh sahifa" />
       <div className="mx-auto max-w-[1000px] px-5 py-6 sm:px-8 sm:py-8">
 
-        <div className="rise" style={{
-          marginBottom: '20px',
-          background: 'linear-gradient(135deg, var(--accent), var(--accent-2))', borderRadius: '18px', padding: '22px',
-          color: 'white',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Bento: chapda katta rasm kartasi + o'ngda statistika widgetlari (Lordbank) */}
+        <div className="rise grid grid-cols-1 min-[760px]:grid-cols-[260px_1fr_1fr] gap-3" style={{ marginBottom: '16px' }}>
+          {/* Rasm kartasi — chap, baland */}
+          <div className="min-[760px]:row-span-2" style={{
+            background: 'linear-gradient(160deg, var(--accent), var(--accent-2))', borderRadius: '18px',
+            padding: '18px', color: 'white', display: 'flex', flexDirection: 'column',
+          }}>
             <button onClick={() => setIkonTanlash((v) => !v)} aria-label="Avatar belgisini tanlash" style={{
-              position: 'relative', width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0,
-              background: 'rgba(255,255,255,.2)', color: 'white', border: 'none', cursor: 'pointer', padding: 0,
+              position: 'relative', flex: 1, minHeight: '150px', borderRadius: '14px',
+              background: 'rgba(255,255,255,.15)', color: 'white', border: 'none', cursor: 'pointer', padding: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             }}>
               {tanlanganHayvon
-                ? <tanlanganHayvon.Icon size={32} strokeWidth={2} />
+                ? <tanlanganHayvon.Icon size={64} strokeWidth={1.5} />
                 : profile.avatar_url
                   ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: '24px', fontWeight: 800 }}>{harf}</span>}
+                  : <span style={{ fontSize: '48px', fontWeight: 800 }}>{harf}</span>}
               <span style={{
-                position: 'absolute', right: '-1px', bottom: '-1px', width: '22px', height: '22px', borderRadius: '50%',
-                background: 'white', color: 'var(--accent)', border: '2px solid var(--accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible',
-              }}><Pencil size={11} strokeWidth={2.4} /></span>
+                position: 'absolute', right: '8px', bottom: '8px', width: '26px', height: '26px', borderRadius: '50%',
+                background: 'white', color: 'var(--accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}><Pencil size={13} strokeWidth={2.4} /></span>
             </button>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{profile.full_name}</h2>
-              <p style={{ margin: '3px 0 6px', fontSize: '13px', opacity: .85 }}>
-                {profile.telefon ?? ROL_NOMI[profile.role] ?? profile.role}
-              </p>
+            <div style={{ marginTop: '14px' }}>
+              <div style={{ fontSize: '17px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.full_name}</div>
+              <div style={{ fontSize: '12.5px', opacity: .85, marginTop: '2px' }}>{ROL_NOMI[profile.role] ?? profile.role}</div>
               {profile.role === 'student' && (
-                <RankMini rank={getRank(getProgressData(natijalarList))} />
+                <div style={{ marginTop: '9px' }}><RankMini rank={getRank(getProgressData(natijalarList))} /></div>
               )}
+              <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
+                {[{ n: 'Testlar', v: `${natijalarList.length}` }, { n: "O'rtacha", v: `${ortacha}%` }, { n: 'Seriya', v: `${seriyaKun}` }].map((s) => (
+                  <div key={s.n} style={{ flex: 1, background: 'rgba(255,255,255,.18)', borderRadius: '10px', padding: '8px 4px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '15px', fontWeight: 800, lineHeight: 1 }}>{s.v}</div>
+                    <div style={{ fontSize: '9.5px', opacity: .8, marginTop: '3px' }}>{s.n}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Stat chiplar (Lordbank referens) — barcha rollar uchun */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-            {([
-              { Icon: ClipboardCheck, nom: 'Testlar', qiymat: `${natijalarList.length}` },
-              { Icon: BarChart3, nom: "O'rtacha", qiymat: `${ortacha}%` },
-              { Icon: Flame, nom: 'Seriya', qiymat: `${seriyaKun} kun` },
-            ] as { Icon: LucideIcon; nom: string; qiymat: string }[]).map((s) => (
-              <div key={s.nom} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '7px',
-                background: 'rgba(255,255,255,.18)', borderRadius: '999px', padding: '6px 12px',
-              }}>
-                <s.Icon size={14} strokeWidth={2} />
-                <span style={{ fontSize: '13px', fontWeight: 800 }}>{s.qiymat}</span>
-                <span style={{ fontSize: '11px', opacity: .8 }}>{s.nom}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Hayvon belgi tanlagich */}
-          {ikonTanlash && (
-            <div className="rise" style={{ marginTop: '16px', background: 'rgba(255,255,255,.15)', borderRadius: '14px', padding: '14px' }}>
-              <p style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 700, opacity: .9 }}>
-                Belgi tanlang <span style={{ opacity: .7, fontWeight: 500 }}>— qayta bossangiz bekor bo'ladi</span>
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                {HAYVONLAR.map((h) => {
-                  const faol = avatarIkon === h.key
-                  return (
-                    <button key={h.key} onClick={() => hayvonTanla(h.key)} aria-label={h.nom} title={h.nom} style={{
-                      aspectRatio: '1', borderRadius: '12px', cursor: 'pointer',
-                      background: faol ? 'white' : 'rgba(255,255,255,.12)',
-                      color: faol ? 'var(--accent)' : 'white',
-                      border: faol ? 'none' : '1px solid rgba(255,255,255,.25)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                    }}>
-                      <h.Icon size={24} strokeWidth={2} />
-                      {faol && <span style={{ position: 'absolute', right: 3, top: 3 }}><Check size={12} strokeWidth={3} /></span>}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+          {myId && <ProfilStatistika studentId={myId} />}
         </div>
 
-        {myId && <ProfilStatistika studentId={myId} />}
+        {/* Hayvon belgi tanlagich — bento ostida, to'liq kenglik */}
+        {ikonTanlash && (
+          <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 800 }}>
+              Belgi tanlang <span style={{ color: 'var(--muted)', fontWeight: 500 }}>— qayta bossangiz bekor bo&apos;ladi</span>
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))', gap: '10px' }}>
+              {HAYVONLAR.map((h) => {
+                const faol = avatarIkon === h.key
+                return (
+                  <button key={h.key} onClick={() => hayvonTanla(h.key)} aria-label={h.nom} title={h.nom} style={{
+                    aspectRatio: '1', borderRadius: '12px', cursor: 'pointer',
+                    background: faol ? 'var(--accent)' : 'var(--surface-2)',
+                    color: faol ? 'white' : 'var(--ink-soft)',
+                    border: faol ? 'none' : '1px solid var(--line)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                  }}>
+                    <h.Icon size={24} strokeWidth={2} />
+                    {faol && <span style={{ position: 'absolute', right: 4, top: 4 }}><Check size={12} strokeWidth={3} /></span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="rise" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
