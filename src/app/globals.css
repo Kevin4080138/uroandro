@@ -280,27 +280,29 @@ h1, h2, h3, h4 {
    yuqoridagi prefers-reduced-motion qoidasi ularni avtomatik to'xtatadi.
    ============================================================ */
 
-/* ── Gorizontal aylanma tasma (o'ngdan chapga) ── */
-.marquee {
-  overflow: hidden;
+/* ── Qo'lda suriladigan aylanma tasma (AylanmaTasma.tsx) ── */
+.aylanma-tasma {
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;             /* Firefox — scrollbar yashirin */
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch; /* iOS silliq surish */
   /* Chekkalarda yumshoq so'nish — kartalar keskin kesilmaydi */
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.marquee-track {
-  display: flex;
-  gap: 16px;
-  width: max-content;
-  animation: marqueeSurish var(--tezlik, 46s) linear infinite;
+.aylanma-tasma::-webkit-scrollbar { display: none; }   /* Chrome/Safari */
+.aylanma-tasma:active { cursor: grabbing; }
+
+/* ── Banner "Batafsil" havola belgisi — yumshoq e'tibor pulsi ── */
+.banner-havola-belgi { animation: bannerBelgiPulse 2.6s ease-in-out infinite; }
+@keyframes bannerBelgiPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  50%      { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(255,255,255,0.12); }
 }
-/* Ustiga sichqoncha kelganda to'xtaydi — o'qimoqchi bo'lgan odam ulgursin */
-.marquee:hover .marquee-track { animation-play-state: paused; }
-/* Ikkinchi qator qarama-qarshi yo'nalishda — ko'z uchun jonli qatlam hosil qiladi */
-.marquee-track.teskari { animation-direction: reverse; }
-@keyframes marqueeSurish {
-  from { transform: translateX(0); }
-  /* Tasma ikki marta takrorlanadi, shuning uchun -50% da uzilishsiz qaytadi */
-  to   { transform: translateX(-50%); }
+@media (prefers-reduced-motion: reduce) {
+  .banner-havola-belgi { animation: none; }
 }
 
 /* ── Scroll bilan ochiladigan bo'lim ── */

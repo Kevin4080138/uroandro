@@ -137,7 +137,7 @@ function KasbiyLanding() {
           }}>
             Ilova ichida shunday
           </p>
-          <ScreenshotMarquee rasmlar={TALABA_SKRINSHOTLAR} tezlik="58s" />
+          <ScreenshotMarquee rasmlar={TALABA_SKRINSHOTLAR} tezlikPx={45} />
         </section>
       )}
 

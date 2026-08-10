@@ -181,6 +181,24 @@ export function BannerCarousel({
           </div>
         </div>
 
+        {/* Havola belgisi — banner bosilsa batafsil ma'lumot ochilishini bildiradi */}
+        {b.link_href && (
+          <span
+            className="banner-havola-belgi"
+            style={{
+              position: 'absolute', top: '10px', right: '10px', zIndex: 2,
+              display: 'flex', alignItems: 'center', gap: '5px',
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+              borderRadius: '999px', padding: '5px 11px 5px 12px',
+              fontSize: '11.5px', fontWeight: 700, color: 'white',
+              border: '1px solid rgba(255,255,255,0.25)', pointerEvents: 'none',
+            }}
+          >
+            Batafsil
+            <span aria-hidden style={{ fontSize: '13px', lineHeight: 1 }}>↗</span>
+          </span>
+        )}
+
         {banners.length > 1 && (
           <>
             <button onClick={(e) => { e.stopPropagation(); prev() }} style={{

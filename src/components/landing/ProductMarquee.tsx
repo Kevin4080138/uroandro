@@ -1,10 +1,12 @@
 /**
- * Imkoniyatlarni ko'rsatuvchi aylanma tasma — ikki qator, qarama-qarshi yo'nalishda.
+ * Imkoniyatlarni ko'rsatuvchi aylanma tasma.
  *
- * Sof CSS animatsiya (`.marquee` globals.css da): JS yo'q, rasm yo'q,
- * sichqoncha ustiga kelganda to'xtaydi, prefers-reduced-motion da o'chadi.
- * Uzilishsiz aylanish uchun ro'yxat ikki marta chiziladi (translateX -50%).
+ * O'zi aylanadi VA qo'lda suriladi (AylanmaTasma) — telefonda barmoq bilan,
+ * kompyuterda sichqoncha bilan. Sichqoncha ustiga kelganda va foydalanuvchi
+ * surganda to'xtaydi, prefers-reduced-motion da auto o'chadi (surish qoladi).
  */
+
+import { AylanmaTasma } from './AylanmaTasma'
 
 type Karta = { belgi: string; nom: string; izoh: string; rang: string }
 
@@ -60,19 +62,13 @@ function KartaKorinishi({ k }: { k: Karta }) {
   )
 }
 
-function Qator({ kartalar, teskari, tezlik }: { kartalar: Karta[]; teskari?: boolean; tezlik: string }) {
+function Qator({ kartalar, teskari, tezlikPx }: { kartalar: Karta[]; teskari?: boolean; tezlikPx: number }) {
   return (
-    <div className="marquee">
-      <div
-        className={`marquee-track${teskari ? ' teskari' : ''}`}
-        style={{ ['--tezlik' as string]: tezlik }}
-      >
-        {/* Ikki nusxa — birinchisi chiqib ketganda ikkinchisi o'rnini bosadi */}
-        {[...kartalar, ...kartalar].map((k, i) => (
-          <KartaKorinishi key={`${k.nom}-${i}`} k={k} />
-        ))}
-      </div>
-    </div>
+    <AylanmaTasma tezlikPx={tezlikPx} teskari={teskari}>
+      {kartalar.map((k, i) => (
+        <KartaKorinishi key={`${k.nom}-${i}`} k={k} />
+      ))}
+    </AylanmaTasma>
   )
 }
 
@@ -82,5 +78,5 @@ function Qator({ kartalar, teskari, tezlik }: { kartalar: Karta[]; teskari?: boo
  * rasmlar chapga, matn kartalari o'ngga suriladi.
  */
 export function ProductMarquee() {
-  return <Qator kartalar={[...QATOR_1, ...QATOR_2]} tezlik="88s" teskari />
+  return <Qator kartalar={[...QATOR_1, ...QATOR_2]} tezlikPx={34} teskari />
 }

@@ -2,12 +2,14 @@
  * Ilova skrinshotlaridan iborat aylanma tasma.
  *
  * Rasmlar `public/landing/` da — WebP, 560px kenglikda (retina uchun 2x),
- * har biri 45 KB dan kichik. Animatsiya globals.css dagi `.marquee` —
- * sof CSS, hover'da to'xtaydi, prefers-reduced-motion da o'chadi.
+ * har biri 45 KB dan kichik. Tasma o'zi aylanadi va qo'lda ham suriladi
+ * (AylanmaTasma) — telefonda barmoq, kompyuterda sichqoncha bilan.
  *
  * Rasmlar `skrinshotlar/qirq.js` orqali tayyorlanadi: holat paneli,
  * ilova sarlavhasi (avatar bilan) va tab-navigatsiya kesib tashlangan.
  */
+
+import { AylanmaTasma } from './AylanmaTasma'
 
 export type Skrinshot = { src: string; izoh: string }
 
@@ -68,27 +70,22 @@ function Karta({ s }: { s: Skrinshot }) {
 
 export function ScreenshotMarquee({
   rasmlar,
-  tezlik = '58s',
+  tezlikPx = 45,
   teskari = false,
 }: {
   rasmlar: Skrinshot[]
-  tezlik?: string
+  /** Sekundiga necha piksel suriladi (avval "58s" kabi string edi) */
+  tezlikPx?: number
   teskari?: boolean
 }) {
   if (rasmlar.length === 0) return null
 
   return (
-    <div className="marquee">
-      <div
-        className={`marquee-track${teskari ? ' teskari' : ''}`}
-        style={{ ['--tezlik' as string]: tezlik, alignItems: 'flex-start' }}
-      >
-        {/* Ikki nusxa — uzilishsiz aylanish uchun (translateX -50%) */}
-        {[...rasmlar, ...rasmlar].map((s, i) => (
-          <Karta key={`${s.src}-${i}`} s={s} />
-        ))}
-      </div>
-    </div>
+    <AylanmaTasma tezlikPx={tezlikPx} teskari={teskari}>
+      {rasmlar.map((s, i) => (
+        <Karta key={`${s.src}-${i}`} s={s} />
+      ))}
+    </AylanmaTasma>
   )
 }
 

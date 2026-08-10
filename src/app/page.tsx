@@ -281,7 +281,7 @@ function Landing() {
 
         {/* Tepada haqiqiy ekranlar, pastda imkoniyat nomlari — qarama-qarshi yo'nalishda */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-          <ScreenshotMarquee rasmlar={ARALASH_SKRINSHOTLAR} tezlik="76s" />
+          <ScreenshotMarquee rasmlar={ARALASH_SKRINSHOTLAR} tezlikPx={38} />
           <ProductMarquee />
         </div>
       </section>

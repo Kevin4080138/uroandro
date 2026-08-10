@@ -120,7 +120,7 @@ export default function BemorEshigiPage() {
         }}>
           Ilova ichida shunday
         </p>
-        <ScreenshotMarquee rasmlar={BEMOR_SKRINSHOTLAR} tezlik="62s" />
+        <ScreenshotMarquee rasmlar={BEMOR_SKRINSHOTLAR} tezlikPx={42} />
       </section>
 
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '20px 20px 48px' }}>
