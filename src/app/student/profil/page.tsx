@@ -6,7 +6,7 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { useTheme } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase'
-import { RankMini } from '@/components/RankBadge'
+import { RankMini, UnvonlarModal } from '@/components/RankBadge'
 import { getRank, getProgressData } from '@/lib/rank'
 import { useSeriya } from '@/lib/talim/seriya'
 import { HAYVONLAR, hayvonTop } from '@/lib/hayvonAvatar'
@@ -55,6 +55,7 @@ export default function ProfilPage() {
   const [parolModal, setParolModal] = useState(false)
   const [parol, setParol] = useState('')
   const [parolXato, setParolXato] = useState('')
+  const [unvonlarOchiq, setUnvonlarOchiq] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -157,7 +158,9 @@ export default function ProfilPage() {
               <div style={{ fontSize: '17px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.full_name}</div>
               <div style={{ fontSize: '12.5px', opacity: .85, marginTop: '2px' }}>{ROL_NOMI[profile.role] ?? profile.role}</div>
               {profile.role === 'student' && (
-                <div style={{ marginTop: '9px' }}><RankMini rank={getRank(getProgressData(natijalarList))} /></div>
+                <div style={{ marginTop: '9px' }}>
+                  <RankMini rank={getRank(getProgressData(natijalarList))} onClick={() => setUnvonlarOchiq(true)} />
+                </div>
               )}
               <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
                 {[{ n: 'Testlar', v: `${natijalarList.length}` }, { n: "O'rtacha", v: `${ortacha}%` }, { n: 'Seriya', v: `${seriyaKun}` }].map((s) => (
@@ -314,6 +317,13 @@ export default function ProfilPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {unvonlarOchiq && (
+        <UnvonlarModal
+          joriyDaraja={getRank(getProgressData(natijalarList)).darajaSon}
+          onClose={() => setUnvonlarOchiq(false)}
+        />
       )}
 
       <BottomNav />

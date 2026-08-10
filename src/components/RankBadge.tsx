@@ -1,6 +1,7 @@
 'use client'
 
 import type { RankInfo } from '@/lib/rank'
+import { hammaRanklar } from '@/lib/rank'
 
 // ── SVG primitives ───────────────────────────────────────────────────────────
 
@@ -313,16 +314,127 @@ export function RankCard({ rank }: { rank: RankInfo }) {
 
 // ── Mini badge (profil sahifasi uchun) ───────────────────────────────────────
 
-export function RankMini({ rank }: { rank: RankInfo }) {
+export function RankMini({ rank, onClick }: { rank: RankInfo; onClick?: () => void }) {
   const cfg = TIER_CONFIG[rank.tier]
+  const bosiladigan = typeof onClick === 'function'
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: '8px',
-      background: `${cfg.bg1}22`, border: `1px solid ${cfg.borderColor}50`,
-      borderRadius: '10px', padding: '6px 12px',
-    }}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!bosiladigan}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: '8px',
+        background: `${cfg.bg1}22`, border: `1px solid ${cfg.borderColor}50`,
+        borderRadius: '10px', padding: '6px 12px',
+        cursor: bosiladigan ? 'pointer' : 'default', font: 'inherit',
+      }}
+    >
       <PogonSvg rank={rank} size="sm" />
       <span style={{ fontSize: '12px', fontWeight: 800, color: cfg.borderColor }}>{rank.nom}</span>
+      {bosiladigan && (
+        <span style={{ fontSize: '11px', color: cfg.borderColor, opacity: .7, marginLeft: '2px' }}>ⓘ</span>
+      )}
+    </button>
+  )
+}
+
+// ── Barcha unvonlar modali ────────────────────────────────────────────────────
+// Unvon ustiga bosilganda: 10 ta unvon ko'rinadi. Talaba yetgan darajalar rangli,
+// hali yetmagani rangsiz (grayscale). Joriy daraja ajratib ko'rsatiladi.
+
+export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; onClose: () => void }) {
+  const ranklar = hammaRanklar()
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 60,
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'var(--surface)', borderRadius: '20px 20px 0 0', width: '100%',
+          maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto',
+          border: '1px solid var(--line)', borderBottom: 'none', padding: '20px 18px 32px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Unvonlar yo&apos;li</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Yopish"
+            style={{
+              width: '30px', height: '30px', borderRadius: '50%', border: 'none',
+              background: 'var(--surface-2)', color: 'var(--ink)', fontSize: '16px',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+          Darslarni tugatgan sari unvoningiz ko&apos;tariladi. Yetib kelgan darajalaringiz rangli,
+          keyingilari kulrang.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {ranklar.map((r) => {
+            const cfg = TIER_CONFIG[r.tier]
+            const yetgan = r.darajaSon <= joriyDaraja
+            const joriy = r.darajaSon === joriyDaraja
+            return (
+              <div
+                key={r.darajaSon}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '13px',
+                  padding: '11px 13px', borderRadius: '13px',
+                  background: joriy ? `${cfg.bg1}22` : 'var(--surface-2)',
+                  border: joriy ? `1.5px solid ${cfg.borderColor}` : '1px solid var(--line)',
+                }}
+              >
+                <div style={{
+                  flexShrink: 0, width: '76px',
+                  filter: yetgan ? `drop-shadow(0 3px 8px ${cfg.glow})` : 'grayscale(1)',
+                  opacity: yetgan ? 1 : .38,
+                }}>
+                  <PogonSvg rank={r as RankInfo} size="sm" />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+                    <span style={{
+                      fontSize: '14px', fontWeight: 800,
+                      color: yetgan ? 'var(--ink)' : 'var(--muted)',
+                    }}>
+                      {r.nom}
+                    </span>
+                    {joriy && (
+                      <span style={{
+                        fontSize: '10px', fontWeight: 800, color: 'white', background: cfg.borderColor,
+                        borderRadius: '999px', padding: '2px 8px', letterSpacing: '.02em',
+                      }}>
+                        SIZ
+                      </span>
+                    )}
+                    {yetgan && !joriy && (
+                      <span style={{ fontSize: '12px', color: cfg.borderColor }}>✓</span>
+                    )}
+                  </div>
+                  <div style={{
+                    fontSize: '11.5px', marginTop: '2px', lineHeight: 1.45,
+                    color: yetgan ? 'var(--muted)' : 'var(--muted)', opacity: yetgan ? 1 : .7,
+                  }}>
+                    {r.tavsif}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

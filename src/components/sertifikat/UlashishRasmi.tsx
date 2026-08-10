@@ -178,7 +178,14 @@ async function chiz(s: SertifikatMalumoti, olcham: Olcham): Promise<Blob | null>
 
 export function UlashishRasmi({ s }: { s: SertifikatMalumoti }) {
   const [ishlayapti, setIshlayapti] = useState<Olcham | null>(null)
+  const [ulashilmoqda, setUlashilmoqda] = useState(false)
   const [xato, setXato] = useState<string | null>(null)
+
+  // Telefon brauzeri fayl ulashishni qo'llasa — to'g'ridan-to'g'ri Instagram/
+  // Telegramga yuborish mumkin. Aks holda (desktop) faqat yuklab olish qoladi.
+  const ulashaOladi = typeof navigator !== 'undefined'
+    && typeof navigator.canShare === 'function'
+    && navigator.canShare({ files: [new File([], 'x.png', { type: 'image/png' })] })
 
   const yuklab = async (olcham: Olcham) => {
     setIshlayapti(olcham)
@@ -199,14 +206,56 @@ export function UlashishRasmi({ s }: { s: SertifikatMalumoti }) {
     }
   }
 
+  const ulash = async () => {
+    setUlashilmoqda(true)
+    setXato(null)
+    try {
+      const blob = await chiz(s, 'kvadrat')
+      if (!blob) throw new Error('rasm yaratilmadi')
+      const fayl = new File([blob], `urosfera-${s.kod}.png`, { type: 'image/png' })
+      const nishonmi = s.turi === 'bob'
+      const matn = nishonmi
+        ? `Urosfera'da "${s.kategoriya}" bo'limini tugatdim! 🏅`
+        : `Urosfera'da ${s.bosqichNomi} bosqichini yakunladim! 🎓`
+      await navigator.share({
+        files: [fayl],
+        title: nishonmi ? 'Urosfera nishoni' : 'Urosfera sertifikati',
+        text: `${matn}\nTekshirish: ${s.tekshirishUrl}`,
+      })
+    } catch (e) {
+      // Foydalanuvchi ulashishni bekor qilsa xato ko'rsatilmaydi
+      if ((e as Error)?.name !== 'AbortError') {
+        setXato("Ulashib bo'lmadi — rasmni yuklab olib qo'lda joylang")
+      }
+    } finally {
+      setUlashilmoqda(false)
+    }
+  }
+
   return (
     <div>
+      {ulashaOladi && (
+        <button
+          onClick={ulash}
+          disabled={ulashilmoqda || ishlayapti !== null}
+          style={{
+            width: '100%', background: 'linear-gradient(120deg, var(--accent), var(--accent-2))',
+            color: 'white', border: 'none', borderRadius: '12px', padding: '13px 18px',
+            fontWeight: 800, fontSize: '14px', cursor: ulashilmoqda ? 'wait' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px', marginBottom: '12px',
+          }}
+        >
+          <span style={{ fontSize: '17px' }}>📲</span>
+          {ulashilmoqda ? 'Tayyorlanmoqda...' : 'Ijtimoiy tarmoqqa ulashish'}
+        </button>
+      )}
+
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         {(Object.keys(OLCHAMLAR) as Olcham[]).map((o) => (
           <button
             key={o}
             onClick={() => yuklab(o)}
-            disabled={ishlayapti !== null}
+            disabled={ishlayapti !== null || ulashilmoqda}
             style={{
               background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)',
               borderRadius: '11px', padding: '11px 16px', fontWeight: 700, fontSize: '13.5px',
@@ -223,6 +272,12 @@ export function UlashishRasmi({ s }: { s: SertifikatMalumoti }) {
           </button>
         ))}
       </div>
+      {ulashaOladi && (
+        <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.6 }}>
+          &quot;Ijtimoiy tarmoqqa ulashish&quot; — telefoningizdagi Instagram, Telegram yoki
+          boshqa ilovaga to&apos;g&apos;ridan-to&apos;g&apos;ri yuboradi.
+        </p>
+      )}
       {xato && <p style={{ color: 'var(--danger)', fontSize: '12.5px', margin: '8px 0 0' }}>{xato}</p>}
     </div>
   )

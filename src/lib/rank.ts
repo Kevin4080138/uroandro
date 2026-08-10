@@ -44,6 +44,12 @@ const RANKS: Omit<RankInfo, 'keyingiFoiz'>[] = [
   { darajaSon: 10, nom: 'Legend',       unvon: '👑 ⭐⭐⭐⭐⭐ 🪽',    tier: 'akademik', subRank: 3, keyingiNom: '—',             tavsif: 'Urologiya bo\'yicha to\'liq kurs yakunlandi! 🏆' },
 ]
 
+// Modal uchun: 0-daraja "boshlang'ich holat" (hali dars boshlanmagan) bo'lgani
+// uchun tashlab yuboriladi — talabaga ko'rsatiladigan haqiqiy unvonlar 1..10.
+export function hammaRanklar(): Omit<RankInfo, 'keyingiFoiz'>[] {
+  return RANKS.slice(1)
+}
+
 export function getRank(p: ProgressData): RankInfo {
   const oFoiz  = p.oson.jami  ? p.oson.bajarilgan  / p.oson.jami  : 0
   const orFoiz = p.orta.jami  ? p.orta.bajarilgan  / p.orta.jami  : 0

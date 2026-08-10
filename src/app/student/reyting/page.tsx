@@ -55,11 +55,16 @@ export default function ReytingPage() {
       setHammaNatijalar((natijalar as Natija[]) ?? [])
 
       const studentIds = Array.from(new Set((natijalar ?? []).map((n) => n.student_id)))
+      // profiles jadvali RLS bilan talabaga faqat o'z profilini ko'rsatadi;
+      // boshqalarning ismini reyting uchun SECURITY DEFINER RPC orqali olamiz
+      // (faqat id + full_name qaytaradi, telefon/email ochilmaydi).
       const { data: profillar } = studentIds.length
-        ? await supabase.from('profiles').select('id, full_name').in('id', studentIds)
+        ? await supabase.rpc('reyting_ismlari', { ids: studentIds })
         : { data: [] }
       const ismMap: Record<string, string> = {}
-      for (const p of profillar ?? []) ismMap[p.id] = p.full_name
+      for (const p of (profillar as { id: string; full_name: string }[] | null) ?? []) {
+        if (p.full_name) ismMap[p.id] = p.full_name
+      }
       setIsmlar(ismMap)
       setLoading(false)
     }
