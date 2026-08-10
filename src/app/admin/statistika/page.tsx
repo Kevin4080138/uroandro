@@ -10,6 +10,7 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const ROLE_COLOR: Record<string, string> = {
   doctor: '#dc2626', student: '#2563eb', patient: '#059669', admin: '#7c3aed',
@@ -236,7 +237,7 @@ export default function AdminStatistikaPage() {
         </p>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <>
             {/* KPI kartalar */}

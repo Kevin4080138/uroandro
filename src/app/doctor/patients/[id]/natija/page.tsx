@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const inp: React.CSSProperties = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)',
@@ -224,7 +225,7 @@ export default function NatijaPage() {
 
         {/* Natija maydonlar */}
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : guruhlar.map((maydonlar, gi) => (
           <div key={gi} style={card}>
             {sectionTitle('', guruhNomlari[gi] ?? `Guruh ${gi + 1}`)}

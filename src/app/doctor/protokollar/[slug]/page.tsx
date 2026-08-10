@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Protokol = {
   id: string; slug: string; nom: string; toifa: string; qisqa: string
@@ -26,7 +27,7 @@ export default function ProtokolDetailPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

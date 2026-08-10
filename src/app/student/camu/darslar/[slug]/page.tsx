@@ -6,6 +6,7 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { getCamuDars, type CamuDars } from '@/lib/camu/darslar'
 import { BookOpen, Library, Target, type LucideIcon } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Tab = 'nazariya' | 'adabiyot' | 'testlar'
 
@@ -29,7 +30,7 @@ export default function CamuDarsPage() {
 
   if (!dars) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

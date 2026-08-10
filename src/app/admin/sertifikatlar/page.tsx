@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, darsTop, type Bosqich } from '@/lib/talim/darslar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type NatijaQator = { student_id: string; dars_slug: string; dars_nomi: string; foiz: number; created_at: string }
 type Profil = { id: string; full_name: string | null; email: string | null }
@@ -128,7 +129,7 @@ export default function AdminSertifikatlarPage() {
         </div>
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
 

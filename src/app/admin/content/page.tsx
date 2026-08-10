@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Protokol = {
   id: string; slug: string; nom: string; toifa: string; qisqa: string
@@ -115,7 +116,7 @@ export default function AdminContentPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : tab === 'protokollar' ? (
           <>
             <div style={{ marginBottom: '16px' }}>

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { darsTugadimi } from '@/lib/talim/useDarsProgress'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type ProgressQator = { student_id: string; dars_slug: string; qadam: string }
 type NatijaQator = { student_id: string; dars_slug: string; foiz: number; turi: string }
@@ -113,7 +114,7 @@ export default function AdminOquvchilarPage() {
         />
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : korinadigan.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Talaba topilmadi.</p>
         ) : (

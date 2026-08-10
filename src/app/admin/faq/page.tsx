@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Faq = { id: string; savol: string; javob: string; tartib: number; faol: boolean }
 
@@ -124,7 +125,7 @@ export default function AdminFaqPage() {
 
         {/* Ro'yxat */}
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : royxat.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Hali savol qo&apos;shilmagan.</p>
         ) : (

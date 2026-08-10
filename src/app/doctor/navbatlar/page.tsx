@@ -6,6 +6,7 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { HAFTA_KUNLARI, sanaISO } from '@/lib/navbatSlotlar'
 import { Phone, MessageSquare, Calendar, Archive, ChevronUp, ChevronDown, CalendarClock, AlertTriangle } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Navbat = {
   id: string; patient_id: string; sana: string; vaqt: string; holat: string; izoh: string | null
@@ -210,7 +211,7 @@ export default function DoctorNavbatlarPage() {
         </div>
 
         {/* Kelgusi navbatlar */}
-        {loading ? <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p> : (
+        {loading ? <UrosferaLoaderMini /> : (
           <>
             {guruhlar.length === 0 ? (
               <div style={{ ...card, textAlign: 'center', padding: '36px 20px' }}>

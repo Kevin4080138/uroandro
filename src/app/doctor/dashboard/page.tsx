@@ -9,6 +9,7 @@ import {
   TrendingUp, Users, Inbox, FileText, Globe, CalendarClock, Bandage,
   ClipboardList, Calculator, Library, BookOpenCheck, ChevronRight,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 export default function DoctorDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -33,7 +34,7 @@ export default function DoctorDashboard() {
 
   if (!profile) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Header } from '@/components/Header'
 import { BOSQICHLAR, BOSQICH_KATEGORIYA_TARTIBI, type Bosqich } from '@/lib/talim/darslar'
 import type { BobHolati, BosqichHolati } from '@/lib/talim/sertifikat'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 // Sertifikat — bosqichga bitta (AGENTS.md qoidasi), nishon — har bob uchun.
 // Ilgari bu sahifa har bir dars uchun alohida "sertifikat" ko'rsatardi; u qoidaga
@@ -78,7 +79,7 @@ export default function SertifikatlarPage() {
   if (yuklanmoqda) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       </div>
     )
   }

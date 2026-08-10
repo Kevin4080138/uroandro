@@ -6,6 +6,7 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { Globe, Briefcase, Star, Wallet, Eye, EyeOff, Trash2 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Xizmat = { nom: string; narx: string }
 type Mezon = { nom: string; qiymat: number; rang: string }
@@ -142,7 +143,7 @@ export default function OchiqProfilPage() {
   }
 
   if (loading) return (
-    <AppShell title="Katalogdagi profilim"><div className="px-8 py-8"><p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p></div></AppShell>
+    <AppShell title="Katalogdagi profilim"><div className="px-8 py-8"><UrosferaLoaderMini /></div></AppShell>
   )
 
   return (

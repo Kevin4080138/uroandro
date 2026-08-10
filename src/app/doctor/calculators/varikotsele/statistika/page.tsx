@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { T, card } from '../_theme'
 import { USULLAR, USUL_IDLARI, type UsulId } from '@/lib/varikotseleUsullari'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Yozuv = {
   method: UsulId
@@ -36,7 +37,7 @@ export default function StatistikaPage() {
     })
   }, [])
 
-  if (loading) return <p style={{ color: T.muted }}>Yuklanmoqda...</p>
+  if (loading) return <UrosferaLoaderMini />
 
   const byMethod = Object.fromEntries(USUL_IDLARI.map((id) => [id, yozuvlar.filter((y) => y.method === id)])) as Record<UsulId, Yozuv[]>
   const pct = (arr: Yozuv[], key: 'recur' | 'hydro' | 'semen' | 'preg') => arr.length ? Math.round((arr.filter((y) => y[key]).length / arr.length) * 100) : 0

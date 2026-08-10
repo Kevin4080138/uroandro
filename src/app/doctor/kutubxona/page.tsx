@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { IconButton } from '@/components/IconButton'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
@@ -107,7 +108,7 @@ export default function KutubxonaPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : fayllar.length === 0 ? (
           <p style={{ color: 'var(--muted)' }}>Hozircha materiallar yo&apos;q.</p>
         ) : (

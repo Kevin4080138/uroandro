@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Profil = {
   doctor_id: string
@@ -79,7 +80,7 @@ export default function AdminKatalogPage() {
           Shifokor profillarini katalogda ko&apos;rsatish/yashirish va bemor izohlarini moderatsiya qilish.
         </p>
 
-        {loading ? <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p> : (
+        {loading ? <UrosferaLoaderMini /> : (
           <>
             {/* Shifokor profillari */}
             <div style={{ ...card, marginBottom: '20px' }}>

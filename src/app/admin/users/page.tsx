@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Profile = { id: string; full_name: string; role: string; telefon: string | null; email: string | null; faol: boolean; created_at: string; arxivlangan: boolean; doctor_holati: string | null; mutaxassislik: string | null; ish_joyi: string | null }
 
@@ -206,7 +207,7 @@ export default function AdminUsersPage() {
               )}
             </h2>
             {kutayotganlarLoading ? (
-              <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Yuklanmoqda...</p>
+              <UrosferaLoaderMini />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {kutayotganlar.map((u) => (
@@ -283,7 +284,7 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', overflowX: 'auto' }}>
             <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', fontSize: '13px' }}>

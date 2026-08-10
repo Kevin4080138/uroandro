@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type LogYozuvi = {
   id: string
@@ -99,7 +100,7 @@ export default function AdminAuditPage() {
         </p>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : loglar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
             <div style={{ fontSize: '36px', marginBottom: '10px', opacity: 0.6 }}>🗂️</div>

@@ -10,6 +10,7 @@ import {
   kalitYasa, shaxsiyShablonga,
   type DeklarativBlok, type DeklarativHujjat, type ShablonTuzilma,
 } from '@/lib/shablonlar/deklarativ'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const input = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1.5px solid var(--line)',
@@ -133,7 +134,7 @@ export default function ShablonTahrirlashPage() {
   )
 
   if (loading) return (
-    <AppShell title="Shablon" actions={orqaga}><div className="px-8 py-8"><p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p></div></AppShell>
+    <AppShell title="Shablon" actions={orqaga}><div className="px-8 py-8"><UrosferaLoaderMini /></div></AppShell>
   )
 
   return (

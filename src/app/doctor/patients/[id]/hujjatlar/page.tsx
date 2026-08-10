@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { SHABLONLAR, type Shablon, type Maydon } from '@/lib/shablonlar'
 import { shaxsiyShablonga, type ShaxsiyShablonRow } from '@/lib/shablonlar/deklarativ'
 import { HujjatVaraq } from '@/components/HujjatVaraq'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const ASOS_HUJJAT = 'birlamchi'   // boshqa hujjatlar shundan boshlang'ich ma'lumot oladi
 
@@ -238,7 +239,7 @@ export default function HujjatlarPage() {
   )
 
   if (loading) return (
-    <AppShell title="Hujjatlar" actions={orqagaTugmasi}><div className="px-8 py-8"><p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p></div></AppShell>
+    <AppShell title="Hujjatlar" actions={orqagaTugmasi}><div className="px-8 py-8"><UrosferaLoaderMini /></div></AppShell>
   )
 
   return (

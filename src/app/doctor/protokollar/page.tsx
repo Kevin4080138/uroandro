@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Protokol = { id: string; slug: string; nom: string; toifa: string; qisqa: string }
 
@@ -40,7 +41,7 @@ export default function ProtokollarPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <>
             {toifalar.map((toifa) => (

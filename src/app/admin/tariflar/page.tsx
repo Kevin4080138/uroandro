@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import type { Bosqich } from '@/lib/talim/darslar'
 import { narxFmt } from '@/lib/talim/tariflar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Tarif = {
   id: string
@@ -144,7 +145,7 @@ export default function AdminTariflarPage() {
 
         {/* Ro'yxat */}
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : royxat.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Hali tarif qo&apos;shilmagan.</p>
         ) : (

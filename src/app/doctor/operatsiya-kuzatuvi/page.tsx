@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { bemorHisobiniTop } from '@/lib/telefonMos'
 import { OPERATSIYALAR, postOpHolat, POSTOP_JADVALI } from '@/lib/operatsiyalar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)',
@@ -167,7 +168,7 @@ export default function OperatsiyaKuzatuviPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : kuzatuvlar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
             <div style={{ fontSize: '40px', marginBottom: '10px', opacity: 0.6 }}>🩹</div>

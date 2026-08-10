@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 export default function PrintReferralPage() {
   const { tashrifId } = useParams<{ tashrifId: string }>()
@@ -31,7 +32,7 @@ export default function PrintReferralPage() {
     load()
   }, [tashrifId])
 
-  if (loading) return <p style={{ padding: '32px' }}>Yuklanmoqda...</p>
+  if (loading) return <UrosferaLoaderMini />
   if (!tashrif || !bemor) return <p style={{ padding: '32px' }}>Topilmadi.</p>
 
   const tekshiruvlar = (tashrif.buyurilgan_tekshiruvlar || '').split(',').map((s: string) => s.trim()).filter(Boolean)

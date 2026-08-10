@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 import { darsTugadimi } from '@/lib/talim/useDarsProgress'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type ProgressQator = { student_id: string; dars_slug: string; qadam: string; created_at: string }
 type NatijaQator = {
@@ -276,7 +277,7 @@ export default function TalabalarNazoratiPage() {
 
         {/* Jadval */}
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : korinadigan.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Talaba topilmadi.</p>
         ) : (

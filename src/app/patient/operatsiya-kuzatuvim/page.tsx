@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { postOpHolat, POSTOP_JADVALI } from '@/lib/operatsiyalar'
 import { Bandage, CalendarClock, Building2, StickyNote } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Kuzatuv = {
   id: string
@@ -51,7 +52,7 @@ export default function OperatsiyaKuzatuvimPage() {
         </p>
 
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : kuzatuvlar.length === 0 ? (
           <div className="rise" style={{
             background: 'var(--surface)', border: '1px dashed var(--line)', borderRadius: '16px',

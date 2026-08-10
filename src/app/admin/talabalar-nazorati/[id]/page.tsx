@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type ProgressQator = { dars_slug: string; qadam: string; created_at: string }
 type NatijaQator = {
@@ -127,7 +128,7 @@ export default function TalabaBatafsilPage() {
 
       <div className="mx-auto max-w-[900px] px-6 py-8">
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <>
             {/* Profil kartasi */}

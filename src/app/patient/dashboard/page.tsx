@@ -13,6 +13,7 @@ import {
   MessageSquare, CalendarClock, Hourglass, Stethoscope, Inbox, Building2,
   Bandage, Pill, TestTube, Activity, HelpCircle, ArrowRight, type LucideIcon,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type HolatKarta = { Icon: LucideIcon; sarlavha: string; matn: string; href: string }
 
@@ -54,7 +55,7 @@ export default function PatientDashboard() {
 
   if (!profile) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

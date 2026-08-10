@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { yangiTuzilma, type ShablonTuzilma } from '@/lib/shablonlar/deklarativ'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Row = { id: string; kasallik: string; tuzilma: ShablonTuzilma; updated_at: string }
 
@@ -108,7 +109,7 @@ export default function ShablonlarimPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : royxat.length === 0 ? (
           <div style={{ ...card, textAlign: 'center', padding: '40px 20px' }}>
             <div style={{ fontSize: '40px', marginBottom: '10px' }}>📄</div>

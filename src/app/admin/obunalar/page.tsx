@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import type { Bosqich } from '@/lib/talim/darslar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Obuna = {
   id: string
@@ -208,7 +209,7 @@ export default function AdminObunalarPage() {
         {/* Ro'yxat */}
         <h2 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 900 }}>📜 Barcha obunalar</h2>
         {yuklanmoqda ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : obunalar.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Hali obuna berilmagan.</p>
         ) : (

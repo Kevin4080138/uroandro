@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const row = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #e5e7eb', fontSize: '14px' }
 const label = { color: '#6b7280' }
@@ -34,7 +35,7 @@ export default function PrintTashrifPage() {
     load()
   }, [tashrifId])
 
-  if (loading) return <p style={{ padding: '32px' }}>Yuklanmoqda...</p>
+  if (loading) return <UrosferaLoaderMini />
   if (!tashrif || !bemor) return <p style={{ padding: '32px' }}>Topilmadi.</p>
 
   return (

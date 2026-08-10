@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 export default function AdminBizHaqimizdaPage() {
   const supabase = createClient()
@@ -50,7 +51,7 @@ export default function AdminBizHaqimizdaPage() {
         </p>
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <div className="rise" style={{
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',

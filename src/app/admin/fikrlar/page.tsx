@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Fikr = { id: string; student_id: string; matn: string; korildi: boolean; created_at: string; full_name?: string }
 
@@ -43,7 +44,7 @@ export default function AdminFikrlarPage() {
         <h2 style={{ margin: '0 0 20px 0', fontSize: '24px' }}>💬 Talabalar fikrlari</h2>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : fikrlar.length === 0 ? (
           <p style={{ color: 'var(--muted)' }}>Hozircha fikr yo&apos;q.</p>
         ) : (

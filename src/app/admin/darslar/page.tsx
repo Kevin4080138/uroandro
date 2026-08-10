@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import { DARSLAR } from '@/lib/talim/darslar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type DarsTarkibi = {
   dars_slug: string
@@ -262,7 +263,7 @@ export default function AdminDarslarPage() {
 
         {tanlanganSlug && (
           yuklanmoqda ? (
-            <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+            <UrosferaLoaderMini />
           ) : (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px' }}>
               <h3 style={{ margin: '0 0 18px 0', fontSize: '16px', color: 'var(--accent)' }}>

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { SAYT_URL } from '@/lib/saytUrl'
 import { Header } from '@/components/Header'
 import { Users, CalendarDays } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Friend = {
   id: string
@@ -94,7 +95,7 @@ export default function TaklifPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       </div>
     )
   }

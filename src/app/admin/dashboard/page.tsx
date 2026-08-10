@@ -13,6 +13,7 @@ import {
   Users, Building2, Globe, FileText, GraduationCap, TrendingUp, Shield, Megaphone,
   Images, Stethoscope, UserRound, Wrench, ChevronRight,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type FaollikMa = {
   bugunKirganlar: number
@@ -121,7 +122,7 @@ export default function AdminDashboard() {
 
   if (!profile) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

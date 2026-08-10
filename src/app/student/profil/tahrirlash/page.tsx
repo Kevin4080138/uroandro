@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Profile = {
   full_name: string
@@ -176,7 +177,7 @@ export default function ProfilTahrirlashPage() {
             }}>Orqaga</button>
           </>
         ) : (
-          <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         )}
       </div>
     )

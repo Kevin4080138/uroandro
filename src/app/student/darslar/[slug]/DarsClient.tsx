@@ -17,6 +17,7 @@ import {
   ClipboardList, Search, GraduationCap, CheckCircle2, Lock, FileText, BarChart3,
   type LucideIcon,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 'klinik' | 'interaktiv' | 'vaziyatli' | 'xatolar' | 'nazorat'
 
@@ -1424,7 +1425,7 @@ function NazoratTestBolimi({
     })
   }
 
-  if (yuklanmoqda) return <BoshUlash matn="Yuklanmoqda..." />
+  if (yuklanmoqda) return <UrosferaLoaderMini />
   if (bank.length === 0) return <BoshUlash matn="Nazorat testi savollari tez orada qo'shiladi." />
 
   if (avvalgiNatija) {

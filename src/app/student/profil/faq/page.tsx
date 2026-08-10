@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Faq = { id: string; savol: string; javob: string }
 
@@ -34,7 +35,7 @@ export default function StudentFaqPage() {
         <h2 style={{ margin: '0 0 16px', fontSize: '22px', fontWeight: 800 }}>❔ Savol-Javoblar</h2>
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : royxat.length === 0 ? (
           <div className="rise" style={{
             background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',

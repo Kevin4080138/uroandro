@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Xizmat = { nom: string; narx: string }
 type Profil = {
@@ -125,7 +126,7 @@ export default function ShifokorlarKatalogiPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : filtered.length === 0 ? (
           <div style={{ ...card, textAlign: 'center', padding: '48px 20px' }}>
             <div style={{ fontSize: '40px', marginBottom: '10px' }}>👨‍⚕️</div>

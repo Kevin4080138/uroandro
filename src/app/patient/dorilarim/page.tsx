@@ -8,6 +8,7 @@ import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi, vaqtKelmadiMi } fro
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 import { HaftalikIntizom } from '@/components/HaftalikIntizom'
 import { Pill, CalendarDays, Bell, BellOff, CheckCircle2, Lock, RefreshCw, StickyNote, Clock, Hourglass } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const HAFTA_KUNLARI = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
 const OYLAR = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr']
@@ -205,7 +206,7 @@ export default function DorilarimPage() {
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : retseptlar.length === 0 ? (
           <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--muted)' }}><Pill size={38} strokeWidth={1.5} /></div>

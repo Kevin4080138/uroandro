@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Nomzod = {
   id: string
@@ -149,7 +150,7 @@ export default function AdminShifokorlarPage() {
         )}
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>

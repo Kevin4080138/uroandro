@@ -12,6 +12,7 @@ import { tekshiruvBoyichaMaydonlar, asosiyMaydonKalitlari, type Maydon } from '@
 import { HoverVariantInput } from '@/components/HoverVariantInput'
 import { DORI_NOMLARI, DOZA_VARIANTLARI, KUNIGA_MARTA_VARIANTLARI, MUDDAT_KUN_VARIANTLARI, IZOH_VARIANTLARI } from '@/lib/doriVariantlari'
 import { bemorHisobiniTop } from '@/lib/telefonMos'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const inputStyle = {
   width: '100%',
@@ -400,7 +401,7 @@ export default function PatientCardPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+      <UrosferaLoaderMini />
     </div>
   )
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 /**
  * Bildirishnoma sozlamalari — barcha rollar uchun bitta sahifa.
@@ -116,7 +117,7 @@ export default function BildirishnomaSozlamalariPage() {
         </p>
 
         {!yuklandi && (
-          <div className="pulse" style={{ color: 'var(--muted)', fontSize: 14 }}>Yuklanmoqda...</div>
+          <UrosferaLoaderMini />
         )}
 
         {yuklandi && (

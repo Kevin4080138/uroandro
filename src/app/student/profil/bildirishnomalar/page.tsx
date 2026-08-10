@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { Info, CheckCircle2, AlertTriangle, Siren, type LucideIcon } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Notification = {
   id: string
@@ -87,7 +88,7 @@ export default function BildirishnomalarPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       </div>
     )
   }

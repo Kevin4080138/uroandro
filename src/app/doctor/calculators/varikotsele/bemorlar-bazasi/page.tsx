@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { T, card } from '../_theme'
 import { USULLAR, type UsulId } from '@/lib/varikotseleUsullari'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Yozuv = {
   id: string
@@ -107,7 +108,7 @@ export default function BemorlarBazasiPage() {
       </div>
 
       {loading ? (
-        <p style={{ color: T.muted }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       ) : yozuvlar.length === 0 ? (
         <div style={card}>
           <p style={{ color: T.muted, textAlign: 'center', margin: 0 }}>

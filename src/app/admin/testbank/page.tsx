@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, type Bosqich } from '@/lib/talim/darslar'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type TarkibQator = {
   dars_slug: string
@@ -111,7 +112,7 @@ export default function AdminTestbankPage() {
         </div>
 
         {!yuklandi ? (
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>

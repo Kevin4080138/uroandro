@@ -16,6 +16,7 @@ import {
   Phone, BookOpen, HelpCircle, FileText, Sun, Moon, ChevronRight, LogOut, Trash2,
   Check, Pencil, type LucideIcon,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Profile = { full_name: string; telefon: string | null; role: string; avatar_url: string | null }
 type NatijaQ = { dars_slug: string; foiz?: number }
@@ -114,7 +115,7 @@ export default function ProfilPage() {
   if (!profile) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       </div>
     )
   }

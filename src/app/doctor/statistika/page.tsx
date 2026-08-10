@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const MAVZULAR = [
   { id: 'varikotsele', nom: '🔵 Varikotsele' },
@@ -216,7 +217,7 @@ export default function StatistikaPage() {
           </button>
         </div>
 
-        {loading ? <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p> : (
+        {loading ? <UrosferaLoaderMini /> : (
           <>
             {/* Umumiy kartalar */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '24px' }}>

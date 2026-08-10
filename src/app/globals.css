@@ -221,6 +221,11 @@ h1, h2, h3, h4 {
 @media (max-width: 680px) { .banner-slide { height: 220px; } }
 
 /* ── Skeleton shimmer ── */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
 @keyframes shimmer {
   0%   { background-position: -400px 0; }
   100% { background-position:  400px 0; }

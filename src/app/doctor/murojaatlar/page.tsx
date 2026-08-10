@@ -9,6 +9,7 @@ import {
   Phone, Clock, AlertTriangle, Check, Bell, BellOff,
   Archive, ArchiveRestore, ChevronUp, ChevronDown, Send, FolderOpen, UserPlus,
 } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Murojaat = {
   id: string; patient_id: string; organlar: string | null; shikoyatlar: string; taxminiy_tashxis: string | null
@@ -199,7 +200,7 @@ export default function DoctorMurojaatlarPage() {
       <div className="mx-auto max-w-[700px] px-8 py-8">
         <PushToggleTugmasi />
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : (
           <>
             {sarlavha('Umumiy navbat', navbat.length)}

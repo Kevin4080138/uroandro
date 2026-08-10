@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { TrendingUp, ClipboardCheck, Trophy, ClipboardList, BarChart3, BookOpen, ArrowUp, ArrowDown } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Natija = {
   id: string
@@ -175,7 +176,7 @@ export default function FaollikPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--ink)' }}>Yuklanmoqda...</p>
+        <UrosferaLoaderMini />
       </div>
     )
   }

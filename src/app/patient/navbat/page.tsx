@@ -9,6 +9,7 @@ import {
   type IshJadvali,
 } from '@/lib/navbatSlotlar'
 import { CalendarCheck, CalendarClock, Stethoscope, Building2, CreditCard, AlertTriangle } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Shifokor = IshJadvali & {
   doctor_id: string; full_name: string; mutaxassislik: string | null
@@ -150,7 +151,7 @@ export default function NavbatOlishPage() {
           Shifokorni tanlang, qulay kun va vaqtni band qiling.
         </p>
 
-        {loading ? <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p> : (
+        {loading ? <UrosferaLoaderMini /> : (
           <>
             {/* Mening navbatlarim */}
             {meningNavbatlarim.filter((n) => n.holat !== 'bekor').length > 0 && (

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { Star } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 type Murojaat = {
   id: string; shikoyatlar: string; taxminiy_tashxis: string | null; tavsiya: string | null
@@ -220,7 +221,7 @@ export default function MurojaatlarimPage() {
         </p>
 
         {loading ? (
-          <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p>
+          <UrosferaLoaderMini />
         ) : murojaatlar.length === 0 ? (
           <p style={{ color: 'var(--muted)' }}>Hozircha murojaat yo&apos;q.</p>
         ) : (

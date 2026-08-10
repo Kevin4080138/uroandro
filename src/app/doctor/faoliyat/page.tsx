@@ -10,6 +10,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { ArrowUp, ArrowDown } from 'lucide-react'
+import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const card: React.CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '20px',
@@ -177,7 +178,7 @@ export default function DoctorFaoliyatPage() {
           Amaliyotingiz bo&apos;yicha jonli ko&apos;rsatkichlar: murojaatlar, navbatlar, reyting va operatsiya kuzatuvi.
         </p>
 
-        {loading ? <p style={{ color: 'var(--muted)' }}>Yuklanmoqda...</p> : (
+        {loading ? <UrosferaLoaderMini /> : (
           <>
             {/* KPI kartalar */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px', marginBottom: '24px' }}>
