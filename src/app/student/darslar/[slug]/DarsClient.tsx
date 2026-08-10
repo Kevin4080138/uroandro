@@ -24,10 +24,13 @@ type Tab = 'nazariya' | 'video' | 'yuklab' | 'flashcard' | 'amaliy' | 'usmle' | 
 // Darsning "yengil" tarkibi — nazariya matni va havolalar. Buni server komponent
 // (page.tsx) oldindan olib beradi, shuning uchun sahifa ochilishi bilan matn joyida
 // bo'ladi: brauzer avval JS ni yuklab, keyin bazaga borishini kutmaydi.
+export type Adabiyot = { nom: string; url: string }
+
 export type DarsMatni = {
   nazariya_html: string | null
   asosiy_video_url: string | null
   video_linklar: string[] | null
+  adabiyotlar: Adabiyot[] | null
   konspekt_url: string | null
   prezentatsiya_url: string | null
   nazorat_savol_soni: number | null
@@ -86,6 +89,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const nazariyaHtml = tarkib?.nazariya_html ?? dars?.nazariyaHtml
   const asosiyVideo = tarkib?.asosiy_video_url ?? dars?.asosiyVideoUrl ?? null
   const videoLinklar = tarkib?.video_linklar ?? dars?.videoLinklar ?? []
+  const adabiyotlar = tarkib?.adabiyotlar ?? []
   // Bular endi public URL emas — 'dars-materiallari' (yopiq bucket) ichidagi fayl yo'li.
   const konspektYoli = tarkib?.konspekt_url ?? dars?.konspektUrl
   const prezentatsiyaYoli = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
@@ -410,7 +414,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
             </div>
 
             {/* Nazariya serverdan tayyor keladi — kutish holati kerak emas. */}
-            {qadam === 'nazariya' && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} />}
+            {qadam === 'nazariya' && <NazariyaBolimi dars={dars} nazariyaHtml={nazariyaHtml} adabiyotlar={adabiyotlar} />}
             {qadam === 'video' && <VideoBolimi asosiyVideo={asosiyVideo} linklar={videoLinklar} />}
             {qadam === 'yuklab' && <YuklabOlishBolimi konspektYoli={konspektYoli} prezentatsiyaYoli={prezentatsiyaYoli} />}
             {/* Test qadamlarida bank shu yerda yuklanadi. "Tez orada qo'shiladi"
@@ -510,9 +514,15 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   )
 }
 
-function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<typeof darsTop>>; nazariyaHtml?: string | null }) {
+function NazariyaBolimi({ dars, nazariyaHtml, adabiyotlar = [] }: {
+  dars: NonNullable<ReturnType<typeof darsTop>>; nazariyaHtml?: string | null; adabiyotlar?: Adabiyot[]
+}) {
+  // Nazariyaning asosiy mazmuni — quyidagi variantlardan biri. Adabiyotlar bloki
+  // har qanday variant ostida bir marta qo'shiladi (hammasi <> ichida qaytadi).
+  let asosiy: React.ReactNode
+
   if (dars.nazariyaIframe) {
-    return (
+    asosiy = (
       <div className="rise" style={{ marginLeft: '-16px', marginRight: '-16px' }}>
         <iframe
           src={dars.nazariyaIframe}
@@ -529,16 +539,12 @@ function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<t
         />
       </div>
     )
-  }
-
-  if (nazariyaHtml) {
-    return <div className="maqola-html" dangerouslySetInnerHTML={{ __html: nazariyaHtml }} />
-  }
-
-  // Tarkib `dars_tarkibi` jadvalidan keladi; hali to'ldirilmagan darslar uchun bo'sh sahifa
-  // o'rniga tushunarli holat ko'rsatiladi.
-  if (dars.bolimlar.length === 0) {
-    return (
+  } else if (nazariyaHtml) {
+    asosiy = <div className="maqola-html" dangerouslySetInnerHTML={{ __html: nazariyaHtml }} />
+  } else if (dars.bolimlar.length === 0) {
+    // Tarkib `dars_tarkibi` jadvalidan keladi; hali to'ldirilmagan darslar uchun
+    // bo'sh sahifa o'rniga tushunarli holat ko'rsatiladi.
+    asosiy = (
       <div className="rise" style={{
         background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
         padding: '28px 24px', textAlign: 'center',
@@ -550,37 +556,91 @@ function NazariyaBolimi({ dars, nazariyaHtml }: { dars: NonNullable<ReturnType<t
         </p>
       </div>
     )
+  } else {
+    asosiy = (
+      <>
+        {dars.bolimlar.map((b, i) => (
+          <div key={i} className="rise" style={{
+            animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+            padding: '20px 24px', marginBottom: '14px',
+          }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: '15px', fontWeight: 800, color: 'var(--accent)' }}>{b.sarlavha}</h3>
+            {b.matn.map((p, pi) => (
+              <p key={pi} style={{ margin: pi === 0 ? 0 : '10px 0 0', fontSize: '14px', lineHeight: 1.7, color: 'var(--ink-soft)' }}>{p}</p>
+            ))}
+          </div>
+        ))}
+
+        {dars.manbalar.length > 0 && (
+          <div className="rise" style={{
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
+            padding: '18px 22px',
+          }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Manbalar</h3>
+            <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {dars.manbalar.map((m) => (
+                <li key={m} style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>{m}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
     <>
-      {dars.bolimlar.map((b, i) => (
-        <div key={i} className="rise" style={{
-          animationDelay: `${Math.min(i * 0.06, 0.4)}s`,
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-          padding: '20px 24px', marginBottom: '14px',
-        }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: '15px', fontWeight: 800, color: 'var(--accent)' }}>{b.sarlavha}</h3>
-          {b.matn.map((p, pi) => (
-            <p key={pi} style={{ margin: pi === 0 ? 0 : '10px 0 0', fontSize: '14px', lineHeight: 1.7, color: 'var(--ink-soft)' }}>{p}</p>
-          ))}
-        </div>
-      ))}
-
-      {dars.manbalar.length > 0 && (
-        <div className="rise" style={{
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
-          padding: '18px 22px',
-        }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Manbalar</h3>
-          <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {dars.manbalar.map((m) => (
-              <li key={m} style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>{m}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {asosiy}
+      <AdabiyotlarBloki adabiyotlar={adabiyotlar} />
     </>
+  )
+}
+
+function adabiyotHost(url: string): string {
+  try { return new URL(url).hostname.replace(/^www\./, '') } catch { return 'havola' }
+}
+
+// Nazariya ostida — talaba chuqurroq o'qishi uchun kitob/maqola havolalari.
+// Admin panelidan qo'shiladi; video kartalari uslubiga mos.
+function AdabiyotlarBloki({ adabiyotlar }: { adabiyotlar: Adabiyot[] }) {
+  if (adabiyotlar.length === 0) return null
+  return (
+    <div className="rise" style={{ marginTop: '20px' }}>
+      <p style={{ margin: '0 0 10px', fontSize: '12.5px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+        Qo&apos;shimcha adabiyotlar
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {adabiyotlar.map((a, i) => (
+          <a
+            key={`${a.url}-${i}`}
+            href={a.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="lift"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '13px',
+              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+              padding: '14px 18px', textDecoration: 'none', color: 'var(--ink)',
+            }}
+          >
+            <span style={{
+              width: '38px', height: '38px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', flexShrink: 0,
+            }}>📖</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: '13.5px', fontWeight: 700, lineHeight: 1.35 }}>
+                {a.nom || adabiyotHost(a.url)}
+              </span>
+              <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {adabiyotHost(a.url)}
+              </span>
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>Ochish ↗</span>
+          </a>
+        ))}
+      </div>
+    </div>
   )
 }
 

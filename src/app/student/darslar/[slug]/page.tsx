@@ -22,7 +22,7 @@ export default async function DarsDetailPage({ params }: Props) {
   // login sahifasiga yo'naltiradi — hozirgi xulq o'zgarmaydi.
   const { data } = await supabase
     .from('dars_tarkibi')
-    .select('nazariya_html, asosiy_video_url, video_linklar, konspekt_url, prezentatsiya_url, nazorat_savol_soni, nazorat_vaqt_daqiqa, sertifikat_otish_foizi')
+    .select('nazariya_html, asosiy_video_url, video_linklar, adabiyotlar, konspekt_url, prezentatsiya_url, nazorat_savol_soni, nazorat_vaqt_daqiqa, sertifikat_otish_foizi')
     .eq('dars_slug', slug)
     .maybeSingle()
 

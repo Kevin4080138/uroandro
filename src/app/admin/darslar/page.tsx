@@ -6,10 +6,13 @@ import { createClient } from '@/lib/supabase'
 import { DARSLAR } from '@/lib/talim/darslar'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
+type Adabiyot = { nom: string; url: string }
+
 type DarsTarkibi = {
   dars_slug: string
   asosiy_video_url: string | null
   video_linklar: string[] | null
+  adabiyotlar: Adabiyot[] | null
   konspekt_url: string | null
   prezentatsiya_url: string | null
   nazariya_html: string | null
@@ -17,6 +20,25 @@ type DarsTarkibi = {
   usmle_savollar: unknown[] | null
   nazorat_savollar: unknown[] | null
   flashcardlar: unknown[] | null
+}
+
+// Adabiyotlar textarea'da "Nom | https://havola" ko'rinishida — har biri yangi
+// qatordan. `|` bo'lmasa butun qator havola bo'ladi, nomi keyin havoladan olinadi.
+function adabiyotlarniOqi(matn: string): Adabiyot[] {
+  return matn
+    .split('\n')
+    .map((q) => q.trim())
+    .filter(Boolean)
+    .map((qator) => {
+      const idx = qator.indexOf('|')
+      if (idx === -1) return { nom: '', url: qator }
+      return { nom: qator.slice(0, idx).trim(), url: qator.slice(idx + 1).trim() }
+    })
+    .filter((a) => a.url)
+}
+
+function adabiyotlarniMatnga(list: Adabiyot[] | null | undefined): string {
+  return (list ?? []).map((a) => (a.nom ? `${a.nom} | ${a.url}` : a.url)).join('\n')
 }
 
 // Nazariya HTML platformaning `.maqola-html` uslubi ichida ko'rsatiladi va
@@ -93,6 +115,7 @@ export default function AdminDarslarPage() {
 
   const [asosiyVideoUrl, setAsosiyVideoUrl] = useState('')
   const [videoLinklarMatn, setVideoLinklarMatn] = useState('')
+  const [adabiyotlarMatn, setAdabiyotlarMatn] = useState('')
   const [nazariyaHtml, setNazariyaHtml] = useState('')
   const [amaliyMatn, setAmaliyMatn] = useState('')
   const [usmleMatn, setUsmleMatn] = useState('')
@@ -118,12 +141,13 @@ export default function AdminDarslarPage() {
     setYuklanmoqda(true)
     const { data } = await supabase
       .from('dars_tarkibi')
-      .select('dars_slug, asosiy_video_url, video_linklar, konspekt_url, prezentatsiya_url, nazariya_html, savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
+      .select('dars_slug, asosiy_video_url, video_linklar, adabiyotlar, konspekt_url, prezentatsiya_url, nazariya_html, savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
       .eq('dars_slug', slug)
       .maybeSingle()
     setTarkib((data as DarsTarkibi) ?? null)
     setAsosiyVideoUrl(data?.asosiy_video_url ?? '')
     setVideoLinklarMatn((data?.video_linklar ?? []).join('\n'))
+    setAdabiyotlarMatn(adabiyotlarniMatnga(data?.adabiyotlar as Adabiyot[] | null))
     setNazariyaHtml(data?.nazariya_html ?? '')
     // JSON'ni o'qishga qulay ko'rinishda ochamiz — admin uni qo'lda ham tahrirlashi mumkin.
     const chiroyli = (v: unknown[] | null | undefined) => (v?.length ? JSON.stringify(v, null, 2) : '')
@@ -167,6 +191,7 @@ export default function AdminDarslarPage() {
     try {
       const asosiyVideo = asosiyVideoUrl.trim() || null
       const videoLinklar = videoLinklarMatn.split('\n').map((s) => s.trim()).filter(Boolean)
+      const adabiyotlar = adabiyotlarniOqi(adabiyotlarMatn)
       const konspektUrl = konspektFayl ? await faylYoliniOl(konspektFayl, 'konspekt', tarkib?.konspekt_url) : tarkib?.konspekt_url ?? null
       const prezentatsiyaUrl = prezentatsiyaFayl ? await faylYoliniOl(prezentatsiyaFayl, 'prezentatsiya', tarkib?.prezentatsiya_url) : tarkib?.prezentatsiya_url ?? null
       // bosqich/bepul_namuna — obuna/RLS tekshiruvi shularni o'qiydi, shu sababli darslar.ts bilan avtomatik sinxronlanadi.
@@ -195,6 +220,7 @@ export default function AdminDarslarPage() {
         {
           dars_slug: tanlanganSlug, bosqich, bepul_namuna: bepulNamuna,
           asosiy_video_url: asosiyVideo, video_linklar: videoLinklar,
+          adabiyotlar,
           konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl,
           nazariya_html: nazariyaHtml.trim() || null,
           savollar_banki: amaliy, usmle_savollar: usmle,
@@ -206,6 +232,7 @@ export default function AdminDarslarPage() {
 
       setTarkib({
         dars_slug: tanlanganSlug, asosiy_video_url: asosiyVideo, video_linklar: videoLinklar,
+        adabiyotlar,
         konspekt_url: konspektUrl, prezentatsiya_url: prezentatsiyaUrl,
         nazariya_html: nazariyaHtml.trim() || null,
         savollar_banki: amaliy, usmle_savollar: usmle,
@@ -335,6 +362,26 @@ export default function AdminDarslarPage() {
                   value={videoLinklarMatn}
                   onChange={(e) => setVideoLinklarMatn(e.target.value)}
                   placeholder={'https://youtube.com/watch?v=...\nhttps://instagram.com/reel/...\nhttps://facebook.com/.../videos/...'}
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>
+                  Qo&apos;shimcha adabiyotlar
+                  <span style={{ color: 'var(--muted)', marginLeft: '8px', fontSize: '11.5px' }}>
+                    {adabiyotlarniOqi(adabiyotlarMatn).length ? `${adabiyotlarniOqi(adabiyotlarMatn).length} ta` : "bo'sh"}
+                  </span>
+                </label>
+                <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: 'var(--muted)' }}>
+                  Nazariya ostida ko&apos;rinadi. Har biri yangi qatordan:{' '}
+                  <code style={{ fontSize: '11px' }}>Nom | havola</code> — masalan{' '}
+                  <code style={{ fontSize: '11px' }}>Campbell-Walsh Urology, 12-bob | https://...</code>
+                </p>
+                <textarea
+                  style={{ ...inputStyle, minHeight: '90px' }}
+                  value={adabiyotlarMatn}
+                  onChange={(e) => setAdabiyotlarMatn(e.target.value)}
+                  placeholder={"Campbell-Walsh Urology, 12-bob | https://...\nEAU Guidelines 2024 | https://uroweb.org/..."}
                 />
               </div>
 
