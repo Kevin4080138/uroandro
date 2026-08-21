@@ -57,6 +57,7 @@ const EFFEKT_OPTS = [
   { value: 'slide', label: 'Surilish (slide)' },
   { value: 'zoom',  label: 'Kattalashish (zoom)' },
 ]
+const DEFAULT_SOZ = { max_soni: 5, interval_soniya: 6, effekt: 'fade' }
 
 const inp: React.CSSProperties = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)',
@@ -87,6 +88,7 @@ export default function AdminBannerlarPage() {
   const [userId, setUserId] = useState('')
   const [banners, setBanners] = useState<Banner[]>([])
   const [sozlamalar, setSozlamalar] = useState<Sozlama[]>([])
+  const [sozXato, setSozXato] = useState(false)
   const [tab, setTab] = useState<'faol' | 'arxiv'>('faol')
   const [editId, setEditId] = useState<string | null>(null)
 
@@ -140,13 +142,20 @@ export default function AdminBannerlarPage() {
   }
 
   const loadSozlamalar = async () => {
-    const { data } = await supabase.from('banner_sozlamalar').select('*')
+    const { data, error } = await supabase.from('banner_sozlamalar').select('*')
+    if (error) { setSozXato(true); return }
+    setSozXato(false)
     setSozlamalar((data ?? []) as Sozlama[])
   }
 
   const saveSozlama = async (r: string, patch: Partial<Sozlama>) => {
-    setSozlamalar(prev => prev.map(s => s.role === r ? { ...s, ...patch } : s))
-    await supabase.from('banner_sozlamalar').update({ ...patch, updated_at: new Date().toISOString() }).eq('role', r)
+    const joriy = sozlamalar.find(s => s.role === r) ?? { role: r, ...DEFAULT_SOZ }
+    const yangi = { ...joriy, ...patch }
+    setSozlamalar(prev => prev.some(s => s.role === r) ? prev.map(s => s.role === r ? yangi : s) : [...prev, yangi])
+    // upsert — qator bo'lmasa yaratadi (seed ishlamagan bo'lsa ham ishlaydi)
+    const { error } = await supabase.from('banner_sozlamalar')
+      .upsert({ ...yangi, updated_at: new Date().toISOString() }, { onConflict: 'role' })
+    if (error) setSozXato(true)
   }
 
   const resetForm = () => {
@@ -286,9 +295,13 @@ export default function AdminBannerlarPage() {
           <p style={{ margin: '-6px 0 0', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.5 }}>
             Har bir bo&apos;limda ko&apos;pi bilan nechta banner, har biri necha soniya turishi va almashinish effekti.
           </p>
+          {sozXato && (
+            <div style={{ background: 'color-mix(in srgb, var(--danger) 12%, transparent)', border: '1px solid var(--danger)', borderRadius: '10px', padding: '10px 12px', fontSize: '12px', color: 'var(--ink-soft)', lineHeight: 1.5 }}>
+              ⚠️ Sozlamalar jadvali topilmadi. Supabase&apos;da <code>20260821000000_banner_kengaytirish.sql</code> migratsiyasini ishga tushiring — shundan keyin bu yer saqlanadi.
+            </div>
+          )}
           {SOZ_ROLLAR.map(sr => {
-            const s = sozlamalar.find(x => x.role === sr.role)
-            if (!s) return null
+            const s = sozlamalar.find(x => x.role === sr.role) ?? { role: sr.role, ...DEFAULT_SOZ }
             return (
               <div key={sr.role} style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px 14px' }}>
                 <p style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 700 }}>{sr.label}</p>
