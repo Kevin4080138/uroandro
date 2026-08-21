@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useTheme } from '@/components/ThemeProvider'
+import { SAYT_URL } from '@/lib/saytUrl'
 import Hero, { MobileHero } from '@/components/Hero'
 
 export default function ParolTiklashPage() {
@@ -22,8 +23,9 @@ export default function ParolTiklashPage() {
     const email = raw.includes('@') ? raw : `${raw}@urosfera.uz`
 
     setLoading(true)
+    // Havola har doim haqiqiy domenga ishora qilsin (localhost/preview'dan sinalganda ham)
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/parol-yangilash`,
+      redirectTo: `${SAYT_URL}/auth/parol-yangilash`,
     })
     setLoading(false)
 

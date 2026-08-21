@@ -40,18 +40,33 @@ export default function ParolYangilashPage() {
   const { theme, toggle } = useTheme()
   const pw = passwordStrength(password)
 
-  // Recovery havolasidan kelganda Supabase URL'dagi tokenni o'qib sessiya ochadi
-  // va PASSWORD_RECOVERY hodisasini yuboradi. Sessiya bo'lsa — forma tayyor.
+  // Recovery havolasidan kelganda @supabase/ssr URL'dagi PKCE `?code=` (yoki hash
+  // token) ni avtomatik almashtirib sessiya ochadi va hodisa yuboradi.
   useEffect(() => {
+    const url = new URL(window.location.href)
+    const hasCode = url.searchParams.has('code')
+    const hasHashToken = /access_token|type=recovery/.test(window.location.hash)
+    const hasError = url.searchParams.has('error') || /error/.test(window.location.hash)
+
+    // Supabase xato qaytargan bo'lsa (muddati o'tgan/ishlatilgan) — darrov yaroqsiz
+    if (hasError) { setReady('yaroqsiz'); return }
+
     let hal = false
+    const tayyorla = () => { if (!hal) { hal = true; setReady('tayyor') } }
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || session) { hal = true; setReady('tayyor') }
+      if (event === 'PASSWORD_RECOVERY' || session) tayyorla()
     })
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) { hal = true; setReady('tayyor') }
-    })
-    // Token topilmasa (sahifa to'g'ridan-to'g'ri ochilgan) — yaroqsiz deb ko'rsatamiz
-    const t = setTimeout(() => { if (!hal) setReady('yaroqsiz') }, 2500)
+    supabase.auth.getSession().then(({ data }) => { if (data.session) tayyorla() })
+
+    // Recovery parametrlari umuman yo'q bo'lsa — sahifa to'g'ridan-to'g'ri ochilgan
+    if (!hasCode && !hasHashToken) {
+      const t = setTimeout(() => { if (!hal) setReady('yaroqsiz') }, 800)
+      return () => { sub.subscription.unsubscribe(); clearTimeout(t) }
+    }
+
+    // Token bor — almashtirish sekin tarmoqda vaqt olishi mumkin, kengroq kutamiz
+    const t = setTimeout(() => { if (!hal) setReady('yaroqsiz') }, 6000)
     return () => { sub.subscription.unsubscribe(); clearTimeout(t) }
   }, [supabase])
 
