@@ -40,7 +40,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '6px',
 }
 
-// Qayta ishlatiladigan yuklanish spinneri (globals.css'dagi `spin` keyframe)
+// ── FIX #12: qayta ishlatiladigan yuklanish spinneri ──
 function Spinner() {
   return (
     <span style={{
@@ -94,7 +94,7 @@ function RegisterForm() {
     return digits
   }
 
-  // Parol kuchi ko'rsatkichi
+  // ── FIX #8: parol kuchi ko'rsatkichi ──
   function passwordStrength(pw: string): { level: number; label: string; color: string } {
     if (!pw) return { level: 0, label: '', color: 'var(--line)' }
     let score = 0
@@ -135,7 +135,7 @@ function RegisterForm() {
   }
 
   // ── OTP: Telegram orqali yuborish ──────────────────────────────────────────
-  // DIQQAT: Bu funksiya haqiqiy kod YUBORMAYDI. Kodni bot yuboradi —
+  // DIQQAT (FIX #6): Bu funksiya haqiqiy kod YUBORMAYDI. Kodni bot yuboradi —
   // foydalanuvchi botga telefon raqamini yuborganda. Shuning uchun UI matni ham
   // "kod yuborildi" demaydi, balki "botga raqamingizni yuboring" deb aniq aytadi.
   function handleSendOtp() {
@@ -199,7 +199,7 @@ function RegisterForm() {
     })
 
     if (signUpError) {
-      // Login band bo'lsa tushunarli xabar
+      // ── FIX #7: login band bo'lsa tushunarli xabar ──
       const msg = /already registered|already exists|duplicate/i.test(signUpError.message)
         ? 'Bu login yoki telefon allaqachon ro\'yxatdan o\'tgan. Boshqasini tanlang yoki kiring.'
         : 'Xatolik: ' + signUpError.message
@@ -276,11 +276,25 @@ function RegisterForm() {
         }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-            <button type="button" onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
+            {/* ── FIX #4: emoji o'rniga SVG ikonka ── */}
+            <button type="button" onClick={toggle} aria-label={theme === 'dark' ? 'Kunduzgi temaga o\'tish' : 'Tungi temaga o\'tish'} className="btn-animated" style={{
               background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '8px',
-              padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
+              padding: '8px', cursor: 'pointer', color: 'var(--ink-soft)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0,
             }}>
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <line x1="12" y1="2" x2="12" y2="4" /><line x1="12" y1="20" x2="12" y2="22" />
+                  <line x1="2" y1="12" x2="4" y2="12" /><line x1="20" y1="12" x2="22" y2="12" />
+                  <line x1="4.9" y1="4.9" x2="6.3" y2="6.3" /><line x1="17.7" y1="17.7" x2="19.1" y2="19.1" />
+                  <line x1="4.9" y1="19.1" x2="6.3" y2="17.7" /><line x1="17.7" y1="6.3" x2="19.1" y2="4.9" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              )}
             </button>
           </div>
 
@@ -339,7 +353,7 @@ function RegisterForm() {
 
           {/* ── STEP: INFO ── */}
           {step === 'info' && (
-            // <form> — Enter bilan "Davom etish" ishlaydi
+            // ── FIX #1: <form> — Enter bilan "Davom etish" ishlaydi ──
             <form onSubmit={(e) => { e.preventDefault(); handleInfoNext() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Tanlangan rol */}
               <div style={{
@@ -414,7 +428,7 @@ function RegisterForm() {
                     <p style={{ color: 'var(--ink)', fontWeight: '600', margin: '0 0 8px', fontSize: '15px' }}>
                       Telegram orqali tasdiqlash
                     </p>
-                    {/* Oqim aniq — botga o'zingiz raqam yuborasiz, bot kod qaytaradi */}
+                    {/* ── FIX #6: oqim aniq — botga o'zingiz raqam yuborasiz, bot kod qaytaradi ── */}
                     <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>
                       1. Botni oching → 2. Raqamingizni yuboring →<br />
                       3. Bot 6 xonali kod qaytaradi → 4. Kodni bu yerga kiriting.
@@ -444,7 +458,7 @@ function RegisterForm() {
                     📱 Telegram botini ochish
                   </a>
 
-                  {/* Botni allaqachon ochgan bo'lsa kod kiritishga o'tsin */}
+                  {/* ── FIX #6: botni allaqachon ochgan bo'lsa kod kiritishga o'tsin ── */}
                   <button type="button" onClick={handleSendOtp} style={{
                     background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer',
                     fontSize: '13px', padding: 0, textAlign: 'center',
@@ -453,7 +467,7 @@ function RegisterForm() {
                   </button>
                 </>
               ) : (
-                // <form> — Enter bilan kod tasdiqlash
+                // ── FIX #1: <form> — Enter bilan kod tasdiqlash ──
                 <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleVerifyOtp() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{
                     background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)',
@@ -504,7 +518,7 @@ function RegisterForm() {
 
           {/* ── STEP: PAROL ── */}
           {step === 'password' && (
-            // <form> — Enter bilan ro'yxatdan o'tish
+            // ── FIX #1: <form> — Enter bilan ro'yxatdan o'tish ──
             <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleRegister() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {role !== 'patient' && (
                 <>
@@ -538,7 +552,7 @@ function RegisterForm() {
                 <label htmlFor="new-password" style={labelStyle}>Parol</label>
                 <input id="new-password" type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" style={inputStyle} />
-                {/* Parol kuchi ko'rsatkichi */}
+                {/* ── FIX #8: parol kuchi ko'rsatkichi ── */}
                 {password && (
                   <div style={{ marginTop: '8px' }}>
                     <div style={{ display: 'flex', gap: '4px' }}>

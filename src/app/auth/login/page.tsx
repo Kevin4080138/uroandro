@@ -21,7 +21,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError('')
 
-    // Bo'sh maydon validatsiyasi (Supabase'ga behuda so'rov ketmasin)
+    // ── FIX #2: bo'sh maydon validatsiyasi (Supabase'ga behuda so'rov ketmasin) ──
     const identifier = mode === 'patient' ? telefon.trim() : email.trim()
     if (!identifier) {
       setError(mode === 'patient' ? 'Telefon raqamini kiriting' : 'Login kiriting')
@@ -108,11 +108,25 @@ export default function LoginPage() {
         border: '1px solid var(--line)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-          <button type="button" onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
+          {/* ── FIX #4: emoji o'rniga SVG ikonka ── */}
+          <button type="button" onClick={toggle} aria-label={theme === 'dark' ? 'Kunduzgi temaga o\'tish' : 'Tungi temaga o\'tish'} className="btn-animated" style={{
             background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '8px',
-            padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
+            padding: '8px', cursor: 'pointer', color: 'var(--ink-soft)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0,
           }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <line x1="12" y1="2" x2="12" y2="4" /><line x1="12" y1="20" x2="12" y2="22" />
+                <line x1="2" y1="12" x2="4" y2="12" /><line x1="20" y1="12" x2="22" y2="12" />
+                <line x1="4.9" y1="4.9" x2="6.3" y2="6.3" /><line x1="17.7" y1="17.7" x2="19.1" y2="19.1" />
+                <line x1="4.9" y1="19.1" x2="6.3" y2="17.7" /><line x1="17.7" y1="6.3" x2="19.1" y2="4.9" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
           </button>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -142,13 +156,14 @@ export default function LoginPage() {
           ))}
         </div>
 
-        {/* <form onSubmit> — Enter bilan kirish ishlaydi */}
+        {/* ── FIX #1: <form onSubmit> — Enter bilan kirish ishlaydi ── */}
         <form
           onSubmit={(e) => { e.preventDefault(); if (!loading) handleLogin() }}
           style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
         >
           {mode === 'patient' ? (
             <div>
+              {/* ── FIX #13: label ↔ input htmlFor/id bilan bog'landi ── */}
               <label htmlFor="telefon" style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
                 Telefon raqami
               </label>
@@ -202,15 +217,9 @@ export default function LoginPage() {
           )}
 
           <div>
-            {/* "Parolni unutdingizmi?" — yorliq yonida */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
-              <label htmlFor="parol" style={{ color: 'var(--ink-soft)', fontSize: '14px' }}>
-                Parol
-              </label>
-              <a href="/auth/parol-tiklash" style={{ color: 'var(--accent)', fontSize: '13px', textDecoration: 'none' }}>
-                Parolni unutdingizmi?
-              </a>
-            </div>
+            <label htmlFor="parol" style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+              Parol
+            </label>
             <input
               id="parol"
               name="password"
@@ -233,7 +242,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* xato xabari skrinrider uchun e'lon qilinadi */}
+          {/* ── FIX #13: xato xabari skrinrider uchun e'lon qilinadi ── */}
           {error && (
             <p role="alert" aria-live="polite" style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>
           )}
@@ -260,7 +269,7 @@ export default function LoginPage() {
               gap: '8px',
             }}
           >
-            {/* yuklanish spinneri (globals.css'dagi `spin` keyframe) */}
+            {/* ── FIX #12: yuklanish spinneri (globals.css'dagi `spin` keyframe) ── */}
             {loading && (
               <span style={{
                 width: '15px', height: '15px', borderRadius: '50%',
@@ -270,6 +279,13 @@ export default function LoginPage() {
             )}
             {loading ? 'Kirish...' : 'Kirish'}
           </button>
+
+          {/* ── FIX #5: "Parolni unutdingizmi?" havolasi ── */}
+          <p style={{ textAlign: 'center', margin: '0' }}>
+            <a href="/auth/parol-tiklash" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '13px' }}>
+              Parolni unutdingizmi?
+            </a>
+          </p>
 
           <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '14px', margin: 0 }}>
             Hisobingiz yo&apos;qmi?{' '}
