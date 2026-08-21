@@ -21,7 +21,14 @@ const TYPE_LABEL: Record<string, { label: string; bg: string }> = {
   bildirishnoma:  { label: '🔔 Bildirishnoma',   bg: 'rgba(220,38,38,0.85)' },
 }
 
-const INTERVAL_MS = 6000
+const DEFAULT_INTERVAL_MS = 6000
+const DEFAULT_MAX = 5
+
+const EFFEKT_CLASS: Record<string, string> = {
+  fade: 'banner-eff-fade',
+  slide: 'banner-eff-slide',
+  zoom: '', // joriy bannerScaleIn
+}
 
 export function BannerCarousel({
   role,
@@ -48,18 +55,39 @@ export function BannerCarousel({
   const [idx, setIdx] = useState(0)
   const [animKey, setAnimKey] = useState(0)
   const [dragging, setDragging] = useState(false)
+  const [intervalMs, setIntervalMs] = useState(DEFAULT_INTERVAL_MS)
+  const [effektClass, setEffektClass] = useState('')
   const startX = useRef(0)
   const didDrag = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const load = async () => {
+      // Bo'lim sozlamalari: soni, interval, effekt (banner_sozlamalar)
+      let maxSoni = DEFAULT_MAX
+      if (role) {
+        const { data: soz } = await supabase
+          .from('banner_sozlamalar')
+          .select('max_soni, interval_soniya, effekt')
+          .eq('role', role)
+          .maybeSingle()
+        if (soz) {
+          maxSoni = soz.max_soni ?? DEFAULT_MAX
+          setIntervalMs((soz.interval_soniya ?? 6) * 1000)
+          setEffektClass(EFFEKT_CLASS[soz.effekt] ?? '')
+        }
+      }
+
+      const now = new Date().toISOString()
       let query = supabase
         .from('bannerlar')
         .select('id, sarlavha, tavsif, image_url, link_href, type, rang')
         .eq('faol', true)
+        .eq('arxiv', false)
+        .or(`boshlanish.is.null,boshlanish.lte.${now}`)
+        .or(`tugash.is.null,tugash.gte.${now}`)
         .order('sort_order', { ascending: true })
-        .limit(5)
+        .limit(maxSoni)
       if (role) {
         query = faqatShuRol
           ? query.eq('target_role', role)
@@ -77,16 +105,16 @@ export function BannerCarousel({
     timerRef.current = setInterval(() => {
       setIdx(i => (i + 1) % banners.length)
       setAnimKey(k => k + 1)
-    }, INTERVAL_MS)
+    }, intervalMs)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [banners.length])
+  }, [banners.length, intervalMs])
 
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
       setIdx(i => (i + 1) % banners.length)
       setAnimKey(k => k + 1)
-    }, INTERVAL_MS)
+    }, intervalMs)
   }
 
   const goTo = (n: number) => { setIdx(n); setAnimKey(k => k + 1); resetTimer() }
@@ -135,7 +163,7 @@ export function BannerCarousel({
         }}
       >
         {/* globals.css dagi bannerScaleIn keyframe, key o'zgarganda remount → animatsiya qayta boshlanadi */}
-        <div key={animKey} className="banner-anim">
+        <div key={animKey} className={`banner-anim ${effektClass}`}>
           {b.image_url && (
             <img
               src={b.image_url}

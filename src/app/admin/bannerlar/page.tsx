@@ -16,7 +16,17 @@ type Banner = {
   rang: string
   faol: boolean
   sort_order: number
+  boshlanish: string | null
+  tugash: string | null
+  arxiv: boolean
   created_at: string
+}
+
+type Sozlama = {
+  role: string
+  max_soni: number
+  interval_soniya: number
+  effekt: string
 }
 
 const TYPE_OPTS = [
@@ -30,12 +40,22 @@ const ROLE_OPTS = [
   { value: 'student', label: '🎓 Talabalar' },
   { value: 'doctor',  label: '👨‍⚕️ Shifokorlar' },
   { value: 'patient', label: '🧑 Bemorlar' },
-  // Kirish sahifasi ochiq — bu banner ro'yxatdan o'tmagan mehmonga ham ko'rinadi.
-  // "Hammaga" bannerlari bu yerga tushmaydi (BannerCarousel faqatShuRol).
   { value: 'landing', label: '🌐 Kirish sahifasi (ochiq)' },
 ]
 const RANG_OPTS = [
   '#2563eb', '#7c3aed', '#dc2626', '#16a34a', '#ca8a04', '#0891b2', '#db2777',
+]
+// Bo'lim sozlamalari uchun ko'rsatiladigan rollar (banner_sozlamalar bilan bir xil)
+const SOZ_ROLLAR = [
+  { role: 'patient', label: '🧑 Bemorlar' },
+  { role: 'student', label: '🎓 Talabalar' },
+  { role: 'doctor',  label: '👨‍⚕️ Shifokorlar' },
+  { role: 'landing', label: '🌐 Kirish sahifasi' },
+]
+const EFFEKT_OPTS = [
+  { value: 'fade',  label: 'Silliq (fade)' },
+  { value: 'slide', label: 'Surilish (slide)' },
+  { value: 'zoom',  label: 'Kattalashish (zoom)' },
 ]
 
 const inp: React.CSSProperties = {
@@ -44,12 +64,30 @@ const inp: React.CSSProperties = {
   padding: '11px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box',
 }
 
+// ── Sana yordamchilari ───────────────────────────────────────────────
+function isoToLocalInput(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 16)
+}
+function localInputToIso(v: string): string | null {
+  if (!v) return null
+  return new Date(v).toISOString()
+}
+function sanaKorinishi(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
 export default function AdminBannerlarPage() {
   const router = useRouter()
   const supabase = createClient()
   const fileRef = useRef<HTMLInputElement>(null)
   const [userId, setUserId] = useState('')
   const [banners, setBanners] = useState<Banner[]>([])
+  const [sozlamalar, setSozlamalar] = useState<Sozlama[]>([])
+  const [tab, setTab] = useState<'faol' | 'arxiv'>('faol')
   const [editId, setEditId] = useState<string | null>(null)
 
   // Form state
@@ -59,6 +97,8 @@ export default function AdminBannerlarPage() {
   const [type, setType] = useState('yangilik')
   const [role, setRole] = useState('')
   const [rang, setRang] = useState('#2563eb')
+  const [boshlanish, setBoshlanish] = useState('')
+  const [tugash, setTugash] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [clearImage, setClearImage] = useState(false)
@@ -75,6 +115,7 @@ export default function AdminBannerlarPage() {
       if (p?.role !== 'admin') { router.push('/student/dashboard'); return }
       setUserId(user.id)
       loadBanners()
+      loadSozlamalar()
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,12 +127,32 @@ export default function AdminBannerlarPage() {
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-    setBanners(data ?? [])
+    let list = (data ?? []) as Banner[]
+
+    // Avto-arxiv: muddati o'tgan, hali arxivlanmagan bannerlarni arxivga o'tkazamiz
+    const now = new Date().toISOString()
+    const eskirgan = list.filter(b => !b.arxiv && b.tugash && b.tugash < now)
+    if (eskirgan.length) {
+      await supabase.from('bannerlar').update({ arxiv: true }).in('id', eskirgan.map(b => b.id))
+      list = list.map(b => eskirgan.some(e => e.id === b.id) ? { ...b, arxiv: true } : b)
+    }
+    setBanners(list)
+  }
+
+  const loadSozlamalar = async () => {
+    const { data } = await supabase.from('banner_sozlamalar').select('*')
+    setSozlamalar((data ?? []) as Sozlama[])
+  }
+
+  const saveSozlama = async (r: string, patch: Partial<Sozlama>) => {
+    setSozlamalar(prev => prev.map(s => s.role === r ? { ...s, ...patch } : s))
+    await supabase.from('banner_sozlamalar').update({ ...patch, updated_at: new Date().toISOString() }).eq('role', r)
   }
 
   const resetForm = () => {
     setEditId(null); setSarlavha(''); setTavsif(''); setLinkHref('')
     setType('yangilik'); setRole(''); setRang('#2563eb')
+    setBoshlanish(''); setTugash('')
     setImageFile(null); setImagePreview(null); setClearImage(false)
     setError(''); setSuccess('')
   }
@@ -100,13 +161,24 @@ export default function AdminBannerlarPage() {
     setEditId(b.id); setSarlavha(b.sarlavha); setTavsif(b.tavsif ?? '')
     setLinkHref(b.link_href ?? ''); setType(b.type); setRole(b.target_role ?? '')
     setRang(b.rang ?? '#2563eb'); setImagePreview(b.image_url)
+    setBoshlanish(isoToLocalInput(b.boshlanish)); setTugash(isoToLocalInput(b.tugash))
     setImageFile(null); setClearImage(false); setError(''); setSuccess('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Muddat presetlari — tugash sanasini hozirdan N kun keyinga qo'yadi
+  const muddatPreset = (kun: number) => {
+    if (!boshlanish) setBoshlanish(isoToLocalInput(new Date().toISOString()))
+    const asos = boshlanish ? new Date(boshlanish) : new Date()
+    setTugash(isoToLocalInput(new Date(asos.getTime() + kun * 86400000).toISOString()))
   }
 
   const saqlash = async () => {
     setError(''); setSuccess('')
     if (!sarlavha.trim()) { setError('Sarlavha kiriting'); return }
+    const boshIso = localInputToIso(boshlanish)
+    const tugIso = localInputToIso(tugash)
+    if (boshIso && tugIso && tugIso <= boshIso) { setError("Tugash sanasi boshlanishdan keyin bo'lsin"); return }
     setLoading(true)
 
     let imageUrl: string | null = imagePreview
@@ -130,14 +202,18 @@ export default function AdminBannerlarPage() {
       type,
       target_role: role || null,
       rang,
+      boshlanish: boshIso,
+      tugash: tugIso,
       created_by: userId,
     }
 
     if (editId) {
-      const { error: dbErr } = await supabase.from('bannerlar').update(payload).eq('id', editId)
+      // Tahrirda: yangi tugash kelajakda bo'lsa arxivdan chiqaramiz
+      const arxivPatch = tugIso && tugIso < new Date().toISOString() ? { arxiv: true } : { arxiv: false }
+      const { error: dbErr } = await supabase.from('bannerlar').update({ ...payload, ...arxivPatch }).eq('id', editId)
       if (dbErr) { setError(dbErr.message); setLoading(false); return }
     } else {
-      const { error: dbErr } = await supabase.from('bannerlar').insert({ ...payload, faol: true, sort_order: banners.length })
+      const { error: dbErr } = await supabase.from('bannerlar').insert({ ...payload, faol: true, arxiv: false, sort_order: banners.length })
       if (dbErr) { setError(dbErr.message); setLoading(false); return }
     }
 
@@ -152,29 +228,48 @@ export default function AdminBannerlarPage() {
     setBanners(prev => prev.map(x => x.id === b.id ? { ...x, faol: !x.faol } : x))
   }
 
+  const arxivla = async (b: Banner) => {
+    await supabase.from('bannerlar').update({ arxiv: true }).eq('id', b.id)
+    setBanners(prev => prev.map(x => x.id === b.id ? { ...x, arxiv: true } : x))
+    if (editId === b.id) resetForm()
+  }
+
+  const arxivdanChiqar = async (b: Banner) => {
+    // Muddati o'tgan bo'lsa tugashni tozalaymiz — aks holda darrov qayta arxivlanardi
+    const patch: Partial<Banner> = { arxiv: false }
+    if (b.tugash && b.tugash < new Date().toISOString()) patch.tugash = null
+    await supabase.from('bannerlar').update(patch).eq('id', b.id)
+    setBanners(prev => prev.map(x => x.id === b.id ? { ...x, ...patch } : x))
+  }
+
   const ochirish = async (id: string) => {
-    if (!confirm('Bannerni o\'chirasizmi?')) return
+    if (!confirm('Bannerni butunlay o\'chirasizmi?')) return
     await supabase.from('bannerlar').delete().eq('id', id)
     setBanners(prev => prev.filter(x => x.id !== id))
     if (editId === id) resetForm()
   }
 
+  const koringan = banners.filter(b => tab === 'arxiv' ? b.arxiv : !b.arxiv)
+
   const tartibOzgartir = async (id: string, dir: 'up' | 'down') => {
-    const i = banners.findIndex(b => b.id === id)
+    const arr = koringan
+    const i = arr.findIndex(b => b.id === id)
     const j = dir === 'up' ? i - 1 : i + 1
-    if (j < 0 || j >= banners.length) return
-    const updated = [...banners]
-    const [a, b2] = [updated[i], updated[j]]
+    if (j < 0 || j >= arr.length) return
+    const a = arr[i], b2 = arr[j]
     await Promise.all([
       supabase.from('bannerlar').update({ sort_order: b2.sort_order }).eq('id', a.id),
       supabase.from('bannerlar').update({ sort_order: a.sort_order }).eq('id', b2.id),
     ])
-    updated[i] = { ...a, sort_order: b2.sort_order }
-    updated[j] = { ...b2, sort_order: a.sort_order }
-    setBanners(updated.sort((x, y) => x.sort_order - y.sort_order))
+    setBanners(prev => prev.map(x =>
+      x.id === a.id ? { ...x, sort_order: b2.sort_order } :
+      x.id === b2.id ? { ...x, sort_order: a.sort_order } : x
+    ).sort((x, y) => x.sort_order - y.sort_order))
   }
 
   const typeInfo = TYPE_OPTS.find(t => t.value === type)
+  const arxivSoni = banners.filter(b => b.arxiv).length
+  const faolSoni = banners.filter(b => !b.arxiv).length
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '40px' }}>
@@ -185,6 +280,43 @@ export default function AdminBannerlarPage() {
           🎠 Bannerlar boshqaruvi
         </h2>
 
+        {/* ── Bo'lim sozlamalari ── */}
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>⚙️ Bo&apos;lim sozlamalari</h3>
+          <p style={{ margin: '-6px 0 0', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.5 }}>
+            Har bir bo&apos;limda ko&apos;pi bilan nechta banner, har biri necha soniya turishi va almashinish effekti.
+          </p>
+          {SOZ_ROLLAR.map(sr => {
+            const s = sozlamalar.find(x => x.role === sr.role)
+            if (!s) return null
+            return (
+              <div key={sr.role} style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px 14px' }}>
+                <p style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 700 }}>{sr.label}</p>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    Nechtagacha
+                    <input type="number" min={1} max={10} value={s.max_soni}
+                      onChange={e => saveSozlama(sr.role, { max_soni: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })}
+                      style={{ ...inp, width: '90px', padding: '8px 10px' }} />
+                  </label>
+                  <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    Soniya
+                    <input type="number" min={2} max={30} value={s.interval_soniya}
+                      onChange={e => saveSozlama(sr.role, { interval_soniya: Math.max(2, Math.min(30, Number(e.target.value) || 6)) })}
+                      style={{ ...inp, width: '90px', padding: '8px 10px' }} />
+                  </label>
+                  <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
+                    Effekt
+                    <select value={s.effekt} onChange={e => saveSozlama(sr.role, { effekt: e.target.value })} style={{ ...inp, padding: '8px 10px' }}>
+                      {EFFEKT_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </label>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
         {/* ── Forma ── */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>
@@ -193,7 +325,7 @@ export default function AdminBannerlarPage() {
 
           {/* Kimga */}
           <div>
-            <p style={{ margin: '0 0 6px', fontSize: '12px', fontWeight: 700, color: 'var(--muted)' }}>Kimga ko'rsatilsin</p>
+            <p style={{ margin: '0 0 6px', fontSize: '12px', fontWeight: 700, color: 'var(--muted)' }}>Kimga ko&apos;rsatilsin</p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {ROLE_OPTS.map(r => (
                 <button key={r.value} onClick={() => setRole(r.value)} style={{
@@ -243,6 +375,38 @@ export default function AdminBannerlarPage() {
             <input value={linkHref} onChange={e => setLinkHref(e.target.value)} placeholder="/student/darslar yoki https://..." style={inp} />
           </div>
 
+          {/* ── Muddat (rejalashtirish) ── */}
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px' }}>
+              📅 Ko&apos;rsatish muddati (ixtiyoriy)
+            </label>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+              {[['1 kun', 1], ['1 hafta', 7], ['1 oy', 30]].map(([lab, kun]) => (
+                <button key={lab as string} onClick={() => muddatPreset(kun as number)} style={{
+                  padding: '6px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                  background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
+                }}>{lab}</button>
+              ))}
+              <button onClick={() => { setBoshlanish(''); setTugash('') }} style={{
+                padding: '6px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                background: 'var(--surface-2)', color: 'var(--muted)', border: '1px solid var(--line)',
+              }}>Muddatsiz</button>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <label style={{ fontSize: '11px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
+                Boshlanish
+                <input type="datetime-local" value={boshlanish} onChange={e => setBoshlanish(e.target.value)} style={{ ...inp, padding: '9px 12px' }} />
+              </label>
+              <label style={{ fontSize: '11px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
+                Tugash
+                <input type="datetime-local" value={tugash} onChange={e => setTugash(e.target.value)} style={{ ...inp, padding: '9px 12px' }} />
+              </label>
+            </div>
+            <p style={{ margin: '6px 0 0', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.5 }}>
+              Bo&apos;sh qoldirilsa — muddatsiz. Tugash o&apos;tgach banner avtomatik arxivga o&apos;tadi.
+            </p>
+          </div>
+
           {/* Rasm */}
           <div>
             <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px' }}>Rasm (ixtiyoriy)</label>
@@ -275,7 +439,7 @@ export default function AdminBannerlarPage() {
           {/* Rang (rasm yo'q bo'lsa) */}
           {!imagePreview || clearImage ? (
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px' }}>Fon rangi (rasm yo'q bo'lsa)</label>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px' }}>Fon rangi (rasm yo&apos;q bo&apos;lsa)</label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {RANG_OPTS.map(r => (
                   <button key={r} onClick={() => setRang(r)} style={{
@@ -325,42 +489,70 @@ export default function AdminBannerlarPage() {
           </div>
         </div>
 
-        {/* ── Bannerlar ro'yxati ── */}
-        {banners.length > 0 && (
-          <div>
-            <h3 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: 800 }}>📋 Mavjud bannerlar ({banners.length})</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {banners.map((b, i) => (
-                <div key={b.id} style={{
-                  background: 'var(--surface)', border: `1px solid ${b.faol ? 'var(--line)' : 'var(--danger)40'}`,
-                  borderRadius: '14px', padding: '14px 16px', opacity: b.faol ? 1 : 0.6,
-                }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                    {b.image_url ? (
-                      <img src={b.image_url} alt="" style={{ width: '72px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: '72px', height: '48px', borderRadius: '8px', background: `linear-gradient(135deg, ${b.rang}, ${b.rang}80)`, flexShrink: 0 }} />
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.sarlavha}</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>
-                        {TYPE_OPTS.find(t => t.value === b.type)?.label} ·{' '}
-                        {ROLE_OPTS.find(r => r.value === (b.target_role ?? ''))?.label} ·{' '}
-                        {b.faol ? <span style={{ color: '#16a34a' }}>Faol</span> : <span style={{ color: 'var(--danger)' }}>Yashirin</span>}
+        {/* ── Faol / Arxiv tablari ── */}
+        <div style={{ display: 'flex', border: '1.5px solid var(--line)', borderRadius: '10px', overflow: 'hidden' }}>
+          {([['faol', `📋 Faol (${faolSoni})`], ['arxiv', `🗄 Arxiv (${arxivSoni})`]] as const).map(([v, label]) => (
+            <button key={v} onClick={() => setTab(v)} style={{
+              flex: 1, border: 'none', padding: '10px 6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+              background: tab === v ? 'var(--accent)' : 'var(--surface-2)',
+              color: tab === v ? 'white' : 'var(--muted)',
+            }}>{label}</button>
+          ))}
+        </div>
+
+        {/* ── Ro'yxat ── */}
+        {koringan.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {koringan.map((b, i) => (
+              <div key={b.id} style={{
+                background: 'var(--surface)', border: `1px solid ${b.faol ? 'var(--line)' : 'var(--danger)40'}`,
+                borderRadius: '14px', padding: '14px 16px', opacity: b.faol || b.arxiv ? 1 : 0.6,
+              }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  {b.image_url ? (
+                    <img src={b.image_url} alt="" style={{ width: '72px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: '72px', height: '48px', borderRadius: '8px', background: `linear-gradient(135deg, ${b.rang}, ${b.rang}80)`, flexShrink: 0 }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.sarlavha}</p>
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>
+                      {TYPE_OPTS.find(t => t.value === b.type)?.label} ·{' '}
+                      {ROLE_OPTS.find(r => r.value === (b.target_role ?? ''))?.label} ·{' '}
+                      {b.faol ? <span style={{ color: '#16a34a' }}>Faol</span> : <span style={{ color: 'var(--danger)' }}>Yashirin</span>}
+                    </p>
+                    {(b.boshlanish || b.tugash) && (
+                      <p style={{ margin: '3px 0 0', fontSize: '10.5px', color: 'var(--muted)' }}>
+                        📅 {sanaKorinishi(b.boshlanish)} → {sanaKorinishi(b.tugash)}
                       </p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-                    <button onClick={() => startEdit(b)} style={{ ...btnSm, color: 'var(--accent)', borderColor: 'var(--accent)20' }}>✏️ Tahrir</button>
-                    <button onClick={() => toggleFaol(b)} style={{ ...btnSm, color: b.faol ? 'var(--muted)' : '#16a34a', borderColor: 'var(--line)' }}>{b.faol ? '🙈 Yashir' : '👁 Ko\'rsat'}</button>
-                    <button onClick={() => tartibOzgartir(b.id, 'up')} disabled={i === 0} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↑</button>
-                    <button onClick={() => tartibOzgartir(b.id, 'down')} disabled={i === banners.length - 1} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↓</button>
-                    <button onClick={() => ochirish(b.id)} style={{ ...btnSm, color: 'var(--danger)', borderColor: 'var(--danger)30' }}>🗑 O'chir</button>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                  {tab === 'faol' ? (
+                    <>
+                      <button onClick={() => startEdit(b)} style={{ ...btnSm, color: 'var(--accent)', borderColor: 'var(--accent)20' }}>✏️ Tahrir</button>
+                      <button onClick={() => toggleFaol(b)} style={{ ...btnSm, color: b.faol ? 'var(--muted)' : '#16a34a', borderColor: 'var(--line)' }}>{b.faol ? '🙈 Yashir' : '👁 Ko\'rsat'}</button>
+                      <button onClick={() => tartibOzgartir(b.id, 'up')} disabled={i === 0} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↑</button>
+                      <button onClick={() => tartibOzgartir(b.id, 'down')} disabled={i === koringan.length - 1} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↓</button>
+                      <button onClick={() => arxivla(b)} style={{ ...btnSm, color: '#ca8a04', borderColor: 'var(--line)' }}>🗄 Arxivla</button>
+                      <button onClick={() => ochirish(b.id)} style={{ ...btnSm, color: 'var(--danger)', borderColor: 'var(--danger)30' }}>🗑 O&apos;chir</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => arxivdanChiqar(b)} style={{ ...btnSm, color: '#16a34a', borderColor: 'var(--line)' }}>↩️ Arxivdan chiqarish</button>
+                      <button onClick={() => startEdit(b)} style={{ ...btnSm, color: 'var(--accent)', borderColor: 'var(--accent)20' }}>✏️ Tahrir</button>
+                      <button onClick={() => ochirish(b.id)} style={{ ...btnSm, color: 'var(--danger)', borderColor: 'var(--danger)30' }}>🗑 O&apos;chir</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
+        ) : (
+          <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '13px', padding: '20px 0' }}>
+            {tab === 'arxiv' ? 'Arxivda banner yo\'q.' : 'Hozircha banner yo\'q.'}
+          </p>
         )}
       </div>
     </div>

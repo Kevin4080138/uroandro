@@ -258,6 +258,14 @@ h1, h2, h3, h4 {
   animation: bannerScaleIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
+/* Almashinish effektlari — bo'lim sozlamasiga qarab tanlanadi (banner_sozlamalar.effekt).
+   Bir xil xususiylik, `.banner-anim` dan keyin turgani uchun animatsiyani almashtiradi. */
+@keyframes bannerFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bannerSlideIn { from { transform: translateX(26px); opacity: 0; } to { transform: none; opacity: 1; } }
+.banner-eff-fade  { animation: bannerFadeIn  0.5s ease both; }
+.banner-eff-slide { animation: bannerSlideIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+/* zoom = joriy bannerScaleIn (alohida modifier kerak emas) */
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 
@@ -268,7 +276,9 @@ h1, h2, h3, h4 {
   .rise,
   .reveal,
   .fade-in,
-  .banner-anim {
+  .banner-anim,
+  .banner-eff-fade,
+  .banner-eff-slide {
     opacity: 1 !important;
     transform: none !important;
   }
