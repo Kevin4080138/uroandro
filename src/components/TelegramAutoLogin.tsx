@@ -6,7 +6,6 @@
 // Yangi foydalanuvchi bo'lsa: Talaba/Bemor tanlash ekrani chiqadi.
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 type TgWebApp = {
@@ -23,7 +22,6 @@ const ROLE_HOME: Record<string, string> = {
 }
 
 export function TelegramAutoLogin() {
-  const router = useRouter()
   const supabase = createClient()
   const [holat, setHolat] = useState<'tekshirilyapti' | 'rol' | 'kirilmoqda' | 'yopiq'>('yopiq')
   const [ism, setIsm] = useState('')
@@ -31,11 +29,15 @@ export function TelegramAutoLogin() {
 
   const kir = async (initData: string, role: string | undefined) => {
     setXato(null)
+    // Watchdog: server yoki tarmoq javob bermasa — cheksiz spinnerда qolmaymiz
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 12000)
     try {
       const res = await fetch('/api/telegram/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initData, role }),
+        signal: ctrl.signal,
       })
       const json = await res.json()
 
@@ -56,21 +58,29 @@ export function TelegramAutoLogin() {
       // "Only the token_hash and type should be provided".
       // `type` server yaratgan havola turiga mos bo'lishi kerak — shuning
       // uchun server generateLink'ning verification_type'ini qaytaradi.
-      const { error } = await supabase.auth.verifyOtp({
+      const verify = supabase.auth.verifyOtp({
         token_hash: json.token_hash,
         type: json.type ?? 'magiclink',
       })
+      const verifyTimeout = new Promise<never>((_, rej) =>
+        setTimeout(() => rej(new Error("Sessiya ochish uzoq davom etdi")), 12000)
+      )
+      const { error } = await Promise.race([verify, verifyTimeout])
       if (error) {
         setXato('Sessiya ochilmadi: ' + error.message)
         setHolat('rol')
         return
       }
-      // Muvaffaqiyat — rol uy sahifasiga
-      router.replace(ROLE_HOME[json.role] ?? '/')
-      router.refresh()
+      // Muvaffaqiyat — TO'LIQ qayta yuklash bilan uy sahifasiga o'tamiz.
+      // Bu overlay'ni butunlay yopadi (router.replace overlay state'ini
+      // tozalamasdi) va server yangi sessiya cookie'sini o'qiydi.
+      window.location.replace(ROLE_HOME[json.role] ?? '/')
     } catch (e) {
-      setXato(e instanceof Error ? e.message : 'Xatolik')
+      const aborted = e instanceof DOMException && e.name === 'AbortError'
+      setXato(aborted ? "Server javob bermadi. Qayta urinib ko'ring." : (e instanceof Error ? e.message : 'Xatolik'))
       setHolat('rol')
+    } finally {
+      clearTimeout(t)
     }
   }
 
