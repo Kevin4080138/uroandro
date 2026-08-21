@@ -1,6 +1,8 @@
 -- Bannerlar kengaytirish:
 --   1) Sana oralig'i (boshlanish / tugash) + arxiv bayrog'i — har banner uchun
 --   2) Bo'lim (rol) bo'yicha ko'rsatish sozlamalari: soni, interval, effekt
+--
+-- Qayta-ishga-tushiriladigan (idempotent): bir necha marta Run qilsa ham xato bermaydi.
 
 -- ── 1) Yangi ustunlar ────────────────────────────────────────────────
 ALTER TABLE public.bannerlar
@@ -25,30 +27,27 @@ ON CONFLICT (role) DO NOTHING;
 
 ALTER TABLE public.banner_sozlamalar ENABLE ROW LEVEL SECURITY;
 
-DO $$ BEGIN
-  CREATE POLICY "banner_sozlamalar_select" ON public.banner_sozlamalar
-    FOR SELECT USING (true);
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DROP POLICY IF EXISTS "banner_sozlamalar_select" ON public.banner_sozlamalar;
+CREATE POLICY "banner_sozlamalar_select" ON public.banner_sozlamalar
+  FOR SELECT USING (true);
 
-DO $$ BEGIN
-  CREATE POLICY "banner_sozlamalar_admin_all" ON public.banner_sozlamalar
-    FOR ALL USING (
-      (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
-    );
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DROP POLICY IF EXISTS "banner_sozlamalar_admin_all" ON public.banner_sozlamalar;
+CREATE POLICY "banner_sozlamalar_admin_all" ON public.banner_sozlamalar
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
 
 -- ── 3) Ko'rsatish siyosatini yangilash ───────────────────────────────
--- Arxivlangan yoki muddati o'tgan/hali boshlanmagan bannerlar chiqmasin.
--- Rol mantiqi o'zgarmaydi — faqat yangi shartlar qo'shiladi.
+-- Prod'dagi mavjud select siyosati "Faol bannerlarni hamma ko'ra oladi" (faol = true).
+-- Uni o'sha nom bilan qayta yaratamiz — endi arxivlangan va muddati o'tgan/hali
+-- boshlanmagan bannerlar ham chiqmaydi. Rol filtri qo'shilmaydi (avvalgidek rol
+-- client tomonda tanlanadi). Eski nomlarning ikkalasini ham tozalaymiz.
+DROP POLICY IF EXISTS "Faol bannerlarni hamma ko'ra oladi" ON public.bannerlar;
 DROP POLICY IF EXISTS "bannerlar_select" ON public.bannerlar;
-CREATE POLICY "bannerlar_select" ON public.bannerlar
+CREATE POLICY "Faol bannerlarni hamma ko'ra oladi" ON public.bannerlar
   FOR SELECT USING (
     faol = true
     AND arxiv = false
     AND (boshlanish IS NULL OR boshlanish <= now())
     AND (tugash IS NULL OR tugash >= now())
-    AND (
-      target_role IS NULL OR
-      target_role = (SELECT role FROM public.profiles WHERE id = auth.uid())
-    )
   );
