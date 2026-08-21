@@ -52,7 +52,7 @@ const SEGMENTLAR = [
 ]
 
 const FAQ = [
-  { s: 'Urosfera nima?', j: "Farg'ona urologlari va bemorlarini bog'lovchi, shifokor ishini va ta'limni bir joyga jamlagan urologiya ekotizimi." },
+  { s: 'Urosfera nima?', j: "O'zbekiston urologlari va bemorlarini bog'lovchi, shifokor ishini va ta'limni bir joyga jamlagan urologiya ekotizimi." },
   { s: 'Foydalanish pullikmi?', j: "Hozircha barcha asosiy imkoniyatlar bepul. Kelajakda faqat yangi qo'shimcha xizmatlar pullik bo'lishi mumkin, mavjudlari bepul qoladi." },
   { s: 'Ro\'yxatdan o\'tish qanday?', j: "Telefon raqamingiz orqali bir daqiqada ro'yxatdan o'tasiz — shifokor yoki talaba sifatida bo'limingizni tanlaysiz." },
   { s: 'Ma\'lumotlarim xavfsizmi?', j: "Ha. Har bir foydalanuvchi faqat o'ziga tegishli ma'lumotni ko'radi, tibbiy ma'lumotlar himoyalangan." },
@@ -234,7 +234,7 @@ function KasbiyLanding() {
       <footer style={{ background: 'var(--surface)', borderTop: '1px solid var(--line)', padding: '32px 20px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 8 }}>Uro<span style={{ color: 'var(--accent)' }}>sfera</span></div>
-          <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 16px', lineHeight: 1.5 }}>Farg&apos;ona urologiya ekotizimi — shifokor, talaba va bemor bir platformada.</p>
+          <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 16px', lineHeight: 1.5 }}>O&apos;zbekiston urologiya ekotizimi — shifokor, talaba va bemor bir platformada.</p>
           <div style={{ display: 'flex', gap: 20, justifyContent: 'center', fontSize: 13, flexWrap: 'wrap' }}>
             <button onClick={() => router.push('/shifokorlar')} style={{ background: 'none', border: 'none', color: 'var(--ink-soft)', cursor: 'pointer', fontSize: 13 }}>Shifokorlar katalogi</button>
             <button onClick={() => router.push('/auth/login')} style={{ background: 'none', border: 'none', color: 'var(--ink-soft)', cursor: 'pointer', fontSize: 13 }}>Kirish</button>

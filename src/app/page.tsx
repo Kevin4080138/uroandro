@@ -217,7 +217,7 @@ function Landing() {
                 background: 'var(--accent-soft)', border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
                 borderRadius: 999, padding: '6px 15px', marginBottom: 20,
               }}>
-                Farg&apos;ona urologiya ekotizimi
+                O&apos;zbekiston urologiya ekotizimi
               </span>
 
               <h1 className="rise" style={{
@@ -430,7 +430,7 @@ function Landing() {
             Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
           </div>
           <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 18px', lineHeight: 1.5 }}>
-            Farg&apos;ona urologiya ekotizimi — shifokor, talaba va bemor bir platformada.
+            O&apos;zbekiston urologiya ekotizimi — shifokor, talaba va bemor bir platformada.
           </p>
           <div style={{ display: 'flex', gap: 22, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/shifokorlar" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Shifokorlar katalogi</a>
