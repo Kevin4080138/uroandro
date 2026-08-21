@@ -20,6 +20,18 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setError('')
+
+    // Bo'sh maydon validatsiyasi (Supabase'ga behuda so'rov ketmasin)
+    const identifier = mode === 'patient' ? telefon.trim() : email.trim()
+    if (!identifier) {
+      setError(mode === 'patient' ? 'Telefon raqamini kiriting' : 'Login kiriting')
+      return
+    }
+    if (!password) {
+      setError('Parolni kiriting')
+      return
+    }
+
     setLoading(true)
 
     const staffEmail = email.includes('@') ? email : `${email}@urosfera.uz`
@@ -96,7 +108,7 @@ export default function LoginPage() {
         border: '1px solid var(--line)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-          <button onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
+          <button type="button" onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
             background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '8px',
             padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
           }}>
@@ -116,6 +128,7 @@ export default function LoginPage() {
           {([['staff', "Shifokor / Talaba"], ['patient', 'Bemor']] as const).map(([v, label]) => (
             <button
               key={v}
+              type="button"
               onClick={() => { setMode(v); setError('') }}
               className="btn-animated"
               style={{
@@ -129,14 +142,21 @@ export default function LoginPage() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* <form onSubmit> — Enter bilan kirish ishlaydi */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); if (!loading) handleLogin() }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        >
           {mode === 'patient' ? (
             <div>
-              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+              <label htmlFor="telefon" style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
                 Telefon raqami
               </label>
               <input
+                id="telefon"
+                name="telefon"
                 type="tel"
+                autoComplete="tel"
                 value={telefon}
                 onChange={(e) => setTelefon(e.target.value)}
                 placeholder="+998 90 123 45 67"
@@ -155,11 +175,14 @@ export default function LoginPage() {
             </div>
           ) : (
             <div>
-              <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
+              <label htmlFor="login" style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
                 Login
               </label>
               <input
+                id="login"
+                name="username"
                 type="text"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
                 placeholder="arabboyev yoki email@gmail.com"
@@ -179,11 +202,20 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label style={{ color: 'var(--ink-soft)', fontSize: '14px', display: 'block', marginBottom: '6px' }}>
-              Parol
-            </label>
+            {/* "Parolni unutdingizmi?" — yorliq yonida */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
+              <label htmlFor="parol" style={{ color: 'var(--ink-soft)', fontSize: '14px' }}>
+                Parol
+              </label>
+              <a href="/auth/parol-tiklash" style={{ color: 'var(--accent)', fontSize: '13px', textDecoration: 'none' }}>
+                Parolni unutdingizmi?
+              </a>
+            </div>
             <input
+              id="parol"
+              name="password"
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -201,13 +233,15 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* xato xabari skrinrider uchun e'lon qilinadi */}
           {error && (
-            <p style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>
+            <p role="alert" aria-live="polite" style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>
           )}
 
           <button
-            onClick={handleLogin}
+            type="submit"
             disabled={loading}
+            className="btn-animated"
             style={{
               width: '100%',
               background: 'var(--accent)',
@@ -219,9 +253,21 @@ export default function LoginPage() {
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               marginTop: '8px',
-              opacity: loading ? 0.7 : 1
+              opacity: loading ? 0.7 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
           >
+            {/* yuklanish spinneri (globals.css'dagi `spin` keyframe) */}
+            {loading && (
+              <span style={{
+                width: '15px', height: '15px', borderRadius: '50%',
+                border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white',
+                animation: 'spin 0.7s linear infinite', display: 'inline-block',
+              }} />
+            )}
             {loading ? 'Kirish...' : 'Kirish'}
           </button>
 
@@ -231,7 +277,7 @@ export default function LoginPage() {
               Ro&apos;yxatdan o&apos;ting
             </a>
           </p>
-        </div>
+        </form>
       </div>
       </div>
     </div>

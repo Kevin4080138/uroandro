@@ -40,6 +40,17 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '6px',
 }
 
+// Qayta ishlatiladigan yuklanish spinneri (globals.css'dagi `spin` keyframe)
+function Spinner() {
+  return (
+    <span style={{
+      width: '15px', height: '15px', borderRadius: '50%',
+      border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white',
+      animation: 'spin 0.7s linear infinite', display: 'inline-block',
+    }} />
+  )
+}
+
 function RegisterForm() {
   const params = useSearchParams()
   // Rol oldingi sahifada tanlangan bo'lsa — qayta so'ralmaydi, to'g'ridan ma'lumot qadamiga
@@ -83,6 +94,21 @@ function RegisterForm() {
     return digits
   }
 
+  // Parol kuchi ko'rsatkichi
+  function passwordStrength(pw: string): { level: number; label: string; color: string } {
+    if (!pw) return { level: 0, label: '', color: 'var(--line)' }
+    let score = 0
+    if (pw.length >= 8) score++
+    if (pw.length >= 12) score++
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++
+    if (/\d/.test(pw)) score++
+    if (/[^A-Za-z0-9]/.test(pw)) score++
+    if (score <= 2) return { level: 1, label: 'Zaif', color: 'var(--danger)' }
+    if (score === 3) return { level: 2, label: "O'rtacha", color: 'var(--warn)' }
+    return { level: 3, label: 'Kuchli', color: 'var(--good)' }
+  }
+  const pwStrength = passwordStrength(password)
+
   // ── Step: rol tanlash ──────────────────────────────────────────────────────
   function handleRoleSelect(r: Role) {
     setRole(r)
@@ -109,11 +135,12 @@ function RegisterForm() {
   }
 
   // ── OTP: Telegram orqali yuborish ──────────────────────────────────────────
-  async function handleSendOtp() {
+  // DIQQAT: Bu funksiya haqiqiy kod YUBORMAYDI. Kodni bot yuboradi —
+  // foydalanuvchi botga telefon raqamini yuborganda. Shuning uchun UI matni ham
+  // "kod yuborildi" demaydi, balki "botga raqamingizni yuboring" deb aniq aytadi.
+  function handleSendOtp() {
     setError('')
     setOtpSent(true)
-    // Bot webhook orqali OTP yuboriladi — foydalanuvchi botga telefon yuborganda.
-    // Bu yerda faqat UI ko'rsatiladi.
   }
 
   async function handleVerifyOtp() {
@@ -172,7 +199,11 @@ function RegisterForm() {
     })
 
     if (signUpError) {
-      setError('Xatolik: ' + signUpError.message)
+      // Login band bo'lsa tushunarli xabar
+      const msg = /already registered|already exists|duplicate/i.test(signUpError.message)
+        ? 'Bu login yoki telefon allaqachon ro\'yxatdan o\'tgan. Boshqasini tanlang yoki kiring.'
+        : 'Xatolik: ' + signUpError.message
+      setError(msg)
       setLoading(false)
       return
     }
@@ -245,7 +276,7 @@ function RegisterForm() {
         }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-            <button onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
+            <button type="button" onClick={toggle} aria-label="Temani almashtirish" className="btn-animated" style={{
               background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '8px',
               padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
             }}>
@@ -272,6 +303,7 @@ function RegisterForm() {
               {(Object.keys(roleLabels) as Role[]).map((r) => (
                 <button
                   key={r}
+                  type="button"
                   onClick={() => handleRoleSelect(r)}
                   className="btn-animated"
                   style={{
@@ -307,7 +339,8 @@ function RegisterForm() {
 
           {/* ── STEP: INFO ── */}
           {step === 'info' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            // <form> — Enter bilan "Davom etish" ishlaydi
+            <form onSubmit={(e) => { e.preventDefault(); handleInfoNext() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Tanlangan rol */}
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
@@ -316,28 +349,28 @@ function RegisterForm() {
               }}>
                 <span style={{ fontSize: '22px' }}>{roleLabels[role!].icon}</span>
                 <span style={{ color: 'var(--ink)', fontWeight: '600' }}>{roleLabels[role!].title}</span>
-                <button onClick={() => { setStep('role'); setError('') }} style={{
+                <button type="button" onClick={() => { setStep('role'); setError('') }} style={{
                   marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--accent)',
                   cursor: 'pointer', fontSize: '13px', padding: 0,
                 }}>O'zgartirish</button>
               </div>
 
               <div>
-                <label style={labelStyle}>To'liq ism</label>
-                <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                <label htmlFor="fullName" style={labelStyle}>To'liq ism</label>
+                <input id="fullName" name="name" type="text" autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)}
                   placeholder="Ism Familiya" style={inputStyle} />
               </div>
 
               {role === 'doctor' && (
                 <>
                   <div>
-                    <label style={labelStyle}>Mutaxassislik</label>
-                    <input type="text" value={mutaxassislik} onChange={e => setMutaxassislik(e.target.value)}
+                    <label htmlFor="mutaxassislik" style={labelStyle}>Mutaxassislik</label>
+                    <input id="mutaxassislik" type="text" value={mutaxassislik} onChange={e => setMutaxassislik(e.target.value)}
                       placeholder="Masalan: Urolog, Androlog" style={inputStyle} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Ish joyi</label>
-                    <input type="text" value={ishJoyi} onChange={e => setIshJoyi(e.target.value)}
+                    <label htmlFor="ishJoyi" style={labelStyle}>Ish joyi</label>
+                    <input id="ishJoyi" type="text" value={ishJoyi} onChange={e => setIshJoyi(e.target.value)}
                       placeholder="Masalan: 1-son shahar shifoxonasi" style={inputStyle} />
                   </div>
                 </>
@@ -345,27 +378,27 @@ function RegisterForm() {
 
               {role === 'student' && (
                 <div>
-                  <label style={labelStyle}>Ta'lim muassasasi</label>
-                  <input type="text" value={mutaxassislik} onChange={e => setMutaxassislik(e.target.value)}
+                  <label htmlFor="talim" style={labelStyle}>Ta'lim muassasasi</label>
+                  <input id="talim" type="text" value={mutaxassislik} onChange={e => setMutaxassislik(e.target.value)}
                     placeholder="Masalan: ToshDTU, Andijon DIM" style={inputStyle} />
                 </div>
               )}
 
               <div>
-                <label style={labelStyle}>Telefon raqami</label>
-                <input type="tel" value={telefon} onChange={e => setTelefon(e.target.value)}
+                <label htmlFor="reg-telefon" style={labelStyle}>Telefon raqami</label>
+                <input id="reg-telefon" name="tel" type="tel" autoComplete="tel" value={telefon} onChange={e => setTelefon(e.target.value)}
                   placeholder="+998 90 123 45 67" style={inputStyle} />
               </div>
 
-              {error && <p style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
+              {error && <p role="alert" aria-live="polite" style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
 
-              <button onClick={handleInfoNext} className="btn-animated" style={{
+              <button type="submit" className="btn-animated" style={{
                 width: '100%', background: 'var(--accent)', color: 'white', border: 'none',
                 borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: '600', cursor: 'pointer',
               }}>
                 Davom etish →
               </button>
-            </div>
+            </form>
           )}
 
           {/* ── STEP: OTP (faqat shifokor/talaba) ── */}
@@ -381,9 +414,10 @@ function RegisterForm() {
                     <p style={{ color: 'var(--ink)', fontWeight: '600', margin: '0 0 8px', fontSize: '15px' }}>
                       Telegram orqali tasdiqlash
                     </p>
+                    {/* Oqim aniq — botga o'zingiz raqam yuborasiz, bot kod qaytaradi */}
                     <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>
-                      Telefon raqamingizni tasdiqlaymiz.<br />
-                      Telegram botimizga raqamingizni yuboring va kod oling.
+                      1. Botni oching → 2. Raqamingizni yuboring →<br />
+                      3. Bot 6 xonali kod qaytaradi → 4. Kodni bu yerga kiriting.
                     </p>
                   </div>
 
@@ -410,27 +444,33 @@ function RegisterForm() {
                     📱 Telegram botini ochish
                   </a>
 
-                  <p style={{ color: 'var(--muted)', fontSize: '12px', textAlign: 'center', margin: 0, lineHeight: '1.6' }}>
-                    Bot ochilganda telefon raqamingizni yuboring.<br />
-                    Bot sizga 6 xonali kod yuboradi.
-                  </p>
+                  {/* Botni allaqachon ochgan bo'lsa kod kiritishga o'tsin */}
+                  <button type="button" onClick={handleSendOtp} style={{
+                    background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+                    fontSize: '13px', padding: 0, textAlign: 'center',
+                  }}>
+                    Botdan kod oldingizmi? Kodni kiritish →
+                  </button>
                 </>
               ) : (
-                <>
+                // <form> — Enter bilan kod tasdiqlash
+                <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleVerifyOtp() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{
                     background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)',
                     borderRadius: '12px', padding: '16px', textAlign: 'center',
                   }}>
                     <p style={{ color: '#34d399', fontWeight: '600', margin: 0, fontSize: '14px' }}>
-                      ✅ Telegram bot ochildi — endi raqamingizni yuboring va kodni kiriting
+                      Botga raqamingizni yuboring — kelgan 6 xonali kodni kiriting
                     </p>
                   </div>
 
                   <div>
-                    <label style={labelStyle}>6 xonali kod</label>
+                    <label htmlFor="otp" style={labelStyle}>6 xonali kod</label>
                     <input
+                      id="otp"
                       type="text"
                       inputMode="numeric"
+                      autoComplete="one-time-code"
                       maxLength={6}
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -439,30 +479,33 @@ function RegisterForm() {
                     />
                   </div>
 
-                  {error && <p style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
+                  {error && <p role="alert" aria-live="polite" style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
 
-                  <button onClick={handleVerifyOtp} disabled={loading} className="btn-animated" style={{
+                  <button type="submit" disabled={loading} className="btn-animated" style={{
                     width: '100%', background: 'var(--accent)', color: 'white', border: 'none',
                     borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: '600',
                     cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                   }}>
+                    {loading && <Spinner />}
                     {loading ? 'Tekshirilmoqda...' : 'Kodni tasdiqlash'}
                   </button>
 
-                  <button onClick={() => setOtpSent(false)} style={{
+                  <button type="button" onClick={() => setOtpSent(false)} style={{
                     background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer',
                     fontSize: '13px', padding: 0, textAlign: 'center',
                   }}>
                     ← Qaytish
                   </button>
-                </>
+                </form>
               )}
             </div>
           )}
 
           {/* ── STEP: PAROL ── */}
           {step === 'password' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            // <form> — Enter bilan ro'yxatdan o'tish
+            <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleRegister() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {role !== 'patient' && (
                 <>
                   <div style={{
@@ -474,8 +517,9 @@ function RegisterForm() {
                     </p>
                   </div>
                   <div>
-                    <label style={labelStyle}>Login (foydalanuvchi nomi)</label>
+                    <label htmlFor="loginEmail" style={labelStyle}>Login (foydalanuvchi nomi)</label>
                     <input
+                      id="loginEmail"
                       type="text"
                       value={loginEmail}
                       onChange={e => setLoginEmail(e.target.value.replace(/\s/g, ''))}
@@ -491,27 +535,44 @@ function RegisterForm() {
               )}
 
               <div>
-                <label style={labelStyle}>Parol</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                <label htmlFor="new-password" style={labelStyle}>Parol</label>
+                <input id="new-password" type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" style={inputStyle} />
+                {/* Parol kuchi ko'rsatkichi */}
+                {password && (
+                  <div style={{ marginTop: '8px' }}>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      {[1, 2, 3].map(i => (
+                        <div key={i} style={{
+                          flex: 1, height: '4px', borderRadius: '2px',
+                          background: i <= pwStrength.level ? pwStrength.color : 'var(--line)',
+                          transition: 'background 0.2s',
+                        }} />
+                      ))}
+                    </div>
+                    <p style={{ color: pwStrength.color, fontSize: '12px', margin: '5px 0 0' }}>{pwStrength.label}</p>
+                  </div>
+                )}
               </div>
 
               <div>
-                <label style={labelStyle}>Parolni tasdiqlang</label>
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                <label htmlFor="confirm-password" style={labelStyle}>Parolni tasdiqlang</label>
+                <input id="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="••••••••" style={inputStyle} />
               </div>
 
-              {error && <p style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
+              {error && <p role="alert" aria-live="polite" style={{ color: 'var(--danger)', fontSize: '14px', margin: 0 }}>{error}</p>}
 
-              <button onClick={handleRegister} disabled={loading} className="btn-animated" style={{
+              <button type="submit" disabled={loading} className="btn-animated" style={{
                 width: '100%', background: 'var(--accent)', color: 'white', border: 'none',
                 borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: '600',
                 cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               }}>
+                {loading && <Spinner />}
                 {loading ? "Ro'yxatdan o'tilmoqda..." : "Ro'yxatdan o'tish"}
               </button>
-            </div>
+            </form>
           )}
 
           {/* ── STEP: DONE ── */}
@@ -526,7 +587,7 @@ function RegisterForm() {
                   ? 'Hisobingiz muvaffaqiyatli yaratildi. Telefon raqam va parolingiz orqali kira olasiz.'
                   : 'So\'rovingiz qabul qilindi. Admin tasdiqlagandan so\'ng hisobingiz faollashadi.'}
               </p>
-              <button onClick={() => router.push('/auth/login')} className="btn-animated" style={{
+              <button type="button" onClick={() => router.push('/auth/login')} className="btn-animated" style={{
                 background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '10px',
                 padding: '14px 32px', fontSize: '15px', fontWeight: '600', cursor: 'pointer',
               }}>
