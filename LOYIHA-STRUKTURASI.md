@@ -156,3 +156,55 @@ supabase/           # SQL sxema va migratsiyalar
 - **Ranglar:** asosiy aksent `--accent` (ko'k `#2563eb`); iliq palitra varianti
   ham muhokamada
 - Kontent tili — **o'zbekcha** (lotin)
+
+---
+
+## 10. Texnik infratuzilma va integratsiyalar
+
+### Hammasi bitta dastur (monolit)
+Sayt, bot va server mantiq — **bitta Next.js loyihasi**. Alohida "bot serveri" yo'q.
+Bot Telegram bilan sayt ichidagi endpointlar orqali gaplashadi:
+- `/api/telegram/webhook` — Telegram xabarlarini qabul qiladi (OTP, menyu)
+- `/api/telegram/auth` — Mini App ichida avto-login
+
+### Dasturlash tillari
+| Nima | Til |
+|------|-----|
+| Sayt + bot + server | **TypeScript** |
+| Interfeys (UI) | **React 19** + Next.js 16 |
+| Uslub | **CSS** (Tailwind + globals.css) |
+| Baza so'rovlari | **SQL** (PostgreSQL) |
+
+> **Bot ham TypeScript'da** — Python emas. Chunki u saytning bir qismi.
+
+### Qayerda nima joylashgan
+| Platforma | Nima turadi |
+|-----------|-------------|
+| **GitHub** (`Kevin4080138/uroandro`) | Butun kod — sayt, bot, server, SQL migratsiyalar. Manba shu yerda. |
+| **Vercel** | Kod ishga tushadigan joy (hosting). Har `git push` avtomatik deploy. Serverless funksiyalar (API, bot) va **Cron** shu yerda. |
+| **Supabase** | Ma'lumotlar bazasi (PostgreSQL) + Auth (kirish/parol) + Storage (rasmlar) |
+| **Telegram** | Bot kanali (Telegram serverlari) |
+
+Qisqasi: **GitHub = kod**, **Vercel = ishlaydi**, **Supabase = ma'lumot saqlaydi**, **Telegram = bot kanali**.
+
+### Ulangan xizmatlar (integratsiyalar)
+1. **Supabase** — baza, autentifikatsiya, fayl saqlash
+2. **Telegram Bot API** — OTP kod, xabarnomalar, Mini App login
+3. **Web Push (VAPID)** — brauzer push-bildirishnomalari
+4. **Vercel Cron** — kunlik avtomatik vazifalar (dori/navbat/operatsiya eslatmalari,
+   javobsiz murojaat, talaba seriyasi) — `vercel.json` da 6 ta jadval
+5. **Email/SMTP** — parol tiklash xatlari (Supabase orqali)
+
+### Bot qanday ishlaydi
+```
+Foydalanuvchi → Telegram bot → xabar → Vercel /api/telegram/webhook (TypeScript)
+                                          → Supabase bazaga yozadi/o'qiydi
+                                          → Telegram orqali javob qaytaradi
+```
+Bot mustaqil "yashamaydi" — Telegram xabar kelganda Vercel funksiyasi uyg'onib
+ishlaydi (serverless).
+
+### Muhim maxfiy kalitlar (env)
+`.env.local` (Vercel'da ham) — Supabase kalitlari, `TELEGRAM_BOT_TOKEN`,
+VAPID kalitlari, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`. **Bu qiymatlar
+hech qachon GitHub'ga yuklanmaydi** (`.gitignore` da).
