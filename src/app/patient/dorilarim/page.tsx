@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { vaqtJadvali, faolKunMi, qolganKunlar, tugashSanasi, vaqtKelmadiMi } from '@/lib/doriEslatma'
 import { pushDastagiHolati, pushYoqish, pushOchirish } from '@/lib/pushClient'
 import { HaftalikIntizom } from '@/components/HaftalikIntizom'
-import { Pill, CalendarDays, Bell, BellOff, CheckCircle2, Lock, RefreshCw, StickyNote, Clock, Hourglass } from 'lucide-react'
+import { Pill, CalendarDays, Bell, BellOff, CheckCircle2, Lock, RefreshCw, StickyNote, Clock, Hourglass, Stethoscope } from 'lucide-react'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
 const HAFTA_KUNLARI = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
@@ -208,9 +208,19 @@ export default function DorilarimPage() {
         {loading ? (
           <UrosferaLoaderMini />
         ) : retseptlar.length === 0 ? (
-          <div className="rise" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--muted)' }}>
+          <div className="rise" style={{ textAlign: 'center', padding: '44px 20px 20px', color: 'var(--muted)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--muted)' }}><Pill size={38} strokeWidth={1.5} /></div>
-            <p style={{ margin: 0 }}>Hozircha sizga retsept yozilmagan.</p>
+            <p style={{ margin: '0 0 6px' }}>Hozircha sizga retsept yozilmagan.</p>
+            <p style={{ margin: '0 0 20px', fontSize: '12.5px', lineHeight: 1.5 }}>
+              Dori kerak bo&apos;lsa yoki shikoyatingiz bo&apos;lsa — shifokorga murojaat qiling.
+            </p>
+            <button onClick={() => router.push('/patient/murojaat')} className="btn-animated soft-press" style={{
+              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
+              padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
+            }}>
+              <Stethoscope size={16} strokeWidth={2} /> Shifokorga murojaat qilish →
+            </button>
           </div>
         ) : (
           <>
@@ -382,6 +392,23 @@ export default function DorilarimPage() {
                 </div>
               </div>
             )}
+
+            {/* Pastki CTA — dori/savol bo'lsa shifokorga murojaat */}
+            <div className="rise" style={{
+              background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
+              padding: '16px 18px', marginTop: '26px', textAlign: 'center',
+            }}>
+              <p style={{ margin: '0 0 11px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
+                Dorini almashtirish, yangi dori yoki savolingiz bo&apos;lsa — shifokorga yozing.
+              </p>
+              <button onClick={() => router.push('/patient/murojaat')} className="btn-animated soft-press" style={{
+                background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px',
+                padding: '12px 24px', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
+              }}>
+                <Stethoscope size={15} strokeWidth={2} /> Shifokorga murojaat qilish →
+              </button>
+            </div>
           </>
         )}
       </div>
