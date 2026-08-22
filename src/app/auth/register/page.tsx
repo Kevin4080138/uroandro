@@ -529,11 +529,8 @@ function RegisterForm() {
                     🔒 Nega parol kerak?
                   </p>
                   <p style={{ color: 'var(--muted)', fontSize: '12.5px', margin: 0, lineHeight: '1.6' }}>
-                    Parol — hisobingiz kaliti. Telefon raqamingizni bilgan boshqa odam
-                    hisobingizga kira olmasligi uchun kerak.<br />
-                    <span style={{ color: 'var(--ink-soft)' }}>Masalan:</span> raqamingiz kimgadir
-                    ma&apos;lum bo&apos;lib qolsa ham, parolsiz ular tahlil natijalari va
-                    murojaatlaringizni ko&apos;ra olmaydi.
+                    Parol — hisobingiz kaliti. Raqamingizni bilgan odam ham parolsiz
+                    tahlillaringiz va murojaatlaringizni ko&apos;ra olmaydi.
                   </p>
                 </div>
               )}
