@@ -37,6 +37,7 @@ const TYPE_OPTS = [
 ]
 const ROLE_OPTS = [
   { value: '',        label: '👥 Hammaga (tizim ichida)' },
+  { value: 'hamma',   label: '🌍 Hamma joyda (ichkarida + tashqarida)' },
   { value: 'student', label: '🎓 Talabalar' },
   { value: 'doctor',  label: '👨‍⚕️ Shifokorlar' },
   { value: 'patient', label: '🧑 Bemorlar' },

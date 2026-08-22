@@ -89,9 +89,10 @@ export function BannerCarousel({
         .order('sort_order', { ascending: true })
         .limit(maxSoni)
       if (role) {
+        // 'hamma' = ham ichkarida (dashboard), ham tashqarida (landing) ko'rinadi
         query = faqatShuRol
-          ? query.eq('target_role', role)
-          : query.or(`target_role.is.null,target_role.eq.${role}`)
+          ? query.or(`target_role.eq.${role},target_role.eq.hamma`)
+          : query.or(`target_role.is.null,target_role.eq.${role},target_role.eq.hamma`)
       }
       const { data } = await query
       if (data && data.length > 0) setBanners(data)

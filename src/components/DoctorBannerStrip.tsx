@@ -40,7 +40,7 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
         .eq('faol', true)
         .order('sort_order', { ascending: true })
         .limit(10)
-      if (role) q = q.or(`target_role.is.null,target_role.eq.${role}`)
+      if (role) q = q.or(`target_role.is.null,target_role.eq.${role},target_role.eq.hamma`)
       const { data } = await q
       if (data && data.length > 0) setBanners(data)
     }
