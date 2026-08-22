@@ -520,6 +520,23 @@ function RegisterForm() {
           {step === 'password' && (
             // ── FIX #1: <form> — Enter bilan ro'yxatdan o'tish ──
             <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleRegister() }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {role === 'patient' && (
+                <div style={{
+                  background: 'rgba(30,136,229,0.08)', border: '1px solid rgba(30,136,229,0.25)',
+                  borderRadius: '12px', padding: '14px 16px',
+                }}>
+                  <p style={{ color: 'var(--ink)', fontWeight: '600', margin: '0 0 6px', fontSize: '13.5px' }}>
+                    🔒 Nega parol kerak?
+                  </p>
+                  <p style={{ color: 'var(--muted)', fontSize: '12.5px', margin: 0, lineHeight: '1.6' }}>
+                    Parol — hisobingiz kaliti. Telefon raqamingizni bilgan boshqa odam
+                    hisobingizga kira olmasligi uchun kerak.<br />
+                    <span style={{ color: 'var(--ink-soft)' }}>Masalan:</span> raqamingiz kimgadir
+                    ma&apos;lum bo&apos;lib qolsa ham, parolsiz ular tahlil natijalari va
+                    murojaatlaringizni ko&apos;ra olmaydi.
+                  </p>
+                </div>
+              )}
               {role !== 'patient' && (
                 <>
                   <div style={{
