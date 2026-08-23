@@ -63,8 +63,10 @@ tushishi...) alohida **Uroginekologiya** bo'limida — takrorlanmaydi.
 - [ ] **Haqiqiy dars/test matni** — ginekolog yozadi (admin paneldan, deploy'siz)
 
 ### Bosqich 3 — Bemor tomoni
-- [ ] Ginekolog katalog / ochiq profillar
-- [ ] Murojaat/navbatni yo'nalishga qarab yo'naltirish
+- [x] Shifokor yo'nalishi (shifokor_profillari.yonalish) + doctor ochiq-profilda tanlash
+- [x] /shifokorlar katalog — yo'nalish filtri (Urolog/Ginekolog)
+- [x] /patient/yonalish — jinsga qarab yo'naltirish (Bosqich 0 da)
+- [ ] Murojaat/navbatni patient yonalishiga qarab avto-filtr (kelajak)
 
 ### Bosqich 4 — Brend / marketing
 - [x] Tagline (login/Hero/manifest) → "Urologiya · Andrologiya · Ginekologiya"
