@@ -55,9 +55,9 @@ tushishi...) alohida **Uroginekologiya** bo'limida — takrorlanmaydi.
 - [x] **Darslar moduli** — admin CRUD (/admin/ginekologiya-darslar) + talaba viewer
       (/student/ginekologiya/darslar[/slug]). Deploy'siz, HTML nazariya. (2026-08-23)
 - [x] **Dars ichida test** — gin_darslar.test_savollar, admin JSON, talaba yechadi
-- [ ] Klassifikatsiyalar (gin) — YANGI modul kerak (yoki gin_darslar kategoriyasi)
-- [ ] Operativ ginekologiya — YANGI modul yoki kategoriya
-- [ ] Kalkulyatorlar (gin) — katta (urologiyada 25+ ta); alohida ish
+- [x] **Klassifikatsiyalar (gin)** — gin_darslar.bolim orqali (admin to'ldiradi)
+- [x] **Operativ ginekologiya** — gin_darslar.bolim orqali (admin to'ldiradi)
+- [ ] Kalkulyatorlar (gin) — katta (urologiyada 25+ ta, real formulalar); alohida ish
 - [ ] qaysi-tahlil (ayollar), savollar (gin)
 - [ ] Uroginekologiya kesishma bo'limi
 - [ ] **Haqiqiy dars/test matni** — ginekolog yozadi (admin paneldan, deploy'siz)
