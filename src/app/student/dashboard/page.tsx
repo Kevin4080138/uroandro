@@ -21,6 +21,7 @@ import {
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
+  const [yonalish, setYonalish] = useState<'urologiya' | 'ginekologiya'>('urologiya')
   const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
   // Qadam progressi: slug -> tugallangan qadamlar; oxirgi faollik darsi "Davom ettirish" uchun
   const [qadamProgress, setQadamProgress] = useState<Map<string, Set<string>>>(new Map())
@@ -35,6 +36,7 @@ export default function StudentDashboard() {
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
+      setYonalish(data?.yonalish === 'ginekologiya' ? 'ginekologiya' : 'urologiya')
       const [{ data: natijalar }, { data: qadamlar }] = await Promise.all([
         supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id),
         supabase.from('dars_qadam_progress').select('dars_slug, qadam, created_at').eq('student_id', user.id).order('created_at', { ascending: false }),
@@ -84,7 +86,7 @@ export default function StudentDashboard() {
     : 0
   const oxirgiTugadi = oxirgiQadamlar.length > 0 && oxirgiTugallangan >= oxirgiQadamlar.length
 
-  const KARTALAR = [
+  const UROLOGIYA_KARTALAR = [
     { Icon: BookOpen, title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
     { Icon: BarChart3, title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { Icon: Library, title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
@@ -96,6 +98,25 @@ export default function StudentDashboard() {
     { Icon: null, imgSrc: '/camu-logo.png', title: "CAMU bo'limi", desc: 'Central Asian Medical University', c: '#1a3a9e', href: '/student/camu' },
     { Icon: Trophy, title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--accent-2)', href: '/student/reyting' },
   ]
+
+  // Ginekologiya — hozircha kontent tayyorlanmoqda ("Tez orada")
+  const GIN_KARTALAR = [
+    { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/darslar', tezOrada: true },
+    { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: Target, title: "O'zingizni tekshiring", desc: 'Savol va klinik holat', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: Trophy, title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--gyn)', href: '/student/reyting' },
+  ]
+
+  const KARTALAR: any[] = yonalish === 'ginekologiya' ? GIN_KARTALAR : UROLOGIYA_KARTALAR
+
+  async function yonalishAlmashtir(y: 'urologiya' | 'ginekologiya') {
+    if (y === yonalish) return
+    setYonalish(y)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) supabase.from('profiles').update({ yonalish: y }).eq('id', user.id)
+  }
 
   const NAZAR_KARTALAR = [
     { Icon: Users, title: "Bemor bo'limi", desc: 'Tanishish uchun', href: '/student/bemor-bolimi' },
@@ -242,6 +263,19 @@ export default function StudentDashboard() {
             </div>
           </div>
 
+          {/* Yo'nalish almashtirgich — Urologiya | Ginekologiya */}
+          <div className="rise" style={{ display: 'flex', gap: '8px', marginBottom: '16px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '12px', padding: '4px' }}>
+            {([['urologiya', 'Urologiya', 'var(--accent)'], ['ginekologiya', 'Ginekologiya', 'var(--gyn)']] as const).map(([id, nom, rang]) => {
+              const faol = yonalish === id
+              return (
+                <button key={id} onClick={() => yonalishAlmashtir(id)} className="soft-press" style={{
+                  flex: 1, border: 'none', borderRadius: '9px', padding: '9px 6px', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
+                  background: faol ? rang : 'transparent', color: faol ? '#fff' : 'var(--muted)',
+                }}>{nom}</button>
+              )
+            })}
+          </div>
+
           {/* Bo'limlar */}
           <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <LayoutGrid size={13} strokeWidth={2.2} /> Bo&apos;limlar
@@ -250,17 +284,20 @@ export default function StudentDashboard() {
             {KARTALAR.map((item, i) => (
               <div
                 key={item.title}
-                onClick={() => router.push(item.href)}
+                onClick={() => { if (!item.tezOrada) router.push(item.href) }}
                 className="dash-card rise"
-                style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: 'pointer' }}
+                style={{ ['--c' as any]: item.c, animationDelay: `${0.1 + i * 0.04}s`, cursor: item.tezOrada ? 'default' : 'pointer', opacity: item.tezOrada ? 0.62 : 1, position: 'relative' }}
               >
                 <div className="dash-icon" style={{ color: item.c }}>
-                  {(item as any).imgSrc
-                    ? <img src={(item as any).imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
+                  {item.imgSrc
+                    ? <img src={item.imgSrc} alt={item.title} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
                     : item.Icon ? <item.Icon size={22} strokeWidth={2} /> : null}
                 </div>
                 <h3 className="dash-title">{item.title}</h3>
                 <p className="dash-desc">{item.desc}</p>
+                {item.tezOrada && (
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '9px', fontWeight: 700, color: 'var(--gyn)', background: 'var(--gyn-soft)', borderRadius: '5px', padding: '2px 6px' }}>Tez orada</span>
+                )}
               </div>
             ))}
           </div>

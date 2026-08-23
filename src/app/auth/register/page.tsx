@@ -64,6 +64,7 @@ function RegisterForm() {
   const [telefon, setTelefon] = useState('')
   const [mutaxassislik, setMutaxassislik] = useState('')
   const [ishJoyi, setIshJoyi] = useState('')
+  const [jins, setJins] = useState<'ayol' | 'erkak' | null>(null)
 
   // OTP step
   const [otpSent, setOtpSent] = useState(false)
@@ -120,6 +121,7 @@ function RegisterForm() {
   function handleInfoNext() {
     setError('')
     if (!fullName.trim()) { setError("To'liq ismni kiriting"); return }
+    if (role === 'patient' && !jins) { setError('Jinsni tanlang'); return }
     if (!telefon.trim()) { setError('Telefon raqamini kiriting'); return }
     if (normalizePhone(telefon).length < 11) { setError("To'g'ri telefon raqami kiriting"); return }
     if (role !== 'patient' && !mutaxassislik.trim()) {
@@ -194,6 +196,7 @@ function RegisterForm() {
           talim_joyi: role === 'student' ? mutaxassislik : null,
           telefon_tasdiqlangan: role !== 'patient' ? true : false,
           doctor_holati: role === 'doctor' ? 'kutish' : null,
+          jins: role === 'patient' ? jins : null,
         },
       },
     })
@@ -374,6 +377,34 @@ function RegisterForm() {
                 <input id="fullName" name="name" type="text" autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)}
                   placeholder="Ism Familiya" style={inputStyle} />
               </div>
+
+              {role === 'patient' && (
+                <div>
+                  <label style={labelStyle}>Jins</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px' }}>
+                    {([{ id: 'ayol', nom: 'Ayol' }, { id: 'erkak', nom: 'Erkak' }] as const).map((j) => {
+                      const faol = jins === j.id
+                      const rang = j.id === 'ayol' ? 'var(--gyn)' : 'var(--accent)'
+                      const soft = j.id === 'ayol' ? 'var(--gyn-soft)' : 'var(--accent-soft)'
+                      return (
+                        <button key={j.id} type="button" onClick={() => setJins(j.id)} className="btn-animated"
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                            padding: '12px', borderRadius: '10px', cursor: 'pointer', fontWeight: faol ? 700 : 600, fontSize: '14px',
+                            border: `1.5px solid ${faol ? rang : 'var(--line)'}`,
+                            background: faol ? soft : 'var(--surface-2)',
+                            color: faol ? rang : 'var(--muted)',
+                          }}>
+                          {j.nom}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p style={{ margin: '7px 0 0', color: 'var(--muted)', fontSize: '11.5px', lineHeight: 1.5 }}>
+                    Jinsga qarab mos bo&apos;lim tavsiya etiladi — bu tanlov sizni cheklamaydi.
+                  </p>
+                </div>
+              )}
 
               {role === 'doctor' && (
                 <>

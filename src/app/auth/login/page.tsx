@@ -48,7 +48,7 @@ export default function LoginPage() {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, faol, doctor_holati')
+      .select('role, faol, doctor_holati, yonalish')
       .eq('id', data.user.id)
       .single()
 
@@ -79,9 +79,10 @@ export default function LoginPage() {
       return
     }
 
-    if (profile?.role === 'student') router.push('/student/dashboard')
+    // Yo'nalish hali tanlanmagan bo'lsa — bir marta yo'naltirish sahifasiga
+    if (profile?.role === 'student') router.push(profile.yonalish ? '/student/dashboard' : '/student/yonalish')
     else if (profile?.role === 'doctor') router.push('/doctor/dashboard')
-    else if (profile?.role === 'patient') router.push('/patient/dashboard')
+    else if (profile?.role === 'patient') router.push(profile.yonalish ? '/patient/dashboard' : '/patient/yonalish')
     else if (profile?.role === 'admin') router.push('/admin/dashboard')
     else router.push('/dashboard')
   }
