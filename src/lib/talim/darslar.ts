@@ -21,6 +21,7 @@ export type Dars = {
   sarlavha: string
   kategoriya: string
   bosqich: Bosqich
+  yonalish?: 'urologiya' | 'ginekologiya' // yo'q bo'lsa — urologiya (mavjud darslar)
   qisqa: string
   daqiqa: number
   bolimlar: DarsBolimi[]
@@ -98,6 +99,16 @@ export const BOSQICH_KATEGORIYA_TARTIBI: Record<Bosqich, string[]> = {
     "Shoshilinch urologiya (o'tkir holatlar)",
     'Reproduktiv va seksual salomatlik',
   ],
+}
+
+// Darsning yo'nalishi — maydon yo'q bo'lsa urologiya (mavjud darslar).
+export function darsYonalishi(d: Dars): 'urologiya' | 'ginekologiya' {
+  return d.yonalish ?? 'urologiya'
+}
+
+// Berilgan yo'nalishdagi darslar (DARSLAR ro'yxatidan).
+export function darslarYonalishBoyicha(y: 'urologiya' | 'ginekologiya'): Dars[] {
+  return DARSLAR.filter((d) => darsYonalishi(d) === y)
 }
 
 // Darslarni bosqich ichidagi to'g'ri bob tartibida saralaydi (kategoriya bo'yicha),
