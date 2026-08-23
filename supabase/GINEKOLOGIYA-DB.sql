@@ -55,3 +55,33 @@ ALTER TABLE public.gin_darslar
   ADD COLUMN IF NOT EXISTS bolim text NOT NULL DEFAULT 'darslar';
 
 CREATE INDEX IF NOT EXISTS gin_darslar_bolim_idx ON public.gin_darslar (bolim);
+
+-- ── Ginekologiya test natijalari (urologiyadan ALOHIDA statistika/reyting) ──
+CREATE TABLE IF NOT EXISTS public.gin_natijalar (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  dars_slug   text NOT NULL,
+  ball        int  NOT NULL,   -- to'g'ri javoblar soni
+  jami        int  NOT NULL,   -- jami savol
+  foiz        int  NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (student_id, dars_slug)   -- har dars bo'yicha oxirgi natija
+);
+
+ALTER TABLE public.gin_natijalar ENABLE ROW LEVEL SECURITY;
+
+-- O'qish: reyting uchun tizimga kirgan hamma ko'radi (urologiya reytingi kabi)
+DROP POLICY IF EXISTS "gin_natijalar_select" ON public.gin_natijalar;
+CREATE POLICY "gin_natijalar_select" ON public.gin_natijalar
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- Yozish: faqat o'z natijasini
+DROP POLICY IF EXISTS "gin_natijalar_insert" ON public.gin_natijalar;
+CREATE POLICY "gin_natijalar_insert" ON public.gin_natijalar
+  FOR INSERT WITH CHECK (student_id = auth.uid());
+DROP POLICY IF EXISTS "gin_natijalar_update" ON public.gin_natijalar;
+CREATE POLICY "gin_natijalar_update" ON public.gin_natijalar
+  FOR UPDATE USING (student_id = auth.uid()) WITH CHECK (student_id = auth.uid());
+
+CREATE INDEX IF NOT EXISTS gin_natijalar_student_idx ON public.gin_natijalar (student_id);

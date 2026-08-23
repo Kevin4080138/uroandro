@@ -22,6 +22,7 @@ import {
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [yonalish, setYonalish] = useState<'urologiya' | 'ginekologiya'>('urologiya')
+  const [ginBosqich, setGinBosqich] = useState<{ id: string; nom: string; rang: string; tugadi: number; jami: number }[]>([])
   const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
   // Qadam progressi: slug -> tugallangan qadamlar; oxirgi faollik darsi "Davom ettirish" uchun
   const [qadamProgress, setQadamProgress] = useState<Map<string, Set<string>>>(new Map())
@@ -50,6 +51,18 @@ export default function StudentDashboard() {
       }
       setQadamProgress(m)
       setOxirgiSlug(qadamlar?.[0]?.dars_slug ?? null)
+
+      // Ginekologiya progressi (ALOHIDA — gin_darslar + gin_natijalar)
+      const [{ data: ginD }, { data: ginN }] = await Promise.all([
+        supabase.from('gin_darslar').select('slug, bosqich').eq('faol', true).eq('bolim', 'darslar'),
+        supabase.from('gin_natijalar').select('dars_slug').eq('student_id', user.id),
+      ])
+      const ishlangan = new Set((ginN ?? []).map((r: { dars_slug: string }) => r.dars_slug))
+      const GB = [{ id: 'oson', nom: 'Oson', rang: '#16a34a' }, { id: 'orta', nom: "O'rta", rang: '#d97706' }, { id: 'qiyin', nom: 'Qiyin', rang: '#dc2626' }]
+      setGinBosqich(GB.map((b) => {
+        const list = (ginD ?? []).filter((d: { slug: string; bosqich: string }) => d.bosqich === b.id)
+        return { ...b, jami: list.length, tugadi: list.filter((d: { slug: string }) => ishlangan.has(d.slug)).length }
+      }))
     }
     getProfile()
   }, [])
@@ -104,9 +117,9 @@ export default function StudentDashboard() {
     { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/ginekologiya/darslar' },
     { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=operativ' },
     { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=klassifikatsiyalar' },
+    { Icon: BarChart3, title: 'Natijalarim', desc: 'Ginekologiya test natijalari', c: 'var(--gyn)', href: '/student/ginekologiya/natijalarim' },
+    { Icon: Trophy, title: 'Reyting', desc: "Ginekologiya reytingi", c: 'var(--gyn)', href: '/student/ginekologiya/reyting' },
     { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar', c: 'var(--gyn)', href: '#', tezOrada: true },
-    { Icon: Target, title: "O'zingizni tekshiring", desc: 'Savol va klinik holat', c: 'var(--gyn)', href: '#', tezOrada: true },
-    { Icon: Trophy, title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--gyn)', href: '/student/reyting' },
   ]
 
   const KARTALAR: any[] = yonalish === 'ginekologiya' ? GIN_KARTALAR : UROLOGIYA_KARTALAR
@@ -214,9 +227,11 @@ export default function StudentDashboard() {
           {/* HERO: chap — rank+progress; o'ng — banner (faqat desktop, telefonda tepada) */}
           <div className="db-hero">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between' }}>
-            <div className="rise" style={{ animationDelay: '.05s' }}>
-              <RankCard rank={rank} />
-            </div>
+            {yonalish !== 'ginekologiya' && (
+              <div className="rise" style={{ animationDelay: '.05s' }}>
+                <RankCard rank={rank} />
+              </div>
+            )}
 
             <div className="rise" style={{
               background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
@@ -224,14 +239,16 @@ export default function StudentDashboard() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink-soft)' }}>O&apos;zlashtirish</span>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--accent)' }}>{jamiTugadi} ta dars tugallandi</span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: yonalish === 'ginekologiya' ? 'var(--gyn)' : 'var(--accent)' }}>
+                  {(yonalish === 'ginekologiya' ? ginBosqich : bosqichProgress).reduce((s, b) => s + b.tugadi, 0)} ta dars tugallandi
+                </span>
               </div>
-              {/* Har qator bosilsa o'sha bosqich sahifasiga o'tadi */}
+              {/* Har qator bosilsa o'sha bo'lim/bosqich sahifasiga o'tadi */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {bosqichProgress.map((b) => (
+                {(yonalish === 'ginekologiya' ? ginBosqich : bosqichProgress).map((b) => (
                   <div
                     key={b.id}
-                    onClick={() => router.push(`/student/darslar/bosqich/${BOSQICH_YOLI[b.id]}`)}
+                    onClick={() => router.push(yonalish === 'ginekologiya' ? '/student/ginekologiya/darslar' : `/student/darslar/bosqich/${BOSQICH_YOLI[b.id as Bosqich]}`)}
                     className="soft-press"
                     style={{ cursor: 'pointer' }}
                   >

@@ -37,6 +37,18 @@ export default function GinDarsViewer() {
   const test = dars?.test_savollar ?? []
   const togriSoni = test.filter((q, i) => javoblar[i] === q.togri).length
 
+  const tekshir = async () => {
+    setTekshirildi(true)
+    if (!test.length) return
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const foiz = Math.round((togriSoni / test.length) * 100)
+    await supabase.from('gin_natijalar').upsert(
+      { student_id: user.id, dars_slug: slug, ball: togriSoni, jami: test.length, foiz, updated_at: new Date().toISOString() },
+      { onConflict: 'student_id,dars_slug' }
+    )
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
       <Header backHref="/student/ginekologiya/darslar" backLabel="Ginekologiya darslari" />
@@ -110,7 +122,7 @@ export default function GinDarsViewer() {
                 </div>
 
                 {!tekshirildi ? (
-                  <button onClick={() => setTekshirildi(true)} disabled={Object.keys(javoblar).length < test.length}
+                  <button onClick={tekshir} disabled={Object.keys(javoblar).length < test.length}
                     style={{
                       marginTop: '16px', width: '100%', background: 'var(--gyn)', color: '#fff', border: 'none',
                       borderRadius: '12px', padding: '14px', fontSize: '15px', fontWeight: 700,
