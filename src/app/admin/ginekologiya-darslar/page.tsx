@@ -14,6 +14,7 @@ type GinDars = {
   bosqich: string
   bolim: string
   qisqa: string | null
+  video_url: string | null
   nazariya_html: string | null
   test_savollar: TestSavol[]
   daqiqa: number
@@ -64,6 +65,7 @@ export default function AdminGinDarslarPage() {
   const [bosqich, setBosqich] = useState('oson')
   const [bolim, setBolim] = useState('darslar')
   const [qisqa, setQisqa] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const [daqiqa, setDaqiqa] = useState(10)
   const [nazariyaHtml, setNazariyaHtml] = useState('')
   const [testMatn, setTestMatn] = useState('')
@@ -89,13 +91,13 @@ export default function AdminGinDarslarPage() {
 
   const reset = () => {
     setEditId(null); setSlug(''); setSarlavha(''); setKategoriya(''); setBosqich('oson'); setBolim('darslar')
-    setQisqa(''); setDaqiqa(10); setNazariyaHtml(''); setTestMatn(''); setFaol(true); setXabar('')
+    setQisqa(''); setVideoUrl(''); setDaqiqa(10); setNazariyaHtml(''); setTestMatn(''); setFaol(true); setXabar('')
     slugTegildi.current = false
   }
 
   const tahrirla = (d: GinDars) => {
     setEditId(d.id); setSlug(d.slug); setSarlavha(d.sarlavha); setKategoriya(d.kategoriya ?? '')
-    setBosqich(d.bosqich); setBolim(d.bolim ?? 'darslar'); setQisqa(d.qisqa ?? ''); setDaqiqa(d.daqiqa); setNazariyaHtml(d.nazariya_html ?? '')
+    setBosqich(d.bosqich); setBolim(d.bolim ?? 'darslar'); setQisqa(d.qisqa ?? ''); setVideoUrl(d.video_url ?? ''); setDaqiqa(d.daqiqa); setNazariyaHtml(d.nazariya_html ?? '')
     setTestMatn(d.test_savollar?.length ? JSON.stringify(d.test_savollar, null, 2) : '')
     setFaol(d.faol); setXabar(''); slugTegildi.current = true
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -127,7 +129,7 @@ export default function AdminGinDarslarPage() {
     setLoading(true)
     const payload = {
       slug: finalSlug, sarlavha: sarlavha.trim(), kategoriya: kategoriya.trim() || null,
-      bosqich, bolim, qisqa: qisqa.trim() || null, daqiqa: Number(daqiqa) || 10,
+      bosqich, bolim, qisqa: qisqa.trim() || null, video_url: videoUrl.trim() || null, daqiqa: Number(daqiqa) || 10,
       nazariya_html: nazariyaHtml.trim() || null, test_savollar: testSavollar, faol,
       sort_order: editId ? undefined : darslar.length, updated_at: new Date().toISOString(),
     }
@@ -211,6 +213,11 @@ export default function AdminGinDarslarPage() {
           <div>
             <label style={lab}>Qisqa tavsif (ixtiyoriy)</label>
             <input value={qisqa} onChange={(e) => setQisqa(e.target.value)} placeholder="Bir-ikki jumla — dars nima haqida" style={inp} />
+          </div>
+
+          <div>
+            <label style={lab}>🎥 Video havolasi (YouTube yoki to&apos;g&apos;ridan-to&apos;g&apos;ri .mp4)</label>
+            <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtu.be/... yoki https://.../video.mp4" style={inp} />
           </div>
 
           <div>

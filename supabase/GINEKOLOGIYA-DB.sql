@@ -54,6 +54,10 @@ ALTER TABLE public.gin_darslar
 ALTER TABLE public.gin_darslar
   ADD COLUMN IF NOT EXISTS bolim text NOT NULL DEFAULT 'darslar';
 
+-- Video havolasi (har modul video bilan boshlanadi — urologiya kabi)
+ALTER TABLE public.gin_darslar
+  ADD COLUMN IF NOT EXISTS video_url text;
+
 CREATE INDEX IF NOT EXISTS gin_darslar_bolim_idx ON public.gin_darslar (bolim);
 
 -- ── Ginekologiya test natijalari (urologiyadan ALOHIDA statistika/reyting) ──

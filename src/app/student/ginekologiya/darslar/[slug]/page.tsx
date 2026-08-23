@@ -8,7 +8,13 @@ import { BottomNav } from '@/components/BottomNav'
 import { Clock, CheckCircle2, XCircle } from 'lucide-react'
 
 type TestSavol = { savol: string; variantlar: string[]; togri: number; izoh?: string }
-type GinDars = { slug: string; sarlavha: string; kategoriya: string | null; bosqich: string; qisqa: string | null; nazariya_html: string | null; test_savollar: TestSavol[]; daqiqa: number }
+type GinDars = { slug: string; sarlavha: string; kategoriya: string | null; bosqich: string; qisqa: string | null; video_url: string | null; nazariya_html: string | null; test_savollar: TestSavol[]; daqiqa: number }
+
+// YouTube havolasini embed ko'rinishiga o'giradi
+function youtubeEmbed(url: string): string | null {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/)
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null
+}
 
 export default function GinDarsViewer() {
   const params = useParams()
@@ -25,7 +31,7 @@ export default function GinDarsViewer() {
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase.from('gin_darslar')
-        .select('slug, sarlavha, kategoriya, bosqich, qisqa, nazariya_html, test_savollar, daqiqa')
+        .select('slug, sarlavha, kategoriya, bosqich, qisqa, video_url, nazariya_html, test_savollar, daqiqa')
         .eq('slug', slug).eq('faol', true).maybeSingle()
       setDars((data as GinDars) ?? null)
       setLoading(false)
@@ -71,6 +77,20 @@ export default function GinDarsViewer() {
             <p style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Clock size={13} strokeWidth={2} /> {dars.daqiqa} daqiqa {dars.kategoriya ? `· ${dars.kategoriya}` : ''}
             </p>
+
+            {/* Video */}
+            {dars.video_url && (
+              <div style={{ marginBottom: '20px', borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--line)' }}>
+                {youtubeEmbed(dars.video_url) ? (
+                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                    <iframe src={youtubeEmbed(dars.video_url)!} title={dars.sarlavha} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
+                  </div>
+                ) : (
+                  <video src={dars.video_url} controls style={{ width: '100%', display: 'block', background: '#000' }} />
+                )}
+              </div>
+            )}
 
             {dars.nazariya_html ? (
               <div className="maqola-html" dangerouslySetInnerHTML={{ __html: dars.nazariya_html }} />
