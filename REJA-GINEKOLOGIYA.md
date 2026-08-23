@@ -51,17 +51,24 @@ tushishi...) alohida **Uroginekologiya** bo'limida — takrorlanmaydi.
 - [ ] `dars_tarkibi` / klassifikatsiya / testbank ga `yonalish` maydoni
 - [ ] Talaba bo'limlari yo'nalishga qarab filtrlansin (gin bo'sh boshlanadi)
 
-### Bosqich 2 — Ginekologiya kontenti (KATTA, ginekolog yozadi)
-- [ ] Darslar (Easy/O'rta/Qiyin), klassifikatsiyalar, operativ ginekologiya
-- [ ] Kalkulyatorlar, qaysi-tahlil (ayollar), savollar
+### Bosqich 2 — Ginekologiya kontenti (izolyatsiya modul)
+- [x] **Darslar moduli** — admin CRUD (/admin/ginekologiya-darslar) + talaba viewer
+      (/student/ginekologiya/darslar[/slug]). Deploy'siz, HTML nazariya. (2026-08-23)
+- [x] **Dars ichida test** — gin_darslar.test_savollar, admin JSON, talaba yechadi
+- [ ] Klassifikatsiyalar (gin) — YANGI modul kerak (yoki gin_darslar kategoriyasi)
+- [ ] Operativ ginekologiya — YANGI modul yoki kategoriya
+- [ ] Kalkulyatorlar (gin) — katta (urologiyada 25+ ta); alohida ish
+- [ ] qaysi-tahlil (ayollar), savollar (gin)
 - [ ] Uroginekologiya kesishma bo'limi
+- [ ] **Haqiqiy dars/test matni** — ginekolog yozadi (admin paneldan, deploy'siz)
 
 ### Bosqich 3 — Bemor tomoni
 - [ ] Ginekolog katalog / ochiq profillar
 - [ ] Murojaat/navbatni yo'nalishga qarab yo'naltirish
 
 ### Bosqich 4 — Brend / marketing
-- [ ] Landing tagline + ginekologiya bloki, SEO
+- [x] Tagline (login/Hero/manifest) → "Urologiya · Andrologiya · Ginekologiya"
+- [ ] Landing'da alohida ginekologiya bloki, SEO matnlari
 
 ## 4. Handoff fayllardagi tuzatiladigan xatolar
 
