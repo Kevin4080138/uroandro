@@ -102,8 +102,8 @@ export default function StudentDashboard() {
   // Ginekologiya — hozircha kontent tayyorlanmoqda ("Tez orada")
   const GIN_KARTALAR = [
     { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/ginekologiya/darslar' },
-    { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '#', tezOrada: true },
-    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=operativ' },
+    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=klassifikatsiyalar' },
     { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar', c: 'var(--gyn)', href: '#', tezOrada: true },
     { Icon: Target, title: "O'zingizni tekshiring", desc: 'Savol va klinik holat', c: 'var(--gyn)', href: '#', tezOrada: true },
     { Icon: Trophy, title: 'Reyting', desc: "Faollik bo'yicha reyting", c: 'var(--gyn)', href: '/student/reyting' },

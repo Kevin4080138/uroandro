@@ -12,6 +12,7 @@ type GinDars = {
   sarlavha: string
   kategoriya: string | null
   bosqich: string
+  bolim: string
   qisqa: string | null
   nazariya_html: string | null
   test_savollar: TestSavol[]
@@ -19,6 +20,12 @@ type GinDars = {
   sort_order: number
   faol: boolean
 }
+
+const BOLIMLAR = [
+  { id: 'darslar', nom: 'Darslar' },
+  { id: 'klassifikatsiyalar', nom: 'Klassifikatsiyalar' },
+  { id: 'operativ', nom: 'Operativ ginekologiya' },
+]
 
 const BOSQICHLAR = [
   { id: 'oson', nom: 'Oson', rang: '#16a34a' },
@@ -55,6 +62,7 @@ export default function AdminGinDarslarPage() {
   const [sarlavha, setSarlavha] = useState('')
   const [kategoriya, setKategoriya] = useState('')
   const [bosqich, setBosqich] = useState('oson')
+  const [bolim, setBolim] = useState('darslar')
   const [qisqa, setQisqa] = useState('')
   const [daqiqa, setDaqiqa] = useState(10)
   const [nazariyaHtml, setNazariyaHtml] = useState('')
@@ -80,14 +88,14 @@ export default function AdminGinDarslarPage() {
   }
 
   const reset = () => {
-    setEditId(null); setSlug(''); setSarlavha(''); setKategoriya(''); setBosqich('oson')
+    setEditId(null); setSlug(''); setSarlavha(''); setKategoriya(''); setBosqich('oson'); setBolim('darslar')
     setQisqa(''); setDaqiqa(10); setNazariyaHtml(''); setTestMatn(''); setFaol(true); setXabar('')
     slugTegildi.current = false
   }
 
   const tahrirla = (d: GinDars) => {
     setEditId(d.id); setSlug(d.slug); setSarlavha(d.sarlavha); setKategoriya(d.kategoriya ?? '')
-    setBosqich(d.bosqich); setQisqa(d.qisqa ?? ''); setDaqiqa(d.daqiqa); setNazariyaHtml(d.nazariya_html ?? '')
+    setBosqich(d.bosqich); setBolim(d.bolim ?? 'darslar'); setQisqa(d.qisqa ?? ''); setDaqiqa(d.daqiqa); setNazariyaHtml(d.nazariya_html ?? '')
     setTestMatn(d.test_savollar?.length ? JSON.stringify(d.test_savollar, null, 2) : '')
     setFaol(d.faol); setXabar(''); slugTegildi.current = true
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -119,7 +127,7 @@ export default function AdminGinDarslarPage() {
     setLoading(true)
     const payload = {
       slug: finalSlug, sarlavha: sarlavha.trim(), kategoriya: kategoriya.trim() || null,
-      bosqich, qisqa: qisqa.trim() || null, daqiqa: Number(daqiqa) || 10,
+      bosqich, bolim, qisqa: qisqa.trim() || null, daqiqa: Number(daqiqa) || 10,
       nazariya_html: nazariyaHtml.trim() || null, test_savollar: testSavollar, faol,
       sort_order: editId ? undefined : darslar.length, updated_at: new Date().toISOString(),
     }
@@ -166,6 +174,19 @@ export default function AdminGinDarslarPage() {
             <div style={{ width: '110px' }}>
               <label style={lab}>Daqiqa</label>
               <input type="number" min={1} value={daqiqa} onChange={(e) => setDaqiqa(Number(e.target.value))} style={inp} />
+            </div>
+          </div>
+
+          <div>
+            <label style={lab}>Bo&apos;lim</label>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {BOLIMLAR.map((b) => (
+                <button key={b.id} type="button" onClick={() => setBolim(b.id)} style={{
+                  flex: 1, minWidth: '120px', padding: '9px', borderRadius: '9px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+                  border: `1.5px solid ${bolim === b.id ? 'var(--gyn)' : 'var(--line)'}`,
+                  background: bolim === b.id ? 'var(--gyn)' : 'var(--surface-2)', color: bolim === b.id ? '#fff' : 'var(--muted)',
+                }}>{b.nom}</button>
+              ))}
             </div>
           </div>
 
@@ -235,7 +256,7 @@ export default function AdminGinDarslarPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ margin: '0 0 2px', fontSize: '13.5px', fontWeight: 700 }}>{d.sarlavha}</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>{d.slug} {d.kategoriya ? `· ${d.kategoriya}` : ''} {d.faol ? '' : '· yashirin'}</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>{BOLIMLAR.find((x) => x.id === d.bolim)?.nom ?? 'Darslar'} · {d.slug} {d.kategoriya ? `· ${d.kategoriya}` : ''} {d.faol ? '' : '· yashirin'}</p>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '9px' }}>

@@ -48,3 +48,10 @@ CREATE INDEX IF NOT EXISTS gin_darslar_bosqich_idx ON public.gin_darslar (bosqic
 -- Test savollari (dars ichida) — [{ savol, variantlar:[...], togri:0, izoh }]
 ALTER TABLE public.gin_darslar
   ADD COLUMN IF NOT EXISTS test_savollar jsonb NOT NULL DEFAULT '[]'::jsonb;
+
+-- Bo'lim — bitta jadval uch bo'limga xizmat qiladi
+--   'darslar' | 'klassifikatsiyalar' | 'operativ'
+ALTER TABLE public.gin_darslar
+  ADD COLUMN IF NOT EXISTS bolim text NOT NULL DEFAULT 'darslar';
+
+CREATE INDEX IF NOT EXISTS gin_darslar_bolim_idx ON public.gin_darslar (bolim);
