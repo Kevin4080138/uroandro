@@ -606,3 +606,7 @@ VALUES ('gin-l3-modul-30', '30-modul. Menopauza va perimenopauza', NULL, 'qiyin'
 ', 15, 30, false)
 ON CONFLICT (slug) DO NOTHING;
 
+
+-- Barcha modul skeletlarini NASHR qilish (struktura talabaga ko'rinsin).
+-- Ginekolog kontentni admin'dan to'ldiraveradi; yashirmoqchi bo'lsa admin'da "Faol" ni o'chiradi.
+UPDATE public.gin_darslar SET faol = true WHERE slug LIKE 'gin-l%-modul-%';
