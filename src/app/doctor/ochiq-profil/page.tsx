@@ -39,6 +39,7 @@ export default function OchiqProfilPage() {
 
   const [fullName, setFullName] = useState('')
   const [mutaxassislik, setMutaxassislik] = useState('')
+  const [yonalish, setYonalish] = useState<'urologiya' | 'ginekologiya' | 'ikkalasi'>('urologiya')
   const [ilmiyDaraja, setIlmiyDaraja] = useState('')
   const [tajribaYil, setTajribaYil] = useState('')
   const [bio, setBio] = useState('')
@@ -85,6 +86,7 @@ export default function OchiqProfilPage() {
       if (mavjud) {
         setFullName(mavjud.full_name ?? '')
         setMutaxassislik(mavjud.mutaxassislik ?? '')
+        setYonalish((mavjud.yonalish as 'urologiya' | 'ginekologiya' | 'ikkalasi') ?? 'urologiya')
         setIlmiyDaraja(mavjud.ilmiy_daraja ?? '')
         setTajribaYil(mavjud.tajriba_yil != null ? String(mavjud.tajriba_yil) : '')
         setBio(mavjud.bio ?? '')
@@ -127,6 +129,7 @@ export default function OchiqProfilPage() {
       full_name: fullName.trim(),
       klinika_id: klId,
       mutaxassislik: mutaxassislik.trim() || null,
+      yonalish,
       ilmiy_daraja: ilmiyDaraja.trim() || null,
       tajriba_yil: tajribaYil ? parseInt(tajribaYil, 10) : null,
       bio: bio.trim() || null,
@@ -247,6 +250,22 @@ export default function OchiqProfilPage() {
             <div style={{ flex: '1 1 160px' }}>
               <label style={lbl}>Mutaxassislik</label>
               <input style={input} value={mutaxassislik} onChange={(e) => setMutaxassislik(e.target.value)} placeholder="Urolog-androlog" />
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={lbl}>Yo&apos;nalish (katalog filtri uchun)</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {([['urologiya', 'Urolog'], ['ginekologiya', 'Ginekolog'], ['ikkalasi', 'Ikkalasi']] as const).map(([id, nom]) => {
+                  const faol = yonalish === id
+                  const rang = id === 'ginekologiya' ? 'var(--gyn)' : 'var(--accent)'
+                  return (
+                    <button key={id} type="button" onClick={() => setYonalish(id)} style={{
+                      padding: '9px 16px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                      border: `1.5px solid ${faol ? rang : 'var(--line)'}`,
+                      background: faol ? rang : 'var(--surface)', color: faol ? '#fff' : 'var(--muted)',
+                    }}>{nom}</button>
+                  )
+                })}
+              </div>
             </div>
             <div style={{ flex: '1 1 160px' }}>
               <label style={lbl}>Ilmiy daraja / toifa</label>

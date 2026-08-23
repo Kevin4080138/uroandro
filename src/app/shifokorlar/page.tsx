@@ -10,7 +10,7 @@ type Profil = {
   doctor_id: string; full_name: string; klinika_id: string | null
   mutaxassislik: string | null; ilmiy_daraja: string | null; tajriba_yil: number | null
   bio: string | null; xizmatlar: Xizmat[]; qabul_narxi: string | null
-  ish_vaqti: string | null; telefon: string | null
+  ish_vaqti: string | null; telefon: string | null; yonalish: string | null
 }
 type Klinika = { id: string; nom: string; manzil: string | null; telefon: string | null }
 type Baho = { doctor_id: string; muomala: number; samara: number; tushuntirish: number; kutish: number; izoh: string | null }
@@ -36,6 +36,7 @@ export default function ShifokorlarKatalogiPage() {
   const [baholar, setBaholar] = useState<Record<string, Baho[]>>({})
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
+  const [yonalishFiltr, setYonalishFiltr] = useState<'hammasi' | 'urologiya' | 'ginekologiya'>('hammasi')
   const [ochiqId, setOchiqId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -78,14 +79,19 @@ export default function ShifokorlarKatalogiPage() {
 
   const filtered = useMemo(() => {
     const q = qidiruv.trim().toLowerCase()
-    if (!q) return profillar
     return profillar.filter((p) => {
+      // Yo'nalish: yo'q bo'lsa urologiya; 'ikkalasi' har ikkisiga tushadi
+      if (yonalishFiltr !== 'hammasi') {
+        const y = p.yonalish ?? 'urologiya'
+        if (y !== yonalishFiltr && y !== 'ikkalasi') return false
+      }
+      if (!q) return true
       const kl = p.klinika_id ? klinikalar[p.klinika_id] : null
       const matn = [p.full_name, p.mutaxassislik, kl?.nom, kl?.manzil, ...(p.xizmatlar ?? []).map((x) => x.nom)]
         .filter(Boolean).join(' ').toLowerCase()
       return matn.includes(q)
     })
-  }, [qidiruv, profillar, klinikalar])
+  }, [qidiruv, yonalishFiltr, profillar, klinikalar])
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
@@ -123,6 +129,20 @@ export default function ShifokorlarKatalogiPage() {
               borderRadius: '999px', padding: '12px 16px 12px 40px', fontSize: '14px', outline: 'none', boxSizing: 'border-box',
             }}
           />
+        </div>
+
+        {/* Yo'nalish filtri */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          {([['hammasi', 'Hammasi', 'var(--accent)'], ['urologiya', 'Urolog', 'var(--accent)'], ['ginekologiya', 'Ginekolog', 'var(--gyn)']] as const).map(([id, nom, rang]) => {
+            const faol = yonalishFiltr === id
+            return (
+              <button key={id} onClick={() => setYonalishFiltr(id)} className="soft-press" style={{
+                padding: '8px 16px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                border: `1.5px solid ${faol ? rang : 'var(--line)'}`,
+                background: faol ? rang : 'var(--surface)', color: faol ? '#fff' : 'var(--muted)',
+              }}>{nom}</button>
+            )
+          })}
         </div>
 
         {loading ? (

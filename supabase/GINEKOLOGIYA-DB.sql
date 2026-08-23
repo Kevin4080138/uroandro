@@ -85,3 +85,8 @@ CREATE POLICY "gin_natijalar_update" ON public.gin_natijalar
   FOR UPDATE USING (student_id = auth.uid()) WITH CHECK (student_id = auth.uid());
 
 CREATE INDEX IF NOT EXISTS gin_natijalar_student_idx ON public.gin_natijalar (student_id);
+
+-- ── Bosqich 3: bemor tomoni — shifokor yo'nalishi (katalog filtri uchun) ──
+--   'urologiya' | 'ginekologiya' | 'ikkalasi'  (yo'q bo'lsa — urologiya)
+ALTER TABLE public.shifokor_profillari
+  ADD COLUMN IF NOT EXISTS yonalish text;
