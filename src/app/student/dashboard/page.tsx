@@ -101,7 +101,7 @@ export default function StudentDashboard() {
 
   // Ginekologiya — hozircha kontent tayyorlanmoqda ("Tez orada")
   const GIN_KARTALAR = [
-    { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/darslar', tezOrada: true },
+    { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/ginekologiya/darslar' },
     { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '#', tezOrada: true },
     { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '#', tezOrada: true },
     { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar', c: 'var(--gyn)', href: '#', tezOrada: true },
