@@ -44,3 +44,7 @@ CREATE POLICY "gin_darslar_admin" ON public.gin_darslar
   FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 CREATE INDEX IF NOT EXISTS gin_darslar_bosqich_idx ON public.gin_darslar (bosqich);
+
+-- Test savollari (dars ichida) — [{ savol, variantlar:[...], togri:0, izoh }]
+ALTER TABLE public.gin_darslar
+  ADD COLUMN IF NOT EXISTS test_savollar jsonb NOT NULL DEFAULT '[]'::jsonb;

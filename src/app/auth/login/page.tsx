@@ -135,7 +135,7 @@ export default function LoginPage() {
             Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
           </h1>
           <p style={{ color: 'var(--muted)', marginTop: '8px', fontSize: '14px' }}>
-            Urologiya va Andrologiya platformasi
+            Urologiya · Andrologiya · Ginekologiya
           </p>
         </div>
 

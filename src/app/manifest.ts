@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Urosfera — Urologiya platformasi',
+    name: 'Urosfera — Urologiya va Ginekologiya platformasi',
     short_name: 'Urosfera',
-    description: 'Urologiya va Andrologiya ta\'lim platformasi',
+    description: 'Urologiya, Andrologiya va Ginekologiya ta\'lim platformasi',
     start_url: '/',
     display: 'standalone',
     background_color: '#0a0a0f',

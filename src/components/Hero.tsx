@@ -23,7 +23,7 @@ export default function Hero() {
         className="relative mb-6 w-fit rounded-full border px-4 py-1.5 text-sm font-medium"
         style={{ borderColor: 'var(--line)', color: 'var(--accent)', background: 'var(--accent-soft)' }}
       >
-        Urologiya va Andrologiya platformasi
+        Urologiya · Andrologiya · Ginekologiya
       </motion.span>
 
       <motion.h1
@@ -65,7 +65,7 @@ export function MobileHero() {
         className="mb-3 w-fit rounded-full border px-3 py-1 text-xs font-medium"
         style={{ borderColor: 'var(--line)', color: 'var(--accent)', background: 'var(--accent-soft)' }}
       >
-        Urologiya va Andrologiya platformasi
+        Urologiya · Andrologiya · Ginekologiya
       </span>
       <h1 className="text-2xl font-extrabold leading-tight" style={{ color: 'var(--ink)' }}>
         Sog&apos;ligingiz <span style={{ color: 'var(--accent)' }}>professional</span> nazoratda

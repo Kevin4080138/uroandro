@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 
+type TestSavol = { savol: string; variantlar: string[]; togri: number; izoh?: string }
 type GinDars = {
   id: string
   slug: string
@@ -13,6 +14,7 @@ type GinDars = {
   bosqich: string
   qisqa: string | null
   nazariya_html: string | null
+  test_savollar: TestSavol[]
   daqiqa: number
   sort_order: number
   faol: boolean
@@ -56,6 +58,7 @@ export default function AdminGinDarslarPage() {
   const [qisqa, setQisqa] = useState('')
   const [daqiqa, setDaqiqa] = useState(10)
   const [nazariyaHtml, setNazariyaHtml] = useState('')
+  const [testMatn, setTestMatn] = useState('')
   const [faol, setFaol] = useState(true)
 
   useEffect(() => {
@@ -78,13 +81,14 @@ export default function AdminGinDarslarPage() {
 
   const reset = () => {
     setEditId(null); setSlug(''); setSarlavha(''); setKategoriya(''); setBosqich('oson')
-    setQisqa(''); setDaqiqa(10); setNazariyaHtml(''); setFaol(true); setXabar('')
+    setQisqa(''); setDaqiqa(10); setNazariyaHtml(''); setTestMatn(''); setFaol(true); setXabar('')
     slugTegildi.current = false
   }
 
   const tahrirla = (d: GinDars) => {
     setEditId(d.id); setSlug(d.slug); setSarlavha(d.sarlavha); setKategoriya(d.kategoriya ?? '')
     setBosqich(d.bosqich); setQisqa(d.qisqa ?? ''); setDaqiqa(d.daqiqa); setNazariyaHtml(d.nazariya_html ?? '')
+    setTestMatn(d.test_savollar?.length ? JSON.stringify(d.test_savollar, null, 2) : '')
     setFaol(d.faol); setXabar(''); slugTegildi.current = true
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -94,11 +98,29 @@ export default function AdminGinDarslarPage() {
     if (!sarlavha.trim()) { setXabar('Sarlavha kiriting'); return }
     const finalSlug = (slug.trim() || slugla(sarlavha)).trim()
     if (!finalSlug) { setXabar('Slug kiriting'); return }
+
+    // Test JSON — bo'sh bo'lsa [], aks holda tekshiramiz
+    let testSavollar: TestSavol[] = []
+    if (testMatn.trim()) {
+      try {
+        const parsed = JSON.parse(testMatn)
+        if (!Array.isArray(parsed)) throw new Error('massiv emas')
+        for (const [i, q] of parsed.entries()) {
+          if (!q.savol || !Array.isArray(q.variantlar) || typeof q.togri !== 'number') {
+            setXabar(`Test #${i + 1}: savol, variantlar[], togri (raqam) kerak`); return
+          }
+        }
+        testSavollar = parsed
+      } catch (e) {
+        setXabar('Test JSON xato: ' + (e instanceof Error ? e.message : '')); return
+      }
+    }
+
     setLoading(true)
     const payload = {
       slug: finalSlug, sarlavha: sarlavha.trim(), kategoriya: kategoriya.trim() || null,
       bosqich, qisqa: qisqa.trim() || null, daqiqa: Number(daqiqa) || 10,
-      nazariya_html: nazariyaHtml.trim() || null, faol,
+      nazariya_html: nazariyaHtml.trim() || null, test_savollar: testSavollar, faol,
       sort_order: editId ? undefined : darslar.length, updated_at: new Date().toISOString(),
     }
     const res = editId
@@ -176,6 +198,16 @@ export default function AdminGinDarslarPage() {
               placeholder="<h2>...</h2><p>...</p> — urologiya darslari bilan bir xil uslub (.maqola-html)" style={{ ...inp, resize: 'vertical', fontFamily: 'monospace', fontSize: '12.5px', lineHeight: 1.5 }} />
             <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: 'var(--muted)' }}>
               Uslub avtomatik qo&apos;llanadi — <code>&lt;style&gt;</code> yozmang. Faqat <code>&lt;h2&gt; &lt;p&gt; &lt;ul&gt; &lt;table&gt;</code> kabi teglar.
+            </p>
+          </div>
+
+          <div>
+            <label style={lab}>Test savollari (JSON, ixtiyoriy)</label>
+            <textarea value={testMatn} onChange={(e) => setTestMatn(e.target.value)} rows={7}
+              placeholder={'[\n  { "savol": "...", "variantlar": ["A", "B", "C", "D"], "togri": 0, "izoh": "..." }\n]'}
+              style={{ ...inp, resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.5 }} />
+            <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: 'var(--muted)' }}>
+              <code>togri</code> — to&apos;g&apos;ri variant tartibi (0 dan boshlanadi). Bo&apos;sh qoldirsangiz test bo&apos;lmaydi.
             </p>
           </div>
 
