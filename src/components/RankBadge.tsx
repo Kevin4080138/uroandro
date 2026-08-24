@@ -2,31 +2,39 @@
 
 import type { RankInfo } from '@/lib/rank'
 import { hammaRanklar } from '@/lib/rank'
+import { Repeat, RefreshCw } from 'lucide-react'
 
 // Hex clip-path — 6 burchakli shakl
 const HEX = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
 
+// Ramka gradientlari (metall romka his beradi)
+const FRAME = {
+  steel:  'linear-gradient(160deg,#C8D0DA,#8A94A2 55%,#525A66)',
+  silver: 'linear-gradient(160deg,#F4F7FA,#AAB8C4 55%,#64707E)',
+  gold:   'linear-gradient(160deg,#FCEFC2,#D9A93B 55%,#8A5F14)',
+}
+
 // Har bir daraja uchun vizual konfig (darajaSon 0–10)
-// HTML t4 "yakuniy tanlov" dizayni asosida
+// HTML t4 "yakuniy tanlov" dizayni asosida — ramka bilan
 const RANK_VIS: Record<number, {
-  p1: string; p2: string; accent: string
+  p1: string; p2: string; accent: string; frame: string
   stars: number; bars: number; chevs: number; crown: boolean
   glow: string; labelColor: string
 }> = {
-  0:  { p1: '#5a6478', p2: '#3a4150', accent: '#d1d5db', stars: 0, bars: 0, chevs: 1, crown: false, glow: 'rgba(90,100,120,0.35)',   labelColor: '#94a3b8' },
-  1:  { p1: '#4C90F5', p2: '#1F5FE0', accent: '#ffffff', stars: 0, bars: 0, chevs: 1, crown: false, glow: 'rgba(76,144,245,0.45)',   labelColor: '#93c5fd' },
-  2:  { p1: '#3E82F2', p2: '#1750DA', accent: '#ffffff', stars: 0, bars: 1, chevs: 1, crown: false, glow: 'rgba(62,130,242,0.45)',   labelColor: '#93c5fd' },
-  3:  { p1: '#3572E8', p2: '#1247C9', accent: '#ffffff', stars: 0, bars: 3, chevs: 1, crown: false, glow: 'rgba(53,114,232,0.45)',   labelColor: '#93c5fd' },
-  4:  { p1: '#22B4B0', p2: '#0E8783', accent: '#ffffff', stars: 0, bars: 3, chevs: 2, crown: false, glow: 'rgba(34,180,176,0.45)',   labelColor: '#5eead4' },
-  5:  { p1: '#1FA79E', p2: '#0C7A72', accent: '#ffffff', stars: 1, bars: 3, chevs: 1, crown: false, glow: 'rgba(31,167,158,0.45)',   labelColor: '#5eead4' },
-  6:  { p1: '#1C9A8C', p2: '#0A6259', accent: '#ffffff', stars: 2, bars: 3, chevs: 1, crown: false, glow: 'rgba(28,154,140,0.45)',   labelColor: '#5eead4' },
-  7:  { p1: '#137F72', p2: '#07463F', accent: '#ffffff', stars: 3, bars: 3, chevs: 1, crown: false, glow: 'rgba(19,127,114,0.45)',   labelColor: '#34d399' },
-  8:  { p1: '#4C4FC9', p2: '#2B2E95', accent: '#ffffff', stars: 3, bars: 3, chevs: 2, crown: false, glow: 'rgba(76,79,201,0.45)',    labelColor: '#a5b4fc' },
-  9:  { p1: '#9142CE', p2: '#5C2596', accent: '#ffffff', stars: 4, bars: 3, chevs: 2, crown: false, glow: 'rgba(145,66,206,0.45)',   labelColor: '#d8b4fe' },
-  10: { p1: '#121E44', p2: '#050914', accent: '#F7DE8B', stars: 4, bars: 3, chevs: 2, crown: true,  glow: 'rgba(247,222,139,0.55)', labelColor: '#F7DE8B' },
+  0:  { p1: '#7C93C4', p2: '#4A5A7E', accent: '#ffffff', frame: FRAME.steel,  stars: 0, bars: 0, chevs: 1, crown: false, glow: 'rgba(124,147,196,0.4)',  labelColor: '#93a5c4' },
+  1:  { p1: '#4C90F5', p2: '#1F5FE0', accent: '#ffffff', frame: FRAME.silver, stars: 0, bars: 0, chevs: 1, crown: false, glow: 'rgba(76,144,245,0.45)',  labelColor: '#3b82f6' },
+  2:  { p1: '#3E82F2', p2: '#1750DA', accent: '#ffffff', frame: FRAME.silver, stars: 0, bars: 1, chevs: 1, crown: false, glow: 'rgba(62,130,242,0.45)',  labelColor: '#3b82f6' },
+  3:  { p1: '#3572E8', p2: '#1247C9', accent: '#ffffff', frame: FRAME.silver, stars: 0, bars: 3, chevs: 1, crown: false, glow: 'rgba(53,114,232,0.45)',  labelColor: '#2563eb' },
+  4:  { p1: '#22B4B0', p2: '#0E8783', accent: '#ffffff', frame: FRAME.silver, stars: 0, bars: 3, chevs: 2, crown: false, glow: 'rgba(34,180,176,0.45)',  labelColor: '#0d9488' },
+  5:  { p1: '#1FA79E', p2: '#0C7A72', accent: '#ffffff', frame: FRAME.silver, stars: 1, bars: 3, chevs: 1, crown: false, glow: 'rgba(31,167,158,0.45)',  labelColor: '#0d9488' },
+  6:  { p1: '#1C9A8C', p2: '#0A6259', accent: '#ffffff', frame: FRAME.silver, stars: 2, bars: 3, chevs: 1, crown: false, glow: 'rgba(28,154,140,0.45)',  labelColor: '#0d9488' },
+  7:  { p1: '#137F72', p2: '#07463F', accent: '#F7DE8B', frame: FRAME.gold,   stars: 3, bars: 3, chevs: 1, crown: false, glow: 'rgba(217,169,59,0.45)',  labelColor: '#b8860b' },
+  8:  { p1: '#4C4FC9', p2: '#2B2E95', accent: '#F7DE8B', frame: FRAME.gold,   stars: 3, bars: 3, chevs: 2, crown: false, glow: 'rgba(217,169,59,0.45)',  labelColor: '#6366f1' },
+  9:  { p1: '#9142CE', p2: '#5C2596', accent: '#F7DE8B', frame: FRAME.gold,   stars: 4, bars: 3, chevs: 2, crown: false, glow: 'rgba(217,169,59,0.5)',   labelColor: '#9333ea' },
+  10: { p1: '#121E44', p2: '#050914', accent: '#F7DE8B', frame: FRAME.gold,   stars: 4, bars: 3, chevs: 2, crown: true,  glow: 'rgba(247,222,139,0.6)', labelColor: '#c99326' },
 }
 
-// ── Hexagon badge (asosiy vizual) ────────────────────────────────────────────
+// ── Hexagon badge (asosiy vizual) — rangli metall ramka bilan ────────────────
 
 function HexBadge({
   darajaSon, earned = true, size = 'md', delay = '0',
@@ -37,9 +45,10 @@ function HexBadge({
   delay?: string
 }) {
   const vis = RANK_VIS[darajaSon] ?? RANK_VIS[0]
-  const W = size === 'lg' ? 100 : size === 'md' ? 70 : 44
+  const W = size === 'lg' ? 100 : size === 'md' ? 70 : 46
   const H = Math.round(W * 1.14)
   const s = (n: number) => Math.max(1, Math.round(n * W / 70))
+  const frameW = s(4) // ramka qalinligi
 
   return (
     <div style={{
@@ -49,15 +58,20 @@ function HexBadge({
         : 'grayscale(0.92)',
       opacity: earned ? 1 : 0.42,
     }}>
-      {/* Gradient qatlam */}
+      {/* Ramka (metall romka) — tashqi hexagon */}
       <div style={{
         position: 'absolute', inset: 0, clipPath: HEX,
+        background: vis.frame,
+      }} />
+      {/* Ichki gradient */}
+      <div style={{
+        position: 'absolute', inset: frameW, clipPath: HEX,
         background: `linear-gradient(135deg, ${vis.p1}, ${vis.p2})`,
       }} />
       {/* Yorug'lik jilosi */}
       <div style={{
-        position: 'absolute', inset: 0, clipPath: HEX,
-        background: 'linear-gradient(160deg, rgba(255,255,255,0.26), transparent 48%)',
+        position: 'absolute', inset: frameW, clipPath: HEX,
+        background: 'linear-gradient(160deg, rgba(255,255,255,0.28), transparent 48%)',
         pointerEvents: 'none',
       }} />
       {/* Nishon belgilari */}
@@ -65,7 +79,7 @@ function HexBadge({
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        gap: s(6), padding: s(13),
+        gap: s(6), padding: s(15),
       }}>
         {vis.crown && (
           <div className="badge-crown" style={{
@@ -153,24 +167,33 @@ export function RankBadge({ rank, size = 'md' }: { rank: RankInfo; size?: 'sm' |
   )
 }
 
-// ── Katta karta (dashboard uchun) ────────────────────────────────────────────
+// ── Katta karta (dashboard uchun) — bosiladigan ──────────────────────────────
 
-export function RankCard({ rank }: { rank: RankInfo }) {
+export function RankCard({ rank, onClick }: { rank: RankInfo; onClick?: () => void }) {
   const vis = RANK_VIS[rank.darajaSon] ?? RANK_VIS[0]
   const delay = (rank.darajaSon * 0.22).toFixed(2)
+  const bosiladigan = typeof onClick === 'function'
 
   return (
-    <div style={{
-      background: `linear-gradient(135deg, ${vis.p1}1a, ${vis.p2}0d)`,
-      border: `1px solid ${vis.labelColor}40`,
-      borderRadius: 18,
-      padding: 20,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 18,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <div
+      onClick={onClick}
+      className={bosiladigan ? 'lift' : undefined}
+      role={bosiladigan ? 'button' : undefined}
+      tabIndex={bosiladigan ? 0 : undefined}
+      onKeyDown={bosiladigan ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick!() } } : undefined}
+      style={{
+        background: `linear-gradient(135deg, ${vis.p1}1a, ${vis.p2}0d)`,
+        border: `1px solid ${vis.labelColor}40`,
+        borderRadius: 18,
+        padding: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 18,
+        position: 'relative',
+        overflow: 'hidden',
+        cursor: bosiladigan ? 'pointer' : 'default',
+      }}
+    >
       <div style={{
         position: 'absolute', right: -20, top: -20,
         width: 120, height: 120, borderRadius: '50%',
@@ -214,11 +237,20 @@ export function RankCard({ rank }: { rank: RankInfo }) {
           </p>
         )}
       </div>
+      {bosiladigan && (
+        <span style={{
+          position: 'absolute', right: 12, bottom: 10,
+          fontSize: 10.5, fontWeight: 700, color: vis.labelColor, opacity: 0.85,
+          display: 'inline-flex', alignItems: 'center', gap: 3,
+        }}>
+          Unvonlar yo&apos;li ⓘ
+        </span>
+      )}
     </div>
   )
 }
 
-// ── Mini badge (profil sahifasi uchun) ───────────────────────────────────────
+// ── Mini badge (profil sahifasi uchun) — rangli fonga chidamli shisha chip ────
 
 export function RankMini({ rank, onClick }: { rank: RankInfo; onClick?: () => void }) {
   const vis = RANK_VIS[rank.darajaSon] ?? RANK_VIS[0]
@@ -230,22 +262,31 @@ export function RankMini({ rank, onClick }: { rank: RankInfo; onClick?: () => vo
       onClick={onClick}
       disabled={!bosiladigan}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        background: `${vis.p1}22`, border: `1px solid ${vis.labelColor}50`,
-        borderRadius: 10, padding: '6px 12px',
+        display: 'inline-flex', alignItems: 'center', gap: 9,
+        // Rangli gradient (profil kartasi) ustida ham o'qiladigan qorong'i shisha
+        background: 'rgba(10,15,25,0.28)',
+        border: '1px solid rgba(255,255,255,0.28)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        borderRadius: 12, padding: '6px 12px 6px 8px',
         cursor: bosiladigan ? 'pointer' : 'default', font: 'inherit',
       }}
     >
       <HexBadge darajaSon={rank.darajaSon} size="sm" delay={delay} />
-      <span style={{ fontSize: 12, fontWeight: 800, color: vis.labelColor }}>{rank.nom}</span>
+      <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+        <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '.06em', textTransform: 'uppercase' }}>Unvon</span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>{rank.nom}</span>
+      </span>
       {bosiladigan && (
-        <span style={{ fontSize: 11, color: vis.labelColor, opacity: .7, marginLeft: 2 }}>ⓘ</span>
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginLeft: 1 }}>ⓘ</span>
       )}
     </button>
   )
 }
 
 // ── Barcha unvonlar modali ────────────────────────────────────────────────────
+// Unvon ustiga bosilganda: 10 ta unvon + qanday erishish sharti ko'rinadi.
+// Talaba yetgan darajalar rangli, hali yetmagani rangsiz (grayscale).
 
 export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; onClose: () => void }) {
   const ranklar = hammaRanklar()
@@ -262,7 +303,7 @@ export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; o
         onClick={(e) => e.stopPropagation()}
         style={{
           background: 'var(--surface)', borderRadius: '20px 20px 0 0', width: '100%',
-          maxWidth: 520, maxHeight: '85vh', overflowY: 'auto',
+          maxWidth: 520, maxHeight: '88vh', overflowY: 'auto',
           border: '1px solid var(--line)', borderBottom: 'none', padding: '20px 18px 32px',
         }}
       >
@@ -282,8 +323,9 @@ export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; o
           </button>
         </div>
         <p style={{ margin: '0 0 16px', fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.6 }}>
-          Darslarni tugatgan sari unvoningiz ko&apos;tariladi. Yetib kelgan darajalaringiz rangli,
-          keyingilari kulrang.
+          Darslarni tugatgan sari unvoningiz ko&apos;tariladi — har bir darajaga
+          <b> qancha o&apos;qishingiz kerakligi</b> quyida ko&apos;rsatilgan. Yetib kelgan
+          darajalaringiz rangli, keyingilari kulrang.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -309,7 +351,7 @@ export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; o
                       fontSize: 14, fontWeight: 800,
                       color: yetgan ? 'var(--ink)' : 'var(--muted)',
                     }}>
-                      {r.nom}
+                      {r.darajaSon}. {r.nom}
                     </span>
                     {joriy && (
                       <span style={{
@@ -324,16 +366,52 @@ export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; o
                       <span style={{ fontSize: 12, color: vis.labelColor }}>✓</span>
                     )}
                   </div>
+                  {/* Qanday erishish sharti */}
                   <div style={{
-                    fontSize: 11.5, marginTop: 2, lineHeight: 1.45,
-                    color: 'var(--muted)', opacity: yetgan ? 1 : .7,
+                    fontSize: 11.5, marginTop: 3, lineHeight: 1.45,
+                    color: yetgan ? vis.labelColor : 'var(--muted)',
+                    fontWeight: yetgan ? 600 : 500,
+                    opacity: yetgan ? 1 : 0.85,
                   }}>
-                    {r.tavsif}
+                    {yetgan ? '✓ ' : '🎯 '}{r.shart}
                   </div>
                 </div>
               </div>
             )
           })}
+        </div>
+
+        {/* Eslatma 1 — takrorlash */}
+        <div style={{
+          display: 'flex', gap: 11, alignItems: 'flex-start',
+          marginTop: 18, padding: '13px 15px', borderRadius: 13,
+          background: 'var(--accent-soft)', border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
+        }}>
+          <span style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}><Repeat size={18} strokeWidth={2.2} /></span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', marginBottom: 2 }}>Takrorlash — bilimlar onasi</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.55 }}>
+              Unvonni qo&apos;lga kiritish yetarli emas — o&apos;tilgan mavzularni vaqti-vaqti bilan
+              qaytarib turmasangiz, bilim yodingizdan ko&apos;tariladi. Har bosqichni takrorlab boring,
+              shunda unvoningiz haqiqiy bilimga aylanadi.
+            </div>
+          </div>
+        </div>
+
+        {/* Eslatma 2 — platforma yangilanishi */}
+        <div style={{
+          display: 'flex', gap: 11, alignItems: 'flex-start',
+          marginTop: 10, padding: '13px 15px', borderRadius: 13,
+          background: 'var(--surface-2)', border: '1px solid var(--line)',
+        }}>
+          <span style={{ color: 'var(--good)', flexShrink: 0, marginTop: 1 }}><RefreshCw size={18} strokeWidth={2.2} /></span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', marginBottom: 2 }}>Platforma doimo yangilanadi</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.55 }}>
+              Urosfera har 6 oydan bir yilgacha bo&apos;lgan muddatda yangi darslar, mavzular va
+              imkoniyatlar bilan yangilanib turadi. Tez-tez kirib, yangilanishlardan boxabar bo&apos;lib turing.
+            </div>
+          </div>
         </div>
       </div>
     </div>

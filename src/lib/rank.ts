@@ -9,6 +9,7 @@ export type RankInfo = {
   keyingiFoiz: number     // keyingi darajagacha foiz (0–100)
   keyingiNom: string
   tavsif: string
+  shart: string           // shu unvonga erishish sharti (talabaga ko'rsatiladi)
 }
 
 export type ProgressData = {
@@ -23,25 +24,25 @@ const QIYIN_JAMI = DARSLAR.filter(d => d.bosqich === 'qiyin').length || 1
 
 const RANKS: Omit<RankInfo, 'keyingiFoiz'>[] = [
   // Tier: boshlang
-  { darajaSon: 0,  nom: 'Boshlovchi',   unvon: '▰',                tier: 'boshlang', subRank: 1, keyingiNom: 'Boshlovchi',   tavsif: 'Birinchi darsni boshlang!' },
+  { darajaSon: 0,  nom: 'Boshlovchi',   unvon: '▰',                tier: 'boshlang', subRank: 1, keyingiNom: 'Boshlovchi',   tavsif: 'Birinchi darsni boshlang!',                        shart: 'Hali dars boshlanmagan — birinchi oson darsni oching' },
 
   // Oson bosqich — bronza (bars)
-  { darajaSon: 1,  nom: 'Boshlovchi',   unvon: '▰',                tier: 'oson',     subRank: 1, keyingiNom: 'Shogird',      tavsif: 'Tibbiyot asoslarini o\'rganmoqda' },
-  { darajaSon: 2,  nom: 'Shogird',      unvon: '▰▰',               tier: 'oson',     subRank: 2, keyingiNom: 'Bilimdon',     tavsif: 'Bilimlarni mustahkamlayapti' },
-  { darajaSon: 3,  nom: 'Bilimdon',     unvon: '▰▰▰',              tier: 'oson',     subRank: 3, keyingiNom: 'Izlanuvchi',   tavsif: 'Asoslar bosqichini zabt etdi' },
+  { darajaSon: 1,  nom: 'Boshlovchi',   unvon: '▰',                tier: 'oson',     subRank: 1, keyingiNom: 'Shogird',      tavsif: 'Tibbiyot asoslarini o\'rganmoqda',                 shart: 'Oson bosqichda birinchi darsni tugating' },
+  { darajaSon: 2,  nom: 'Shogird',      unvon: '▰▰',               tier: 'oson',     subRank: 2, keyingiNom: 'Bilimdon',     tavsif: 'Bilimlarni mustahkamlayapti',                      shart: 'Oson bosqich darslarining 35% ini tugating' },
+  { darajaSon: 3,  nom: 'Bilimdon',     unvon: '▰▰▰',              tier: 'oson',     subRank: 3, keyingiNom: 'Izlanuvchi',   tavsif: 'Asoslar bosqichini zabt etdi',                     shart: 'Oson bosqich darslarining 70% ini tugating' },
 
   // O'rta bosqich — kumush (star + bars)
-  { darajaSon: 4,  nom: 'Izlanuvchi',   unvon: '⭐ ▰▰▰',           tier: 'orta',     subRank: 1, keyingiNom: 'Amaliyotchi',  tavsif: 'Klinik amaliyotga qadam qo\'ydi' },
-  { darajaSon: 5,  nom: 'Amaliyotchi',  unvon: '⭐⭐ ▰▰▰',          tier: 'orta',     subRank: 2, keyingiNom: 'Mutaxassis',   tavsif: 'Diagnostika va davolashni o\'zlashtirmoqda' },
-  { darajaSon: 6,  nom: 'Mutaxassis',   unvon: '⭐⭐⭐ ▰▰▰',         tier: 'orta',     subRank: 3, keyingiNom: 'Ekspert',      tavsif: 'O\'rta bosqichni muvaffaqiyatli yakunladi' },
+  { darajaSon: 4,  nom: 'Izlanuvchi',   unvon: '⭐ ▰▰▰',           tier: 'orta',     subRank: 1, keyingiNom: 'Amaliyotchi',  tavsif: 'Klinik amaliyotga qadam qo\'ydi',                  shart: 'Oson bosqichni yakunlab, o\'rta bosqichga o\'ting' },
+  { darajaSon: 5,  nom: 'Amaliyotchi',  unvon: '⭐⭐ ▰▰▰',          tier: 'orta',     subRank: 2, keyingiNom: 'Mutaxassis',   tavsif: 'Diagnostika va davolashni o\'zlashtirmoqda',       shart: 'O\'rta bosqich darslarining 35% ini tugating' },
+  { darajaSon: 6,  nom: 'Mutaxassis',   unvon: '⭐⭐⭐ ▰▰▰',         tier: 'orta',     subRank: 3, keyingiNom: 'Ekspert',      tavsif: 'O\'rta bosqichni muvaffaqiyatli yakunladi',        shart: 'O\'rta bosqich darslarining 70% ini tugating' },
 
   // Qiyin bosqich — oltin (stars)
-  { darajaSon: 7,  nom: 'Ekspert',      unvon: '⭐⭐⭐⭐',            tier: 'qiyin',    subRank: 1, keyingiNom: 'Ustoz',        tavsif: 'Murakkab klinik masalalarni hal qilmoqda' },
-  { darajaSon: 8,  nom: 'Ustoz',        unvon: '⭐⭐⭐⭐⭐',           tier: 'qiyin',    subRank: 2, keyingiNom: 'Elita',        tavsif: 'Eng chuqur klinik bilimlarga ega' },
-  { darajaSon: 9,  nom: 'Elita',        unvon: '⭐⭐⭐⭐⭐ 🏅',        tier: 'qiyin',    subRank: 3, keyingiNom: 'Afsona',       tavsif: 'Qiyin bosqichni zabt etdi' },
+  { darajaSon: 7,  nom: 'Ekspert',      unvon: '⭐⭐⭐⭐',            tier: 'qiyin',    subRank: 1, keyingiNom: 'Ustoz',        tavsif: 'Murakkab klinik masalalarni hal qilmoqda',        shart: 'O\'rta bosqichni yakunlab, qiyin bosqichga o\'ting' },
+  { darajaSon: 8,  nom: 'Ustoz',        unvon: '⭐⭐⭐⭐⭐',           tier: 'qiyin',    subRank: 2, keyingiNom: 'Elita',        tavsif: 'Eng chuqur klinik bilimlarga ega',                shart: 'Qiyin bosqich darslarining 35% ini tugating' },
+  { darajaSon: 9,  nom: 'Elita',        unvon: '⭐⭐⭐⭐⭐ 🏅',        tier: 'qiyin',    subRank: 3, keyingiNom: 'Afsona',       tavsif: 'Qiyin bosqichni zabt etdi',                        shart: 'Qiyin bosqich darslarining 70% ini tugating' },
 
   // Afsona — qirollik
-  { darajaSon: 10, nom: 'Afsona',       unvon: '👑 ⭐⭐⭐⭐⭐ 🪽',    tier: 'akademik', subRank: 3, keyingiNom: '—',             tavsif: 'To\'liq kurs yakunlandi! 🏆' },
+  { darajaSon: 10, nom: 'Afsona',       unvon: '👑 ⭐⭐⭐⭐⭐ 🪽',    tier: 'akademik', subRank: 3, keyingiNom: '—',             tavsif: 'To\'liq kurs yakunlandi! 🏆',                      shart: 'Har uch bosqichning kamida 80% ini tugating' },
 ]
 
 // Modal uchun: 0-daraja "boshlang'ich holat" (hali dars boshlanmagan) bo'lgani
@@ -94,6 +95,22 @@ export function getRank(p: ProgressData): RankInfo {
   else                        keyingiFoiz = 100
 
   return { ...rank, keyingiFoiz: Math.min(100, Math.max(0, keyingiFoiz)) }
+}
+
+// Ginekologiya (yoki boshqa yo'nalish) uchun: bosqich kesimidagi tugallangan/jami
+// sanoqlaridan to'g'ridan-to'g'ri rank hisoblaydi. Urologiya DARSLAR'iga bog'liq emas.
+export function getRankFromStages(
+  stages: { id: string; tugadi: number; jami: number }[],
+): RankInfo {
+  const top = (id: string) => stages.find((s) => s.id === id)
+  const o  = top('oson')
+  const or = top('orta') ?? top("o'rta")
+  const q  = top('qiyin')
+  return getRank({
+    oson:  { bajarilgan: o?.tugadi  ?? 0, jami: o?.jami  || 1 },
+    orta:  { bajarilgan: or?.tugadi ?? 0, jami: or?.jami || 1 },
+    qiyin: { bajarilgan: q?.tugadi  ?? 0, jami: q?.jami  || 1 },
+  })
 }
 
 export function getProgressData(

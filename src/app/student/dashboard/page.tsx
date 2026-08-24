@@ -10,10 +10,10 @@ import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import { BannerHero } from '@/components/BannerHero'
 import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
-import { RankCard } from '@/components/RankBadge'
+import { RankCard, UnvonlarModal } from '@/components/RankBadge'
 import { SeriyaKarta } from '@/components/SeriyaKarta'
 import { useSeriya } from '@/lib/talim/seriya'
-import { getRank, getProgressData } from '@/lib/rank'
+import { getRank, getProgressData, getRankFromStages } from '@/lib/rank'
 import {
   BookOpen, BarChart3, Library, Target, Dna, Calculator, Scissors, FolderTree,
   Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye,
@@ -27,6 +27,7 @@ export default function StudentDashboard() {
   // Qadam progressi: slug -> tugallangan qadamlar; oxirgi faollik darsi "Davom ettirish" uchun
   const [qadamProgress, setQadamProgress] = useState<Map<string, Set<string>>>(new Map())
   const [oxirgiSlug, setOxirgiSlug] = useState<string | null>(null)
+  const [unvonlarOchiq, setUnvonlarOchiq] = useState(false)
   const router = useRouter()
   const supabase = createClient()
   const { seriya } = useSeriya()
@@ -74,6 +75,9 @@ export default function StudentDashboard() {
   )
 
   const rank = getRank(getProgressData(natijalarList))
+  // Ginekologiya unvoni — gin bosqich sanoqlaridan (urologiyadan mustaqil)
+  const ginRank = getRankFromStages(ginBosqich)
+  const joriyRank = yonalish === 'ginekologiya' ? ginRank : rank
 
   // Bosqich kesimidagi progress: tugallangan (nazariya+amaliy) darslar soni
   const BOSQICH_MA: { id: Bosqich; nom: string; rang: string }[] = [
@@ -227,11 +231,9 @@ export default function StudentDashboard() {
           {/* HERO: chap — rank+progress; o'ng — banner (faqat desktop, telefonda tepada) */}
           <div className="db-hero">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between' }}>
-            {yonalish !== 'ginekologiya' && (
-              <div className="rise" style={{ animationDelay: '.05s' }}>
-                <RankCard rank={rank} />
-              </div>
-            )}
+            <div className="rise" style={{ animationDelay: '.05s' }}>
+              <RankCard rank={joriyRank} onClick={() => setUnvonlarOchiq(true)} />
+            </div>
 
             <div className="rise" style={{
               background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
@@ -348,6 +350,10 @@ export default function StudentDashboard() {
         </BannerHero>
         <BottomNav />
       </div>
+
+      {unvonlarOchiq && (
+        <UnvonlarModal joriyDaraja={joriyRank.darajaSon} onClose={() => setUnvonlarOchiq(false)} />
+      )}
     </>
   )
 }
