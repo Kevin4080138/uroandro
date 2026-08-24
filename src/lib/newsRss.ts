@@ -28,13 +28,18 @@ function link(block: string) {
   return atom ?? tag(block, ['link', 'guid'])
 }
 
-const TOPIC = /\b(urolog|urology|urinary|bladder|kidney|renal|prostate|testicular|androlog|male infertility|erectile|gynecol|gynaecol|ovarian|uterine|cervical|endometri|menopaus|pelvic)\b/i
+const TOPIC = /\b(urolog|urology|urinary|bladder|kidney|renal|prostate|testicular|androlog|male infertility|erectile|gynecol|gynaecol|ovarian|uterine|cervix|endometri|menopaus|pelvic)\b|\bcervical\s+(?:cancer|carcinoma|screening)\b/i
 const ANDROLOGY = /\b(androlog|male infertility|erectile|testicular|testis|penile|sperm|semen)\b/i
-const GYNECOLOGY = /\b(gynecol|gynaecol|ovarian|uterine|cervical|endometri|menopaus|pelvic floor|vaginal|vulva)\b/i
+const GYNECOLOGY = /\b(gynecol|gynaecol|ovarian|uterine|cervix|endometri|menopaus|pelvic floor|vaginal|vulva)\b|\bcervical\s+(?:cancer|carcinoma|screening)\b/i
+const NON_GYNECOLOGIC_CERVICAL = /\bcervical\s+(?:dystonia|spine|myelopathy|radiculopathy)\b/i
+
+export function ginekologiyaMavzusimi(text: string) {
+  return !NON_GYNECOLOGIC_CERVICAL.test(text) && GYNECOLOGY.test(text)
+}
 
 function categoryFor(text: string, fallback: NewsCategory): NewsCategory {
   if (ANDROLOGY.test(text)) return 'andrologiya'
-  if (GYNECOLOGY.test(text)) return 'ginekologiya'
+  if (ginekologiyaMavzusimi(text)) return 'ginekologiya'
   return fallback
 }
 
@@ -87,7 +92,8 @@ export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate
     const url = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
     return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category,
       dedupHash: createHash('sha256').update(`pubmed:${pmid}`).digest('hex') }
-  }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary)
+  }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary
+    && !(source.category === 'ginekologiya' && NON_GYNECOLOGIC_CERVICAL.test(`${item.title} ${item.summary}`)))
 }
 
 export function manbaNomzodlari(source: FeedSource) {
@@ -112,6 +118,7 @@ export async function rssNomzodlar(source: FeedSource): Promise<FeedCandidate[]>
       category: categoryFor(`${title} ${summary}`, source.category),
       dedupHash: createHash('sha256').update(url.trim().toLowerCase()).digest('hex') }
   }).filter((item) => item.title && /^https?:\/\//.test(item.url) && TOPIC.test(`${item.title} ${item.summary}`)
+    && !(item.category === 'ginekologiya' && NON_GYNECOLOGIC_CERVICAL.test(`${item.title} ${item.summary}`))
     && (!item.publishedAt || new Date(item.publishedAt).getTime() >= cutoff))
 }
 
