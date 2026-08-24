@@ -323,6 +323,12 @@ export default function ProfilPage() {
         <UnvonlarModal
           joriyDaraja={getRank(getProgressData(natijalarList)).darajaSon}
           onClose={() => setUnvonlarOchiq(false)}
+          ulash={{
+            rank: getRank(getProgressData(natijalarList)),
+            ism: profile.full_name ?? 'Talaba',
+            ortacha,
+            seriya: seriyaKun,
+          }}
         />
       )}
 

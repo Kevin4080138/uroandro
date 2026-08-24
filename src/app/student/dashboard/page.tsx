@@ -23,10 +23,11 @@ export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [yonalish, setYonalish] = useState<'urologiya' | 'ginekologiya'>('urologiya')
   const [ginBosqich, setGinBosqich] = useState<{ id: string; nom: string; rang: string; tugadi: number; jami: number }[]>([])
-  const [natijalarList, setNatijalarList] = useState<{ dars_slug: string }[]>([])
+  const [natijalarList, setNatijalarList] = useState<{ dars_slug: string; foiz?: number }[]>([])
   // Qadam progressi: slug -> tugallangan qadamlar; oxirgi faollik darsi "Davom ettirish" uchun
   const [qadamProgress, setQadamProgress] = useState<Map<string, Set<string>>>(new Map())
   const [oxirgiSlug, setOxirgiSlug] = useState<string | null>(null)
+  const [ginOrtacha, setGinOrtacha] = useState(0)
   const [unvonlarOchiq, setUnvonlarOchiq] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -40,7 +41,7 @@ export default function StudentDashboard() {
       setProfile(data)
       setYonalish(data?.yonalish === 'ginekologiya' ? 'ginekologiya' : 'urologiya')
       const [{ data: natijalar }, { data: qadamlar }] = await Promise.all([
-        supabase.from('talim_natijalari').select('dars_slug').eq('student_id', user.id),
+        supabase.from('talim_natijalari').select('dars_slug, foiz').eq('student_id', user.id),
         supabase.from('dars_qadam_progress').select('dars_slug, qadam, created_at').eq('student_id', user.id).order('created_at', { ascending: false }),
       ])
       setNatijalarList(natijalar ?? [])
@@ -56,9 +57,11 @@ export default function StudentDashboard() {
       // Ginekologiya progressi (ALOHIDA — gin_darslar + gin_natijalar)
       const [{ data: ginD }, { data: ginN }] = await Promise.all([
         supabase.from('gin_darslar').select('slug, bosqich').eq('faol', true).eq('bolim', 'darslar'),
-        supabase.from('gin_natijalar').select('dars_slug').eq('student_id', user.id),
+        supabase.from('gin_natijalar').select('dars_slug, foiz').eq('student_id', user.id),
       ])
-      const ishlangan = new Set((ginN ?? []).map((r: { dars_slug: string }) => r.dars_slug))
+      const ginList = (ginN ?? []) as { dars_slug: string; foiz?: number }[]
+      const ishlangan = new Set(ginList.map((r) => r.dars_slug))
+      setGinOrtacha(ginList.length ? Math.round(ginList.reduce((s, n) => s + (n.foiz ?? 0), 0) / ginList.length) : 0)
       const GB = [{ id: 'oson', nom: 'Oson', rang: '#16a34a' }, { id: 'orta', nom: "O'rta", rang: '#d97706' }, { id: 'qiyin', nom: 'Qiyin', rang: '#dc2626' }]
       setGinBosqich(GB.map((b) => {
         const list = (ginD ?? []).filter((d: { slug: string; bosqich: string }) => d.bosqich === b.id)
@@ -78,6 +81,16 @@ export default function StudentDashboard() {
   // Ginekologiya unvoni — gin bosqich sanoqlaridan (urologiyadan mustaqil)
   const ginRank = getRankFromStages(ginBosqich)
   const joriyRank = yonalish === 'ginekologiya' ? ginRank : rank
+  const urOrtacha = natijalarList.length
+    ? Math.round(natijalarList.reduce((s, n) => s + (n.foiz ?? 0), 0) / natijalarList.length)
+    : 0
+  const ulashData = {
+    rank: joriyRank,
+    ism: profile.full_name ?? 'Talaba',
+    ortacha: yonalish === 'ginekologiya' ? ginOrtacha : urOrtacha,
+    seriya: seriya?.joriy ?? 0,
+    yonalish,
+  }
 
   // Bosqich kesimidagi progress: tugallangan (nazariya+amaliy) darslar soni
   const BOSQICH_MA: { id: Bosqich; nom: string; rang: string }[] = [
@@ -352,7 +365,7 @@ export default function StudentDashboard() {
       </div>
 
       {unvonlarOchiq && (
-        <UnvonlarModal joriyDaraja={joriyRank.darajaSon} onClose={() => setUnvonlarOchiq(false)} />
+        <UnvonlarModal joriyDaraja={joriyRank.darajaSon} onClose={() => setUnvonlarOchiq(false)} ulash={ulashData} />
       )}
     </>
   )
