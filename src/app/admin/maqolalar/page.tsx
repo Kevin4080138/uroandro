@@ -8,7 +8,7 @@ import type { NewsRow, NewsStatus } from '@/lib/newsTypes'
 const STATUS: NewsStatus[] = ['draft', 'approved', 'published', 'rejected', 'failed']
 const LABEL: Record<NewsStatus, string> = { draft: 'Qoralama', approved: 'Tasdiqlangan', published: 'Nashr qilingan', rejected: 'Rad etilgan', failed: 'Xatoli' }
 const input: React.CSSProperties = { width: '100%', border: '1px solid var(--line)', borderRadius: '10px', padding: '10px 12px', background: 'var(--surface-2)', color: 'var(--ink)', font: 'inherit' }
-type TestResult = { candidatesFound: number; draftsCreated: number; duplicates: number; errors: string[] }
+type TestResult = { candidatesFound: number; draftsCreated: number; draftsEnriched: number; duplicates: number; geminiFailures: number; errors: string[] }
 
 export default function AdminMaqolalarPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -68,7 +68,7 @@ export default function AdminMaqolalarPage() {
         {busy === 'test' ? '⏳ Tekshirilmoqda...' : '🧪 Kunlik yangilikni hozir tekshirish'}
       </button>
       {testResult && <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '12px', marginBottom: '16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', fontSize: '13px', fontWeight: 700 }}>
-        <span>🔎 Topildi: {testResult.candidatesFound}</span><span>📝 Draft yaratildi: {testResult.draftsCreated}</span><span>♻️ Dublikat: {testResult.duplicates}</span><span>❌ Xato: {testResult.errors.length}</span>
+        <span>🔎 Topildi: {testResult.candidatesFound}</span><span>📝 Draft yaratildi: {testResult.draftsCreated}</span><span>✨ Gemini to‘ldirdi: {testResult.draftsEnriched}</span><span>♻️ Dublikat: {testResult.duplicates}</span><span>🤖 Gemini xatosi: {testResult.geminiFailures}</span><span>❌ Xato: {testResult.errors.length}</span>
         {testResult.errors.length > 0 && <details style={{ width: '100%', color: 'var(--danger)' }}><summary>Xatolarni ko‘rish</summary><ul>{testResult.errors.map((error, index) => <li key={`${error}-${index}`}>{error}</li>)}</ul></details>}
       </div>}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '22px' }}>{STATUS.map((item) => <button key={item} onClick={() => { setStatus(item); setEditing(null) }} style={{ border: '1px solid var(--line)', borderRadius: '999px', padding: '8px 14px', cursor: 'pointer', fontWeight: 700, background: status === item ? 'var(--accent)' : 'var(--surface)', color: status === item ? 'white' : 'var(--ink)' }}>{LABEL[item]}</button>)}</div>

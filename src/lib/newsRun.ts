@@ -3,11 +3,14 @@ import { uzbekContentYarat } from '@/lib/newsContent'
 import { newsImageTopVaSaqlash } from '@/lib/newsImages'
 import { manbaNomzodlari, newsSlug, type FeedSource } from '@/lib/newsRss'
 import { yangilikBannerlariniSaqlash, yangilikniNashrQil } from '@/lib/newsPublish'
+import type { NewsRow } from '@/lib/newsTypes'
 
 export type NewsRunResult = {
   candidatesFound: number
   draftsCreated: number
+  draftsEnriched: number
   duplicates: number
+  geminiFailures: number
   publishedCount: number
   errors: string[]
 }
@@ -20,11 +23,24 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
   const { data: run, error: runError } = await supabase.from('yangilik_ishlari').insert({
     status: 'running', run_key: testMode ? null : today, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode },
   }).select('id').single()
-  if (!testMode && runError?.code === '23505') return { candidatesFound: 0, draftsCreated: 0, duplicates: 0, publishedCount: 0, errors: [], skipped: true, reason: 'Bugungi cron allaqachon bajarilgan' }
+  if (!testMode && runError?.code === '23505') return { candidatesFound: 0, draftsCreated: 0, draftsEnriched: 0, duplicates: 0, geminiFailures: 0, publishedCount: 0, errors: [], skipped: true, reason: 'Bugungi cron allaqachon bajarilgan' }
   if (runError || !run) throw new Error(runError?.message ?? 'Ish yozuvi yaratilmadi')
 
-  let candidatesFound = 0, draftsCreated = 0, duplicates = 0, publishedCount = 0
+  let candidatesFound = 0, draftsCreated = 0, draftsEnriched = 0, duplicates = 0, geminiFailures = 0, publishedCount = 0
   const errors: string[] = []
+
+  const geminiKontent = async (candidate: { title: string; summary: string; url: string }, source: FeedSource, newsId: string) => {
+    const result = await uzbekContentYarat({ ...candidate, sourceName: source.name })
+    if (result.content) return result.content
+    geminiFailures++
+    const message = `${source.name}: ${result.error}`
+    errors.push(message)
+    await supabase.from('yangilik_xato_loglari').insert({
+      run_id: run.id, source_id: source.id, news_id: newsId, stage: 'gemini', error_message: result.error,
+      metadata: { source_url: candidate.url },
+    })
+    return null
+  }
   try {
     // Cron faqat o'zi yaratgan, muddati tugagan bannerlarni arxivlaydi.
     await supabase.from('bannerlar').update({ arxiv: true, faol: false })
@@ -36,13 +52,27 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
         const candidates = await manbaNomzodlari(source)
         candidatesFound += candidates.length
         for (const candidate of candidates.slice(0, 3)) {
-          const { data: duplicate } = await supabase.from('yangiliklar').select('id').eq('content_origin', 'automation').eq('dedup_hash', candidate.dedupHash).limit(1).maybeSingle()
-          if (duplicate) { duplicates++; continue }
-          const content = await uzbekContentYarat({ title: candidate.title, summary: candidate.summary, url: candidate.url, sourceName: source.name })
+          const { data: duplicate } = await supabase.from('yangiliklar').select('*').eq('content_origin', 'automation').eq('dedup_hash', candidate.dedupHash).limit(1).maybeSingle()
+          if (duplicate) {
+            const draft = duplicate as NewsRow
+            const tayyor = Boolean(draft.title_uz?.trim() && draft.summary_uz?.trim() && draft.content_uz?.trim()
+              && draft.student_importance?.trim() && draft.doctor_importance?.trim() && draft.patient_importance?.trim())
+            if (draft.status !== 'draft' || tayyor) { duplicates++; continue }
+
+            const content = await geminiKontent(candidate, source, draft.id)
+            if (!content) continue
+            const { error: updateError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
+              .eq('id', draft.id).eq('content_origin', 'automation').eq('status', 'draft')
+            if (updateError) { errors.push(`${source.name}: draftni boyitish xatosi: ${updateError.message}`); continue }
+            draftsEnriched++
+            if (testMode) await yangilikBannerlariniSaqlash({ ...draft, ...content }, { faol: false })
+            continue
+          }
+
           const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({
             slug: newsSlug(candidate.title, candidate.dedupHash), source_name: source.name, source_url: candidate.url,
             source_date: candidate.publishedAt, original_title: candidate.title, category: candidate.category,
-            dedup_hash: candidate.dedupHash, status: 'draft', content_origin: 'automation', ...(content ?? {}),
+            dedup_hash: candidate.dedupHash, status: 'draft', content_origin: 'automation',
           }).select('*').single()
           if (insertError || !inserted) {
             if (insertError?.code === '23505') duplicates++
@@ -50,6 +80,15 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
             continue
           }
           draftsCreated++
+          let content = await geminiKontent(candidate, source, inserted.id)
+          if (content) {
+            const { error: contentError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
+              .eq('id', inserted.id).eq('content_origin', 'automation')
+            if (contentError) {
+              errors.push(`${source.name}: Gemini kontentini saqlash xatosi: ${contentError.message}`)
+              content = null
+            }
+          }
           const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: candidate.title, category: candidate.category,
             sourceUrl: candidate.url, mayReuseOfficialImages: source.may_reuse_official_images })
           if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id)
@@ -57,7 +96,7 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
           // Admin testi DB'da ko'riladigan preview bannerlar yaratadi, lekin ular faol emas.
           // Shuning uchun draft maqola ochiq sahifaga chiqmaydi va Telegram chaqirilmaydi.
           if (testMode) {
-            await yangilikBannerlariniSaqlash({ ...inserted, ...(image ?? {}) }, { faol: false })
+            await yangilikBannerlariniSaqlash({ ...inserted, ...(content ?? {}), ...(image ?? {}) }, { faol: false })
           }
 
           // Test rejimi env qiymatidan qat'i nazar hech qachon publish/Telegram qilmaydi.
@@ -73,14 +112,16 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
         await supabase.from('yangilik_xato_loglari').insert({ run_id: run.id, source_id: source.id, stage: 'source', error_message: message })
       }
     }
-    const result = { candidatesFound, draftsCreated, duplicates, publishedCount, errors }
+    const result = { candidatesFound, draftsCreated, draftsEnriched, duplicates, geminiFailures, publishedCount, errors }
     await supabase.from('yangilik_ishlari').update({ status: 'completed', candidates_found: candidatesFound,
-      published_count: publishedCount, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode, drafts_created: draftsCreated, duplicates, errors } }).eq('id', run.id)
+      published_count: publishedCount, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode,
+        drafts_created: draftsCreated, drafts_enriched: draftsEnriched, duplicates, gemini_failures: geminiFailures, errors } }).eq('id', run.id)
     return result
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Noma’lum xato'
     await supabase.from('yangilik_ishlari').update({ status: 'failed', candidates_found: candidatesFound,
-      published_count: publishedCount, error_message: message, metadata: { mode: testMode ? 'admin_test' : 'cron', drafts_created: draftsCreated, duplicates, errors } }).eq('id', run.id)
+      published_count: publishedCount, error_message: message, metadata: { mode: testMode ? 'admin_test' : 'cron',
+        drafts_created: draftsCreated, drafts_enriched: draftsEnriched, duplicates, gemini_failures: geminiFailures, errors } }).eq('id', run.id)
     throw new Error(message)
   }
 }

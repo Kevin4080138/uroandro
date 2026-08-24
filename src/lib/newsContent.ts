@@ -9,6 +9,10 @@ export type UzbekNewsContent = {
   patient_importance: string
 }
 
+export type UzbekContentResult =
+  | { content: UzbekNewsContent; error: null }
+  | { content: null; error: string }
+
 const REQUIRED_FIELDS: (keyof UzbekNewsContent)[] = [
   'title_uz', 'summary_uz', 'content_uz',
   'student_importance', 'doctor_importance', 'patient_importance',
@@ -25,7 +29,6 @@ const RESPONSE_SCHEMA = {
     patient_importance: { type: 'string', description: "Bemor uchun 1-2 gaplik sodda xulosa, individual tavsiyasiz." },
   },
   required: REQUIRED_FIELDS,
-  additionalProperties: false,
 }
 
 function geminiMatni(data: unknown) {
@@ -33,15 +36,32 @@ function geminiMatni(data: unknown) {
   return response.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim() ?? ''
 }
 
+function xato(message: string): UzbekContentResult {
+  console.error(`[daily-news][gemini] ${message}`)
+  return { content: null, error: message }
+}
+
+async function apiXatosi(response: Response) {
+  try {
+    const data = await response.json() as { error?: { message?: string; status?: string } }
+    const detail = data.error?.message ?? data.error?.status
+    return `Gemini HTTP ${response.status}${detail ? `: ${detail.slice(0, 500)}` : ''}`
+  } catch {
+    return `Gemini HTTP ${response.status}`
+  }
+}
+
 // Kalit/model sozlanmagan yoki Gemini to'liq JSON qaytarmasa cron xavfsiz draft yaratadi.
-export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekNewsContent | null> {
+export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekContentResult> {
   const key = process.env.GEMINI_API_KEY
   const rawModel = process.env.GEMINI_MODEL
-  if (!key || !rawModel) return null
+  if (!key) return xato("GEMINI_API_KEY topilmadi (Vercel env scope'larini tekshiring)")
+  if (!rawModel) return xato("GEMINI_MODEL topilmadi (Vercel env scope'larini tekshiring)")
   const model = rawModel.replace(/^models\//, '')
-  if (!/^[a-zA-Z0-9._-]+$/.test(model)) return null
+  if (!/^[a-zA-Z0-9._-]+$/.test(model)) return xato(`GEMINI_MODEL formati noto'g'ri: ${rawModel.slice(0, 100)}`)
 
   try {
+    console.info(`[daily-news][gemini] request model=${model} source=${candidate.sourceName} url=${candidate.url}`)
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
@@ -61,20 +81,24 @@ export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekNews
           "Shu ma'lumotdan o'zbekcha sarlavha, qisqa mazmun, maqola va uch auditoriya uchun alohida ahamiyat xulosalarini yarating.",
         ].join('\n\n') }] }],
         generationConfig: {
-          responseFormat: { text: { mimeType: 'application/json', schema: RESPONSE_SCHEMA } },
+          responseMimeType: 'application/json',
+          responseSchema: RESPONSE_SCHEMA,
           temperature: 0.2,
           maxOutputTokens: 4096,
         },
       }),
       signal: AbortSignal.timeout(45_000),
     })
-    if (!response.ok) return null
+    if (!response.ok) return xato(await apiXatosi(response))
     const text = geminiMatni(await response.json())
-    if (!text) return null
+    if (!text) return xato("Gemini javobida candidates[0].content.parts.text topilmadi")
     const data = JSON.parse(text.replace(/^```json\s*|\s*```$/g, '')) as Partial<UzbekNewsContent>
-    if (!REQUIRED_FIELDS.every((field) => typeof data[field] === 'string' && data[field]!.trim())) return null
-    return data as UzbekNewsContent
-  } catch {
-    return null
+    const missing = REQUIRED_FIELDS.filter((field) => typeof data[field] !== 'string' || !data[field]!.trim())
+    if (missing.length) return xato(`Gemini javobida maydonlar bo'sh: ${missing.join(', ')}`)
+    console.info(`[daily-news][gemini] success model=${model} url=${candidate.url}`)
+    return { content: data as UzbekNewsContent, error: null }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Noma'lum Gemini xatosi"
+    return xato(`Gemini so'rovi bajarilmadi: ${message.slice(0, 500)}`)
   }
 }
