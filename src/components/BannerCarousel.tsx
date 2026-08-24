@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { bannerlarniTanla, type SelectableBanner } from '@/lib/bannerSelection'
 
-type Banner = {
+type Banner = SelectableBanner & {
   id: string
   sarlavha: string
   tavsif: string | null
@@ -64,15 +65,17 @@ export function BannerCarousel({
   useEffect(() => {
     const load = async () => {
       // Bo'lim sozlamalari: soni, interval, effekt (banner_sozlamalar)
-      let maxSoni = DEFAULT_MAX
+      let maxVisible = DEFAULT_MAX
+      let autoBannerSlots = role === 'landing' ? 0 : 1
       if (role) {
         const { data: soz } = await supabase
           .from('banner_sozlamalar')
-          .select('max_soni, interval_soniya, effekt')
+          .select('max_visible, max_soni, auto_banner_slots, interval_soniya, effekt')
           .eq('role', role)
           .maybeSingle()
         if (soz) {
-          maxSoni = soz.max_soni ?? DEFAULT_MAX
+          maxVisible = soz.max_visible ?? soz.max_soni ?? DEFAULT_MAX
+          autoBannerSlots = soz.auto_banner_slots ?? autoBannerSlots
           setIntervalMs((soz.interval_soniya ?? 6) * 1000)
           setEffektClass(EFFEKT_CLASS[soz.effekt] ?? '')
         }
@@ -81,13 +84,12 @@ export function BannerCarousel({
       const now = new Date().toISOString()
       let query = supabase
         .from('bannerlar')
-        .select('id, sarlavha, tavsif, image_url, link_href, type, rang')
+        .select('id, sarlavha, tavsif, image_url, link_href, type, rang, content_origin, is_pinned, priority, created_at, published_at')
         .eq('faol', true)
         .eq('arxiv', false)
         .or(`boshlanish.is.null,boshlanish.lte.${now}`)
         .or(`tugash.is.null,tugash.gte.${now}`)
-        .order('sort_order', { ascending: true })
-        .limit(maxSoni)
+        .limit(100)
       if (role) {
         // 'hamma' = ham ichkarida (dashboard), ham tashqarida (landing) ko'rinadi
         query = faqatShuRol
@@ -95,7 +97,7 @@ export function BannerCarousel({
           : query.or(`target_role.is.null,target_role.eq.${role},target_role.eq.hamma`)
       }
       const { data } = await query
-      if (data && data.length > 0) setBanners(data)
+      setBanners(bannerlarniTanla((data ?? []) as Banner[], { maxVisible, autoBannerSlots }))
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -126,14 +128,22 @@ export function BannerCarousel({
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!dragging) return
     const diff = startX.current - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 40) { didDrag.current = true; diff > 0 ? next() : prev() }
+    if (Math.abs(diff) > 40) {
+      didDrag.current = true
+      if (diff > 0) next()
+      else prev()
+    }
     setDragging(false)
   }
   const onMouseDown = (e: React.MouseEvent) => { startX.current = e.clientX; didDrag.current = false; setDragging(true) }
   const onMouseUp = (e: React.MouseEvent) => {
     if (!dragging) return
     const diff = startX.current - e.clientX
-    if (Math.abs(diff) > 40) { didDrag.current = true; diff > 0 ? next() : prev() }
+    if (Math.abs(diff) > 40) {
+      didDrag.current = true
+      if (diff > 0) next()
+      else prev()
+    }
     setDragging(false)
   }
   const handleClick = () => {

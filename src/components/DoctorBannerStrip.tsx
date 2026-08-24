@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { BannerCarousel } from './BannerCarousel'
+import { bannerlarniTanla, type SelectableBanner } from '@/lib/bannerSelection'
 
-type Banner = {
+type Banner = SelectableBanner & {
   id: string
   sarlavha: string
   tavsif: string | null
@@ -34,15 +35,22 @@ export function DoctorBannerStrip({ role }: { role?: string }) {
 
   useEffect(() => {
     const load = async () => {
+      const { data: soz } = role ? await supabase.from('banner_sozlamalar')
+        .select('max_visible, max_soni, auto_banner_slots').eq('role', role).maybeSingle() : { data: null }
+      const maxVisible = soz?.max_visible ?? soz?.max_soni ?? 5
+      const autoBannerSlots = soz?.auto_banner_slots ?? 1
+      const now = new Date().toISOString()
       let q = supabase
         .from('bannerlar')
-        .select('id, sarlavha, tavsif, image_url, link_href, type, rang')
+        .select('id, sarlavha, tavsif, image_url, link_href, type, rang, content_origin, is_pinned, priority, created_at, published_at')
         .eq('faol', true)
-        .order('sort_order', { ascending: true })
-        .limit(10)
+        .eq('arxiv', false)
+        .or(`boshlanish.is.null,boshlanish.lte.${now}`)
+        .or(`tugash.is.null,tugash.gte.${now}`)
+        .limit(100)
       if (role) q = q.or(`target_role.is.null,target_role.eq.${role},target_role.eq.hamma`)
       const { data } = await q
-      if (data && data.length > 0) setBanners(data)
+      setBanners(bannerlarniTanla((data ?? []) as Banner[], { maxVisible, autoBannerSlots }))
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
