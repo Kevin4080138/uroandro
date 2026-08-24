@@ -4,6 +4,7 @@ import type { NewsCategory } from '@/lib/newsTypes'
 export type FeedSource = {
   id: string; name: string; feed_url: string; source_url: string; category: NewsCategory
   priority: number; may_reuse_official_images: boolean
+  source_type?: 'rss' | 'pubmed'; search_query?: string | null; lookback_days?: number
 }
 export type FeedCandidate = {
   title: string; url: string; summary: string; publishedAt: string | null; source: FeedSource
@@ -35,6 +36,62 @@ function categoryFor(text: string, fallback: NewsCategory): NewsCategory {
   if (ANDROLOGY.test(text)) return 'andrologiya'
   if (GYNECOLOGY.test(text)) return 'ginekologiya'
   return fallback
+}
+
+const NCBI_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
+const NCBI_HEADERS = { 'User-Agent': 'UrosferaNewsBot/1.0 (admin@urosfera.uz)' }
+
+function pubmedTag(block: string, name: string) {
+  const matches = [...block.matchAll(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${name}>`, 'gi'))]
+  return matches.map((match) => decodeXml(match[1])).filter(Boolean).join(' ')
+}
+
+function pubmedDate(block: string) {
+  const raw = pubmedTag(block, 'PubDate') || pubmedTag(block, 'ArticleDate')
+  const year = raw.match(/\b(19|20)\d{2}\b/)?.[0]
+  if (!year) return null
+  const months: Record<string, string> = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' }
+  const monthName = Object.keys(months).find((name) => raw.includes(name))
+  const numeric = raw.match(/\b(?:0?[1-9]|1[0-2])\b/)?.[0]
+  const month = monthName ? months[monthName] : numeric?.padStart(2, '0') ?? '01'
+  const date = new Date(`${year}-${month}-01T00:00:00.000Z`)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate[]> {
+  if (!source.search_query) throw new Error(`${source.name}: PubMed qidiruv so'rovi yo'q`)
+  const params = new URLSearchParams({
+    db: 'pubmed', term: source.search_query, reldate: String(source.lookback_days ?? 30), datetype: 'edat',
+    retmax: '10', sort: 'pub_date', retmode: 'json', tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
+  })
+  const search = await fetch(`${NCBI_BASE}/esearch.fcgi?${params}`, { headers: NCBI_HEADERS, signal: AbortSignal.timeout(15_000) })
+  if (!search.ok) throw new Error(`${source.name}: ESearch HTTP ${search.status}`)
+  const json = await search.json() as { esearchresult?: { idlist?: string[] } }
+  const ids = json.esearchresult?.idlist ?? []
+  if (!ids.length) return []
+
+  // NCBI API kalitisiz bir IP uchun sekundiga 3 so'rov limitidan oshmaymiz.
+  await new Promise((resolve) => setTimeout(resolve, 400))
+  const fetchParams = new URLSearchParams({
+    db: 'pubmed', id: ids.join(','), rettype: 'abstract', retmode: 'xml',
+    tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
+  })
+  const details = await fetch(`${NCBI_BASE}/efetch.fcgi?${fetchParams}`, { headers: NCBI_HEADERS, signal: AbortSignal.timeout(20_000) })
+  if (!details.ok) throw new Error(`${source.name}: EFetch HTTP ${details.status}`)
+  const xml = await details.text()
+  const articles = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/gi) ?? []
+  return articles.map((article) => {
+    const pmid = pubmedTag(article, 'PMID').split(' ')[0]
+    const title = pubmedTag(article, 'ArticleTitle')
+    const summary = pubmedTag(article, 'AbstractText')
+    const url = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
+    return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category,
+      dedupHash: createHash('sha256').update(`pubmed:${pmid}`).digest('hex') }
+  }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary)
+}
+
+export function manbaNomzodlari(source: FeedSource) {
+  return source.source_type === 'pubmed' ? pubmedNomzodlar(source) : rssNomzodlar(source)
 }
 
 export async function rssNomzodlar(source: FeedSource): Promise<FeedCandidate[]> {

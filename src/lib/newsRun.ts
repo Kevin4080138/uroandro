@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { uzbekContentYarat } from '@/lib/newsContent'
 import { newsImageTopVaSaqlash } from '@/lib/newsImages'
-import { newsSlug, rssNomzodlar, type FeedSource } from '@/lib/newsRss'
+import { manbaNomzodlari, newsSlug, type FeedSource } from '@/lib/newsRss'
 import { yangilikBannerlariniSaqlash, yangilikniNashrQil } from '@/lib/newsPublish'
 
 export type NewsRunResult = {
@@ -33,7 +33,7 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
     if (error) throw error
     for (const source of (sources ?? []) as FeedSource[]) {
       try {
-        const candidates = await rssNomzodlar(source)
+        const candidates = await manbaNomzodlari(source)
         candidatesFound += candidates.length
         for (const candidate of candidates.slice(0, 3)) {
           const { data: duplicate } = await supabase.from('yangiliklar').select('id').eq('content_origin', 'automation').eq('dedup_hash', candidate.dedupHash).limit(1).maybeSingle()
