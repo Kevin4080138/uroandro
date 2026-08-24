@@ -31,6 +31,43 @@ export type UnvonUlashData = {
   yonalish?: 'urologiya' | 'ginekologiya'
 }
 
+// Karta palitrasi — yo'nalishga qarab: urologiya havorang, ginekologiya pushti.
+// Nishonning O'ZI (RANK_VIS rank rangi) o'zgarmaydi — unvon identifikatori umumiy.
+type Palitra = {
+  bgFrom: string; bgTo: string; glow: string
+  brend: string; brendSoft: string; nom: string
+  statBorder: string; statSon: string; statYorliq: string
+  ism: string; sayt: string; accentPast: string
+  // Modal ichidagi o'rov (wrapper) uslubi
+  uiBg: string; uiBorder: string; uiShadow: string; uiSarlavha: string; uiIzoh: string
+  yonalishMatn: string; platformFonBosim: string
+}
+
+const PALITRALAR: Record<'urologiya' | 'ginekologiya', Palitra> = {
+  urologiya: {
+    bgFrom: '#062A3C', bgTo: '#04121C', glow: 'rgba(6,182,212,0.35)',
+    brend: '#BFEAF5', brendSoft: 'rgba(191,234,245,0.6)', nom: '#DCF4FB',
+    statBorder: 'rgba(6,182,212,0.32)', statSon: '#DCF4FB', statYorliq: '#6FB4C8',
+    ism: '#E4F4FA', sayt: '#6FB4C8', accentPast: '#8FAEE8',
+    uiBg: 'linear-gradient(160deg, #062A3C, #081824)', uiBorder: '1px solid rgba(6,182,212,0.22)',
+    uiShadow: '0 4px 20px rgba(6,182,212,0.08)', uiSarlavha: '#DCF4FB', uiIzoh: 'rgba(220,244,251,0.6)',
+    yonalishMatn: 'urologiya va andrologiya', platformFonBosim: 'rgba(255,255,255,0.08)',
+  },
+  ginekologiya: {
+    bgFrom: '#3A0F2A', bgTo: '#1C0715', glow: 'rgba(168,70,125,0.4)',
+    brend: '#F5D6E7', brendSoft: 'rgba(245,214,231,0.6)', nom: '#F7E3EE',
+    statBorder: 'rgba(217,137,180,0.34)', statSon: '#F7E3EE', statYorliq: '#C98BB0',
+    ism: '#F5E4EE', sayt: '#C98BB0', accentPast: '#E39BC4',
+    uiBg: 'linear-gradient(160deg, #3A0F2A, #24091A)', uiBorder: '1px solid rgba(217,137,180,0.24)',
+    uiShadow: '0 4px 20px rgba(168,70,125,0.1)', uiSarlavha: '#F7E3EE', uiIzoh: 'rgba(247,227,238,0.6)',
+    yonalishMatn: 'ginekologiya', platformFonBosim: 'rgba(255,255,255,0.08)',
+  },
+}
+
+function palitraTop(yonalish?: 'urologiya' | 'ginekologiya'): Palitra {
+  return PALITRALAR[yonalish === 'ginekologiya' ? 'ginekologiya' : 'urologiya']
+}
+
 // ── Canvas primitivlari ───────────────────────────────────────────────────────
 
 function hexYol(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
@@ -186,19 +223,20 @@ async function storyBlob(d: UnvonUlashData): Promise<Blob | null> {
 
   const vis = RANK_VIS[d.rank.darajaSon] ?? RANK_VIS[0]
   const markaz = w / 2
-  const accent = d.rank.darajaSon >= 7 ? '#F7DE8B' : '#8FAEE8'
+  const pal = palitraTop(d.yonalish)
+  const accent = d.rank.darajaSon >= 7 ? '#F7DE8B' : pal.accentPast
 
-  // Fon — navy-havorang
+  // Fon — yo'nalish palitrasi (urologiya havorang / ginekologiya pushti)
   const fon = ctx.createLinearGradient(0, 0, w, h)
-  fon.addColorStop(0, '#062A3C')
-  fon.addColorStop(1, '#04121C')
+  fon.addColorStop(0, pal.bgFrom)
+  fon.addColorStop(1, pal.bgTo)
   ctx.fillStyle = fon
   ctx.fillRect(0, 0, w, h)
 
   // Yumshoq radial nur
   const nurY = h * 0.40
   const nur = ctx.createRadialGradient(markaz, nurY, 0, markaz, nurY, w * 0.6)
-  nur.addColorStop(0, 'rgba(6,182,212,0.35)')
+  nur.addColorStop(0, pal.glow)
   nur.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = nur
   ctx.fillRect(0, 0, w, h)
@@ -207,15 +245,14 @@ async function storyBlob(d: UnvonUlashData): Promise<Blob | null> {
 
   // Brend
   const brendY = h * 0.13
-  ctx.fillStyle = '#BFEAF5'
+  ctx.fillStyle = pal.brend
   ctx.font = '700 40px system-ui, sans-serif'
   ctx.letterSpacing = '4px'
   ctx.fillText('UROSFERA', markaz, brendY)
   ctx.letterSpacing = '0px'
-  ctx.fillStyle = 'rgba(191,234,245,0.6)'
+  ctx.fillStyle = pal.brendSoft
   ctx.font = '500 24px system-ui, sans-serif'
-  const yonalishMatn = d.yonalish === 'ginekologiya' ? 'ginekologiya' : 'urologiya va andrologiya'
-  ctx.fillText(`${yonalishMatn} platformasi`, markaz, brendY + 42)
+  ctx.fillText(`${pal.yonalishMatn} platformasi`, markaz, brendY + 42)
 
   // Nishon
   const badgeW = 420
@@ -224,7 +261,7 @@ async function storyBlob(d: UnvonUlashData): Promise<Blob | null> {
 
   // Unvon nomi
   const nomY = badgeCy + badgeW * 0.62 + 96
-  ctx.fillStyle = '#DCF4FB'
+  ctx.fillStyle = pal.nom
   ctx.font = '800 88px Georgia, serif'
   ctx.fillText(d.rank.nom, markaz, nomY)
 
@@ -248,24 +285,24 @@ async function storyBlob(d: UnvonUlashData): Promise<Blob | null> {
     ctx.fillStyle = 'rgba(255,255,255,0.06)'
     yumaloqRect(ctx, tx, statY, tileW, tileH, 22)
     ctx.fill()
-    ctx.strokeStyle = 'rgba(6,182,212,0.32)'
+    ctx.strokeStyle = pal.statBorder
     ctx.lineWidth = 1.5
     yumaloqRect(ctx, tx, statY, tileW, tileH, 22)
     ctx.stroke()
-    ctx.fillStyle = '#DCF4FB'
+    ctx.fillStyle = pal.statSon
     ctx.font = '800 56px Georgia, serif'
     ctx.fillText(st.son, tx + tileW / 2, statY + 66)
-    ctx.fillStyle = '#6FB4C8'
+    ctx.fillStyle = pal.statYorliq
     ctx.font = '600 24px system-ui, sans-serif'
     ctx.fillText(st.yorliq, tx + tileW / 2, statY + 104)
   })
 
   // Pastki blok
   const pastY = h - 160
-  ctx.fillStyle = '#E4F4FA'
+  ctx.fillStyle = pal.ism
   ctx.font = '700 44px Georgia, serif'
   ctx.fillText(d.ism, markaz, pastY)
-  ctx.fillStyle = '#6FB4C8'
+  ctx.fillStyle = pal.sayt
   ctx.font = '500 28px system-ui, sans-serif'
   ctx.fillText('urosfera.uz', markaz, pastY + 44)
 
@@ -295,6 +332,7 @@ export function UnvonUlashish({ data }: { data: UnvonUlashData }) {
     typeof navigator.canShare === 'function' &&
     navigator.canShare({ files: [new File([], 'x.png', { type: 'image/png' })] })
 
+  const pal = palitraTop(data.yonalish)
   const shareText = `Urosfera'da "${data.rank.nom}" unvoniga erishdim! 🎖️\nurosfera.uz`
 
   const bosim = async (platform: Platform) => {
@@ -341,16 +379,16 @@ export function UnvonUlashish({ data }: { data: UnvonUlashData }) {
       marginTop: 16,
       borderRadius: 16,
       overflow: 'hidden',
-      background: 'linear-gradient(160deg, #062A3C, #081824)',
-      border: '1px solid rgba(6,182,212,0.22)',
-      boxShadow: '0 4px 20px rgba(6,182,212,0.08)',
+      background: pal.uiBg,
+      border: pal.uiBorder,
+      boxShadow: pal.uiShadow,
     }}>
       {/* Sarlavha */}
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#DCF4FB', marginBottom: 3 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: pal.uiSarlavha, marginBottom: 3 }}>
           Unvoningizni ulashing 🎖️
         </div>
-        <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(220,244,251,0.6)', lineHeight: 1.5 }}>
+        <p style={{ margin: 0, fontSize: 11.5, color: pal.uiIzoh, lineHeight: 1.5 }}>
           {canNativeShare
             ? 'Chiroyli story rasm tayyorlanadi — siz ilovani tanlaysiz.'
             : 'Rasm yuklab olinadi, so\'ng platformani ochamiz.'}
@@ -366,7 +404,7 @@ export function UnvonUlashish({ data }: { data: UnvonUlashData }) {
             disabled={ishlayapti !== null}
             style={{
               display: 'flex', alignItems: 'center', gap: 11,
-              background: ishlayapti === p.id ? 'rgba(255,255,255,0.08)' : p.rang,
+              background: ishlayapti === p.id ? pal.platformFonBosim : p.rang,
               border: 'none', borderRadius: 11, padding: '11px 14px',
               color: 'white', fontWeight: 800, fontSize: 13,
               cursor: ishlayapti !== null ? 'wait' : 'pointer',
