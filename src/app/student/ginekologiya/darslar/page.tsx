@@ -141,7 +141,7 @@ function BosqichLanding() {
                 borderRadius: '999px', padding: '4px 12px',
               }}>🎁 100% BEPUL</span>
             </div>
-            <h2 style={{ margin: '10px 0 2px', fontSize: '20px', fontWeight: 900 }}>🟢 Asoslar</h2>
+            <h2 style={{ margin: '10px 0 2px', fontSize: '20px', fontWeight: 900 }}>🟢 Foundation</h2>
             <p style={{ margin: 0, fontSize: '12.5px', opacity: .9 }}>Ginekologiyaga birinchi qadam — anatomiya, hayz sikli, kontratseptsiya. Hech narsa to&apos;lamasdan darhol boshlang</p>
           </div>
 
@@ -198,7 +198,7 @@ function BosqichLanding() {
 
           <div style={{ background: 'linear-gradient(135deg,#d97706,#f59e0b)', color: 'white', padding: '20px 22px' }}>
             <span style={{ fontSize: '11px', fontWeight: 900, letterSpacing: '.08em', opacity: .85 }}>2-BOSQICH</span>
-            <h2 style={{ margin: '10px 0 2px', fontSize: '20px', fontWeight: 900 }}>🟡 Klinik chuqurlik</h2>
+            <h2 style={{ margin: '10px 0 2px', fontSize: '20px', fontWeight: 900 }}>🟡 Clinical</h2>
             <p style={{ margin: 0, fontSize: '12.5px', opacity: .92 }}>Haqiqiy shifokor kabi fikrlashni o&apos;rganasiz — sikl buzilishlari, infeksiyalar, mioma, endometrioz</p>
           </div>
 
@@ -270,7 +270,7 @@ function BosqichLanding() {
               margin: '10px 0 2px', fontSize: '20px', fontWeight: 900,
               background: 'linear-gradient(90deg,#fca5a5,#fbbf24)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>🔴 Murakkab holatlar</h2>
+            }}>🔴 Advanced Gynecology</h2>
             <p style={{ margin: 0, fontSize: '12.5px', opacity: .65 }}>
               Williams Gynecology darajasi — PCOS, onkologiya, bepushtlik, jarrohlik va real klinik qarorlar
             </p>
