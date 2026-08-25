@@ -50,8 +50,19 @@ export default function AdminMaqolalarPage() {
     setBusy('test'); setMessage(''); setTestResult(null)
     try {
       const response = await fetch('/api/admin/yangiliklar/test', { method: 'POST' })
-      const json = await response.json()
-      if (!response.ok) throw new Error(json.error ?? 'Test bajarilmadi')
+      const contentType = response.headers.get('content-type') ?? ''
+      const body = await response.text()
+      if (!contentType.toLowerCase().includes('application/json')) {
+        const detail = body.trim().slice(0, 1000) || 'Server bo‘sh javob qaytardi'
+        throw new Error(`HTTP ${response.status}: ${detail}`)
+      }
+      let json: TestResult & { error?: string }
+      try {
+        json = JSON.parse(body) as TestResult & { error?: string }
+      } catch {
+        throw new Error(`HTTP ${response.status}: server noto‘g‘ri JSON qaytardi`)
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${json.error ?? 'Test bajarilmadi'}`)
       setTestResult(json as TestResult)
       setStatus('draft')
       await load()

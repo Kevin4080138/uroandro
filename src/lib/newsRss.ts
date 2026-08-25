@@ -63,6 +63,33 @@ function pubmedDate(block: string) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
+function pubmedMaqolalarniOqish(xml: string, source: FeedSource): FeedCandidate[] {
+  const articles = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/gi) ?? []
+  return articles.map((article) => {
+    const pmid = pubmedTag(article, 'PMID').split(' ')[0]
+    const title = pubmedTag(article, 'ArticleTitle')
+    const summary = pubmedTag(article, 'AbstractText')
+    const url = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
+    return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category,
+      dedupHash: createHash('sha256').update(`pubmed:${pmid}`).digest('hex') }
+  }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary
+    && !(source.category === 'ginekologiya' && NON_GYNECOLOGIC_CERVICAL.test(`${item.title} ${item.summary}`)))
+}
+
+export async function pubmedNomzodiniUrlBoyicha(source: FeedSource, url: string): Promise<FeedCandidate | null> {
+  const pmid = new URL(url).pathname.split('/').find((part) => /^\d+$/.test(part))
+  if (!pmid) throw new Error(`${source.name}: draft manzilida PubMed ID topilmadi`)
+  const params = new URLSearchParams({
+    db: 'pubmed', id: pmid, rettype: 'abstract', retmode: 'xml',
+    tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
+  })
+  const response = await fetch(`${NCBI_BASE}/efetch.fcgi?${params}`, {
+    headers: NCBI_HEADERS, signal: AbortSignal.timeout(15_000),
+  })
+  if (!response.ok) throw new Error(`${source.name}: EFetch HTTP ${response.status}`)
+  return pubmedMaqolalarniOqish(await response.text(), source)[0] ?? null
+}
+
 export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate[]> {
   if (!source.search_query) throw new Error(`${source.name}: PubMed qidiruv so'rovi yo'q`)
   const params = new URLSearchParams({
@@ -83,17 +110,7 @@ export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate
   })
   const details = await fetch(`${NCBI_BASE}/efetch.fcgi?${fetchParams}`, { headers: NCBI_HEADERS, signal: AbortSignal.timeout(20_000) })
   if (!details.ok) throw new Error(`${source.name}: EFetch HTTP ${details.status}`)
-  const xml = await details.text()
-  const articles = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/gi) ?? []
-  return articles.map((article) => {
-    const pmid = pubmedTag(article, 'PMID').split(' ')[0]
-    const title = pubmedTag(article, 'ArticleTitle')
-    const summary = pubmedTag(article, 'AbstractText')
-    const url = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
-    return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category,
-      dedupHash: createHash('sha256').update(`pubmed:${pmid}`).digest('hex') }
-  }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary
-    && !(source.category === 'ginekologiya' && NON_GYNECOLOGIC_CERVICAL.test(`${item.title} ${item.summary}`)))
+  return pubmedMaqolalarniOqish(await details.text(), source)
 }
 
 export function manbaNomzodlari(source: FeedSource) {

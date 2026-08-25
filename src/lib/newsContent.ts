@@ -17,6 +17,7 @@ const REQUIRED_FIELDS: (keyof UzbekNewsContent)[] = [
   'title_uz', 'summary_uz', 'content_uz',
   'student_importance', 'doctor_importance', 'patient_importance',
 ]
+const GEMINI_TIMEOUT_MS = 25_000
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -42,12 +43,14 @@ function xato(message: string): UzbekContentResult {
 }
 
 async function apiXatosi(response: Response) {
+  const raw = (await response.text()).trim()
   try {
-    const data = await response.json() as { error?: { message?: string; status?: string } }
+    const data = JSON.parse(raw) as { error?: { message?: string; status?: string } }
     const detail = data.error?.message ?? data.error?.status
     return `Gemini HTTP ${response.status}${detail ? `: ${detail.slice(0, 500)}` : ''}`
   } catch {
-    return `Gemini HTTP ${response.status}`
+    const detail = raw.replace(/[\r\n\t]+/g, ' ').slice(0, 500)
+    return `Gemini HTTP ${response.status}${detail ? `: ${detail}` : ''}`
   }
 }
 
@@ -87,7 +90,7 @@ export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekCont
           maxOutputTokens: 4096,
         },
       }),
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
     })
     if (!response.ok) return xato(await apiXatosi(response))
     const text = geminiMatni(await response.json())
@@ -98,6 +101,9 @@ export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekCont
     console.info(`[daily-news][gemini] success model=${model} url=${candidate.url}`)
     return { content: data as UzbekNewsContent, error: null }
   } catch (error) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      return xato(`Gemini timeout: ${GEMINI_TIMEOUT_MS / 1000} soniyada javob kelmadi`)
+    }
     const message = error instanceof Error ? error.message : "Noma'lum Gemini xatosi"
     return xato(`Gemini so'rovi bajarilmadi: ${message.slice(0, 500)}`)
   }
