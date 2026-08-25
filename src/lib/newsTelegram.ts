@@ -26,18 +26,33 @@ function summaryQatorlari(value: string | null) {
 }
 
 async function telegramRequest(token: string, method: string, body: Record<string, unknown>) {
-  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-  })
-  const json = await response.json() as { ok: boolean; result?: { message_id: number }; description?: string }
-  if (!json.ok || !json.result) throw new Error(json.description ?? `Telegram ${method} xatosi`)
+  let response: Response
+  try {
+    response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      signal: AbortSignal.timeout(20_000),
+    })
+  } catch (error) {
+    const detail = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ? '20 soniyada javob kelmadi' : error instanceof Error ? error.message : 'tarmoq xatosi'
+    throw new Error(`Telegram ${method} so'rovi bajarilmadi: ${detail.slice(0, 500)}`)
+  }
+  const raw = await response.text()
+  let json: { ok?: boolean; result?: { message_id: number }; description?: string } = {}
+  try { json = JSON.parse(raw) as typeof json } catch { /* Quyida xavfsiz HTTP xatosi qaytariladi. */ }
+  if (!response.ok || !json.ok || !json.result) {
+    const detail = json.description ?? raw.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 500) ?? `Telegram ${method} xatosi`
+    throw new Error(`Telegram HTTP ${response.status} (${method}): ${detail || 'noma’lum xato'}`)
+  }
   return json.result
 }
 
-export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageId: string } | null> {
+export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageId: string }> {
   const token = process.env.TELEGRAM_BOT_TOKEN
   const channelId = process.env.TELEGRAM_CHANNEL_ID
-  if (!token || !channelId || news.telegram_message_id) return null
+  if (!token) throw new Error("TELEGRAM_BOT_TOKEN topilmadi (Vercel env scope'larini tekshiring)")
+  if (!channelId) throw new Error("TELEGRAM_CHANNEL_ID topilmadi (Vercel env scope'larini tekshiring)")
+  if (news.telegram_message_id) throw new Error('Yangilik Telegramga avval yuborilgan')
 
   const website = safeUrl(process.env.WEBSITE_URL, 'https://urosfera.uz')!.replace(/\/$/, '')
   const articleUrl = `${website}/yangiliklar/${encodeURIComponent(news.slug)}`

@@ -30,6 +30,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
     return NextResponse.json({ error: 'Noma’lum amal' }, { status: 400 })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Xatolik' }, { status: 400 })
+    const message = error instanceof Error ? error.message : 'Xatolik'
+    console.error(`[daily-news][admin-action] action=${body.action ?? 'unknown'} news_id=${id} ${message}`)
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }

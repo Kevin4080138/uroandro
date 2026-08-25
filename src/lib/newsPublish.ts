@@ -34,23 +34,34 @@ export async function yangilikniNashrQil(newsId: string, options?: { resendTeleg
   if (!news.title_uz || !news.summary_uz || !news.content_uz) throw new Error("O'zbekcha kontent to'liq emas")
 
   const now = new Date()
-  await yangilikBannerlariniSaqlash(news, { umumiyBanner: options?.umumiyBanner, faol: true })
-
-  await supabase.from('yangiliklar').update({ status: 'published', published_at: news.published_at ?? now.toISOString(), updated_at: now.toISOString() }).eq('id', news.id)
-
   if (options?.resendTelegram) {
-    await supabase.from('yangiliklar').update({ telegram_message_id: null, telegram_status: 'pending', telegram_error: null }).eq('id', news.id)
+    if (news.status !== 'published') throw new Error("Faqat nashr qilingan maqolani Telegramga qayta yuborish mumkin")
+    const { error: resetError } = await supabase.from('yangiliklar').update({
+      telegram_message_id: null, telegram_status: 'pending', telegram_error: null,
+    }).eq('id', news.id)
+    if (resetError) throw new Error(`Telegram holatini yangilash xatosi: ${resetError.message}`)
     news.telegram_message_id = null
+  } else {
+    await yangilikBannerlariniSaqlash(news, { umumiyBanner: options?.umumiyBanner, faol: true })
+    const { error: publishError } = await supabase.from('yangiliklar').update({
+      status: 'published', published_at: news.published_at ?? now.toISOString(), updated_at: now.toISOString(),
+    }).eq('id', news.id)
+    if (publishError) throw new Error(`Maqolani nashr qilish xatosi: ${publishError.message}`)
   }
+
   if (!news.telegram_message_id) {
     try {
       const sent = await telegramKanalgaYangilik(news)
-      await supabase.from('yangiliklar').update(sent
-        ? { telegram_message_id: sent.messageId, telegram_status: 'sent', telegram_error: null }
-        : { telegram_status: 'skipped' }).eq('id', news.id)
+      const { error: sentError } = await supabase.from('yangiliklar').update({
+        telegram_message_id: sent.messageId, telegram_status: 'sent', telegram_error: null,
+      }).eq('id', news.id)
+      if (sentError) throw new Error(`Telegram message_id saqlash xatosi: ${sentError.message}`)
     } catch (error) {
-      await supabase.from('yangiliklar').update({ telegram_status: 'failed', telegram_error: error instanceof Error ? error.message : 'Telegram xatosi' }).eq('id', news.id)
+      const message = error instanceof Error ? error.message : 'Telegram xatosi'
+      console.error(`[daily-news][telegram] news_id=${news.id} ${message}`)
+      await supabase.from('yangiliklar').update({ telegram_status: 'failed', telegram_error: message }).eq('id', news.id)
+      throw new Error(message)
     }
   }
-  return { published: true }
+  return { published: true, telegramStatus: 'sent' as const }
 }
