@@ -25,6 +25,12 @@ function summaryQatorlari(value: string | null) {
   return sentences.length > 1 ? sentences.join('\n') : clean
 }
 
+function mavzuEmojisi(category: NewsRow['category']) {
+  if (category === 'andrologiya') return '🧬'
+  if (category === 'ginekologiya') return '🩺'
+  return '🔬'
+}
+
 async function telegramRequest(token: string, method: string, body: Record<string, unknown>) {
   let response: Response
   try {
@@ -57,6 +63,7 @@ export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageI
   const website = safeUrl(process.env.WEBSITE_URL, 'https://urosfera.uz')!.replace(/\/$/, '')
   const articleUrl = `${website}/yangiliklar/${encodeURIComponent(news.slug)}`
   const sourceUrl = safeUrl(news.source_url, articleUrl)!
+  const topicEmoji = mavzuEmojisi(news.category)
   const title = escapeHtml(news.title_uz ?? news.original_title)
   const summary = escapeHtml(summaryQatorlari(news.summary_uz))
   const student = escapeHtml(qisqartir(news.student_importance, 150))
@@ -64,19 +71,23 @@ export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageI
   const patient = escapeHtml(qisqartir(news.patient_importance, 150))
   const importance = [student && `🎓 <b>Talaba:</b> ${student}`, doctor && `👨‍⚕️ <b>Shifokor:</b> ${doctor}`, patient && `🧑 <b>Bemor:</b> ${patient}`].filter(Boolean).join('\n')
   const text = [
-    `<b>${title}</b>`, summary, importance,
+    `${topicEmoji} <b>${title}</b>`, summary, importance,
     `🔗 <b>Original manba:</b> <a href="${escapeHtml(sourceUrl)}">${escapeHtml(news.source_name)}</a>`,
     '— Urosfera | Urologiya bilim platformasi',
   ].filter(Boolean).join('\n\n')
 
+  const instagramUrl = safeUrl(process.env.INSTAGRAM_URL)
+  const youtubeUrl = safeUrl(process.env.YOUTUBE_URL)
+  const telegramUrl = safeUrl(process.env.TELEGRAM_SOCIAL_URL)
   const socialButtons = [
-    safeUrl(process.env.INSTAGRAM_URL) && { text: 'Instagram', url: safeUrl(process.env.INSTAGRAM_URL)! },
-    safeUrl(process.env.YOUTUBE_URL) && { text: 'YouTube', url: safeUrl(process.env.YOUTUBE_URL)! },
-    { text: 'Veb-sayt', url: website },
+    instagramUrl && { text: '📸 Instagram', url: instagramUrl },
+    youtubeUrl && { text: '▶️ YouTube', url: youtubeUrl },
+    telegramUrl && { text: '✈️ Telegram', url: telegramUrl },
   ].filter((button): button is { text: string; url: string } => Boolean(button))
   const reply_markup = { inline_keyboard: [
-    [{ text: '📖 Urosfera’da batafsil o‘qish', url: articleUrl }],
+    [{ text: '📖 Urosferada batafsil o‘qish', url: articleUrl }],
     socialButtons,
+    [{ text: '🌐 Veb-sayt', url: website }],
   ].filter(row => row.length > 0) }
 
   if (!news.image_url) {
