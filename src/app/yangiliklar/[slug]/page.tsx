@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import type { NewsRow } from '@/lib/newsTypes'
 
 export default async function YangilikPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const supabase = await createClient()
-  const { data } = await supabase.from('yangiliklar').select('*').eq('slug', slug).eq('status', 'published').maybeSingle()
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  })
+  const { data, error } = await supabase.from('yangiliklar').select('*').eq('slug', slug).eq('status', 'published').maybeSingle()
+  if (error) console.error(`[daily-news][public-article] slug=${slug} code=${error.code} ${error.message}`)
   if (!data) notFound()
   const news = data as NewsRow
   const date = news.source_date ?? news.published_at
