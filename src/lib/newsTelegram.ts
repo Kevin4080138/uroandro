@@ -70,25 +70,24 @@ export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageI
   const doctor = escapeHtml(qisqartir(news.doctor_importance, 150))
   const patient = escapeHtml(qisqartir(news.patient_importance, 150))
   const importance = [student && `🎓 <b>Talaba:</b> ${student}`, doctor && `👨‍⚕️ <b>Shifokor:</b> ${doctor}`, patient && `🧑 <b>Bemor:</b> ${patient}`].filter(Boolean).join('\n')
-  const text = [
-    `${topicEmoji} <b>${title}</b>`, summary, importance,
-    `🔗 <b>Original manba:</b> <a href="${escapeHtml(sourceUrl)}">${escapeHtml(news.source_name)}</a>`,
-    '— Urosfera | Urologiya bilim platformasi',
-  ].filter(Boolean).join('\n\n')
-
   const instagramUrl = safeUrl(process.env.INSTAGRAM_URL)
   const youtubeUrl = safeUrl(process.env.YOUTUBE_URL)
   const telegramUrl = safeUrl(process.env.TELEGRAM_SOCIAL_URL)
-  const socialButtons = [
-    instagramUrl && { text: '📸 Instagram', url: instagramUrl },
-    youtubeUrl && { text: '▶️ YouTube', url: youtubeUrl },
-    telegramUrl && { text: '✈️ Telegram', url: telegramUrl },
-  ].filter((button): button is { text: string; url: string } => Boolean(button))
+  const socialLinks = [
+    telegramUrl && `✈️ <a href="${escapeHtml(telegramUrl)}">Telegram</a>`,
+    instagramUrl && `📸 <a href="${escapeHtml(instagramUrl)}">Instagram</a>`,
+    youtubeUrl && `▶️ <a href="${escapeHtml(youtubeUrl)}">YouTube</a>`,
+  ].filter((link): link is string => Boolean(link))
+  const socialFooter = socialLinks.length ? `📲 <b>Bizni kuzating:</b>\n${socialLinks.join(' / ')}` : ''
+  const text = [
+    `${topicEmoji} <b>${title}</b>`, summary, importance,
+    `🔗 <b>Original manba:</b> <a href="${escapeHtml(sourceUrl)}">${escapeHtml(news.source_name)}</a>`,
+    '— Urosfera | Urologiya bilim platformasi', socialFooter,
+  ].filter(Boolean).join('\n\n')
+
   const reply_markup = { inline_keyboard: [
     [{ text: '📖 Urosferada batafsil o‘qish', url: articleUrl }],
-    socialButtons,
-    [{ text: '🌐 Veb-sayt', url: website }],
-  ].filter(row => row.length > 0) }
+  ] }
 
   if (!news.image_url) {
     const sent = await telegramRequest(token, 'sendMessage', { chat_id: channelId, text, parse_mode: 'HTML', link_preview_options: { is_disabled: true }, reply_markup })
