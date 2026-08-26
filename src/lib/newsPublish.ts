@@ -26,42 +26,71 @@ export async function yangilikBannerlariniSaqlash(news: NewsRow, options?: { umu
   }
 }
 
-export async function yangilikniNashrQil(newsId: string, options?: { resendTelegram?: boolean; umumiyBanner?: boolean }) {
+async function yangilikniOl(newsId: string) {
   const supabase = createAdminClient()
   const { data, error } = await supabase.from('yangiliklar').select('*').eq('id', newsId).single()
   if (error || !data) throw new Error('Yangilik topilmadi')
   const news = data as NewsRow
   if (!news.title_uz || !news.summary_uz || !news.content_uz) throw new Error("O'zbekcha kontent to'liq emas")
+  return { supabase, news }
+}
 
+async function maqolaniPublicQil(news: NewsRow) {
+  const supabase = createAdminClient()
   const now = new Date()
+  if (news.status === 'published') return
+  const { error } = await supabase.from('yangiliklar').update({
+    status: 'published', published_at: news.published_at ?? now.toISOString(), updated_at: now.toISOString(),
+  }).eq('id', news.id)
+  if (error) throw new Error(`Maqolani nashr qilish xatosi: ${error.message}`)
+  news.status = 'published'
+  news.published_at = news.published_at ?? now.toISOString()
+}
+
+export async function yangilikBannergaChiqar(newsId: string, options?: { umumiyBanner?: boolean }) {
+  const { news } = await yangilikniOl(newsId)
+  await maqolaniPublicQil(news)
+  await yangilikBannerlariniSaqlash(news, { umumiyBanner: options?.umumiyBanner, faol: true })
+  return { published: true, bannerStatus: 'active' as const }
+}
+
+export async function yangilikTelegramgaYubor(newsId: string, options?: { resendTelegram?: boolean }) {
+  const { supabase, news } = await yangilikniOl(newsId)
+  await maqolaniPublicQil(news)
+
+  if (news.telegram_message_id && !options?.resendTelegram) {
+    return { published: true, telegramStatus: 'sent' as const, alreadySent: true }
+  }
   if (options?.resendTelegram) {
-    if (news.status !== 'published') throw new Error("Faqat nashr qilingan maqolani Telegramga qayta yuborish mumkin")
     const { error: resetError } = await supabase.from('yangiliklar').update({
       telegram_message_id: null, telegram_status: 'pending', telegram_error: null,
     }).eq('id', news.id)
     if (resetError) throw new Error(`Telegram holatini yangilash xatosi: ${resetError.message}`)
     news.telegram_message_id = null
-  } else {
-    await yangilikBannerlariniSaqlash(news, { umumiyBanner: options?.umumiyBanner, faol: true })
-    const { error: publishError } = await supabase.from('yangiliklar').update({
-      status: 'published', published_at: news.published_at ?? now.toISOString(), updated_at: now.toISOString(),
-    }).eq('id', news.id)
-    if (publishError) throw new Error(`Maqolani nashr qilish xatosi: ${publishError.message}`)
   }
 
-  if (!news.telegram_message_id) {
-    try {
-      const sent = await telegramKanalgaYangilik(news)
-      const { error: sentError } = await supabase.from('yangiliklar').update({
-        telegram_message_id: sent.messageId, telegram_status: 'sent', telegram_error: null,
-      }).eq('id', news.id)
-      if (sentError) throw new Error(`Telegram message_id saqlash xatosi: ${sentError.message}`)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Telegram xatosi'
-      console.error(`[daily-news][telegram] news_id=${news.id} ${message}`)
-      await supabase.from('yangiliklar').update({ telegram_status: 'failed', telegram_error: message }).eq('id', news.id)
-      throw new Error(message)
-    }
+  try {
+    const sent = await telegramKanalgaYangilik(news)
+    const { error: sentError } = await supabase.from('yangiliklar').update({
+      telegram_message_id: sent.messageId, telegram_status: 'sent', telegram_error: null,
+    }).eq('id', news.id)
+    if (sentError) throw new Error(`Telegram message_id saqlash xatosi: ${sentError.message}`)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Telegram xatosi'
+    console.error(`[daily-news][telegram] news_id=${news.id} ${message}`)
+    await supabase.from('yangiliklar').update({ telegram_status: 'failed', telegram_error: message }).eq('id', news.id)
+    throw new Error(message)
   }
   return { published: true, telegramStatus: 'sent' as const }
+}
+
+export async function yangilikBannerVaTelegram(newsId: string, options?: { umumiyBanner?: boolean; resendTelegram?: boolean }) {
+  const banner = await yangilikBannergaChiqar(newsId, { umumiyBanner: options?.umumiyBanner })
+  const telegram = await yangilikTelegramgaYubor(newsId, { resendTelegram: options?.resendTelegram })
+  return { ...banner, ...telegram }
+}
+
+// Cronning mavjud avtomatik nashr oqimi uchun orqaga mos alias.
+export function yangilikniNashrQil(newsId: string, options?: { resendTelegram?: boolean; umumiyBanner?: boolean }) {
+  return yangilikBannerVaTelegram(newsId, options)
 }

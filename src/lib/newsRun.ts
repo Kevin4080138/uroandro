@@ -12,6 +12,7 @@ export type NewsRunResult = {
   duplicates: number
   geminiFailures: number
   publishedCount: number
+  processedNewsId: string | null
   errors: string[]
 }
 
@@ -23,14 +24,15 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
   const { data: run, error: runError } = await supabase.from('yangilik_ishlari').insert({
     status: 'running', run_key: testMode ? null : today, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode },
   }).select('id').single()
-  if (!testMode && runError?.code === '23505') return { candidatesFound: 0, draftsCreated: 0, draftsEnriched: 0, duplicates: 0, geminiFailures: 0, publishedCount: 0, errors: [], skipped: true, reason: 'Bugungi cron allaqachon bajarilgan' }
+  if (!testMode && runError?.code === '23505') return { candidatesFound: 0, draftsCreated: 0, draftsEnriched: 0, duplicates: 0, geminiFailures: 0, publishedCount: 0, processedNewsId: null, errors: [], skipped: true, reason: 'Bugungi cron allaqachon bajarilgan' }
   if (runError || !run) throw new Error(runError?.message ?? 'Ish yozuvi yaratilmadi')
 
   let candidatesFound = 0, draftsCreated = 0, draftsEnriched = 0, duplicates = 0, geminiFailures = 0, publishedCount = 0
+  let processedNewsId: string | null = null
   const errors: string[] = []
 
   const natijaniYakunlash = async () => {
-    const result = { candidatesFound, draftsCreated, draftsEnriched, duplicates, geminiFailures, publishedCount, errors }
+    const result = { candidatesFound, draftsCreated, draftsEnriched, duplicates, geminiFailures, publishedCount, processedNewsId, errors }
     await supabase.from('yangilik_ishlari').update({ status: 'completed', candidates_found: candidatesFound,
       published_count: publishedCount, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode,
         drafts_created: draftsCreated, drafts_enriched: draftsEnriched, duplicates, gemini_failures: geminiFailures, errors } }).eq('id', run.id)
@@ -68,6 +70,7 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
         && draft.doctor_importance?.trim() && draft.patient_importance?.trim()))
 
       if (emptyDraft) {
+        processedNewsId = emptyDraft.id
         const source = sourceRows.find((item) => item.name === emptyDraft.source_name)
           ?? sourceRows.find((item) => item.category === emptyDraft.category && item.source_type === 'pubmed')
         if (!source || source.source_type !== 'pubmed') {
@@ -119,6 +122,7 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
       }).select('*').single()
       if (insertError || !inserted) throw new Error(insertError?.message ?? 'Test drafti yaratilmadi')
       draftsCreated = 1
+      processedNewsId = inserted.id
       const content = await geminiKontent(candidate, source, inserted.id)
       if (content) {
         const { error: updateError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })

@@ -8,7 +8,7 @@ import type { NewsRow, NewsStatus } from '@/lib/newsTypes'
 const STATUS: NewsStatus[] = ['draft', 'approved', 'published', 'rejected', 'failed']
 const LABEL: Record<NewsStatus, string> = { draft: 'Qoralama', approved: 'Tasdiqlangan', published: 'Nashr qilingan', rejected: 'Rad etilgan', failed: 'Xatoli' }
 const input: React.CSSProperties = { width: '100%', border: '1px solid var(--line)', borderRadius: '10px', padding: '10px 12px', background: 'var(--surface-2)', color: 'var(--ink)', font: 'inherit' }
-type TestResult = { candidatesFound: number; draftsCreated: number; draftsEnriched: number; duplicates: number; geminiFailures: number; errors: string[] }
+type TestResult = { candidatesFound: number; draftsCreated: number; draftsEnriched: number; duplicates: number; geminiFailures: number; processedNewsId: string | null; errors: string[] }
 
 export default function AdminMaqolalarPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -20,11 +20,21 @@ export default function AdminMaqolalarPage() {
   const [message, setMessage] = useState('')
   const [testResult, setTestResult] = useState<TestResult | null>(null)
   const [umumiyBanner, setUmumiyBanner] = useState(false)
-  const load = useCallback(async () => {
-    let query = supabase.from('yangiliklar').select('*').eq('status', status).order('created_at', { ascending: false }).limit(100)
-    if (origin !== 'all') query = query.eq('content_origin', origin)
+  const [bannerFaol, setBannerFaol] = useState<Record<string, boolean>>({})
+  const load = useCallback(async (requestedStatus: NewsStatus = status, requestedOrigin: 'all' | 'manual' | 'automation' = origin) => {
+    let query = supabase.from('yangiliklar').select('*').eq('status', requestedStatus)
+      .order('updated_at', { ascending: false }).order('created_at', { ascending: false }).limit(100)
+    if (requestedOrigin !== 'all') query = query.eq('content_origin', requestedOrigin)
     const { data } = await query
-    setItems((data ?? []) as NewsRow[])
+    const rows = (data ?? []) as NewsRow[]
+    setItems(rows)
+    if (rows.length) {
+      const { data: banners } = await supabase.from('bannerlar').select('yangilik_id,faol,arxiv').in('yangilik_id', rows.map((row) => row.id))
+      const active: Record<string, boolean> = {}
+      for (const banner of banners ?? []) if (banner.yangilik_id && banner.faol && !banner.arxiv) active[banner.yangilik_id] = true
+      setBannerFaol(active)
+    } else setBannerFaol({})
+    return rows
   }, [origin, status, supabase])
   // Ma'lumot tarmoq javobidan keyin yangilanadi; bu sinxron cascading render emas.
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -33,17 +43,19 @@ export default function AdminMaqolalarPage() {
   const save = async () => {
     if (!editing) return
     setBusy(editing.id); setMessage('')
-    const { id, title_uz, summary_uz, content_uz, student_importance, doctor_importance, patient_importance, importance } = editing
-    const { error } = await supabase.from('yangiliklar').update({ title_uz, summary_uz, content_uz, student_importance, doctor_importance, patient_importance, importance, updated_at: new Date().toISOString() }).eq('id', id)
-    setBusy(null); setMessage(error ? `❌ ${error.message}` : '✅ Saqlandi'); if (!error) await load()
+    const { id, title_uz, summary_uz, content_uz, student_importance, doctor_importance, patient_importance, telegram_post_uz, importance } = editing
+    const { error } = await supabase.from('yangiliklar').update({ title_uz, summary_uz, content_uz, student_importance, doctor_importance, patient_importance, telegram_post_uz, importance, updated_at: new Date().toISOString() }).eq('id', id)
+    setBusy(null); setMessage(error ? `❌ ${error.message}` : '✅ Saqlandi'); if (!error) { const rows = await load(); setEditing(rows.find((row) => row.id === id) ?? null) }
   }
-  const action = async (news: NewsRow, name: 'approve' | 'publish' | 'reject' | 'resend') => {
-    if ((name === 'publish' || name === 'resend') && !confirm(name === 'resend' ? 'Telegram kanaliga qayta yuborilsinmi?' : 'Yangilik nashr qilinsinmi?')) return
+  const action = async (news: NewsRow, name: 'approve' | 'banner' | 'telegram' | 'publish' | 'reject' | 'resend') => {
+    if (name === 'resend' && !confirm('Telegram kanaliga qayta yuborilsinmi?')) return
     setBusy(news.id); setMessage('')
     try {
       const response = await fetch(`/api/admin/yangiliklar/${news.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: name, umumiyBanner }) })
       const json = await response.json(); if (!response.ok) throw new Error(json.error ?? 'Xatolik')
-      setMessage('✅ Amal bajarildi'); setEditing(null); await load()
+      setMessage('✅ Amal bajarildi'); const rows = await load(name === 'reject' ? 'rejected' : name === 'approve' ? 'approved' : 'published')
+      const nextStatus = name === 'reject' ? 'rejected' : name === 'approve' ? 'approved' : 'published'
+      setStatus(nextStatus); setEditing(rows.find((row) => row.id === news.id) ?? null)
     } catch (error) { setMessage(`❌ ${error instanceof Error ? error.message : 'Xatolik'}`) } finally { setBusy(null) }
   }
   const testRun = async () => {
@@ -65,7 +77,13 @@ export default function AdminMaqolalarPage() {
       if (!response.ok) throw new Error(`HTTP ${response.status}: ${json.error ?? 'Test bajarilmadi'}`)
       setTestResult(json as TestResult)
       setStatus('draft')
-      await load()
+      setOrigin('automation')
+      const rows = await load('draft', 'automation')
+      const processed = rows.find((row) => row.id === json.processedNewsId)
+      if (processed) {
+        setEditing(processed); setUmumiyBanner(processed.importance === 'critical')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     } catch (error) { setMessage(`❌ ${error instanceof Error ? error.message : 'Test xatosi'}`) }
     finally { setBusy(null) }
   }
@@ -89,12 +107,12 @@ export default function AdminMaqolalarPage() {
         <h2 style={{ margin: 0, fontSize: '18px' }}>Tahrirlash va banner preview</h2><a href={editing.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>{editing.source_name}: {editing.original_title} ↗</a>
         {editing.image_url && <img src={editing.image_url} alt="Yangilik rasmi" style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '12px' }} />}
         <div style={{ minHeight: '180px', borderRadius: '14px', padding: '22px', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', background: editing.image_url ? `linear-gradient(to top,rgba(0,0,0,.8),transparent),url(${editing.image_url}) center/cover` : 'linear-gradient(135deg,#0891b2,#2563eb)' }}><b style={{ fontSize: '20px' }}>{editing.title_uz || editing.original_title}</b><span>{editing.summary_uz}</span></div>
-        {field('title_uz', "O'zbekcha sarlavha")}{field('summary_uz', 'Qisqa mazmun', 3)}{field('content_uz', 'Maqola matni', 9)}{field('student_importance', 'Talaba uchun: nima uchun muhim?', 3)}{field('doctor_importance', 'Shifokor uchun: nima uchun muhim?', 3)}{field('patient_importance', 'Bemor uchun: nima uchun muhim?', 3)}
+        {field('title_uz', "O'zbekcha sarlavha")}{field('summary_uz', 'Qisqa mazmun', 3)}{field('content_uz', 'Maqola matni', 9)}{field('telegram_post_uz', 'Telegram uchun umumiy matn', 9)}{field('student_importance', 'Talaba uchun: nima uchun muhim?', 3)}{field('doctor_importance', 'Shifokor uchun: nima uchun muhim?', 3)}{field('patient_importance', 'Bemor uchun: nima uchun muhim?', 3)}
         <label style={{ display: 'grid', gap: '5px' }}><span style={{ fontSize: '12px', fontWeight: 800 }}>MUHIMLIK</span><select value={editing.importance} onChange={(e) => setEditing({ ...editing, importance: e.target.value as NewsRow['importance'] })} style={input}><option value="normal">Oddiy</option><option value="high">Muhim</option><option value="critical">Juda muhim</option></select></label>
         <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><input type="checkbox" checked={umumiyBanner} onChange={(e) => setUmumiyBanner(e.target.checked)} /> Uch rol o‘rniga bitta “hamma” banner</label>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}><button onClick={save} disabled={busy === editing.id}>💾 Saqlash</button>{editing.status === 'draft' && <button onClick={() => action(editing, 'approve')}>✅ Tasdiqlash</button>}{['draft', 'approved'].includes(editing.status) && <button onClick={() => action(editing, 'publish')}>🚀 Nashr qilish</button>}{editing.status !== 'rejected' && <button onClick={() => action(editing, 'reject')}>⛔ Rad etish</button>}{editing.status === 'published' && <button onClick={() => action(editing, 'resend')}>✈️ Telegramga qayta yuborish</button>}<button onClick={() => setEditing(null)}>Yopish</button></div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}><button onClick={save} disabled={busy === editing.id}>💾 Saqlash</button>{editing.status === 'draft' && <button onClick={() => action(editing, 'approve')}>✅ Tasdiqlash</button>}{['approved', 'published'].includes(editing.status) && <button onClick={() => action(editing, 'banner')}>🖼 Bannerga chiqarish</button>}{['approved', 'published'].includes(editing.status) && <button onClick={() => action(editing, editing.telegram_status === 'sent' ? 'resend' : 'telegram')}>✈️ Telegramga yuborish</button>}{['approved', 'published'].includes(editing.status) && <button onClick={() => action(editing, 'publish')}>🚀 Banner + Telegram</button>}{editing.status !== 'rejected' && <button onClick={() => action(editing, 'reject')}>⛔ Rad etish</button>}<button onClick={() => setEditing(null)}>Yopish</button></div>
       </section>}
-      <div style={{ display: 'grid', gap: '12px' }}>{items.map((news) => <article key={news.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '16px', display: 'grid', gridTemplateColumns: news.image_url ? '110px 1fr' : '1fr', gap: '14px' }}>{news.image_url && <img src={news.image_url} alt="" style={{ width: '110px', height: '90px', objectFit: 'cover', borderRadius: '10px' }} />}<div><div style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 800 }}>{news.category.toUpperCase()} · {news.source_name}</div><h2 style={{ fontSize: '16px', margin: '5px 0' }}>{news.title_uz || news.original_title}</h2><p style={{ color: 'var(--muted)', fontSize: '13px', margin: '0 0 9px' }}>{news.summary_uz || 'O‘zbekcha mazmun hali tayyor emas.'}</p><button onClick={() => { setEditing(news); setUmumiyBanner(news.importance === 'critical'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ko‘rish / tahrirlash</button><span style={{ marginLeft: '10px', fontSize: '11px', color: 'var(--muted)' }}>Telegram: {news.telegram_status}</span></div></article>)}{!items.length && <p style={{ color: 'var(--muted)' }}>Bu holatda yangilik yo‘q.</p>}</div>
+      <div style={{ display: 'grid', gap: '12px' }}>{items.map((news) => <article key={news.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px', padding: '16px', display: 'grid', gridTemplateColumns: news.image_url ? '110px 1fr' : '1fr', gap: '14px' }}>{news.image_url && <img src={news.image_url} alt="" style={{ width: '110px', height: '90px', objectFit: 'cover', borderRadius: '10px' }} />}<div><div style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 800 }}>{news.category.toUpperCase()} · {news.source_name}</div><h2 style={{ fontSize: '16px', margin: '5px 0' }}>{news.title_uz || news.original_title}</h2><p style={{ color: 'var(--muted)', fontSize: '13px', margin: '0 0 9px' }}>{news.summary_uz || 'O‘zbekcha mazmun hali tayyor emas.'}</p><button onClick={() => { setEditing(news); setUmumiyBanner(news.importance === 'critical'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ko‘rish / tahrirlash</button><span style={{ marginLeft: '10px', fontSize: '11px', color: 'var(--muted)' }}>Banner: {bannerFaol[news.id] ? 'faol' : 'yaratilmagan'} · Telegram: {news.telegram_status}</span></div></article>)}{!items.length && <p style={{ color: 'var(--muted)' }}>Bu holatda yangilik yo‘q.</p>}</div>
     </div>
   </div>
 }

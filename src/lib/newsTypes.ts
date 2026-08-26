@@ -16,6 +16,7 @@ export type NewsRow = {
   student_importance: string | null
   doctor_importance: string | null
   patient_importance: string | null
+  telegram_post_uz: string | null
   status: NewsStatus
   content_origin: 'manual' | 'automation'
   image_url: string | null
@@ -26,4 +27,5 @@ export type NewsRow = {
   telegram_error: string | null
   published_at: string | null
   created_at: string
+  updated_at: string
 }
