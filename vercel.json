@@ -1,5 +1,6 @@
 {
   "crons": [
+    { "path": "/api/cron/kunlik-yangiliklar", "schedule": "0 4 * * *" },
     { "path": "/api/cron/javobsiz-murojaat", "schedule": "0 5 * * *" },
     { "path": "/api/cron/dori-eslatmalari", "schedule": "0 9 * * *" },
     { "path": "/api/cron/operatsiya-eslatmalari", "schedule": "30 9 * * *" },

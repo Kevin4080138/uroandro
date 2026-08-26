@@ -5,24 +5,40 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { BarChart3, CheckCircle2 } from 'lucide-react'
+import { getRankFromStages } from '@/lib/rank'
+import { RankCard, UnvonlarModal } from '@/components/RankBadge'
+import type { UnvonUlashData } from '@/components/UnvonUlashish'
 
 type Natija = { dars_slug: string; ball: number; jami: number; foiz: number; sarlavha: string }
+
+// Ginekologiya modul sluglari bosqich prefixi asosida turkumlanadi
+function bosqichdan(slug: string): 'oson' | 'orta' | 'qiyin' {
+  if (slug.startsWith('gin-l1-')) return 'oson'
+  if (slug.startsWith('gin-l2-')) return 'orta'
+  return 'qiyin'
+}
 
 export default function GinNatijalarim() {
   const supabase = createClient()
   const [natijalar, setNatijalar] = useState<Natija[]>([])
+  const [jamiDarslar, setJamiDarslar] = useState<{ slug: string; sarlavha: string }[]>([])
+  const [ism, setIsm] = useState('Talaba')
   const [loading, setLoading] = useState(true)
+  const [unvonOchiq, setUnvonOchiq] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setLoading(false); return }
-      const [{ data: nat }, { data: darslar }] = await Promise.all([
+      const [{ data: nat }, { data: darslar }, { data: profil }] = await Promise.all([
         supabase.from('gin_natijalar').select('dars_slug, ball, jami, foiz').eq('student_id', user.id).order('updated_at', { ascending: false }),
-        supabase.from('gin_darslar').select('slug, sarlavha'),
+        supabase.from('gin_darslar').select('slug, sarlavha').eq('faol', true),
+        supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
       ])
       const nomi = new Map((darslar ?? []).map((d: { slug: string; sarlavha: string }) => [d.slug, d.sarlavha]))
       setNatijalar((nat ?? []).map((n: { dars_slug: string; ball: number; jami: number; foiz: number }) => ({ ...n, sarlavha: nomi.get(n.dars_slug) ?? n.dars_slug })))
+      setJamiDarslar(darslar ?? [])
+      setIsm(profil?.full_name ?? 'Talaba')
       setLoading(false)
     }
     load()
@@ -30,6 +46,23 @@ export default function GinNatijalarim() {
   }, [])
 
   const ortacha = natijalar.length ? Math.round(natijalar.reduce((s, n) => s + n.foiz, 0) / natijalar.length) : 0
+
+  // Gin bosqich progressi (rank uchun)
+  const tugatilganSluglar = new Set(natijalar.map(n => n.dars_slug))
+  const stages = (['oson', 'orta', 'qiyin'] as const).map(b => ({
+    id: b,
+    tugadi: jamiDarslar.filter(d => bosqichdan(d.slug) === b && tugatilganSluglar.has(d.slug)).length,
+    jami:   jamiDarslar.filter(d => bosqichdan(d.slug) === b).length || 1,
+  }))
+  const rank = getRankFromStages(stages)
+
+  const ulashData: UnvonUlashData = {
+    rank,
+    ism,
+    ortacha,
+    seriya: 0,
+    yonalish: 'ginekologiya',
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -39,6 +72,13 @@ export default function GinNatijalarim() {
           <span style={{ color: 'var(--gyn)' }}><BarChart3 size={22} strokeWidth={2} /></span> Ginekologiya — Natijalarim
         </h2>
         <p style={{ margin: '0 0 20px', color: 'var(--muted)', fontSize: '13.5px' }}>Ginekologiya testlaringiz natijalari.</p>
+
+        {/* Unvon kartasi */}
+        {!loading && (
+          <div style={{ marginBottom: '20px' }}>
+            <RankCard rank={rank} onClick={() => setUnvonOchiq(true)} />
+          </div>
+        )}
 
         {loading ? (
           <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Yuklanmoqda…</p>
@@ -70,6 +110,14 @@ export default function GinNatijalarim() {
         )}
       </div>
       <BottomNav />
+
+      {unvonOchiq && (
+        <UnvonlarModal
+          joriyDaraja={rank.darajaSon}
+          onClose={() => setUnvonOchiq(false)}
+          ulash={rank.darajaSon >= 1 ? ulashData : undefined}
+        />
+      )}
     </div>
   )
 }

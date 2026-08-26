@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { bannerlarniTanla } from '@/lib/bannerSelection'
 
 type Banner = {
   id: string
@@ -20,11 +21,17 @@ type Banner = {
   tugash: string | null
   arxiv: boolean
   created_at: string
+  content_origin: 'manual' | 'automation'
+  priority: number
+  is_pinned: boolean
+  published_at: string | null
 }
 
 type Sozlama = {
   role: string
   max_soni: number
+  max_visible: number
+  auto_banner_slots: number
   interval_soniya: number
   effekt: string
 }
@@ -58,7 +65,7 @@ const EFFEKT_OPTS = [
   { value: 'slide', label: 'Surilish (slide)' },
   { value: 'zoom',  label: 'Kattalashish (zoom)' },
 ]
-const DEFAULT_SOZ = { max_soni: 5, interval_soniya: 6, effekt: 'fade' }
+const DEFAULT_SOZ = { max_soni: 5, max_visible: 5, auto_banner_slots: 1, interval_soniya: 6, effekt: 'fade' }
 
 const inp: React.CSSProperties = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)',
@@ -91,6 +98,7 @@ export default function AdminBannerlarPage() {
   const [sozlamalar, setSozlamalar] = useState<Sozlama[]>([])
   const [sozXato, setSozXato] = useState(false)
   const [tab, setTab] = useState<'faol' | 'arxiv'>('faol')
+  const [originFilter, setOriginFilter] = useState<'all' | 'manual' | 'automation'>('all')
   const [editId, setEditId] = useState<string | null>(null)
 
   // Form state
@@ -105,6 +113,8 @@ export default function AdminBannerlarPage() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [clearImage, setClearImage] = useState(false)
+  const [isPinned, setIsPinned] = useState(false)
+  const [priority, setPriority] = useState(100)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -124,7 +134,7 @@ export default function AdminBannerlarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const loadBanners = async () => {
+  async function loadBanners() {
     const { data } = await supabase
       .from('bannerlar')
       .select('*')
@@ -134,15 +144,15 @@ export default function AdminBannerlarPage() {
 
     // Avto-arxiv: muddati o'tgan, hali arxivlanmagan bannerlarni arxivga o'tkazamiz
     const now = new Date().toISOString()
-    const eskirgan = list.filter(b => !b.arxiv && b.tugash && b.tugash < now)
+    const eskirgan = list.filter(b => b.content_origin === 'automation' && !b.arxiv && b.tugash && b.tugash < now)
     if (eskirgan.length) {
-      await supabase.from('bannerlar').update({ arxiv: true }).in('id', eskirgan.map(b => b.id))
+      await supabase.from('bannerlar').update({ arxiv: true, faol: false }).eq('content_origin', 'automation').in('id', eskirgan.map(b => b.id))
       list = list.map(b => eskirgan.some(e => e.id === b.id) ? { ...b, arxiv: true } : b)
     }
     setBanners(list)
   }
 
-  const loadSozlamalar = async () => {
+  async function loadSozlamalar() {
     const { data, error } = await supabase.from('banner_sozlamalar').select('*')
     if (error) { setSozXato(true); return }
     setSozXato(false)
@@ -157,6 +167,15 @@ export default function AdminBannerlarPage() {
     const { error } = await supabase.from('banner_sozlamalar')
       .upsert({ ...yangi, updated_at: new Date().toISOString() }, { onConflict: 'role' })
     if (error) setSozXato(true)
+    if (!error && patch.auto_banner_slots !== undefined) {
+      const { data: activeAuto } = await supabase.from('bannerlar').select('id')
+        .eq('content_origin', 'automation').eq('target_role', r).eq('faol', true).eq('arxiv', false)
+        .order('published_at', { ascending: false }).order('created_at', { ascending: false })
+      const overflow = (activeAuto ?? []).slice(yangi.auto_banner_slots).map(b => b.id)
+      if (overflow.length) await supabase.from('bannerlar').update({ faol: false, arxiv: true })
+        .eq('content_origin', 'automation').in('id', overflow)
+      await loadBanners()
+    }
   }
 
   const resetForm = () => {
@@ -164,6 +183,7 @@ export default function AdminBannerlarPage() {
     setType('yangilik'); setRole(''); setRang('#2563eb')
     setBoshlanish(''); setTugash('')
     setImageFile(null); setImagePreview(null); setClearImage(false)
+    setIsPinned(false); setPriority(100)
     setError(''); setSuccess('')
   }
 
@@ -172,6 +192,7 @@ export default function AdminBannerlarPage() {
     setLinkHref(b.link_href ?? ''); setType(b.type); setRole(b.target_role ?? '')
     setRang(b.rang ?? '#2563eb'); setImagePreview(b.image_url)
     setBoshlanish(isoToLocalInput(b.boshlanish)); setTugash(isoToLocalInput(b.tugash))
+    setIsPinned(b.is_pinned); setPriority(b.priority)
     setImageFile(null); setClearImage(false); setError(''); setSuccess('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -215,6 +236,8 @@ export default function AdminBannerlarPage() {
       boshlanish: boshIso,
       tugash: tugIso,
       created_by: userId,
+      priority,
+      is_pinned: isPinned,
     }
 
     if (editId) {
@@ -223,7 +246,7 @@ export default function AdminBannerlarPage() {
       const { error: dbErr } = await supabase.from('bannerlar').update({ ...payload, ...arxivPatch }).eq('id', editId)
       if (dbErr) { setError(dbErr.message); setLoading(false); return }
     } else {
-      const { error: dbErr } = await supabase.from('bannerlar').insert({ ...payload, faol: true, arxiv: false, sort_order: banners.length })
+      const { error: dbErr } = await supabase.from('bannerlar').insert({ ...payload, content_origin: 'manual', faol: true, arxiv: false, sort_order: banners.length })
       if (dbErr) { setError(dbErr.message); setLoading(false); return }
     }
 
@@ -259,7 +282,13 @@ export default function AdminBannerlarPage() {
     if (editId === id) resetForm()
   }
 
-  const koringan = banners.filter(b => tab === 'arxiv' ? b.arxiv : !b.arxiv)
+  const koringan = banners.filter(b => (tab === 'arxiv' ? b.arxiv : !b.arxiv) && (originFilter === 'all' || b.content_origin === originFilter))
+
+  const togglePinned = async (b: Banner) => {
+    if (b.content_origin !== 'manual') return
+    await supabase.from('bannerlar').update({ is_pinned: !b.is_pinned }).eq('id', b.id).eq('content_origin', 'manual')
+    setBanners(prev => prev.map(x => x.id === b.id ? { ...x, is_pinned: !x.is_pinned } : x))
+  }
 
   const tartibOzgartir = async (id: string, dir: 'up' | 'down') => {
     const arr = koringan
@@ -278,6 +307,7 @@ export default function AdminBannerlarPage() {
   }
 
   const typeInfo = TYPE_OPTS.find(t => t.value === type)
+  const editOrigin = editId ? banners.find(b => b.id === editId)?.content_origin : 'manual'
   const arxivSoni = banners.filter(b => b.arxiv).length
   const faolSoni = banners.filter(b => !b.arxiv).length
 
@@ -303,14 +333,28 @@ export default function AdminBannerlarPage() {
           )}
           {SOZ_ROLLAR.map(sr => {
             const s = sozlamalar.find(x => x.role === sr.role) ?? { role: sr.role, ...DEFAULT_SOZ }
+            const previewNow = Date.now()
+            const eligible = banners.filter(b => !b.arxiv && b.faol
+              && (!b.boshlanish || new Date(b.boshlanish).getTime() <= previewNow)
+              && (!b.tugash || new Date(b.tugash).getTime() >= previewNow)
+              && (b.target_role === null || b.target_role === sr.role || b.target_role === 'hamma'))
+            const preview = bannerlarniTanla(eligible, { maxVisible: s.max_visible, autoBannerSlots: s.auto_banner_slots })
+            const manualBand = preview.filter(b => b.content_origin === 'manual').length
+            const autoBand = preview.filter(b => b.content_origin === 'automation').length
             return (
               <div key={sr.role} style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px 14px' }}>
                 <p style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: 700 }}>{sr.label}</p>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    Nechtagacha
-                    <input type="number" min={1} max={10} value={s.max_soni}
-                      onChange={e => saveSozlama(sr.role, { max_soni: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })}
+                    Jami limit
+                    <input type="number" min={0} max={20} value={s.max_visible}
+                      onChange={e => { const value = Math.max(0, Math.min(20, Number(e.target.value) || 0)); saveSozlama(sr.role, { max_visible: value, max_soni: value }) }}
+                      style={{ ...inp, width: '90px', padding: '8px 10px' }} />
+                  </label>
+                  <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    Avto slot
+                    <input type="number" min={0} max={20} value={s.auto_banner_slots}
+                      onChange={e => saveSozlama(sr.role, { auto_banner_slots: Math.max(0, Math.min(20, Number(e.target.value) || 0)) })}
                       style={{ ...inp, width: '90px', padding: '8px 10px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -326,6 +370,9 @@ export default function AdminBannerlarPage() {
                     </select>
                   </label>
                 </div>
+                <p style={{ margin: '9px 0 0', fontSize: '11px', color: 'var(--muted)' }}>
+                  Preview: jami {preview.length}/{s.max_visible} · qo&apos;lda {manualBand} · avtomatik {autoBand}/{s.auto_banner_slots}
+                </p>
               </div>
             )
           })}
@@ -466,6 +513,15 @@ export default function AdminBannerlarPage() {
             </div>
           ) : null}
 
+          {editOrigin === 'manual' && <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', gap: '7px', alignItems: 'center', fontSize: '13px', fontWeight: 700 }}>
+              <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} /> 📌 Muhim / tepaga mahkamlash
+            </label>
+            <label style={{ fontSize: '12px', color: 'var(--muted)' }}>Priority&nbsp;
+              <input type="number" value={priority} onChange={e => setPriority(Number(e.target.value) || 0)} style={{ ...inp, width: '90px', padding: '7px 9px' }} />
+            </label>
+          </div>}
+
           {/* Preview */}
           {sarlavha && (
             <div style={{ borderRadius: '14px', overflow: 'hidden', height: '120px', position: 'relative',
@@ -513,6 +569,9 @@ export default function AdminBannerlarPage() {
             }}>{label}</button>
           ))}
         </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {([['all', 'Hammasi'], ['manual', '✍️ Qo‘lda'], ['automation', '⚙️ Avtomatik']] as const).map(([value, text]) => <button key={value} onClick={() => setOriginFilter(value)} style={{ ...btnSm, flex: 1, borderColor: 'var(--line)', background: originFilter === value ? 'var(--accent)' : 'var(--surface-2)', color: originFilter === value ? 'white' : 'var(--ink)' }}>{text}</button>)}
+        </div>
 
         {/* ── Ro'yxat ── */}
         {koringan.length > 0 ? (
@@ -533,6 +592,8 @@ export default function AdminBannerlarPage() {
                     <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>
                       {TYPE_OPTS.find(t => t.value === b.type)?.label} ·{' '}
                       {ROLE_OPTS.find(r => r.value === (b.target_role ?? ''))?.label} ·{' '}
+                      {b.content_origin === 'manual' ? '✍️ Qo‘lda' : '⚙️ Avtomatik'} ·{' '}
+                      {b.is_pinned ? '📌 ' : ''}
                       {b.faol ? <span style={{ color: '#16a34a' }}>Faol</span> : <span style={{ color: 'var(--danger)' }}>Yashirin</span>}
                     </p>
                     {(b.boshlanish || b.tugash) && (
@@ -547,6 +608,7 @@ export default function AdminBannerlarPage() {
                     <>
                       <button onClick={() => startEdit(b)} style={{ ...btnSm, color: 'var(--accent)', borderColor: 'var(--accent)20' }}>✏️ Tahrir</button>
                       <button onClick={() => toggleFaol(b)} style={{ ...btnSm, color: b.faol ? 'var(--muted)' : '#16a34a', borderColor: 'var(--line)' }}>{b.faol ? '🙈 Yashir' : '👁 Ko\'rsat'}</button>
+                      {b.content_origin === 'manual' && <button onClick={() => togglePinned(b)} style={{ ...btnSm, color: b.is_pinned ? '#ca8a04' : 'var(--muted)', borderColor: 'var(--line)' }}>{b.is_pinned ? '📌 Mahkamlangan' : '📍 Tepaga mahkamlash'}</button>}
                       <button onClick={() => tartibOzgartir(b.id, 'up')} disabled={i === 0} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↑</button>
                       <button onClick={() => tartibOzgartir(b.id, 'down')} disabled={i === koringan.length - 1} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)' }}>↓</button>
                       <button onClick={() => arxivla(b)} style={{ ...btnSm, color: '#ca8a04', borderColor: 'var(--line)' }}>🗄 Arxivla</button>

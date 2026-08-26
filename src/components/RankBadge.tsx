@@ -3,6 +3,7 @@
 import type { RankInfo } from '@/lib/rank'
 import { hammaRanklar } from '@/lib/rank'
 import { Repeat, RefreshCw } from 'lucide-react'
+import { UnvonUlashish, type UnvonUlashData } from '@/components/UnvonUlashish'
 
 // Hex clip-path — 6 burchakli shakl
 const HEX = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
@@ -16,7 +17,8 @@ const FRAME = {
 
 // Har bir daraja uchun vizual konfig (darajaSon 0–10)
 // HTML t4 "yakuniy tanlov" dizayni asosida — ramka bilan
-const RANK_VIS: Record<number, {
+// Eksport: ulashish kartasi (canvas) ham shu ranglardan foydalanadi
+export const RANK_VIS: Record<number, {
   p1: string; p2: string; accent: string; frame: string
   stars: number; bars: number; chevs: number; crown: boolean
   glow: string; labelColor: string
@@ -50,6 +52,23 @@ function HexBadge({
   const s = (n: number) => Math.max(1, Math.round(n * W / 70))
   const frameW = s(4) // ramka qalinligi
 
+  // Belgilarni ramka ichiga SIG'DIRISH: element hajmlari W=70 asosida (dizayn px)
+  // hisoblanadi, so'ng hexagonning xavfsiz o'rta zonasiga mos ravishda
+  // birgalikda kichraytiriladi — shunda 7–10 darajada ham shakllar ramkadan chiqmaydi.
+  const uBase = W / 70
+  const rows: { turi: string; h: number; w: number }[] = []
+  if (vis.crown)     rows.push({ turi: 'crown', h: 13, w: 24 })
+  if (vis.stars > 0) rows.push({ turi: 'stars', h: 12, w: vis.stars * 12 + (vis.stars - 1) * 4 })
+  if (vis.bars > 0)  rows.push({ turi: 'bars',  h: vis.bars * 4 + (vis.bars - 1) * 3, w: 38 })
+  if (vis.chevs > 0) rows.push({ turi: 'chevs', h: vis.chevs * 9 - (vis.chevs - 1) * 2, w: 30 })
+  const BLOCK_GAP = 5
+  const totalH = rows.reduce((a, r) => a + r.h, 0) + Math.max(0, rows.length - 1) * BLOCK_GAP
+  const maxW = rows.reduce((a, r) => Math.max(a, r.w), 1)
+  // Xavfsiz zona — hexagonning to'la kenglikdagi o'rta bo'lagi (balandlik 52%, en 60%)
+  const fit = Math.min(1, (70 * 1.14 * 0.52) / totalH, (70 * 0.60) / maxW)
+  const u = uBase * fit
+  const g = (n: number) => n * u // sig'dirilgan px
+
   return (
     <div style={{
       position: 'relative', width: W, height: H, flexShrink: 0,
@@ -74,29 +93,29 @@ function HexBadge({
         background: 'linear-gradient(160deg, rgba(255,255,255,0.28), transparent 48%)',
         pointerEvents: 'none',
       }} />
-      {/* Nishon belgilari */}
+      {/* Nishon belgilari — fit orqali ramka ichiga sig'diriladi */}
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        gap: s(6), padding: s(15),
+        gap: g(BLOCK_GAP),
       }}>
         {vis.crown && (
           <div className="badge-crown" style={{
-            width: s(24), height: s(13),
+            width: g(24), height: g(13),
             background: vis.accent,
             clipPath: 'polygon(0% 100%, 0% 28%, 20% 55%, 50% 0%, 80% 55%, 100% 28%, 100% 100%)',
             animationDelay: `${delay}s`,
           }} />
         )}
         {vis.stars > 0 && (
-          <div style={{ display: 'flex', gap: s(4), alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: g(4), alignItems: 'center' }}>
             {Array.from({ length: vis.stars }).map((_, i) => (
               <div
                 key={i}
                 className="badge-star"
                 style={{
-                  width: s(12), height: s(12),
+                  width: g(12), height: g(12),
                   background: vis.accent,
                   clipPath: 'polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)',
                   animationDelay: `${(parseFloat(delay) + i * 0.15).toFixed(2)}s`,
@@ -106,13 +125,13 @@ function HexBadge({
           </div>
         )}
         {vis.bars > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: s(3), alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: g(3), alignItems: 'center' }}>
             {Array.from({ length: vis.bars }).map((_, i) => (
               <div
                 key={i}
                 className="badge-bar"
                 style={{
-                  width: s(38), height: s(4),
+                  width: g(38), height: g(4),
                   borderRadius: 999,
                   background: vis.accent,
                   animationDelay: `${(parseFloat(delay) + i * 0.15).toFixed(2)}s`,
@@ -128,8 +147,8 @@ function HexBadge({
                 key={i}
                 className="badge-chev"
                 style={{
-                  width: s(30), height: s(9),
-                  marginTop: i > 0 ? s(-2) : 0,
+                  width: g(30), height: g(9),
+                  marginTop: i > 0 ? g(-2) : 0,
                   background: vis.accent,
                   clipPath: 'polygon(50% 0%,100% 100%,76% 100%,50% 42%,24% 100%,0% 100%)',
                   animationDelay: `${(parseFloat(delay) + i * 0.2).toFixed(2)}s`,
@@ -288,7 +307,7 @@ export function RankMini({ rank, onClick }: { rank: RankInfo; onClick?: () => vo
 // Unvon ustiga bosilganda: 10 ta unvon + qanday erishish sharti ko'rinadi.
 // Talaba yetgan darajalar rangli, hali yetmagani rangsiz (grayscale).
 
-export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; onClose: () => void }) {
+export function UnvonlarModal({ joriyDaraja, onClose, ulash }: { joriyDaraja: number; onClose: () => void; ulash?: UnvonUlashData }) {
   const ranklar = hammaRanklar()
 
   return (
@@ -380,6 +399,11 @@ export function UnvonlarModal({ joriyDaraja, onClose }: { joriyDaraja: number; o
             )
           })}
         </div>
+
+        {/* Joriy unvonni ulashish — faqat kamida 1-darajaga yetganda */}
+        {ulash && ulash.rank.darajaSon >= 1 && (
+          <UnvonUlashish data={ulash} />
+        )}
 
         {/* Eslatma 1 — takrorlash */}
         <div style={{
