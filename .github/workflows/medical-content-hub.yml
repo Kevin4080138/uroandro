@@ -1,0 +1,36 @@
+name: Medical Content Hub scheduler
+
+on:
+  schedule:
+    - cron: "0 4,15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: medical-content-hub-production
+  cancel-in-progress: false
+
+jobs:
+  run-medical-content-hub:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Call production Medical Content Hub endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          MEDICAL_NEWS_CRON_URL: ${{ secrets.MEDICAL_NEWS_CRON_URL }}
+        shell: bash
+        run: |
+          if [[ -z "$CRON_SECRET" || -z "$MEDICAL_NEWS_CRON_URL" ]]; then
+            echo "Required Medical Content Hub secrets are not configured." >&2
+            exit 1
+          fi
+
+          curl --silent --show-error --fail-with-body \
+            --connect-timeout 15 \
+            --max-time 290 \
+            --request GET \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${MEDICAL_NEWS_CRON_URL}"

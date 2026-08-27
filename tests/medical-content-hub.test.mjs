@@ -7,6 +7,7 @@ import { telegramKanalgaYangilik } from '../src/lib/newsTelegram.ts'
 import { isolateSourceFetch } from '../src/lib/newsSources/isolation.ts'
 import { DEFAULT_NEWS_MIN_IMPORTANCE_SCORE, newsMinImportanceScore } from '../src/lib/newsConfig.ts'
 import { urosferaRelevant } from '../src/lib/newsRelevance.ts'
+import { cronRuxsatBormi, cronRuxsatXatosi } from '../src/lib/cronAuth.ts'
 
 const candidate = { source_key: 'pubmed-urology', source_name: 'PubMed', source_type: 'api', external_id: '123',
   original_url: 'https://pubmed.ncbi.nlm.nih.gov/123/', canonical_url: 'https://pubmed.ncbi.nlm.nih.gov/123/',
@@ -47,6 +48,17 @@ test('generic PubMed popularity cannot bypass specialty relevance', () => {
 test('Tashkent morning and evening cron slots are distinct', () => {
   assert.match(newsCronSlotKey(new Date('2026-08-27T04:00:00Z')), /-09$/)
   assert.match(newsCronSlotKey(new Date('2026-08-27T15:00:00Z')), /-20$/)
+  assert.equal(newsCronSlotKey(new Date('2026-08-27T04:00:00Z')), newsCronSlotKey(new Date('2026-08-27T05:00:00Z')))
+})
+
+test('cron endpoint auth rejects missing/wrong secrets and accepts matching bearer', () => {
+  const endpoint = 'https://urosfera.uz/api/cron/kunlik-yangiliklar'
+  assert.equal(cronRuxsatBormi(new Request(endpoint), 'server-secret'), false)
+  assert.equal(cronRuxsatBormi(new Request(endpoint, { headers: { authorization: 'Bearer wrong' } }), 'server-secret'), false)
+  assert.equal(cronRuxsatBormi(new Request(endpoint, { headers: { authorization: 'Bearer server-secret' } }), 'server-secret'), true)
+  assert.equal(cronRuxsatBormi(new Request(endpoint, { headers: { authorization: 'Bearer server-secret' } }), undefined), false)
+  assert.equal(cronRuxsatXatosi(new Request(endpoint), 'server-secret')?.status, 401)
+  assert.equal(cronRuxsatXatosi(new Request(endpoint, { headers: { authorization: 'Bearer server-secret' } }), 'server-secret'), null)
 })
 
 test('Telegram auto-send keeps one article button and linked circle footer', async () => {
@@ -91,4 +103,20 @@ test('Telegram claim and existing manual publish actions remain idempotent', asy
   assert.match(publish, /export async function yangilikBannergaChiqar/)
   assert.match(publish, /export async function yangilikTelegramgaYubor/)
   assert.match(publish, /export async function yangilikBannerVaTelegram/)
+})
+
+test('GitHub scheduler is minimal, serialized and Vercel no longer schedules the hub', async () => {
+  const fs = await import('node:fs/promises')
+  const workflow = await fs.readFile(new URL('../.github/workflows/medical-content-hub.yml', import.meta.url), 'utf8')
+  const vercel = JSON.parse(await fs.readFile(new URL('../vercel.json', import.meta.url), 'utf8'))
+  assert.match(workflow, /cron: "0 4,15 \* \* \*"/)
+  assert.match(workflow, /workflow_dispatch:/)
+  assert.match(workflow, /permissions:\s*\n\s*contents: read/)
+  assert.match(workflow, /group: medical-content-hub-production/)
+  assert.match(workflow, /cancel-in-progress: false/)
+  assert.match(workflow, /Authorization: Bearer \$\{CRON_SECRET\}/)
+  assert.match(workflow, /--fail-with-body/)
+  assert.match(workflow, /--max-time 290/)
+  assert.equal(vercel.crons.some((cron) => cron.path === '/api/cron/kunlik-yangiliklar'), false)
+  assert.equal(vercel.crons.length, 6)
 })
