@@ -28,4 +28,18 @@ export type NewsRow = {
   published_at: string | null
   created_at: string
   updated_at: string
+  source_key: string | null
+  external_id: string | null
+  canonical_url: string | null
+  content_type: 'news' | 'research_summary' | 'guideline_update' | 'educational_article' | 'clinical_review' | 'event'
+  specialty: 'urology' | 'gynecology' | 'andrology' | 'urogynecology' | 'mixed' | null
+  audience: Array<'student' | 'doctor' | 'patient'>
+  importance_score: number
+  importance_reasons: string[]
+  telegram_auto_eligible: boolean
+  telegram_selected_at: string | null
+  telegram_sent_at: string | null
+  banner_approval_status: 'not_created' | 'pending' | 'active' | 'failed'
+  source_published_at: string | null
+  source_metadata: Record<string, unknown>
 }

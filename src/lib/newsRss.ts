@@ -8,7 +8,7 @@ export type FeedSource = {
 }
 export type FeedCandidate = {
   title: string; url: string; summary: string; publishedAt: string | null; source: FeedSource
-  category: NewsCategory; dedupHash: string
+  category: NewsCategory; dedupHash: string; doi?: string | null; authors?: string[]
 }
 
 function decodeXml(value: string) {
@@ -70,7 +70,10 @@ function pubmedMaqolalarniOqish(xml: string, source: FeedSource): FeedCandidate[
     const title = pubmedTag(article, 'ArticleTitle')
     const summary = pubmedTag(article, 'AbstractText')
     const url = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
-    return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category,
+    const doi = article.match(/<ArticleId[^>]+IdType=["']doi["'][^>]*>([^<]+)<\/ArticleId>/i)?.[1]?.trim() ?? null
+    const authors = (article.match(/<Author(?:\s[^>]*)?>[\s\S]*?<\/Author>/gi) ?? []).map((author) =>
+      `${pubmedTag(author, 'ForeName')} ${pubmedTag(author, 'LastName')}`.trim()).filter(Boolean)
+    return { title, url, summary, publishedAt: pubmedDate(article), source, category: source.category, doi, authors,
       dedupHash: createHash('sha256').update(`pubmed:${pmid}`).digest('hex') }
   }).filter((item) => /^\d+$/.test(item.url.split('/')[3]) && item.title && item.summary
     && !(source.category === 'ginekologiya' && NON_GYNECOLOGIC_CERVICAL.test(`${item.title} ${item.summary}`)))

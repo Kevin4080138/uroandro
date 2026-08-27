@@ -1,212 +1,120 @@
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { uzbekContentYarat } from '@/lib/newsContent'
+import { newsMinImportanceScore } from '@/lib/newsConfig'
+import { candidateHash, canonicalUrl, titleSimilarity } from '@/lib/newsDedup'
 import { newsImageTopVaSaqlash } from '@/lib/newsImages'
-import { manbaNomzodlari, newsSlug, pubmedNomzodiniUrlBoyicha, type FeedCandidate, type FeedSource } from '@/lib/newsRss'
-import { yangilikBannerlariniSaqlash, yangilikniNashrQil } from '@/lib/newsPublish'
+import { defaultAudience, importanceHisobla } from '@/lib/newsRanking'
+import { urosferaRelevant } from '@/lib/newsRelevance'
+import { newsSlug, pubmedNomzodiniUrlBoyicha } from '@/lib/newsRss'
+import { yangilikTelegramgaYubor } from '@/lib/newsPublish'
+import { newsCronSlotKey } from '@/lib/newsSchedule'
+import { fetchSourceSafely } from '@/lib/newsSources/registry'
+import type { NormalizedNewsCandidate, SourceConfig } from '@/lib/newsSources/types'
 import type { NewsRow } from '@/lib/newsTypes'
 
-export type NewsRunResult = {
-  candidatesFound: number
-  draftsCreated: number
-  draftsEnriched: number
-  duplicates: number
-  geminiFailures: number
-  publishedCount: number
-  processedNewsId: string | null
-  errors: string[]
+export type NewsRunResult = { candidatesFound: number; draftsCreated: number; draftsEnriched: number; duplicates: number; geminiFailures: number; publishedCount: number; processedNewsId: string | null; checkedSources: number; eligibleCount: number; telegramResult: string; errors: string[]; skipped?: boolean; reason?: string }
+const boolEnv = (name: string, fallback: boolean) => process.env[name] == null ? fallback : process.env[name] === 'true'
+function sourceConfig(row: Record<string, unknown>): SourceConfig {
+  return { id: String(row.id), source_key: String(row.source_key), name: String(row.name), base_url: row.base_url ? String(row.base_url) : null,
+    feed_url: String(row.feed_url), source_url: String(row.source_url), source_type: String(row.source_type), category: row.category as SourceConfig['category'],
+    specialties: (row.specialties ?? []) as SourceConfig['specialties'], priority: Number(row.priority), search_query: row.search_query ? String(row.search_query) : null,
+    lookback_days: Number(row.lookback_days ?? 30), may_reuse_official_images: Boolean(row.may_reuse_official_images) }
 }
 
-export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<NewsRunResult & { skipped?: boolean; reason?: string }> {
-  const supabase = createAdminClient()
-  // Xavfsiz default: env berilmasa ham avtomatik nashr o'chirilgan.
-  const autoPublish = (process.env.NEWS_AUTOPUBLISH ?? 'false') === 'true'
-  const today = new Date().toISOString().slice(0, 10)
-  const { data: run, error: runError } = await supabase.from('yangilik_ishlari').insert({
-    status: 'running', run_key: testMode ? null : today, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode },
-  }).select('id').single()
-  if (!testMode && runError?.code === '23505') return { candidatesFound: 0, draftsCreated: 0, draftsEnriched: 0, duplicates: 0, geminiFailures: 0, publishedCount: 0, processedNewsId: null, errors: [], skipped: true, reason: 'Bugungi cron allaqachon bajarilgan' }
-  if (runError || !run) throw new Error(runError?.message ?? 'Ish yozuvi yaratilmadi')
-
-  let candidatesFound = 0, draftsCreated = 0, draftsEnriched = 0, duplicates = 0, geminiFailures = 0, publishedCount = 0
-  let processedNewsId: string | null = null
-  const errors: string[] = []
-
-  const natijaniYakunlash = async () => {
-    const result = { candidatesFound, draftsCreated, draftsEnriched, duplicates, geminiFailures, publishedCount, processedNewsId, errors }
-    await supabase.from('yangilik_ishlari').update({ status: 'completed', candidates_found: candidatesFound,
-      published_count: publishedCount, metadata: { mode: testMode ? 'admin_test' : 'cron', telegram_disabled: testMode,
-        drafts_created: draftsCreated, drafts_enriched: draftsEnriched, duplicates, gemini_failures: geminiFailures, errors } }).eq('id', run.id)
-    return result
+export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<NewsRunResult> {
+  const supabase = createAdminClient(), legacyAuto = boolEnv('NEWS_AUTOPUBLISH', false)
+  const autoFetch = boolEnv('NEWS_AUTO_FETCH', true), autoTelegram = boolEnv('NEWS_AUTO_TELEGRAM', legacyAuto), autoSite = boolEnv('NEWS_AUTO_SITE_PUBLISH', legacyAuto)
+  const { data: run, error: runError } = await supabase.from('yangilik_ishlari').insert({ status: 'running', run_key: null,
+    run_slot: testMode ? null : newsCronSlotKey(), metadata: { mode: testMode ? 'admin_test' : 'cron', auto_banner: false } }).select('id').single()
+  const result: NewsRunResult = { candidatesFound: 0, draftsCreated: 0, draftsEnriched: 0, duplicates: 0, geminiFailures: 0,
+    publishedCount: 0, processedNewsId: null, checkedSources: 0, eligibleCount: 0, telegramResult: 'not_sent', errors: [] }
+  if (!testMode && runError?.code === '23505') return { ...result, skipped: true, reason: 'Bu cron sloti allaqachon bajarilgan' }
+  if (runError || !run) throw new Error(runError?.message ?? 'Cron audit yozuvi yaratilmadi')
+  const finish = async (status: 'completed' | 'failed', reason?: string) => {
+    await supabase.from('yangilik_ishlari').update({ status, finished_at: new Date().toISOString(), checked_sources: result.checkedSources,
+      found_count: result.candidatesFound, candidates_found: result.candidatesFound, duplicate_count: result.duplicates,
+      eligible_count: result.eligibleCount, selected_article_id: result.processedNewsId, telegram_result: { status: result.telegramResult },
+      skipped_reason: reason ?? null, error_summary: result.errors.join(' | ').slice(0, 4000) || null, published_count: result.publishedCount,
+      metadata: { mode: testMode ? 'admin_test' : 'cron', auto_banner: false, drafts_created: result.draftsCreated,
+        drafts_enriched: result.draftsEnriched, gemini_failures: result.geminiFailures } }).eq('id', run.id)
   }
-
-  const geminiKontent = async (candidate: { title: string; summary: string; url: string }, source: FeedSource, newsId: string) => {
-    const result = await uzbekContentYarat({ ...candidate, sourceName: source.name })
-    if (result.content) return result.content
-    geminiFailures++
-    const message = `${source.name}: ${result.error}`
-    errors.push(message)
-    await supabase.from('yangilik_xato_loglari').insert({
-      run_id: run.id, source_id: source.id, news_id: newsId, stage: 'gemini', error_message: result.error,
-      metadata: { source_url: candidate.url },
-    })
-    return null
+  const logError = async (source: SourceConfig | null, stage: string, message: string, newsId?: string) => {
+    result.errors.push(message); console.error(`[medical-content-hub][${stage}] source=${source?.source_key ?? 'none'} ${message}`)
+    await supabase.from('yangilik_xato_loglari').insert({ run_id: run.id, source_id: source?.id ?? null, news_id: newsId ?? null, stage, error_message: message.slice(0, 2000) })
   }
   try {
-    // Cron faqat o'zi yaratgan, muddati tugagan bannerlarni arxivlaydi.
-    if (!testMode) {
-      await supabase.from('bannerlar').update({ arxiv: true, faol: false })
-        .eq('content_origin', 'automation').eq('arxiv', false).lt('tugash', new Date().toISOString())
+    const { data: sourceRows, error: sourceError } = await supabase.from('yangilik_manbalari').select('*').eq('is_enabled', true).order('priority').limit(30)
+    if (sourceError) throw sourceError
+    const sources = (sourceRows ?? []).map((row) => sourceConfig(row as Record<string, unknown>))
+    const { data: drafts } = await supabase.from('yangiliklar').select('*').eq('content_origin', 'automation').eq('status', 'draft').order('updated_at').limit(25)
+    const blank = ((drafts ?? []) as NewsRow[]).find((item) => !item.title_uz?.trim() || !item.summary_uz?.trim() || !item.content_uz?.trim() || !item.telegram_post_uz?.trim())
+    if (testMode && blank) {
+      const source = sources.find((item) => item.source_key === blank.source_key) ?? sources.find((item) => item.name === blank.source_name)
+      if (!source || source.source_type !== 'pubmed') throw new Error(`Bo'sh draft uchun PubMed manbasi topilmadi: ${blank.source_name}`)
+      const candidate = await pubmedNomzodiniUrlBoyicha({ ...source, source_type: 'pubmed' }, blank.source_url)
+      if (!candidate) throw new Error('PubMed sarlavha va abstract qaytarmadi')
+      const generated = await uzbekContentYarat({ title: candidate.title, summary: candidate.summary, url: candidate.url, sourceName: source.name })
+      if (!generated.content) { result.geminiFailures++; await logError(source, 'gemini', generated.error, blank.id) }
+      else { const { error } = await supabase.from('yangiliklar').update({ ...generated.content, updated_at: new Date().toISOString() }).eq('id', blank.id).eq('content_origin', 'automation'); if (error) throw error; result.draftsEnriched = 1; result.processedNewsId = blank.id }
+      await finish('completed'); return result
     }
-    const { data: sources, error } = await supabase.from('yangilik_manbalari').select('*').eq('enabled', true).order('priority').limit(20)
-    if (error) throw error
-
-    if (testMode) {
-      const sourceRows = (sources ?? []) as FeedSource[]
-      const { data: draftRows, error: draftsError } = await supabase.from('yangiliklar').select('*')
-        .eq('content_origin', 'automation').eq('status', 'draft').order('created_at').limit(100)
-      if (draftsError) throw draftsError
-      const emptyDraft = ((draftRows ?? []) as NewsRow[]).find((draft) => !(draft.title_uz?.trim()
-        && draft.summary_uz?.trim() && draft.content_uz?.trim() && draft.student_importance?.trim()
-        && draft.doctor_importance?.trim() && draft.patient_importance?.trim()))
-
-      if (emptyDraft) {
-        processedNewsId = emptyDraft.id
-        const source = sourceRows.find((item) => item.name === emptyDraft.source_name)
-          ?? sourceRows.find((item) => item.category === emptyDraft.category && item.source_type === 'pubmed')
-        if (!source || source.source_type !== 'pubmed') {
-          throw new Error(`Bo'sh draft uchun faol PubMed manbasi topilmadi: ${emptyDraft.source_name}`)
-        }
-        const candidate = await pubmedNomzodiniUrlBoyicha(source, emptyDraft.source_url)
-        if (!candidate) throw new Error(`PubMed draft uchun sarlavha va abstract qaytarmadi: ${emptyDraft.source_url}`)
-        candidatesFound = 1
-        const content = await geminiKontent(candidate, source, emptyDraft.id)
-        if (content) {
-          const { error: updateError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
-            .eq('id', emptyDraft.id).eq('content_origin', 'automation').eq('status', 'draft')
-          if (updateError) errors.push(`${source.name}: draftni boyitish xatosi: ${updateError.message}`)
-          else {
-            draftsEnriched = 1
-            await yangilikBannerlariniSaqlash({ ...emptyDraft, ...content }, { faol: false })
-          }
-        }
-        return natijaniYakunlash()
-      }
-
-      let selected: { candidate: FeedCandidate; source: FeedSource } | null = null
-      for (const source of sourceRows) {
-        try {
-          const candidates = await manbaNomzodlari(source)
-          candidatesFound += candidates.length
-          for (const candidate of candidates) {
-            const { data: duplicate } = await supabase.from('yangiliklar').select('id').eq('content_origin', 'automation')
-              .eq('dedup_hash', candidate.dedupHash).limit(1).maybeSingle()
-            if (duplicate) { duplicates++; continue }
-            selected = { candidate, source }
-            break
-          }
-          if (selected) break
-        } catch (sourceError) {
-          const message = sourceError instanceof Error ? sourceError.message : source.name
-          errors.push(message)
-          await supabase.from('yangilik_xato_loglari').insert({ run_id: run.id, source_id: source.id,
-            stage: 'source', error_message: message })
-        }
-      }
-      if (!selected) return natijaniYakunlash()
-
-      const { candidate, source } = selected
-      const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({
-        slug: newsSlug(candidate.title, candidate.dedupHash), source_name: source.name, source_url: candidate.url,
-        source_date: candidate.publishedAt, original_title: candidate.title, category: candidate.category,
-        dedup_hash: candidate.dedupHash, status: 'draft', content_origin: 'automation',
-      }).select('*').single()
-      if (insertError || !inserted) throw new Error(insertError?.message ?? 'Test drafti yaratilmadi')
-      draftsCreated = 1
-      processedNewsId = inserted.id
-      const content = await geminiKontent(candidate, source, inserted.id)
-      if (content) {
-        const { error: updateError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
-          .eq('id', inserted.id).eq('content_origin', 'automation').eq('status', 'draft')
-        if (updateError) errors.push(`${source.name}: Gemini kontentini saqlash xatosi: ${updateError.message}`)
-        else {
-          draftsEnriched = 1
-          await yangilikBannerlariniSaqlash({ ...inserted, ...content }, { faol: false })
-        }
-      }
-      return natijaniYakunlash()
+    if (!autoFetch && !testMode) { result.skipped = true; result.reason = 'NEWS_AUTO_FETCH=false'; await finish('completed', result.reason); return result }
+    const all: Array<{ candidate: NormalizedNewsCandidate; source: SourceConfig }> = []
+    for (const source of sources) {
+      result.checkedSources++
+      const fetched = await fetchSourceSafely(source), now = new Date().toISOString()
+      await supabase.from('yangilik_manbalari').update(fetched.error ? { last_checked_at: now, last_error: fetched.error } : { last_checked_at: now, last_success_at: now, last_error: null }).eq('id', source.id)
+      if (fetched.error) { await logError(source, 'source', fetched.error); continue }
+      result.candidatesFound += fetched.candidates.length; all.push(...fetched.candidates.map((candidate) => ({ candidate, source })))
     }
-
-    for (const source of (sources ?? []) as FeedSource[]) {
-      try {
-        const candidates = await manbaNomzodlari(source)
-        candidatesFound += candidates.length
-        for (const candidate of candidates.slice(0, 3)) {
-          const { data: duplicate } = await supabase.from('yangiliklar').select('*').eq('content_origin', 'automation').eq('dedup_hash', candidate.dedupHash).limit(1).maybeSingle()
-          if (duplicate) {
-            const draft = duplicate as NewsRow
-            const tayyor = Boolean(draft.title_uz?.trim() && draft.summary_uz?.trim() && draft.content_uz?.trim()
-              && draft.student_importance?.trim() && draft.doctor_importance?.trim() && draft.patient_importance?.trim())
-            if (draft.status !== 'draft' || tayyor) { duplicates++; continue }
-
-            const content = await geminiKontent(candidate, source, draft.id)
-            if (!content) continue
-            const { error: updateError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
-              .eq('id', draft.id).eq('content_origin', 'automation').eq('status', 'draft')
-            if (updateError) { errors.push(`${source.name}: draftni boyitish xatosi: ${updateError.message}`); continue }
-            draftsEnriched++
-            if (testMode) await yangilikBannerlariniSaqlash({ ...draft, ...content }, { faol: false })
-            continue
-          }
-
-          const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({
-            slug: newsSlug(candidate.title, candidate.dedupHash), source_name: source.name, source_url: candidate.url,
-            source_date: candidate.publishedAt, original_title: candidate.title, category: candidate.category,
-            dedup_hash: candidate.dedupHash, status: 'draft', content_origin: 'automation',
-          }).select('*').single()
-          if (insertError || !inserted) {
-            if (insertError?.code === '23505') duplicates++
-            else errors.push(insertError?.message ?? candidate.url)
-            continue
-          }
-          draftsCreated++
-          let content = await geminiKontent(candidate, source, inserted.id)
-          if (content) {
-            const { error: contentError } = await supabase.from('yangiliklar').update({ ...content, updated_at: new Date().toISOString() })
-              .eq('id', inserted.id).eq('content_origin', 'automation')
-            if (contentError) {
-              errors.push(`${source.name}: Gemini kontentini saqlash xatosi: ${contentError.message}`)
-              content = null
-            }
-          }
-          const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: candidate.title, category: candidate.category,
-            sourceUrl: candidate.url, mayReuseOfficialImages: source.may_reuse_official_images })
-          if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id)
-
-          // Admin testi DB'da ko'riladigan preview bannerlar yaratadi, lekin ular faol emas.
-          // Shuning uchun draft maqola ochiq sahifaga chiqmaydi va Telegram chaqirilmaydi.
-          if (testMode) {
-            await yangilikBannerlariniSaqlash({ ...inserted, ...(content ?? {}), ...(image ?? {}) }, { faol: false })
-          }
-
-          // Test rejimi env qiymatidan qat'i nazar hech qachon publish/Telegram qilmaydi.
-          if (!testMode && autoPublish && content) {
-            await supabase.from('yangiliklar').update({ status: 'approved' }).eq('id', inserted.id)
-            await yangilikniNashrQil(inserted.id)
-            publishedCount++
-          }
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : source.name
-        errors.push(message)
-        await supabase.from('yangilik_xato_loglari').insert({ run_id: run.id, source_id: source.id, stage: 'source', error_message: message })
+    const eligible: Array<{ candidate: NormalizedNewsCandidate; source: SourceConfig; score: number; reasons: string[] }> = []
+    for (const item of all) {
+      item.candidate.canonical_url = canonicalUrl(item.candidate.canonical_url)
+      const hash = candidateHash(item.candidate)
+      let exact: Record<string, unknown> | null = null
+      if (item.candidate.external_id) {
+        const { data } = await supabase.from('yangiliklar').select('*').eq('source_key', item.candidate.source_key)
+          .eq('external_id', item.candidate.external_id).limit(1).maybeSingle()
+        exact = data as Record<string, unknown> | null
       }
+      if (!exact) { const { data } = await supabase.from('yangiliklar').select('*').eq('dedup_hash', hash).limit(1).maybeSingle(); exact = data as Record<string, unknown> | null }
+      if (!exact) { const { data } = await supabase.from('yangiliklar').select('*').eq('canonical_url', item.candidate.canonical_url).limit(1).maybeSingle(); exact = data as Record<string, unknown> | null }
+      let duplicate: { id: string; original_title: string; content_origin: 'manual' | 'automation' } | null = exact
+        ? { id: String(exact.id), original_title: String(exact.original_title), content_origin: exact.content_origin as 'manual' | 'automation' } : null
+      if (!duplicate) { const { data: recent } = await supabase.from('yangiliklar').select('id,original_title,content_origin').eq('content_origin', 'automation').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()).limit(100); const similar = (recent ?? []).find((row) => titleSimilarity(row.original_title, item.candidate.title_original) >= .82); duplicate = similar ? { id: String(similar.id), original_title: String(similar.original_title), content_origin: similar.content_origin as 'manual' | 'automation' } : null }
+      if (duplicate) { result.duplicates++; if (duplicate.content_origin === 'automation') await supabase.from('yangilik_source_references').upsert({ news_id: duplicate.id, source_key: item.candidate.source_key, external_id: item.candidate.external_id, canonical_url: item.candidate.canonical_url, metadata: item.candidate.metadata }, { onConflict: 'news_id,canonical_url' }); continue }
+      const ranked = importanceHisobla(item.candidate)
+      if (!urosferaRelevant(item.candidate)) continue
+      if (ranked.score >= newsMinImportanceScore()) eligible.push({ ...item, ...ranked })
     }
-    return natijaniYakunlash()
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Noma’lum xato'
-    await supabase.from('yangilik_ishlari').update({ status: 'failed', candidates_found: candidatesFound,
-      published_count: publishedCount, error_message: message, metadata: { mode: testMode ? 'admin_test' : 'cron',
-        drafts_created: draftsCreated, drafts_enriched: draftsEnriched, duplicates, gemini_failures: geminiFailures, errors } }).eq('id', run.id)
-    throw new Error(message)
-  }
+    result.eligibleCount = eligible.length; eligible.sort((a, b) => b.score - a.score || (Date.parse(b.candidate.published_at ?? '') || 0) - (Date.parse(a.candidate.published_at ?? '') || 0))
+    const selected = eligible[0]
+    if (!selected) { result.reason = 'no eligible content'; result.skipped = true; await finish('completed', result.reason); return result }
+    const hash = candidateHash(selected.candidate), audience = defaultAudience(selected.candidate.content_type)
+    const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({ slug: newsSlug(selected.candidate.title_original, hash), source_name: selected.candidate.source_name,
+      source_url: selected.candidate.original_url, source_date: selected.candidate.published_at, original_title: selected.candidate.title_original,
+      category: selected.candidate.specialty === 'gynecology' ? 'ginekologiya' : selected.candidate.specialty === 'andrology' ? 'andrologiya' : 'urologiya',
+      dedup_hash: hash, status: 'draft', content_origin: 'automation', source_key: selected.candidate.source_key, external_id: selected.candidate.external_id,
+      canonical_url: selected.candidate.canonical_url, content_type: selected.candidate.content_type, specialty: selected.candidate.specialty, audience,
+      importance_score: selected.score, importance_reasons: selected.reasons, telegram_auto_eligible: true, banner_approval_status: 'pending',
+      source_published_at: selected.candidate.published_at, source_metadata: selected.candidate.metadata }).select('*').single()
+    if (insertError || !inserted) throw new Error(insertError?.message ?? 'Yangilik saqlanmadi')
+    result.draftsCreated = 1; result.processedNewsId = inserted.id
+    await supabase.from('yangilik_source_references').upsert({ news_id: inserted.id, source_key: selected.candidate.source_key,
+      external_id: selected.candidate.external_id, canonical_url: selected.candidate.canonical_url,
+      metadata: selected.candidate.metadata }, { onConflict: 'news_id,canonical_url' })
+    const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name })
+    if (!generated.content) { result.geminiFailures++; await logError(selected.source, 'gemini', generated.error, inserted.id); await finish('completed'); return result }
+    const status = !testMode && autoSite ? 'published' : 'draft', now = new Date().toISOString()
+    const { error: updateError } = await supabase.from('yangiliklar').update({ ...generated.content, status, published_at: status === 'published' ? now : null, updated_at: now }).eq('id', inserted.id).eq('content_origin', 'automation')
+    if (updateError) throw updateError
+    result.draftsEnriched = 1
+    const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: selected.candidate.title_original,
+      category: selected.candidate.specialty === 'gynecology' ? 'ginekologiya' : selected.candidate.specialty === 'andrology' ? 'andrologiya' : 'urologiya',
+      sourceUrl: selected.candidate.original_url, mayReuseOfficialImages: selected.source.may_reuse_official_images })
+    if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id).eq('content_origin', 'automation')
+    if (!testMode && autoTelegram && autoSite) { try { await yangilikTelegramgaYubor(inserted.id); result.telegramResult = 'sent'; result.publishedCount = 1 } catch (error) { await logError(selected.source, 'telegram', error instanceof Error ? error.message : 'Telegram xatosi', inserted.id); result.telegramResult = 'failed' } }
+    else result.telegramResult = testMode ? 'disabled_in_test' : 'disabled_by_env'
+    await finish('completed'); return result
+  } catch (error) { const message = error instanceof Error ? error.message : 'Noma’lum xato'; result.errors.push(message); await finish('failed'); throw new Error(message) }
 }

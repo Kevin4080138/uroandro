@@ -73,7 +73,7 @@ export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekCont
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: [
-          "Siz Urosfera tibbiy muharririsiz. Faqat berilgan PubMed sarlavhasi va abstractidagi faktlarga asoslaning.",
+          "Siz Urosfera tibbiy muharririsiz. Faqat berilgan ishonchli manba sarlavhasi va ochiq annotatsiyasidagi faktlarga asoslaning.",
           "Matnni aniq, tabiiy va adabiy o'zbek tilida yozing; isbotlanmagan tafsilot qo'shmang.",
           "Individual tashxis qo'ymang, dori dozasi yoki shaxsiy davolash buyurmang.",
           "Bemor bo'limida umumiy ma'rifiy ma'lumot bering va zarur bo'lsa shifokorga murojaat qilishni neytral ayting.",
@@ -85,7 +85,7 @@ export async function uzbekContentYarat(candidate: Candidate): Promise<UzbekCont
         ].join(' ') }] },
         contents: [{ role: 'user', parts: [{ text: [
           `Manba: ${candidate.sourceName}`,
-          `PubMed URL: ${candidate.url}`,
+          `Original URL: ${candidate.url}`,
           `Original sarlavha: ${candidate.title}`,
           `Abstract:\n${candidate.summary}`,
           "Shu ma'lumotdan o'zbekcha sarlavha, qisqa mazmun, maqola, uch auditoriya uchun ichki ahamiyat xulosalari va umumiy Telegram post yarating.",
