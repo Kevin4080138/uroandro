@@ -22,11 +22,14 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
   const [items, setItems] = useState<FeedRow[]>([])
   const [tags, setTags] = useState<TegRow[]>([])
   const [saqlangan, setSaqlangan] = useState<Set<string>>(new Set())
+  const [oqilgan, setOqilgan] = useState<Set<string>>(new Set())
+  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
   const [category, setCategory] = useState<'all' | NewsCategory>('all')
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [faqatSaqlangan, setFaqatSaqlangan] = useState(false)
+  const [faqatOqilmagan, setFaqatOqilmagan] = useState(false)
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('yangiliklar')
@@ -44,10 +47,20 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
     void supabase.from('yangilik_teglari').select('id,slug,nom_uz,category,created_at').order('nom_uz').then(({ data }) => setTags((data ?? []) as TegRow[]))
     void supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return
+      setUserId(data.user.id)
       void supabase.from('saqlangan_maqolalar').select('yangilik_id').eq('user_id', data.user.id)
         .then(({ data: rows }) => setSaqlangan(new Set((rows ?? []).map((r) => r.yangilik_id as string))))
+      void supabase.from('oqilgan_maqolalar').select('yangilik_id').eq('user_id', data.user.id)
+        .then(({ data: rows }) => setOqilgan(new Set((rows ?? []).map((r) => r.yangilik_id as string))))
     })
   }, [supabase])
+
+  const ochish = async (id: string, slug: string) => {
+    router.push(`/yangiliklar/${slug}`)
+    if (!userId || oqilgan.has(id)) return
+    setOqilgan((prev) => new Set(prev).add(id))
+    await supabase.from('oqilgan_maqolalar').upsert({ user_id: userId, yangilik_id: id }, { onConflict: 'user_id,yangilik_id' })
+  }
 
   const toggleSaqla = async (id: string, event: React.MouseEvent) => {
     event.stopPropagation()
@@ -71,10 +84,11 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
       if (category !== 'all' && item.category !== category) return false
       if (activeTag && !(item.tags ?? []).includes(activeTag)) return false
       if (faqatSaqlangan && !saqlangan.has(item.id)) return false
+      if (faqatOqilmagan && oqilgan.has(item.id)) return false
       if (q && !`${item.title_uz ?? item.original_title} ${item.summary_uz ?? ''}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [items, category, activeTag, faqatSaqlangan, saqlangan, qidiruv])
+  }, [items, category, activeTag, faqatSaqlangan, faqatOqilmagan, saqlangan, oqilgan, qidiruv])
 
   const chip = (active: boolean): React.CSSProperties => ({
     border: '1px solid var(--line)', borderRadius: '999px', padding: '6px 13px', cursor: 'pointer',
@@ -104,6 +118,7 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
               </button>
             ))}
             <button onClick={() => setFaqatSaqlangan((v) => !v)} style={chip(faqatSaqlangan)}>🔖 Saqlangan</button>
+            {userId && <button onClick={() => setFaqatOqilmagan((v) => !v)} style={chip(faqatOqilmagan)}>🆕 O‘qilmagan</button>}
           </div>
           {mavjudTeglar.length > 0 && (
             <div style={{ display: 'flex', gap: '7px', overflowX: 'auto', paddingBottom: '2px' }}>
@@ -131,7 +146,7 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
             {korinadigan.map((news, i) => (
-              <article key={news.id} onClick={() => router.push(`/yangiliklar/${news.slug}`)}
+              <article key={news.id} onClick={() => ochish(news.id, news.slug)}
                 className="rise lift"
                 style={{
                   animationDelay: `${Math.min(i * 0.04, 0.4)}s`, cursor: 'pointer',
@@ -142,6 +157,9 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
                 <div style={{ padding: '13px 15px', minWidth: 0 }}>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '5px' }}>
                     <span style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.3px' }}>{CAT_LABEL[news.category] ?? news.category}</span>
+                    {userId && !oqilgan.has(news.id) && (
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#fff', background: 'var(--accent)', padding: '2px 7px', borderRadius: '6px' }}>🆕 Yangi</span>
+                    )}
                     {news.verification_status === 'tasdiqlangan' && (
                       <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--good)', background: 'color-mix(in srgb, var(--good) 14%, transparent)', padding: '2px 7px', borderRadius: '6px' }}>✔ Tasdiqlangan</span>
                     )}

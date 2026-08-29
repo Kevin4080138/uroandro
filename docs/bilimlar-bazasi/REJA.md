@@ -93,10 +93,11 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ⏳ "oʻqildi" holati — keyingi (alohida jadval kerak)
 
 ### Bosqich 5 — Personalizatsiya va yetkazish (keyingi toʻlqin)
-- Haftalik/kunlik digest (push + Telegram)
-- Tegga obuna
-- Darsga bogʻlash: tegga mos yangilik dars sahifasida
-- Oʻqish tarixiga asoslangan tavsiya
+- ✅ "Oʻqildi" holati — `oqilgan_maqolalar` jadvali; feʼdda "🆕 Yangi" belgisi + "Oʻqilmagan" filtri
+- ⏳ Haftalik/kunlik digest (push + Telegram) — bildirishnoma cron'iga ulash
+- ⏳ Tegga obuna
+- ⏳ Darsga bogʻlash: tegga mos yangilik dars sahifasida
+- ⏳ Oʻqish tarixiga asoslangan tavsiya
 
 ## Manba ishonch darajalari
 
