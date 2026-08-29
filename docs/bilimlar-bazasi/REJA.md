@@ -92,10 +92,11 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ✅ Ikkala dashboard'ga "Yangiliklar" kartasi qoʻshildi
 - ⏳ "oʻqildi" holati — keyingi (alohida jadval kerak)
 
-### Bosqich 5 — Personalizatsiya va yetkazish (keyingi toʻlqin)
+### Bosqich 5 — Personalizatsiya va yetkazish ✅ (asosiy qismi)
 - ✅ "Oʻqildi" holati — `oqilgan_maqolalar` jadvali; feʼdda "🆕 Yangi" belgisi + "Oʻqilmagan" filtri
-- ⏳ Haftalik/kunlik digest (push + Telegram) — bildirishnoma cron'iga ulash
-- ⏳ Tegga obuna
+- ✅ Tegga obuna — `teg_obunalari` jadvali; feʼdda faol teg uchun "🔔 Obuna" tugmasi
+- ✅ Kunlik digest — `newsDigest.ts` + `api/cron/yangilik-digest` + `yangilik-digest.yml` (10:00 Toshkent);
+  bildirishnoma tizimiga ulangan (sozlama `yangilik`, dedup, Telegram+push)
 - ⏳ Darsga bogʻlash: tegga mos yangilik dars sahifasida
 - ⏳ Oʻqish tarixiga asoslangan tavsiya
 

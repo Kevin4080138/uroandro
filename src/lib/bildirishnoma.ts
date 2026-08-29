@@ -24,6 +24,7 @@ export type EslatmaTuri =
   | 'yarim_dars'
   | 'murojaat'
   | 'javobsiz_murojaat'
+  | 'yangilik'
 
 /** Jurnaldagi `turi` → sozlamalar jadvalidagi ustun */
 const SOZLAMA_USTUNI: Record<EslatmaTuri, string> = {
@@ -36,6 +37,7 @@ const SOZLAMA_USTUNI: Record<EslatmaTuri, string> = {
   yarim_dars: 'yarim_dars',
   murojaat: 'murojaat',
   javobsiz_murojaat: 'murojaat',
+  yangilik: 'yangilik',
 }
 
 export type Natija = 'yuborildi' | 'ochirilgan' | 'takror' | 'kunlik_limit' | 'xato'

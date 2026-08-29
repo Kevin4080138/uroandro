@@ -23,6 +23,7 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
   const [tags, setTags] = useState<TegRow[]>([])
   const [saqlangan, setSaqlangan] = useState<Set<string>>(new Set())
   const [oqilgan, setOqilgan] = useState<Set<string>>(new Set())
+  const [obunalar, setObunalar] = useState<Set<string>>(new Set())
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [qidiruv, setQidiruv] = useState('')
@@ -52,8 +53,18 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
         .then(({ data: rows }) => setSaqlangan(new Set((rows ?? []).map((r) => r.yangilik_id as string))))
       void supabase.from('oqilgan_maqolalar').select('yangilik_id').eq('user_id', data.user.id)
         .then(({ data: rows }) => setOqilgan(new Set((rows ?? []).map((r) => r.yangilik_id as string))))
+      void supabase.from('teg_obunalari').select('teg_slug').eq('user_id', data.user.id)
+        .then(({ data: rows }) => setObunalar(new Set((rows ?? []).map((r) => r.teg_slug as string))))
     })
   }, [supabase])
+
+  const toggleObuna = async (slug: string) => {
+    if (!userId) { router.push('/auth/login'); return }
+    const bor = obunalar.has(slug)
+    setObunalar((prev) => { const next = new Set(prev); if (bor) next.delete(slug); else next.add(slug); return next })
+    if (bor) await supabase.from('teg_obunalari').delete().eq('user_id', userId).eq('teg_slug', slug)
+    else await supabase.from('teg_obunalari').insert({ user_id: userId, teg_slug: slug })
+  }
 
   const ochish = async (id: string, slug: string) => {
     router.push(`/yangiliklar/${slug}`)
@@ -129,6 +140,14 @@ export function YangiliklarFeed({ audience, backHref }: { audience: 'student' | 
               ))}
             </div>
           )}
+          {userId && activeTag && (() => {
+            const teg = tags.find((t) => t.slug === activeTag)
+            const bor = obunalar.has(activeTag)
+            return <button onClick={() => toggleObuna(activeTag)}
+              style={{ border: `1px solid ${bor ? 'var(--accent)' : 'var(--line)'}`, borderRadius: '10px', padding: '9px 12px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', background: bor ? 'var(--accent-soft)' : 'var(--surface)', color: bor ? 'var(--accent)' : 'var(--ink)', textAlign: 'left' }}>
+              {bor ? `🔕 "${teg?.nom_uz}" obunasini bekor qilish` : `🔔 "${teg?.nom_uz}" mavzusiga obuna bo‘lish`}
+            </button>
+          })()}
         </div>
 
         {loading ? (

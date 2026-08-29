@@ -1,0 +1,39 @@
+name: Yangilik digest scheduler
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # har kuni 10:00 (Toshkent)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yangilik-digest-production
+  cancel-in-progress: false
+
+jobs:
+  run-yangilik-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Call production yangilik digest endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          MEDICAL_NEWS_CRON_URL: ${{ secrets.MEDICAL_NEWS_CRON_URL }}
+        shell: bash
+        run: |
+          if [[ -z "$CRON_SECRET" || -z "$MEDICAL_NEWS_CRON_URL" ]]; then
+            echo "Required secrets are not configured." >&2
+            exit 1
+          fi
+
+          # Ingestion URL'idan digest endpoint'ini hosil qilamiz (yangi secret shart emas).
+          DIGEST_URL="${MEDICAL_NEWS_CRON_URL%/*}/yangilik-digest"
+
+          curl --silent --show-error --fail-with-body \
+            --connect-timeout 15 \
+            --max-time 290 \
+            --request GET \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${DIGEST_URL}"
