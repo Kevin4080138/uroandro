@@ -69,11 +69,12 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ⏳ PubMed qidiruvlarini kengaytirish
 - NCBI rate-limit (3 req/s) va fetch izolyatsiyasini hurmat qilish (mavjud)
 
-### Bosqich 2 — Tarjima sifati + avto-teglash (~3–4 kun)
-- `newsContent.ts` — javobga `tags`, `reading_level`, `confidence` qoʻshilsin
-- Xavfsizlik lint: bemor koʻrinishida doza/tashxis yoʻqligini tekshirish
-- Boʻsh/past-ishonch tarjimani avtomatik draft'ga qaytarish
-- Mavzu teglari `yangilik_teglari` lugʻatiga map qilinadi
+### Bosqich 2 — Tarjima sifati + avto-teglash (~3–4 kun) ✅
+- ✅ `newsContent.ts` — Gemini javobiga `tags`, `reading_level`, `confidence` qoʻshildi
+- ✅ Xavfsizlik lint (`xavfsizlikTekshir`): bemor matnida doza/individual koʻrsatma → confidence ≤ 40
+- ✅ Teglar `yangilik_teglari` lugʻatidan tanlanadi (prompt'ga ruxsat etilgan slug'lar beriladi, kod validatsiya qiladi)
+- ✅ `newsRun.ts` — tags/reading_level saqlanadi, confidence+safety `source_metadata`da
+- ⏳ Past-confidence'ni avto-tasdiqdan tiyish — Bosqich 3 da (chegara qoidasi)
 
 ### Bosqich 3 — Bosqichli avto-tasdiqlash (~2–3 kun)
 - Qoida: `ball ≥ chegara` + `trust_tier = 1` + validatsiya → avto-publish + banner

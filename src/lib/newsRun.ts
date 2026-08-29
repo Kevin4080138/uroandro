@@ -46,6 +46,8 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
     const { data: sourceRows, error: sourceError } = await supabase.from('yangilik_manbalari').select('*').eq('is_enabled', true).order('priority').limit(30)
     if (sourceError) throw sourceError
     const sources = (sourceRows ?? []).map((row) => sourceConfig(row as Record<string, unknown>))
+    const { data: tagRows } = await supabase.from('yangilik_teglari').select('slug,nom_uz')
+    const allowedTags = (tagRows ?? []).map((row) => ({ slug: String(row.slug), nom_uz: String(row.nom_uz) }))
     const { data: drafts } = await supabase.from('yangiliklar').select('*').eq('content_origin', 'automation').eq('status', 'draft').order('updated_at').limit(25)
     const blank = ((drafts ?? []) as NewsRow[]).find((item) => !item.title_uz?.trim() || !item.summary_uz?.trim() || !item.content_uz?.trim() || !item.telegram_post_uz?.trim())
     if (testMode && blank) {
@@ -53,9 +55,9 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
       if (!source || source.source_type !== 'pubmed') throw new Error(`Bo'sh draft uchun PubMed manbasi topilmadi: ${blank.source_name}`)
       const candidate = await pubmedNomzodiniUrlBoyicha({ ...source, source_type: 'pubmed' }, blank.source_url)
       if (!candidate) throw new Error('PubMed sarlavha va abstract qaytarmadi')
-      const generated = await uzbekContentYarat({ title: candidate.title, summary: candidate.summary, url: candidate.url, sourceName: source.name })
+      const generated = await uzbekContentYarat({ title: candidate.title, summary: candidate.summary, url: candidate.url, sourceName: source.name }, allowedTags)
       if (!generated.content) { result.geminiFailures++; await logError(source, 'gemini', generated.error, blank.id) }
-      else { const { error } = await supabase.from('yangiliklar').update({ ...generated.content, updated_at: new Date().toISOString() }).eq('id', blank.id).eq('content_origin', 'automation'); if (error) throw error; result.draftsEnriched = 1; result.processedNewsId = blank.id }
+      else { const { error } = await supabase.from('yangiliklar').update({ ...generated.content, tags: generated.meta.tags, reading_level: generated.meta.readingLevel, updated_at: new Date().toISOString() }).eq('id', blank.id).eq('content_origin', 'automation'); if (error) throw error; result.draftsEnriched = 1; result.processedNewsId = blank.id }
       await finish('completed'); return result
     }
     if (!autoFetch && !testMode) { result.skipped = true; result.reason = 'NEWS_AUTO_FETCH=false'; await finish('completed', result.reason); return result }
@@ -106,12 +108,14 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
       await supabase.from('yangilik_source_references').upsert({ news_id: inserted.id, source_key: selected.candidate.source_key,
         external_id: selected.candidate.external_id, canonical_url: selected.candidate.canonical_url,
         metadata: selected.candidate.metadata }, { onConflict: 'news_id,canonical_url' })
-      const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name })
+      const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name }, allowedTags)
       if (!generated.content) { result.geminiFailures++; await logError(selected.source, 'gemini', generated.error, inserted.id); return }
       const status = !testMode && autoSite ? 'published' : 'draft', now = new Date().toISOString()
       const { error: updateError } = await supabase.from('yangiliklar').update({ ...generated.content, status,
+        tags: generated.meta.tags, reading_level: generated.meta.readingLevel,
         verification_status: status === 'published' ? 'tasdiqlangan' : 'kutilmoqda', auto_published: status === 'published',
-        published_at: status === 'published' ? now : null, updated_at: now }).eq('id', inserted.id).eq('content_origin', 'automation')
+        published_at: status === 'published' ? now : null, updated_at: now,
+        source_metadata: { ...selected.candidate.metadata, gemini_confidence: generated.meta.confidence, safety_issues: generated.meta.safetyIssues } }).eq('id', inserted.id).eq('content_origin', 'automation')
       if (updateError) { await logError(selected.source, 'enrich', updateError.message, inserted.id); return }
       result.draftsEnriched++
       const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: selected.candidate.title_original, category,
