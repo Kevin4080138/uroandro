@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { uzbekContentYarat } from '@/lib/newsContent'
 import { newsMinImportanceScore, newsMaxPerRun } from '@/lib/newsConfig'
+import { avtoTasdiqQarori } from '@/lib/newsGate'
 import { candidateHash, canonicalUrl, titleSimilarity } from '@/lib/newsDedup'
 import { newsImageTopVaSaqlash } from '@/lib/newsImages'
 import { defaultAudience, importanceHisobla } from '@/lib/newsRanking'
@@ -110,19 +111,21 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
         metadata: selected.candidate.metadata }, { onConflict: 'news_id,canonical_url' })
       const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name }, allowedTags)
       if (!generated.content) { result.geminiFailures++; await logError(selected.source, 'gemini', generated.error, inserted.id); return }
-      const status = !testMode && autoSite ? 'published' : 'draft', now = new Date().toISOString()
+      // Bosqichli avto-tasdiq: ishonch + manba darajasi + xavfsizlik chegarasidan oʻtsagina nashr.
+      const qaror = avtoTasdiqQarori({ confidence: generated.meta.confidence, trustTier: selected.source.trust_tier ?? 3, safetyIssues: generated.meta.safetyIssues, autoSite, testMode })
+      const status = qaror.publish ? 'published' : 'draft', now = new Date().toISOString()
       const { error: updateError } = await supabase.from('yangiliklar').update({ ...generated.content, status,
         tags: generated.meta.tags, reading_level: generated.meta.readingLevel,
         verification_status: status === 'published' ? 'tasdiqlangan' : 'kutilmoqda', auto_published: status === 'published',
         published_at: status === 'published' ? now : null, updated_at: now,
-        source_metadata: { ...selected.candidate.metadata, gemini_confidence: generated.meta.confidence, safety_issues: generated.meta.safetyIssues } }).eq('id', inserted.id).eq('content_origin', 'automation')
+        source_metadata: { ...selected.candidate.metadata, gemini_confidence: generated.meta.confidence, safety_issues: generated.meta.safetyIssues, auto_decision: qaror } }).eq('id', inserted.id).eq('content_origin', 'automation')
       if (updateError) { await logError(selected.source, 'enrich', updateError.message, inserted.id); return }
       result.draftsEnriched++
       const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: selected.candidate.title_original, category,
         sourceUrl: selected.candidate.original_url, mayReuseOfficialImages: selected.source.may_reuse_official_images })
       if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id).eq('content_origin', 'automation')
-      // Telegram faqat eng yuqori maqola uchun — kanalni spam qilmaslik.
-      if (index === 0 && !testMode && autoTelegram && autoSite) {
+      // Telegram faqat eng yuqori maqola uchun va faqat u haqiqatan nashr boʻlgan boʻlsa.
+      if (index === 0 && !testMode && autoTelegram && status === 'published') {
         try { await yangilikTelegramgaYubor(inserted.id); result.telegramResult = 'sent'; result.publishedCount++ }
         catch (error) { await logError(selected.source, 'telegram', error instanceof Error ? error.message : 'Telegram xatosi', inserted.id); result.telegramResult = 'failed' }
       }

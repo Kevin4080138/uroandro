@@ -67,6 +67,15 @@ export function MaqolaEditor({ editing, setEditing, busy, umumiyBanner, setUmumi
           {editing.source_name}: {editing.original_title} ↗
         </a>
       )}
+      {!isNew && !isManual && (() => {
+        const meta = editing.source_metadata as { gemini_confidence?: number; auto_decision?: { publish?: boolean; reasons?: string[] } } | null
+        const dec = meta?.auto_decision
+        if (!dec && meta?.gemini_confidence == null) return null
+        return <div style={{ fontSize: '12px', padding: '9px 11px', borderRadius: '9px', background: dec?.publish ? 'color-mix(in srgb, var(--good) 12%, transparent)' : 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)' }}>
+          <b>Ishonch:</b> {meta?.gemini_confidence ?? '—'} · <b>Manba darajasi:</b> {editing.trust_tier}
+          {dec && <div style={{ marginTop: '3px', color: 'var(--muted)' }}>{dec.publish ? '✔ Avto-nashr shartlariga mos' : `Draftda qoldi: ${(dec.reasons ?? []).join(', ')}`}</div>}
+        </div>
+      })()}
 
       {/* Banner preview */}
       <div style={{ minHeight: '150px', borderRadius: '12px', padding: '18px', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', background: showImage ? `linear-gradient(to top,rgba(0,0,0,.82),transparent),url(${editing.image_url}) center/cover` : 'linear-gradient(135deg,#0891b2,#2563eb)' }}>

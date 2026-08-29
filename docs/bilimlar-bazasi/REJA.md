@@ -76,11 +76,13 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ✅ `newsRun.ts` — tags/reading_level saqlanadi, confidence+safety `source_metadata`da
 - ⏳ Past-confidence'ni avto-tasdiqdan tiyish — Bosqich 3 da (chegara qoidasi)
 
-### Bosqich 3 — Bosqichli avto-tasdiqlash (~2–3 kun)
-- Qoida: `ball ≥ chegara` + `trust_tier = 1` + validatsiya → avto-publish + banner
-- Aks holda → `draft` navbati
-- Har avto-nashr audit log'ga (`auto_published` + sabab)
-- "✔ Tasdiqlangan manba" belgisi `verification_status`'dan
+### Bosqich 3 — Bosqichli avto-tasdiqlash (~2–3 kun) ✅
+- ✅ Qoidalar dvigateli `newsGate.ts` (`avtoTasdiqQarori`): `confidence ≥ NEWS_MIN_CONFIDENCE` (60)
+  + `trust_tier ≤ NEWS_AUTO_MAX_TRUST_TIER` (1) + xavfsizlik toza + `NEWS_AUTO_SITE_PUBLISH` → avto-nashr
+- ✅ Aks holda → `draft` navbati; sabablar `source_metadata.auto_decision`da
+- ✅ `auto_published` + `verification_status='tasdiqlangan'` faqat oʻtganda; Telegram faqat nashr boʻlsa
+- ✅ Admin editorda "nega draftda qoldi" (ishonch + daraja + sabablar) koʻrsatiladi
+- Env: `NEWS_MIN_CONFIDENCE`, `NEWS_AUTO_MAX_TRUST_TIER`, `NEWS_AUTO_SITE_PUBLISH`, `NEWS_AUTO_TELEGRAM`
 
 ### Bosqich 4 — Boʻlim ichida feʼd (asosiy maqsad) (~5–7 kun) ✅
 - ✅ `/student/yangiliklar` va `/doctor/yangiliklar` — umumiy `YangiliklarFeed` komponenti, `audience` filtri
