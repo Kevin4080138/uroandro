@@ -91,6 +91,18 @@ export async function yangilikTelegramgaYubor(newsId: string, options?: { resend
   return { published: true, telegramStatus: 'sent' as const }
 }
 
+export async function yangilikniQaytaribOl(newsId: string) {
+  const supabase = createAdminClient()
+  const now = new Date().toISOString()
+  // Nashr qilingan maqolani qaytarib olish: bannerlarni o'chirish va holatni qoralamaga qaytarish.
+  await supabase.from('bannerlar').update({ faol: false, arxiv: true, updated_at: now }).eq('yangilik_id', newsId)
+  const { error } = await supabase.from('yangiliklar').update({
+    status: 'draft', banner_approval_status: 'not_created', published_at: null, updated_at: now,
+  }).eq('id', newsId)
+  if (error) throw new Error(`Qaytarib olish xatosi: ${error.message}`)
+  return { unpublished: true }
+}
+
 export async function yangilikBannerVaTelegram(newsId: string, options?: { umumiyBanner?: boolean; resendTelegram?: boolean }) {
   const banner = await yangilikBannergaChiqar(newsId, { umumiyBanner: options?.umumiyBanner })
   const telegram = await yangilikTelegramgaYubor(newsId, { resendTelegram: options?.resendTelegram })

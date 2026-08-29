@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { uzbekContentYarat } from '@/lib/newsContent'
-import { newsMinImportanceScore } from '@/lib/newsConfig'
+import { newsMinImportanceScore, newsMaxPerRun } from '@/lib/newsConfig'
 import { candidateHash, canonicalUrl, titleSimilarity } from '@/lib/newsDedup'
 import { newsImageTopVaSaqlash } from '@/lib/newsImages'
 import { defaultAudience, importanceHisobla } from '@/lib/newsRanking'
@@ -18,7 +18,7 @@ function sourceConfig(row: Record<string, unknown>): SourceConfig {
   return { id: String(row.id), source_key: String(row.source_key), name: String(row.name), base_url: row.base_url ? String(row.base_url) : null,
     feed_url: String(row.feed_url), source_url: String(row.source_url), source_type: String(row.source_type), category: row.category as SourceConfig['category'],
     specialties: (row.specialties ?? []) as SourceConfig['specialties'], priority: Number(row.priority), search_query: row.search_query ? String(row.search_query) : null,
-    lookback_days: Number(row.lookback_days ?? 30), may_reuse_official_images: Boolean(row.may_reuse_official_images) }
+    lookback_days: Number(row.lookback_days ?? 30), may_reuse_official_images: Boolean(row.may_reuse_official_images), trust_tier: Number(row.trust_tier ?? 3) }
 }
 
 export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<NewsRunResult> {
@@ -88,33 +88,44 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
       if (ranked.score >= newsMinImportanceScore()) eligible.push({ ...item, ...ranked })
     }
     result.eligibleCount = eligible.length; eligible.sort((a, b) => b.score - a.score || (Date.parse(b.candidate.published_at ?? '') || 0) - (Date.parse(a.candidate.published_at ?? '') || 0))
-    const selected = eligible[0]
-    if (!selected) { result.reason = 'no eligible content'; result.skipped = true; await finish('completed', result.reason); return result }
-    const hash = candidateHash(selected.candidate), audience = defaultAudience(selected.candidate.content_type)
-    const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({ slug: newsSlug(selected.candidate.title_original, hash), source_name: selected.candidate.source_name,
-      source_url: selected.candidate.original_url, source_date: selected.candidate.published_at, original_title: selected.candidate.title_original,
-      category: selected.candidate.specialty === 'gynecology' ? 'ginekologiya' : selected.candidate.specialty === 'andrology' ? 'andrologiya' : 'urologiya',
-      dedup_hash: hash, status: 'draft', content_origin: 'automation', source_key: selected.candidate.source_key, external_id: selected.candidate.external_id,
-      canonical_url: selected.candidate.canonical_url, content_type: selected.candidate.content_type, specialty: selected.candidate.specialty, audience,
-      importance_score: selected.score, importance_reasons: selected.reasons, telegram_auto_eligible: true, banner_approval_status: 'pending',
-      source_published_at: selected.candidate.published_at, source_metadata: selected.candidate.metadata }).select('*').single()
-    if (insertError || !inserted) throw new Error(insertError?.message ?? 'Yangilik saqlanmadi')
-    result.draftsCreated = 1; result.processedNewsId = inserted.id
-    await supabase.from('yangilik_source_references').upsert({ news_id: inserted.id, source_key: selected.candidate.source_key,
-      external_id: selected.candidate.external_id, canonical_url: selected.candidate.canonical_url,
-      metadata: selected.candidate.metadata }, { onConflict: 'news_id,canonical_url' })
-    const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name })
-    if (!generated.content) { result.geminiFailures++; await logError(selected.source, 'gemini', generated.error, inserted.id); await finish('completed'); return result }
-    const status = !testMode && autoSite ? 'published' : 'draft', now = new Date().toISOString()
-    const { error: updateError } = await supabase.from('yangiliklar').update({ ...generated.content, status, published_at: status === 'published' ? now : null, updated_at: now }).eq('id', inserted.id).eq('content_origin', 'automation')
-    if (updateError) throw updateError
-    result.draftsEnriched = 1
-    const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: selected.candidate.title_original,
-      category: selected.candidate.specialty === 'gynecology' ? 'ginekologiya' : selected.candidate.specialty === 'andrology' ? 'andrologiya' : 'urologiya',
-      sourceUrl: selected.candidate.original_url, mayReuseOfficialImages: selected.source.may_reuse_official_images })
-    if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id).eq('content_origin', 'automation')
-    if (!testMode && autoTelegram && autoSite) { try { await yangilikTelegramgaYubor(inserted.id); result.telegramResult = 'sent'; result.publishedCount = 1 } catch (error) { await logError(selected.source, 'telegram', error instanceof Error ? error.message : 'Telegram xatosi', inserted.id); result.telegramResult = 'failed' } }
-    else result.telegramResult = testMode ? 'disabled_in_test' : 'disabled_by_env'
+    if (!eligible.length) { result.reason = 'no eligible content'; result.skipped = true; await finish('completed', result.reason); return result }
+    // Bir run'da eng yaxshi top-N maqola olinadi. Test rejimida faqat bittasi.
+    const tanlanganlar = eligible.slice(0, testMode ? 1 : newsMaxPerRun())
+
+    const maqolaniYarat = async (selected: typeof eligible[number], index: number) => {
+      const hash = candidateHash(selected.candidate), audience = defaultAudience(selected.candidate.content_type)
+      const category = selected.candidate.specialty === 'gynecology' ? 'ginekologiya' : selected.candidate.specialty === 'andrology' ? 'andrologiya' : 'urologiya'
+      const { data: inserted, error: insertError } = await supabase.from('yangiliklar').insert({ slug: newsSlug(selected.candidate.title_original, hash), source_name: selected.candidate.source_name,
+        source_url: selected.candidate.original_url, source_date: selected.candidate.published_at, original_title: selected.candidate.title_original, category,
+        dedup_hash: hash, status: 'draft', content_origin: 'automation', source_key: selected.candidate.source_key, external_id: selected.candidate.external_id,
+        canonical_url: selected.candidate.canonical_url, content_type: selected.candidate.content_type, specialty: selected.candidate.specialty, audience,
+        importance_score: selected.score, importance_reasons: selected.reasons, telegram_auto_eligible: true, banner_approval_status: 'pending',
+        trust_tier: selected.source.trust_tier ?? 3, source_published_at: selected.candidate.published_at, source_metadata: selected.candidate.metadata }).select('*').single()
+      if (insertError || !inserted) { await logError(selected.source, 'insert', insertError?.message ?? 'Yangilik saqlanmadi'); return }
+      result.draftsCreated++; if (!result.processedNewsId) result.processedNewsId = inserted.id
+      await supabase.from('yangilik_source_references').upsert({ news_id: inserted.id, source_key: selected.candidate.source_key,
+        external_id: selected.candidate.external_id, canonical_url: selected.candidate.canonical_url,
+        metadata: selected.candidate.metadata }, { onConflict: 'news_id,canonical_url' })
+      const generated = await uzbekContentYarat({ title: selected.candidate.title_original, summary: selected.candidate.summary_original, url: selected.candidate.original_url, sourceName: selected.candidate.source_name })
+      if (!generated.content) { result.geminiFailures++; await logError(selected.source, 'gemini', generated.error, inserted.id); return }
+      const status = !testMode && autoSite ? 'published' : 'draft', now = new Date().toISOString()
+      const { error: updateError } = await supabase.from('yangiliklar').update({ ...generated.content, status,
+        verification_status: status === 'published' ? 'tasdiqlangan' : 'kutilmoqda', auto_published: status === 'published',
+        published_at: status === 'published' ? now : null, updated_at: now }).eq('id', inserted.id).eq('content_origin', 'automation')
+      if (updateError) { await logError(selected.source, 'enrich', updateError.message, inserted.id); return }
+      result.draftsEnriched++
+      const image = await newsImageTopVaSaqlash({ newsId: inserted.id, title: selected.candidate.title_original, category,
+        sourceUrl: selected.candidate.original_url, mayReuseOfficialImages: selected.source.may_reuse_official_images })
+      if (image) await supabase.from('yangiliklar').update(image).eq('id', inserted.id).eq('content_origin', 'automation')
+      // Telegram faqat eng yuqori maqola uchun — kanalni spam qilmaslik.
+      if (index === 0 && !testMode && autoTelegram && autoSite) {
+        try { await yangilikTelegramgaYubor(inserted.id); result.telegramResult = 'sent'; result.publishedCount++ }
+        catch (error) { await logError(selected.source, 'telegram', error instanceof Error ? error.message : 'Telegram xatosi', inserted.id); result.telegramResult = 'failed' }
+      }
+    }
+
+    for (let i = 0; i < tanlanganlar.length; i++) await maqolaniYarat(tanlanganlar[i], i)
+    if (result.telegramResult === 'not_sent') result.telegramResult = testMode ? 'disabled_in_test' : 'disabled_by_env'
     await finish('completed'); return result
   } catch (error) { const message = error instanceof Error ? error.message : 'Noma’lum xato'; result.errors.push(message); await finish('failed'); throw new Error(message) }
 }

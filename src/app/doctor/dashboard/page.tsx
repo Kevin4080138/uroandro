@@ -7,7 +7,7 @@ import { AppShell } from '@/components/AppShell'
 import { DoctorBannerStrip } from '@/components/DoctorBannerStrip'
 import {
   TrendingUp, Users, Inbox, FileText, Globe, CalendarClock, Bandage,
-  ClipboardList, Calculator, Library, BookOpenCheck, ChevronRight,
+  ClipboardList, Calculator, Library, BookOpenCheck, ChevronRight, Newspaper,
 } from 'lucide-react'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
@@ -61,6 +61,7 @@ export default function DoctorDashboard() {
             { Icon: CalendarClock, title: 'Navbatlar', desc: 'Onlayn yozilgan bemorlar', href: '/doctor/navbatlar', c: 'var(--warn)' },
             { Icon: Bandage, title: 'Operatsiya kuzatuvi', desc: 'Operatsiyadan keyingi eslatmalar', href: '/doctor/operatsiya-kuzatuvi', c: 'var(--danger)' },
             { Icon: ClipboardList, title: 'Protokollar', desc: 'Klinik protokollar', href: '/doctor/protokollar', c: 'var(--accent)' },
+            { Icon: Newspaper, title: 'Yangiliklar', desc: 'Klinik yangilik va tadqiqotlar', href: '/doctor/yangiliklar', c: 'var(--accent-2)' },
             { Icon: Calculator, title: 'Kalkulatorlar', desc: 'Varikotsele usul tanlash, IPSS, PSA', href: '/doctor/calculators', c: 'var(--accent-2)' },
             { Icon: Library, title: 'Kutubxona', desc: 'PDF materiallar', href: '/doctor/kutubxona', c: 'var(--good)' },
             { Icon: BookOpenCheck, title: "Qo'llanmalar", desc: 'EAU, AUA guidelines', href: '/doctor/qollanmalar', c: 'var(--warn)' },

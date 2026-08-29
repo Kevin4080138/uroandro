@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
-import { yangilikBannergaChiqar, yangilikBannerVaTelegram, yangilikTelegramgaYubor } from '@/lib/newsPublish'
+import { yangilikBannergaChiqar, yangilikBannerVaTelegram, yangilikTelegramgaYubor, yangilikniQaytaribOl } from '@/lib/newsPublish'
 
 async function adminTekshir() {
   const client = await createServerSupabase()
@@ -20,6 +20,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (body.action === 'telegram') return NextResponse.json({ ok: true, ...(await yangilikTelegramgaYubor(id)) })
     if (body.action === 'resend') return NextResponse.json({ ok: true, ...(await yangilikTelegramgaYubor(id, { resendTelegram: true })) })
     if (body.action === 'publish') return NextResponse.json({ ok: true, ...(await yangilikBannerVaTelegram(id, { umumiyBanner: body.umumiyBanner })) })
+    if (body.action === 'unpublish') return NextResponse.json({ ok: true, ...(await yangilikniQaytaribOl(id)) })
     if (body.action === 'approve') {
       const { error } = await admin.from('yangiliklar').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', id)
       if (error) throw error

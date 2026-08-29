@@ -1,0 +1,471 @@
+<title>Bilimlar Bazasi Yoʻl Xaritasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg: #f5f7f8;
+    --surface: #ffffff;
+    --surface-2: #eef2f3;
+    --ink: #10201f;
+    --ink-soft: #33474a;
+    --muted: #5f7278;
+    --line: #dfe6e7;
+    --line-strong: #c6d2d3;
+    --accent: #0d8a9e;
+    --accent-deep: #0a6474;
+    --accent-soft: #dcf0f2;
+    --trust: #b0791a;
+    --trust-soft: #f7ecd4;
+    --risk: #b23a2e;
+    --risk-soft: #f6e2df;
+    --good: #2f8f5b;
+    --shadow: 0 1px 2px rgba(16,32,31,.04), 0 8px 28px rgba(16,32,31,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1414;
+      --surface: #101d1d;
+      --surface-2: #16292a;
+      --ink: #e7f0ef;
+      --ink-soft: #b6c8c7;
+      --muted: #8299a0;
+      --line: #21393a;
+      --line-strong: #2e4c4d;
+      --accent: #3fb6c8;
+      --accent-deep: #7fd6e2;
+      --accent-soft: #10312f;
+      --trust: #e0b25a;
+      --trust-soft: #2e2712;
+      --risk: #e78a7d;
+      --risk-soft: #2f1815;
+      --good: #6fc394;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1414;
+    --surface: #101d1d;
+    --surface-2: #16292a;
+    --ink: #e7f0ef;
+    --ink-soft: #b6c8c7;
+    --muted: #8299a0;
+    --line: #21393a;
+    --line-strong: #2e4c4d;
+    --accent: #3fb6c8;
+    --accent-deep: #7fd6e2;
+    --accent-soft: #10312f;
+    --trust: #e0b25a;
+    --trust-soft: #2e2712;
+    --risk: #e78a7d;
+    --risk-soft: #2f1815;
+    --good: #6fc394;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 46px 22px 96px; }
+
+  h1, h2, h3 { font-family: "Fraunces", Georgia, serif; text-wrap: balance; line-height: 1.12; margin: 0; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500;
+  }
+  a { color: var(--accent-deep); }
+
+  /* ---- Header ---- */
+  header.hero { margin-bottom: 40px; }
+  header.hero h1 { font-size: clamp(34px, 7vw, 54px); font-weight: 600; margin: 14px 0 16px; letter-spacing: -.015em; }
+  header.hero p.lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--ink-soft); margin: 0; max-width: 60ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+    padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-strong);
+    color: var(--muted); background: var(--surface);
+  }
+
+  section { margin-top: 52px; }
+  h2.section-title { font-size: clamp(24px, 4vw, 32px); font-weight: 600; margin-bottom: 6px; letter-spacing: -.01em; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 62ch; }
+
+  /* ---- Diagnoz two lists ---- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 620px) { .split { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 20px 8px; box-shadow: var(--shadow);
+  }
+  .panel h3 { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 9px; margin-bottom: 4px; font-family: "IBM Plex Sans", sans-serif; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--good); }
+  .dot.gap { background: var(--risk); }
+  .panel ul { list-style: none; margin: 14px 0 12px; padding: 0; }
+  .panel li { position: relative; padding: 9px 0 9px 22px; font-size: 14.5px; border-top: 1px solid var(--line); line-height: 1.5; }
+  .panel li:first-child { border-top: none; }
+  .panel li::before { content: ""; position: absolute; left: 4px; top: 17px; width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); }
+  .panel li code { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; color: var(--ink-soft); }
+
+  /* ---- Recommendations (thesis) ---- */
+  .recs { display: grid; gap: 12px; }
+  .rec {
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .rec .num {
+    font-family: "Fraunces", serif; font-size: 26px; font-weight: 600; color: var(--accent);
+    line-height: 1; padding-top: 2px;
+  }
+  .rec h3 { font-size: 17px; font-weight: 600; margin-bottom: 5px; font-family: "IBM Plex Sans", sans-serif; }
+  .rec p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .rec .tag { display: inline-block; margin-top: 9px; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--trust); background: var(--trust-soft); padding: 3px 9px; border-radius: 6px; }
+
+  /* ---- Pipeline diagram ---- */
+  .pipe-scroll { overflow-x: auto; padding: 6px 2px 12px; margin: 0 -4px; }
+  .pipe { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .stage { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .stage .box {
+    background: var(--surface); border: 1px solid var(--line-strong); border-radius: 13px;
+    padding: 13px 8px; height: 100%; box-shadow: var(--shadow);
+  }
+  .stage.hot .box { border-color: var(--accent); background: var(--accent-soft); }
+  .stage .icon { font-size: 20px; display: block; margin-bottom: 5px; }
+  .stage .lbl { font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+  .stage .sub { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .stage .arrow { position: absolute; right: -7px; top: 34px; color: var(--accent); font-size: 15px; z-index: 2; }
+
+  /* ---- Phases ---- */
+  .phases { display: grid; gap: 14px; }
+  .phase {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 22px 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .phase::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .phase-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .phase-id { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--accent); font-weight: 600; letter-spacing: .05em; }
+  .phase h3 { font-size: 20px; font-weight: 600; margin: 2px 0 0; }
+  .effort { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--muted); border: 1px solid var(--line-strong); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .phase .goal { color: var(--ink-soft); font-size: 15px; margin: 10px 0 14px; }
+  .deliv { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .deliv li { position: relative; padding-left: 24px; font-size: 14px; line-height: 1.5; }
+  .deliv li::before { content: "→"; position: absolute; left: 2px; top: 0; color: var(--accent); font-weight: 600; }
+  .deliv code, .goal code { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; background: var(--surface-2); padding: 1px 6px; border-radius: 5px; color: var(--ink-soft); }
+
+  /* ---- Schema block ---- */
+  .code {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; overflow-x: auto; box-shadow: var(--shadow);
+    font-family: "IBM Plex Mono", monospace; font-size: 13px; line-height: 1.75; color: var(--ink-soft);
+  }
+  .code .k { color: var(--accent-deep); font-weight: 600; }
+  .code .c { color: var(--muted); font-style: italic; }
+  .code .n { color: var(--trust); }
+
+  /* ---- Tables ---- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; background: var(--surface); font-size: 14px; }
+  th, td { text-align: left; padding: 12px 15px; border-top: 1px solid var(--line); vertical-align: top; }
+  thead th { border-top: none; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+  td .tier { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .tier.t1 { background: var(--accent-soft); color: var(--accent-deep); }
+  .tier.t2 { background: var(--trust-soft); color: var(--trust); }
+  .tier.t3 { background: var(--surface-2); color: var(--muted); }
+  td.risk-h { font-weight: 600; color: var(--ink); }
+
+  /* ---- Callout ---- */
+  .callout {
+    background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 16px;
+    padding: 22px 24px; margin-top: 12px;
+  }
+  .callout h3 { font-family: "IBM Plex Sans", sans-serif; font-size: 17px; font-weight: 600; margin-bottom: 8px; color: var(--accent-deep); }
+  .callout p { margin: 0 0 8px; font-size: 15px; color: var(--ink-soft); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .foot { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; font-family: "IBM Plex Mono", monospace; }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Urosfera · Kontent avtomatizatsiyasi</div>
+    <h1>Ishonchli bilimlar bazasini avtomatik yigʻish</h1>
+    <p class="lede">Tasdiqlangan manbalardan yangilik va maqolalarni oʻzi topib, tarjima qilib, tekshirib, teglab — talaba va shifokor boʻlimlarida alohida feʼd qilib beradigan tizim uchun bosqichli yoʻl xaritasi.</p>
+    <div class="meta">
+      <span class="chip">6 bosqich</span>
+      <span class="chip">poydevor mavjud</span>
+      <span class="chip">tibbiy · huquqiy xavfsiz</span>
+      <span class="chip">telefon-first</span>
+    </div>
+  </header>
+
+  <!-- DIAGNOZ -->
+  <section>
+    <div class="eyebrow">Diagnoz</div>
+    <h2 class="section-title">Hozir nima bor, nima yetishmaydi</h2>
+    <p class="section-sub">Loyihada allaqachon jiddiy poydevor qurilgan — adapter tizimi, saralash, dedup va Gemini tarjima. Maqsadga yetish uchun tor joylar aynan quyida.</p>
+    <div class="split">
+      <div class="panel">
+        <h3><span class="dot ok"></span> Tayyor poydevor</h3>
+        <ul>
+          <li>Adapter arxitekturasi — <code>newsSources/registry.ts</code> har manba uchun alohida modul</li>
+          <li>Saralash + dedup + relevance + xato-izolyatsiya moduллари ishlaydi</li>
+          <li>Gemini tarjima uch auditoriya (talaba/shifokor/bemor) uchun</li>
+          <li>Rol boʻyicha banner + Telegram + public <code>/yangiliklar</code></li>
+          <li>GitHub Actions cron, kuniga 2 marta</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3><span class="dot gap"></span> Tor joylar</h3>
+        <ul>
+          <li>Faqat <b>PubMed + NIDDK</b> ishlaydi; ACOG/AUA/EAU/NICHD adapterlari “unavailable”</li>
+          <li>Har run’da faqat <b>1 ta</b> maqola olinadi (<code>eligible[0]</code>) — baza sekin toʻladi</li>
+          <li>Kontent boʻlim ichida faqat banner’da — <b>alohida feʼd/arxiv yoʻq</b></li>
+          <li>Avto-tasdiq “hammasi yoki hech nima” (env flag)</li>
+          <li>Tarjimada sifat darvozasi yoʻq; <b>teglash / taksonomiya yoʻq</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAVSIYA -->
+  <section>
+    <div class="eyebrow">Asosiy tavsiya</div>
+    <h2 class="section-title">Yechimning beshta ustuni</h2>
+    <p class="section-sub">Sizning og‘riq: “yangilikni bilish uchun izlash kerak, tasdiqlangan-yo‘qligini aniqlash kerak”. Yechim — ishonchni avtomatik va koʻrinadigan qilish.</p>
+    <div class="recs">
+      <div class="rec">
+        <div class="num">1</div>
+        <div>
+          <h3>“Tasdiqlangan manba” = ishonch darajali roʻyxat + belgi</h3>
+          <p>Har manbaga <b>ishonch darajasi</b> (rasmiy qoʻllanma / indekslangan / preprint) beriladi. Har maqolada koʻrinadigan “✔ Tasdiqlangan manba” belgisi — foydalanuvchi izlanmaydi, ishonch darajasini bir qarashda koʻradi.</p>
+          <span class="tag">og‘riqning bevosita yechimi</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">2</div>
+        <div>
+          <h3>Bosqichli avto-tasdiqlash</h3>
+          <p>Yuqori ball + ishonchli manba + validatsiyadan oʻtgan material <b>avtomatik nashr</b> boʻladi; past ishonch — admin navbatiga tushadi. Toʻliq avtomatik, lekin tibbiy javobgarlik nazorat ostida.</p>
+          <span class="tag">avtomatik, ammo xavfsiz</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">3</div>
+        <div>
+          <h3>Boʻlim ichida alohida “Bilimlar bazasi” feʼdi</h3>
+          <p>Talaba va shifokor boʻlimlarida alohida sahifa — <code>audience</code> boʻyicha filtr. Banner faqat diqqat tortadi; feʼd — toʻplanadigan, qidiriladigan, saqlanadigan arxiv.</p>
+          <span class="tag">asosiy UX maqsadi</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">4</div>
+        <div>
+          <h3>Koʻp-maqola oqimi + avto-teglash</h3>
+          <p>Run’da bitta emas, eng yaxshi <b>N ta</b> material olinadi va mavzu boʻyicha teglanadi (prostata, buyrak, menopauza…). Shunda baza tez toʻladi va browsable boʻladi.</p>
+          <span class="tag">baza tezligi</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">5</div>
+        <div>
+          <h3>Sifat va huquqiy darvoza</h3>
+          <p>Faqat <b>annotatsiya</b>dan tarjima (toʻliq matn koʻchirilmaydi), bemor koʻrinishida doza yoʻq, majburiy disclaimer, oʻz SVG/rasmlari. Pullik platforma uchun huquqiy xavf nolga yaqin.</p>
+          <span class="tag">mualliflik huquqi</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section>
+    <div class="eyebrow">Toʻliq oqim</div>
+    <h2 class="section-title">Manbadan boʻlim feʼdigacha</h2>
+    <p class="section-sub">Butun quvur avtomatik. Odam faqat past-ishonchli materialga aralashadi — qolgani oʻzi oqadi.</p>
+    <div class="pipe-scroll">
+      <div class="pipe">
+        <div class="stage"><div class="box"><span class="icon">🛰️</span><span class="lbl">Manbalar</span><span class="sub">tier 1–3</span></div><span class="arrow">▶</span></div>
+        <div class="stage"><div class="box"><span class="icon">📥</span><span class="lbl">Ingestion</span><span class="sub">top-N · dedup</span></div><span class="arrow">▶</span></div>
+        <div class="stage hot"><div class="box"><span class="icon">🌐</span><span class="lbl">Tarjima + sifat</span><span class="sub">Gemini · lint</span></div><span class="arrow">▶</span></div>
+        <div class="stage"><div class="box"><span class="icon">🏷️</span><span class="lbl">Teglash</span><span class="sub">mavzu · daraja</span></div><span class="arrow">▶</span></div>
+        <div class="stage hot"><div class="box"><span class="icon">⚖️</span><span class="lbl">Avto-tasdiq</span><span class="sub">ball + tier</span></div><span class="arrow">▶</span></div>
+        <div class="stage"><div class="box"><span class="icon">🗂️</span><span class="lbl">Baza</span><span class="sub">arxiv</span></div><span class="arrow">▶</span></div>
+        <div class="stage"><div class="box"><span class="icon">📱</span><span class="lbl">Boʻlim feʼd</span><span class="sub">talaba · shifokor</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOSQICHLAR -->
+  <section>
+    <div class="eyebrow">Yoʻl xaritasi</div>
+    <h2 class="section-title">Bosqichma-bosqich reja</h2>
+    <p class="section-sub">Har bosqich mustaqil deploy qilinadi va o‘zicha qiymat beradi. Tartib — bog‘liqlik bo‘yicha.</p>
+    <div class="phases">
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 0</div><h3>Poydevor: ma’lumotlar modeli</h3></div>
+          <span class="effort">~2–3 kun</span>
+        </div>
+        <p class="goal">Baza va belgilar tizimi uchun ustunlar. Hech qanday UI o‘zgarishisiz, keyingi hammasi shu ustunlarga tayanadi.</p>
+        <ul class="deliv">
+          <li><code>yangiliklar</code> ga: <code>trust_tier</code>, <code>verification_status</code>, <code>auto_published</code>, <code>tags text[]</code>, <code>reading_level</code></li>
+          <li><code>yangilik_manbalari</code> ga: <code>trust_tier</code> (1–3) va litsenziya turi</li>
+          <li>Yangi <code>saqlangan_maqolalar</code> jadvali (foydalanuvchi bookmark’i)</li>
+          <li>Yangi <code>yangilik_teglari</code> lug‘ati (mavzu taksonomiyasi + o‘zbekcha nom)</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 1</div><h3>Ingestion’ni kuchaytirish</h3></div>
+          <span class="effort">~3–5 kun</span>
+        </div>
+        <p class="goal">Baza tez to‘lishi uchun ko‘p-maqola va ko‘p-manba. Bloklangan sayt scraping emas — bot-do‘st, ochiq litsenziyali manbalar.</p>
+        <ul class="deliv">
+          <li><code>newsRun.ts</code> — bitta o‘rniga eng yaxshi <b>top-N</b> (masalan 5) ni ingest qilsin</li>
+          <li>Yangi adapterlar: <b>Europe PMC</b>, <b>medRxiv/bioRxiv</b>, <b>DOAJ</b> (ochiq jurnal), <b>WHO</b> — hammasi API/ochiq litsenziya</li>
+          <li>PubMed qidiruvlarini kengaytirish (ko‘proq mavzu bo‘yicha so‘rovlar)</li>
+          <li>NCBI rate-limit (3 req/s) va manba fetch izolyatsiyasini hurmat qilish</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 2</div><h3>Tarjima sifati + avto-teglash</h3></div>
+          <span class="effort">~3–4 kun</span>
+        </div>
+        <p class="goal">Avtomatik nashrga ishonish uchun tarjima ishonchli bo‘lishi shart. Sifat darvozasi va teglashni bir Gemini chaqiruviga qo‘shamiz.</p>
+        <ul class="deliv">
+          <li><code>newsContent.ts</code> — javobga <code>tags</code>, <code>reading_level</code>, <code>confidence</code> maydonlari qo‘shilsin</li>
+          <li>Xavfsizlik lint: bemor ko‘rinishida doza/tashxis yo‘qligini tekshirish (kod bilan)</li>
+          <li>Bo‘sh yoki past-ishonch tarjimani avtomatik draft’ga qaytarish</li>
+          <li>Mavzu teglari <code>yangilik_teglari</code> lug‘atiga map qilinadi</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 3</div><h3>Bosqichli avto-tasdiqlash</h3></div>
+          <span class="effort">~2–3 kun</span>
+        </div>
+        <p class="goal">“Hammasi yoki hech nima” o‘rniga qoidalar dvigateli. Ishonchli material o‘zi chiqadi, shubhali material odam oldiga boradi.</p>
+        <ul class="deliv">
+          <li>Qoida: <code>ball ≥ chegara</code> + <code>trust_tier = 1</code> + validatsiya o‘tgan → avto-publish + banner</li>
+          <li>Aks holda → <code>draft</code> navbati (mavjud admin panel)</li>
+          <li>Har avto-nashr audit log’ga yoziladi (<code>auto_published</code> + sabab)</li>
+          <li>“✔ Tasdiqlangan manba” belgisi verification_status’dan chiqadi</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 4</div><h3>Bo‘lim ichida feʼd — asosiy maqsad</h3></div>
+          <span class="effort">~5–7 kun</span>
+        </div>
+        <p class="goal">Talaba va shifokor o‘z bo‘limida yangilik/maqolalarni to‘plangan, qidiriladigan arxiv sifatida ko‘radi — internetdan izlash tugaydi.</p>
+        <ul class="deliv">
+          <li><code>/student/yangiliklar</code> va <code>/doctor/yangiliklar</code> — <code>audience</code> bo‘yicha filtrlangan feʼd</li>
+          <li>Mavzu (teg) va yo‘nalish bo‘yicha filtr, sarlavha bo‘yicha qidiruv</li>
+          <li>Har kartada: ishonch belgisi, manba, sana, o‘qish darajasi</li>
+          <li>Saqlash (bookmark) va “o‘qildi” holati; telefon-first ixcham dizayn</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div><div class="phase-id">BOSQICH 5</div><h3>Personalizatsiya va yetkazish</h3></div>
+          <span class="effort">keyingi to‘lqin</span>
+        </div>
+        <p class="goal">Baza to‘lgach — foydalanuvchini o‘zi qaytadigan qilish. Ixtiyoriy, lekin ushlab turish uchun kuchli.</p>
+        <ul class="deliv">
+          <li>Haftalik/kunlik digest (push + Telegram) — foydalanuvchi yo‘nalishiga mos</li>
+          <li>Tegga obuna: “prostata bo‘yicha yangi material chiqsa xabar ber”</li>
+          <li>Darsga bog‘lash: tegga mos yangilik dars sahifasida ko‘rinsin</li>
+          <li>O‘qish tarixiga asoslangan tavsiya</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SCHEMA -->
+  <section>
+    <div class="eyebrow">Ma’lumotlar modeli</div>
+    <h2 class="section-title">Bosqich 0 dagi asosiy o‘zgarishlar</h2>
+    <p class="section-sub">Mavjud <code>yangiliklar</code> jadvaliga qo‘shiladigan minimal ustunlar — qolgan bosqichlar shularga tayanadi.</p>
+    <div class="code">
+<span class="c">-- yangiliklar jadvaliga</span><br>
+<span class="k">ALTER TABLE</span> yangiliklar<br>
+&nbsp;&nbsp;<span class="k">ADD COLUMN</span> trust_tier <span class="k">int</span> <span class="k">DEFAULT</span> <span class="n">3</span>,&nbsp;&nbsp;<span class="c">-- 1 rasmiy · 2 indekslangan · 3 preprint</span><br>
+&nbsp;&nbsp;<span class="k">ADD COLUMN</span> verification_status <span class="k">text</span> <span class="k">DEFAULT</span> <span class="n">'kutilmoqda'</span>,<br>
+&nbsp;&nbsp;<span class="k">ADD COLUMN</span> auto_published <span class="k">boolean</span> <span class="k">DEFAULT</span> <span class="k">false</span>,<br>
+&nbsp;&nbsp;<span class="k">ADD COLUMN</span> tags <span class="k">text</span>[] <span class="k">DEFAULT</span> <span class="n">'{}'</span>,<br>
+&nbsp;&nbsp;<span class="k">ADD COLUMN</span> reading_level <span class="k">text</span>;&nbsp;&nbsp;<span class="c">-- easy · orta · qiyin</span><br><br>
+<span class="c">-- foydalanuvchi bookmark’i</span><br>
+<span class="k">CREATE TABLE</span> saqlangan_maqolalar (<br>
+&nbsp;&nbsp;user_id <span class="k">uuid</span>, yangilik_id <span class="k">uuid</span>, saqlangan_at <span class="k">timestamptz</span><br>
+);
+    </div>
+  </section>
+
+  <!-- MANBALAR -->
+  <section>
+    <div class="eyebrow">Manba strategiyasi</div>
+    <h2 class="section-title">Ishonch darajalari</h2>
+    <p class="section-sub">AUA/EAU/ACOG bot’ni bloklaydi va ba’zi rasmlar tijoriy taqiqli. Shuning uchun ochiq, API-li, litsenziya-toza manbalarga tayanamiz.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Manba</th><th>Daraja</th><th>Nega</th></tr></thead>
+        <tbody>
+          <tr><td>PubMed · Europe PMC · NIDDK</td><td><span class="tier t1">Tier 1</span></td><td>Indekslangan, API-li, annotatsiya ochiq</td></tr>
+          <tr><td>DOAJ ochiq jurnallar · WHO</td><td><span class="tier t1">Tier 1</span></td><td>Ochiq litsenziya (CC BY), tijoriy ruxsat</td></tr>
+          <tr><td>medRxiv / bioRxiv preprint</td><td><span class="tier t2">Tier 2</span></td><td>Yangi, ammo peer-review’siz — belgi bilan</td></tr>
+          <tr><td>AUA · EAU · ACOG</td><td><span class="tier t3">Tier 3</span></td><td>Bot/AI cheklovi — faqat qo‘lda havola</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- XAVFLAR -->
+  <section>
+    <div class="eyebrow">Xavflar va yumshatish</div>
+    <h2 class="section-title">Nimalarga e’tibor berish kerak</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Xavf</th><th>Yumshatish</th></tr></thead>
+        <tbody>
+          <tr><td class="risk-h">Tibbiy javobgarlik</td><td>Bosqichli avto-tasdiq; disclaimer; bemor ko‘rinishida doza/tashxis yo‘q; individual maslahat bermaslik</td></tr>
+          <tr><td class="risk-h">Gemini xarajati</td><td>Faqat top-N ni tarjima qilish; dedup nashrdan oldin; arzon model + qat’iy token limiti</td></tr>
+          <tr><td class="risk-h">Sifat “drift”i</td><td>confidence maydoni; xavfsizlik lint; past-ball material admin navbatiga</td></tr>
+          <tr><td class="risk-h">Rate-limit / manba uzilishi</td><td>Mavjud fetch izolyatsiyasi; per-manba interval; xato log</td></tr>
+          <tr><td class="risk-h">Mualliflik huquqi</td><td>Faqat annotatsiyadan qayta yozish; rasm — o‘z SVG yoki CC BY; to‘liq matn ko‘chirilmaydi</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BIRINCHI QADAM -->
+  <section>
+    <div class="eyebrow">Boshlash nuqtasi</div>
+    <h2 class="section-title">Birinchi nima qilamiz</h2>
+    <div class="callout">
+      <h3>Eng katta qiymat / eng kam xavf: Bosqich 0 + 4</h3>
+      <p><b>Bosqich 0</b> (schema) bir kunlik ish, lekin butun rejaning poydevori. Undan keyin darrov <b>Bosqich 4</b> (bo‘lim feʼdi) — bu sizning asl maqsadingiz va mavjud published maqolalar bilan bugunoq ishlaydi, avtomatizatsiyani kutmaydi.</p>
+      <p>Avtomatizatsiya (1–3) esa feʼd tayyor bo‘lgach uni to‘ldiradi. Ya’ni foydalanuvchi qiymatni birinchi haftadayoq ko‘radi, avtomatika ortidan yetadi.</p>
+    </div>
+  </section>
+
+  <div class="foot">Urosfera · bilimlar bazasi yo‘l xaritasi · muhokama uchun qoralama</div>
+
+</div>

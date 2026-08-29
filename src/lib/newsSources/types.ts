@@ -9,7 +9,7 @@ export type SourceConfig = {
   id: string; source_key: string; name: string; base_url: string | null; feed_url: string
   source_url: string; source_type: string; category: NewsCategory; specialties: Specialty[]
   priority: number; search_query?: string | null; lookback_days?: number
-  may_reuse_official_images: boolean
+  may_reuse_official_images: boolean; trust_tier?: number
 }
 export type NormalizedNewsCandidate = {
   source_key: string; source_name: string; source_type: SourceType; external_id: string | null

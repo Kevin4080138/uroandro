@@ -16,7 +16,7 @@ import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData, getRankFromStages } from '@/lib/rank'
 import {
   BookOpen, BarChart3, Library, Target, Dna, Calculator, Scissors, FolderTree,
-  Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye,
+  Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye, Newspaper,
 } from 'lucide-react'
 
 export default function StudentDashboard() {
@@ -118,6 +118,7 @@ export default function StudentDashboard() {
 
   const UROLOGIYA_KARTALAR = [
     { Icon: BookOpen, title: 'Darslar', desc: 'Urologiya va andrologiya kurslari', c: 'var(--accent)', href: '/student/darslar' },
+    { Icon: Newspaper, title: 'Yangiliklar', desc: 'Tibbiy yangilik va maqolalar', c: 'var(--accent-2)', href: '/student/yangiliklar' },
     { Icon: BarChart3, title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { Icon: Library, title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
     { Icon: Target, title: "O'zingizni tekshiring", desc: 'Aralash savol va klinik holat', c: 'var(--danger)', href: '/student/ozingizni-tekshiring' },

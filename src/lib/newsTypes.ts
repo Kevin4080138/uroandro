@@ -42,4 +42,11 @@ export type NewsRow = {
   banner_approval_status: 'not_created' | 'pending' | 'active' | 'failed'
   source_published_at: string | null
   source_metadata: Record<string, unknown>
+  trust_tier: number
+  verification_status: 'kutilmoqda' | 'tasdiqlangan' | 'rad_etilgan'
+  auto_published: boolean
+  tags: string[]
+  reading_level: 'easy' | 'orta' | 'qiyin' | null
 }
+
+export type TegRow = { id: string; slug: string; nom_uz: string; category: NewsCategory | null; created_at: string }
