@@ -62,17 +62,32 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
       await finish('completed'); return result
     }
     if (!autoFetch && !testMode) { result.skipped = true; result.reason = 'NEWS_AUTO_FETCH=false'; await finish('completed', result.reason); return result }
+    // Manbalar parallel o'qiladi — ketma-ket bo'lsa ko'p manba funksiya vaqtini oshiradi (504).
+    // Bog'lamalar (concurrency) cheklangan, NCBI kabi manbalar bir vaqtda haddan ortiq so'rov olmasin.
+    const CONCURRENCY = 6
     const all: Array<{ candidate: NormalizedNewsCandidate; source: SourceConfig }> = []
-    for (const source of sources) {
+    const fetchedAll: Array<{ source: SourceConfig; fetched: Awaited<ReturnType<typeof fetchSourceSafely>> }> = []
+    for (let i = 0; i < sources.length; i += CONCURRENCY) {
+      const batch = sources.slice(i, i + CONCURRENCY)
+      const settled = await Promise.all(batch.map(async (source) => {
+        const fetched = await fetchSourceSafely(source), now = new Date().toISOString()
+        await supabase.from('yangilik_manbalari').update(fetched.error ? { last_checked_at: now, last_error: fetched.error } : { last_checked_at: now, last_success_at: now, last_error: null }).eq('id', source.id)
+        return { source, fetched }
+      }))
+      fetchedAll.push(...settled)
+    }
+    for (const { source, fetched } of fetchedAll) {
       result.checkedSources++
-      const fetched = await fetchSourceSafely(source), now = new Date().toISOString()
-      await supabase.from('yangilik_manbalari').update(fetched.error ? { last_checked_at: now, last_error: fetched.error } : { last_checked_at: now, last_success_at: now, last_error: null }).eq('id', source.id)
       if (fetched.error) { await logError(source, 'source', fetched.error); continue }
       result.candidatesFound += fetched.candidates.length; all.push(...fetched.candidates.map((candidate) => ({ candidate, source })))
     }
     const eligible: Array<{ candidate: NormalizedNewsCandidate; source: SourceConfig; score: number; reasons: string[] }> = []
     for (const item of all) {
       item.candidate.canonical_url = canonicalUrl(item.candidate.canonical_url)
+      // Arzon filtrlar (tarmoqsiz) avval — DB dedup so'rovlari faqat mos va yuqori baholi nomzodlar uchun.
+      if (!urosferaRelevant(item.candidate)) continue
+      const ranked = importanceHisobla(item.candidate)
+      if (ranked.score < newsMinImportanceScore()) continue
       const hash = candidateHash(item.candidate)
       let exact: Record<string, unknown> | null = null
       if (item.candidate.external_id) {
@@ -86,9 +101,7 @@ export async function kunlikYangilikIshiniBajar(testMode: boolean): Promise<News
         ? { id: String(exact.id), original_title: String(exact.original_title), content_origin: exact.content_origin as 'manual' | 'automation' } : null
       if (!duplicate) { const { data: recent } = await supabase.from('yangiliklar').select('id,original_title,content_origin').eq('content_origin', 'automation').gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString()).limit(100); const similar = (recent ?? []).find((row) => titleSimilarity(row.original_title, item.candidate.title_original) >= .82); duplicate = similar ? { id: String(similar.id), original_title: String(similar.original_title), content_origin: similar.content_origin as 'manual' | 'automation' } : null }
       if (duplicate) { result.duplicates++; if (duplicate.content_origin === 'automation') await supabase.from('yangilik_source_references').upsert({ news_id: duplicate.id, source_key: item.candidate.source_key, external_id: item.candidate.external_id, canonical_url: item.candidate.canonical_url, metadata: item.candidate.metadata }, { onConflict: 'news_id,canonical_url' }); continue }
-      const ranked = importanceHisobla(item.candidate)
-      if (!urosferaRelevant(item.candidate)) continue
-      if (ranked.score >= newsMinImportanceScore()) eligible.push({ ...item, ...ranked })
+      eligible.push({ ...item, ...ranked })
     }
     result.eligibleCount = eligible.length; eligible.sort((a, b) => b.score - a.score || (Date.parse(b.candidate.published_at ?? '') || 0) - (Date.parse(a.candidate.published_at ?? '') || 0))
     if (!eligible.length) { result.reason = 'no eligible content'; result.skipped = true; await finish('completed', result.reason); return result }
