@@ -68,6 +68,8 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ✅ DOAJ adapteri — ochiq jurnal maqolalari (`doaj.ts`, tier 1, cc-by; brauzer UA, jonli tasdiqlangan)
 - ✅ medRxiv/bioRxiv preprintlari — Europe PMC `SRC:PPR` orqali (tier 2 → avto-tasdiqdan tashqarida, admin koʻrigi)
 - ✅ 6 yangi manba seed: `20260914000000_qoshimcha_manbalar.sql`
+- ✅ EAU + AUA flagman jurnallari (European Urology, Journal of Urology) Europe PMC orqali
+  (`20260915000000_eau_aua_jurnal_manbalari.sql`, tier 1) — sayt scrape emas, indekslangan abstract
 - ⏳ WHO — barqaror API/RSS yoʻq, oʻtkazib yuborildi (adapter unavailable)
 - NCBI rate-limit (3 req/s) va fetch izolyatsiyasini hurmat qilish (mavjud)
 
