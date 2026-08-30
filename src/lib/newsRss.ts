@@ -44,6 +44,12 @@ function categoryFor(text: string, fallback: NewsCategory): NewsCategory {
 }
 
 const NCBI_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
+// NCBI_API_KEY bo'lsa limit 3→10 so'rov/sek: parallel manba o'qishda 429 kamayadi.
+function ncbiKalit(params: URLSearchParams) {
+  const key = process.env.NCBI_API_KEY
+  if (key) params.set('api_key', key)
+  return params
+}
 const NCBI_HEADERS = { 'User-Agent': 'UrosferaNewsBot/1.0 (admin@urosfera.uz)' }
 
 function pubmedTag(block: string, name: string) {
@@ -86,6 +92,7 @@ export async function pubmedNomzodiniUrlBoyicha(source: FeedSource, url: string)
     db: 'pubmed', id: pmid, rettype: 'abstract', retmode: 'xml',
     tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
   })
+  ncbiKalit(params)
   const response = await fetch(`${NCBI_BASE}/efetch.fcgi?${params}`, {
     headers: NCBI_HEADERS, signal: AbortSignal.timeout(15_000),
   })
@@ -99,6 +106,7 @@ export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate
     db: 'pubmed', term: source.search_query, reldate: String(source.lookback_days ?? 30), datetype: 'edat',
     retmax: '10', sort: 'pub_date', retmode: 'json', tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
   })
+  ncbiKalit(params)
   const search = await fetch(`${NCBI_BASE}/esearch.fcgi?${params}`, { headers: NCBI_HEADERS, signal: AbortSignal.timeout(15_000) })
   if (!search.ok) throw new Error(`${source.name}: ESearch HTTP ${search.status}`)
   const json = await search.json() as { esearchresult?: { idlist?: string[] } }
@@ -111,6 +119,7 @@ export async function pubmedNomzodlar(source: FeedSource): Promise<FeedCandidate
     db: 'pubmed', id: ids.join(','), rettype: 'abstract', retmode: 'xml',
     tool: 'UrosferaNewsBot', email: 'admin@urosfera.uz',
   })
+  ncbiKalit(fetchParams)
   const details = await fetch(`${NCBI_BASE}/efetch.fcgi?${fetchParams}`, { headers: NCBI_HEADERS, signal: AbortSignal.timeout(20_000) })
   if (!details.ok) throw new Error(`${source.name}: EFetch HTTP ${details.status}`)
   return pubmedMaqolalarniOqish(await details.text(), source)

@@ -128,7 +128,13 @@ export async function uzbekContentYarat(candidate: Candidate, allowedTags: TagOp
     const data = JSON.parse(text.replace(/^```json\s*|\s*```$/g, '')) as Partial<UzbekNewsContent> & { tags?: unknown; reading_level?: unknown; confidence?: unknown }
     const missing = REQUIRED_FIELDS.filter((field) => typeof data[field] !== 'string' || !data[field]!.trim())
     if (missing.length) return xato(`Gemini javobida maydonlar bo'sh: ${missing.join(', ')}`)
-    const content = data as UzbekNewsContent
+    // Faqat 7 ta matn maydoni — tags/reading_level/confidence bazaga alohida yoziladi,
+    // shu bois ...content spreadida ular (ayniqsa ustuni yo'q confidence) tushib qolmasin.
+    const content: UzbekNewsContent = {
+      title_uz: data.title_uz!, summary_uz: data.summary_uz!, content_uz: data.content_uz!,
+      student_importance: data.student_importance!, doctor_importance: data.doctor_importance!,
+      patient_importance: data.patient_importance!, telegram_post_uz: data.telegram_post_uz!,
+    }
 
     const allowedSlugs = new Set(allowedTags.map((tag) => tag.slug))
     const tags = Array.isArray(data.tags)
