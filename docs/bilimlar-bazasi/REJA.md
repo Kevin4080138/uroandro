@@ -65,8 +65,10 @@ Koʻp-maqola va koʻp-manba. Bloklangan sayt scraping emas — bot-doʻst, ochiq
 - ✅ Telegram faqat eng yuqori maqola uchun (kanal spam boʻlmasin)
 - ✅ Europe PMC adapteri — `newsSources/adapters/europepmc.ts` (ochiq JSON API, jonli tasdiqlangan);
   PMID/DOI orqali PubMed bilan avtomatik dedup; 3 manba seed: `20260911000000_europepmc_manbalari.sql`
-- ⏳ Qolgan adapterlar: medRxiv/bioRxiv, DOAJ, WHO
-- ⏳ PubMed qidiruvlarini kengaytirish
+- ✅ DOAJ adapteri — ochiq jurnal maqolalari (`doaj.ts`, tier 1, cc-by; brauzer UA, jonli tasdiqlangan)
+- ✅ medRxiv/bioRxiv preprintlari — Europe PMC `SRC:PPR` orqali (tier 2 → avto-tasdiqdan tashqarida, admin koʻrigi)
+- ✅ 6 yangi manba seed: `20260914000000_qoshimcha_manbalar.sql`
+- ⏳ WHO — barqaror API/RSS yoʻq, oʻtkazib yuborildi (adapter unavailable)
 - NCBI rate-limit (3 req/s) va fetch izolyatsiyasini hurmat qilish (mavjud)
 
 ### Bosqich 2 — Tarjima sifati + avto-teglash (~3–4 kun) ✅
