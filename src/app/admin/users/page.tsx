@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
@@ -14,10 +14,12 @@ const ROLLAR = [
   { value: 'admin', label: '🛠️ Admin' },
 ]
 
-const BOSQICH_PILLLAR: { id: "oson" | "o'rta" | 'qiyin'; emoji: string }[] = [
-  { id: 'oson', emoji: '🟢' },
-  { id: "o'rta", emoji: '🟡' },
-  { id: 'qiyin', emoji: '🔴' },
+// Obuna bosqichi — rang + matnli belgi (faqat rang bilan ajratish rang ko'rmaydiganlar
+// uchun tushunarsiz edi).
+const BOSQICH_PILLLAR: { id: "oson" | "o'rta" | 'qiyin'; label: string; rang: string }[] = [
+  { id: 'oson', label: 'Oson', rang: 'var(--good)' },
+  { id: "o'rta", label: "O'rta", rang: 'var(--warn)' },
+  { id: 'qiyin', label: 'Qiyin', rang: 'var(--danger)' },
 ]
 
 const inputStyle = {
@@ -41,6 +43,9 @@ export default function AdminUsersPage() {
   const [xato, setXato] = useState<string | null>(null)
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
+  const [amalXato, setAmalXato] = useState<string | null>(null)
+  const [tanlanganlar, setTanlanganlar] = useState<Set<string>>(new Set())
+  const [bulkYuklanmoqda, setBulkYuklanmoqda] = useState(false)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
   const [kutayotganlar, setKutayotganlar] = useState<Profile[]>([])
   const [kutayotganlarLoading, setKutayotganlarLoading] = useState(true)
@@ -48,7 +53,10 @@ export default function AdminUsersPage() {
   const load = async (q: string, rol: string, s: number) => {
     setLoading(true)
     let base = supabase.from('profiles').select('*', { count: 'exact' }).order('created_at', { ascending: false })
-    if (q.trim()) base = base.or(`full_name.ilike.%${q.trim()}%,telefon.ilike.%${q.trim()}%,email.ilike.%${q.trim()}%`)
+    // .or() grammatikasini buzadigan belgilarni tozalaymiz (vergul OR ajratuvchisi,
+    // qavslar guruhlash, `*` PostgREST wildcard'i) — xom kiritma to'g'ridan-to'g'ri kirmasin.
+    const qq = q.trim().replace(/[,()*\\]/g, ' ').trim()
+    if (qq) base = base.or(`full_name.ilike.%${qq}%,telefon.ilike.%${qq}%,email.ilike.%${qq}%`)
     if (rol) base = base.eq('role', rol)
     const [{ data: profillar, count }, { data: obunaQatorlari }] = await Promise.all([
       base.range(s * SAHIFADA, (s + 1) * SAHIFADA - 1),
@@ -106,43 +114,99 @@ export default function AdminUsersPage() {
     load(qidiruv, rolFiltr, yangi)
   }
 
+  // Mutatsiyalar server route orqali ketadi: xato bo'lsa optimistik UI qaytariladi.
+  const amalYubor = async (payload: Record<string, unknown>): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/admin/foydalanuvchi-amal', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}))
+        setAmalXato(j.error ?? "Amalni bajarib bo'lmadi")
+        return false
+      }
+      return true
+    } catch (e: any) {
+      setAmalXato(e?.message ?? 'Tarmoq xatosi')
+      return false
+    }
+  }
+
+  const tanlaToggle = (id: string) => setTanlanganlar((prev) => {
+    const n = new Set(prev)
+    if (n.has(id)) n.delete(id); else n.add(id)
+    return n
+  })
+  const hammaTanla = (ids: string[]) => setTanlanganlar((prev) => {
+    const hammaTanlangan = ids.length > 0 && ids.every((i) => prev.has(i))
+    const n = new Set(prev)
+    if (hammaTanlangan) ids.forEach((i) => n.delete(i))
+    else ids.forEach((i) => n.add(i))
+    return n
+  })
+
+  // Ommaviy arxivlash/chiqarish — tanlangan foydalanuvchilar ustida
+  const bulkArxivla = async (arxivlangan: boolean) => {
+    const ids = [...tanlanganlar]
+    if (ids.length === 0) return
+    setBulkYuklanmoqda(true)
+    setUsers((prev) => prev.map((u) => (tanlanganlar.has(u.id) ? { ...u, arxivlangan } : u)))
+    const natijalar = await Promise.all(ids.map((id) => amalYubor({ amal: 'arxiv_ozgartirish', userId: id, arxivlangan })))
+    setBulkYuklanmoqda(false)
+    setTanlanganlar(new Set())
+    // Biror amal muvaffaqiyatsiz bo'lsa — ro'yxatni qayta yuklab, holatni bazaga moslaymiz
+    if (natijalar.some((ok) => !ok)) load(qidiruv, rolFiltr, sahifa)
+  }
+
   const obunaniBekorQil = async (studentId: string, bosqich: string) => {
+    const borMi = obunalar[studentId]?.has(bosqich) ?? false
     setObunalar((prev) => {
       const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
       yangi[studentId].delete(bosqich)
       return yangi
     })
-    await supabase.from('obunalar').delete().eq('student_id', studentId).eq('bosqich', bosqich)
+    const ok = await amalYubor({ amal: 'obuna_bekor', userId: studentId, bosqich })
+    if (!ok && borMi) setObunalar((prev) => {
+      const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
+      yangi[studentId].add(bosqich)
+      return yangi
+    })
   }
 
   const obunaBer = async (studentId: string, bosqich: string, oylar: number | null) => {
+    const borMi = obunalar[studentId]?.has(bosqich) ?? false
     setObunalar((prev) => {
       const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
       yangi[studentId].add(bosqich)
       return yangi
     })
-    const tugashSanasi = oylar ? new Date(Date.now() + oylar * 30 * 24 * 60 * 60 * 1000).toISOString() : null
-    await supabase.from('obunalar').upsert(
-      { student_id: studentId, bosqich, faol: true, tugash_sanasi: tugashSanasi },
-      { onConflict: 'student_id,bosqich' }
-    )
+    const ok = await amalYubor({ amal: 'obuna_berish', userId: studentId, bosqich, oylar })
+    if (!ok && !borMi) setObunalar((prev) => {
+      const yangi = { ...prev, [studentId]: new Set(prev[studentId] ?? []) }
+      yangi[studentId].delete(bosqich)
+      return yangi
+    })
   }
 
   const changeRole = async (id: string, role: string) => {
+    const eski = users.find((u) => u.id === id)?.role
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)))
-    await supabase.from('profiles').update({ role }).eq('id', id)
+    const ok = await amalYubor({ amal: 'rol_ozgartirish', userId: id, role })
+    if (!ok && eski !== undefined) setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role: eski } : u)))
   }
 
   const toggleFaol = async (u: Profile) => {
     const faol = !u.faol
     setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, faol } : x)))
-    await supabase.from('profiles').update({ faol }).eq('id', u.id)
+    const ok = await amalYubor({ amal: 'faol_ozgartirish', userId: u.id, faol })
+    if (!ok) setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, faol: u.faol } : x)))
   }
 
   const toggleArxiv = async (u: Profile) => {
     const arxivlangan = !u.arxivlangan
     setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, arxivlangan } : x)))
-    await supabase.from('profiles').update({ arxivlangan }).eq('id', u.id)
+    const ok = await amalYubor({ amal: 'arxiv_ozgartirish', userId: u.id, arxivlangan })
+    if (!ok) setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, arxivlangan: u.arxivlangan } : x)))
   }
 
   const foydalanuvchiniOchir = async (u: Profile) => {
@@ -193,6 +257,19 @@ export default function AdminUsersPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
 
+      {amalXato && (
+        <div role="alert" style={{
+          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100,
+          background: 'var(--danger)', color: 'white', borderRadius: '12px', padding: '12px 18px',
+          fontSize: '13px', fontWeight: 600, boxShadow: 'var(--shadow)', display: 'flex', alignItems: 'center', gap: '12px', maxWidth: '90vw',
+        }}>
+          <span>{amalXato}</span>
+          <button onClick={() => setAmalXato(null)} style={{ background: 'rgba(255,255,255,.25)', border: 'none', color: 'white', borderRadius: '6px', padding: '2px 8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+            Yopish
+          </button>
+        </div>
+      )}
+
       <div className="fade-in px-4 py-6 sm:px-8 sm:py-8">
 
         {/* Kutayotgan shifokorlar */}
@@ -228,7 +305,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => tasdiqlash(u)}
                         style={{
-                          background: '#059669', color: 'white', border: 'none', borderRadius: '8px',
+                          background: 'var(--good)', color: 'white', border: 'none', borderRadius: '8px',
                           padding: '8px 18px', fontSize: '13px', fontWeight: 600, cursor: 'pointer'
                         }}
                       >
@@ -283,13 +360,33 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
+        {tanlanganlar.size > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', padding: '10px 14px', background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: '10px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent)' }}>{tanlanganlar.size} ta tanlandi</span>
+            <button onClick={() => bulkArxivla(true)} disabled={bulkYuklanmoqda} className="soft-press" style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '6px 12px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' }}>
+              {bulkYuklanmoqda ? '...' : '🗄️ Arxivlash'}
+            </button>
+            <button onClick={() => bulkArxivla(false)} disabled={bulkYuklanmoqda} className="soft-press" style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '6px 12px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' }}>
+              {bulkYuklanmoqda ? '...' : '↩️ Chiqarish'}
+            </button>
+            <button onClick={() => setTanlanganlar(new Set())} style={{ background: 'none', color: 'var(--muted)', border: 'none', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer' }}>
+              Tozalash
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <UrosferaLoaderMini />
         ) : (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: 'var(--surface-2)', textAlign: 'left' }}>
+                  <th style={{ padding: '12px 16px', width: '36px' }}>
+                    <input type="checkbox" aria-label="Barchasini tanlash"
+                      checked={filtered.length > 0 && filtered.every((u) => tanlanganlar.has(u.id))}
+                      onChange={() => hammaTanla(filtered.map((u) => u.id))} />
+                  </th>
                   {['Ism', 'Login (telefon/email)', 'Rol', 'Holat', 'Obuna', "Ro'yxatdan o'tgan", ''].map((h) => (
                     <th key={h} style={{ padding: '12px 16px', color: 'var(--muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
@@ -298,6 +395,7 @@ export default function AdminUsersPage() {
               <tbody>
                 {filtered.map((u) => (
                   <FoydalanuvchiQatori key={u.id} u={u} changeRole={changeRole} toggleFaol={toggleFaol}
+                    tanlangan={tanlanganlar.has(u.id)} onTanla={tanlaToggle}
                     toggleArxiv={toggleArxiv} foydalanuvchiniOchir={foydalanuvchiniOchir} ochirilmoqda={ochirilmoqda === u.id}
                     tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                     tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
@@ -369,6 +467,7 @@ export default function AdminUsersPage() {
                   <tbody>
                     {arxivlangan.map((u) => (
                       <FoydalanuvchiQatori key={u.id} u={u} changeRole={changeRole} toggleFaol={toggleFaol}
+                        tanlangan={tanlanganlar.has(u.id)} onTanla={tanlaToggle}
                         toggleArxiv={toggleArxiv} foydalanuvchiniOchir={foydalanuvchiniOchir} ochirilmoqda={ochirilmoqda === u.id}
                         tahrirId={tahrirId} tahrirniOch={tahrirniOch} setTahrirId={setTahrirId}
                         tahrirLogin={tahrirLogin} setTahrirLogin={setTahrirLogin}
@@ -396,12 +495,15 @@ const MUDDATLAR = [
 
 function FoydalanuvchiQatori({
   u, changeRole, toggleFaol, toggleArxiv, foydalanuvchiniOchir, ochirilmoqda,
+  tanlangan, onTanla,
   tahrirId, tahrirniOch, setTahrirId, tahrirLogin, setTahrirLogin, tahrirParol, setTahrirParol,
   tahrirniSaqla, saqlanmoqda, xato, obunalar, obunaBer, obunaniBekorQil,
 }: {
   u: Profile
   changeRole: (id: string, role: string) => void
   toggleFaol: (u: Profile) => void
+  tanlangan: boolean
+  onTanla: (id: string) => void
   toggleArxiv: (u: Profile) => void
   foydalanuvchiniOchir: (u: Profile) => void
   ochirilmoqda: boolean
@@ -418,10 +520,24 @@ function FoydalanuvchiQatori({
   obunaniBekorQil: (studentId: string, bosqich: string) => void
 }) {
   const [muddatTanlovOchiq, setMuddatTanlovOchiq] = useState<string | null>(null)
+  const pillRef = useRef<HTMLDivElement>(null)
+
+  // Muddat-tanlash popover'i tashqariga bosilganda yopiladi
+  useEffect(() => {
+    if (!muddatTanlovOchiq) return
+    const h = (e: MouseEvent) => {
+      if (pillRef.current && !pillRef.current.contains(e.target as Node)) setMuddatTanlovOchiq(null)
+    }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [muddatTanlovOchiq])
 
   return (
     <React.Fragment>
       <tr className="row-hover" style={{ borderTop: '1px solid var(--line)' }}>
+        <td style={{ padding: '12px 16px', width: '36px' }}>
+          <input type="checkbox" checked={tanlangan} onChange={() => onTanla(u.id)} aria-label={`${u.full_name ?? 'Foydalanuvchi'} — tanlash`} />
+        </td>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>{u.full_name ?? '—'}</td>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap', color: 'var(--ink-soft)', fontSize: '12px' }}>
           {u.role === 'patient' ? (u.telefon ?? '—') : (u.email ?? '—')}
@@ -441,7 +557,7 @@ function FoydalanuvchiQatori({
             className="btn-animated"
             style={{
               border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer',
-              background: u.faol ? 'rgba(5,150,105,.15)' : 'rgba(220,38,38,.15)',
+              background: u.faol ? 'color-mix(in srgb, var(--good) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)',
               color: u.faol ? 'var(--good)' : 'var(--danger)', whiteSpace: 'nowrap',
             }}
           >
@@ -452,23 +568,28 @@ function FoydalanuvchiQatori({
           {u.role !== 'student' ? (
             <span style={{ color: 'var(--muted)' }}>—</span>
           ) : (
-            <div style={{ display: 'flex', gap: '4px' }}>
+            <div ref={pillRef} style={{ display: 'flex', gap: '4px' }}>
               {BOSQICH_PILLLAR.map((b) => {
                 const ega = obunalar.has(b.id)
                 return (
                   <div key={b.id} style={{ position: 'relative' }}>
                     <button
                       onClick={() => (ega ? obunaniBekorQil(u.id, b.id) : setMuddatTanlovOchiq(muddatTanlovOchiq === b.id ? null : b.id))}
-                      title={`${b.id}${ega ? ' — sotib olingan (bekor qilish uchun bosing)' : ' — sotib olinmagan (muddat tanlash uchun bosing)'}`}
+                      title={`${b.label}${ega ? ' — sotib olingan (bekor qilish uchun bosing)' : ' — sotib olinmagan (muddat tanlash uchun bosing)'}`}
+                      aria-label={`${b.label} bosqich — ${ega ? 'obuna bor, bekor qilish' : "obuna yo'q, berish"}`}
+                      aria-pressed={ega}
                       className="soft-press"
                       style={{
-                        border: ega ? '1px solid var(--good)' : '1px solid var(--line)',
-                        background: ega ? 'rgba(5,150,105,.12)' : 'var(--surface-2)',
-                        borderRadius: '6px', padding: '3px 7px', fontSize: '12px', cursor: 'pointer',
-                        opacity: ega ? 1 : 0.45,
+                        display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap',
+                        border: ega ? `1px solid ${b.rang}` : '1px solid var(--line)',
+                        background: ega ? `color-mix(in srgb, ${b.rang} 12%, transparent)` : 'var(--surface-2)',
+                        color: ega ? b.rang : 'var(--muted)',
+                        borderRadius: '6px', padding: '3px 8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
+                        opacity: ega ? 1 : 0.7,
                       }}
                     >
-                      {b.emoji}
+                      <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ega ? b.rang : 'var(--muted)', flexShrink: 0 }} />
+                      {b.label}
                     </button>
                     {muddatTanlovOchiq === b.id && (
                       <div style={{
@@ -525,7 +646,7 @@ function FoydalanuvchiQatori({
               disabled={ochirilmoqda}
               className="soft-press"
               style={{
-                background: 'rgba(220,38,38,.1)', color: 'var(--danger)', border: '1px solid var(--danger)',
+                background: 'color-mix(in srgb, var(--danger) 10%, transparent)', color: 'var(--danger)', border: '1px solid var(--danger)',
                 borderRadius: '8px', padding: '5px 11px', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer',
               }}
             >
@@ -536,7 +657,7 @@ function FoydalanuvchiQatori({
       </tr>
       {tahrirId === u.id && (
         <tr style={{ borderTop: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-          <td colSpan={7} style={{ padding: '14px 16px' }}>
+          <td colSpan={8} style={{ padding: '14px 16px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div style={{ flex: '1 1 200px' }}>
                 <label style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>

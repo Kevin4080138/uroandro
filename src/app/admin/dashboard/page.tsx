@@ -52,69 +52,39 @@ export default function AdminDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
 
-      const bugun = new Date(); bugun.setHours(0, 0, 0, 0)
-      const hafta = new Date(); hafta.setDate(hafta.getDate() - 7); hafta.setHours(0, 0, 0, 0)
-      const yettikun = new Date(); yettikun.setDate(yettikun.getDate() - 6); yettikun.setHours(0, 0, 0, 0)
-
-      const rolSon = (r: string) => supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', r)
-      const [profileRes, bugunRes, haftaRes, fikrRes, murojaatRes, recentRes, yettiKunRes, obunaRes, qadamFaolRes, testFaolRes,
-        studentRes, doctorRes, patientRes, adminRes] = await Promise.all([
+      // Og'ir agregatsiyalar bazada: KPI (14 so'rov o'rniga 1) + 7 kunlik grafik.
+      // Profil va so'nggi a'zolar — yengil, to'g'ridan-to'g'ri.
+      const [profileRes, kpiRes, grafikRes, recentRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', bugun.toISOString()),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', hafta.toISOString()),
-        supabase.from('fikrlar').select('id', { count: 'exact', head: true }).eq('korildi', false),
-        supabase.from('tashriflar').select('id', { count: 'exact', head: true }).eq('holat', 'yangi'),
+        supabase.rpc('admin_dashboard_kpi').single(),
+        supabase.rpc('admin_yangi_azolar_7kun'),
         supabase.from('profiles').select('full_name, role, created_at').order('created_at', { ascending: false }).limit(5),
-        supabase.from('profiles').select('created_at').gte('created_at', yettikun.toISOString()),
-        supabase.from('obunalar').select('student_id, tugash_sanasi').eq('faol', true),
-        supabase.from('dars_qadam_progress').select('student_id').gte('created_at', hafta.toISOString()),
-        supabase.from('talim_natijalari').select('student_id').gte('created_at', hafta.toISOString()),
-        rolSon('student'), rolSon('doctor'), rolSon('patient'), rolSon('admin'),
       ])
 
+      const kpi = (kpiRes.data ?? {}) as Record<string, number>
       setRolTaqsimot([
-        { role: 'student', son: studentRes.count ?? 0 },
-        { role: 'doctor', son: doctorRes.count ?? 0 },
-        { role: 'patient', son: patientRes.count ?? 0 },
-        { role: 'admin', son: adminRes.count ?? 0 },
-      ])
-
-      // Obunali talabalar — muddati o'tmagan faol obunalar bo'yicha unikal talabalar
-      const obunalilar = new Set(
-        ((obunaRes.data ?? []) as { student_id: string; tugash_sanasi: string | null }[])
-          .filter((o) => !o.tugash_sanasi || new Date(o.tugash_sanasi) > new Date())
-          .map((o) => o.student_id)
-      )
-      // 7 kunda faol talabalar — qadam yoki test urinishi qilganlar (unikal)
-      const faollar = new Set([
-        ...((qadamFaolRes.data ?? []) as { student_id: string }[]).map((r) => r.student_id),
-        ...((testFaolRes.data ?? []) as { student_id: string }[]).map((r) => r.student_id),
+        { role: 'student', son: Number(kpi.student_soni) || 0 },
+        { role: 'doctor', son: Number(kpi.doctor_soni) || 0 },
+        { role: 'patient', son: Number(kpi.patient_soni) || 0 },
+        { role: 'admin', son: Number(kpi.admin_soni) || 0 },
       ])
 
       setProfile(profileRes.data)
       setFaollik({
-        bugunKirganlar: bugunRes.count ?? 0,
-        haftaYangilar: haftaRes.count ?? 0,
-        korilmagan: fikrRes.count ?? 0,
-        yangiMurojaatlar: murojaatRes.count ?? 0,
-        obunaliTalabalar: obunalilar.size,
-        faolTalabalar: faollar.size,
+        bugunKirganlar: Number(kpi.bugun_qoshildi) || 0,
+        haftaYangilar: Number(kpi.hafta_yangilar) || 0,
+        korilmagan: Number(kpi.korilmagan_fikr) || 0,
+        yangiMurojaatlar: Number(kpi.yangi_murojaat) || 0,
+        obunaliTalabalar: Number(kpi.obunali_talabalar) || 0,
+        faolTalabalar: Number(kpi.faol_talabalar) || 0,
       })
       setRecentUsers((recentRes.data as Recent[]) ?? [])
 
-      // Mini chart: 7 kunlik
-      const kunMap: Record<string, number> = {}
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
-        kunMap[d.toDateString()] = 0
-      }
-      for (const p of yettiKunRes.data ?? []) {
-        const d = new Date(p.created_at); d.setHours(0, 0, 0, 0)
-        if (kunMap[d.toDateString()] !== undefined) kunMap[d.toDateString()]++
-      }
-      setMiniChart(Object.entries(kunMap).map(([key, soni]) => ({
-        kun: new Date(key).toLocaleDateString('uz-UZ', { weekday: 'short' }),
-        soni,
+      // Mini chart: 7 kunlik (kun bo'yicha sanoq bazadan keladi)
+      const grafik = (grafikRes.data as { kun: string; soni: number }[]) ?? []
+      setMiniChart(grafik.map((r) => ({
+        kun: new Date(r.kun).toLocaleDateString('uz-UZ', { weekday: 'short' }),
+        soni: Number(r.soni) || 0,
       })))
     }
     load()
@@ -165,9 +135,12 @@ export default function AdminDashboard() {
               { label: 'Ko\'rilmagan fikrlar', value: faollik.korilmagan, Icon: MessageSquare, color: faollik.korilmagan > 0 ? 'var(--warn)' : 'var(--muted)', href: '/admin/fikrlar' },
               { label: 'Yangi murojaatlar', value: faollik.yangiMurojaatlar, Icon: ClipboardList, color: faollik.yangiMurojaatlar > 0 ? 'var(--danger)' : 'var(--muted)', href: '/admin/statistika' },
             ].map((k) => (
-              <div key={k.label} onClick={() => router.push(k.href)} className="rise" style={{
+              <button key={k.label} onClick={() => router.push(k.href)} className="rise"
+                aria-label={`${k.label}: ${k.value}`}
+                style={{
                 background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
                 padding: '16px 18px', cursor: 'pointer', transition: 'border-color .15s',
+                textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit', display: 'block',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <span style={{ display: 'flex', color: k.color }}><k.Icon size={20} strokeWidth={2} /></span>
@@ -179,7 +152,7 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ fontSize: '28px', fontWeight: 700, color: k.color, fontFamily: 'monospace', lineHeight: 1 }}>{k.value}</div>
                 <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '6px' }}>{k.label}</div>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -264,12 +237,12 @@ export default function AdminDashboard() {
                 { Icon: Megaphone, title: 'Bildirishnoma', href: '/admin/bildirishnomalar', c: 'var(--warn)' },
                 { Icon: Images, title: 'Bannerlar', href: '/admin/bannerlar', c: 'var(--accent-2)' },
               ].map((item) => (
-                <div key={item.title} onClick={() => router.push(item.href)}
-                  className="dash-card rise"
-                  style={{ ['--c' as any]: item.c, cursor: 'pointer', padding: '14px' }}>
-                  <div className="dash-icon" style={{ marginBottom: '6px', color: item.c }}><item.Icon size={20} strokeWidth={2} /></div>
-                  <h3 className="dash-title" style={{ fontSize: '13px', margin: 0 }}>{item.title}</h3>
-                </div>
+                <Link key={item.title} href={item.href} style={{ textDecoration: 'none' }}>
+                  <div className="dash-card rise" style={{ ['--c' as any]: item.c, padding: '14px' }}>
+                    <div className="dash-icon" style={{ marginBottom: '6px', color: item.c }}><item.Icon size={20} strokeWidth={2} /></div>
+                    <h3 className="dash-title" style={{ fontSize: '13px', margin: 0 }}>{item.title}</h3>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>

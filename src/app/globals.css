@@ -175,6 +175,14 @@ h1, h2, h3, h4 {
 .soft-press { transition: transform .08s ease, filter .15s ease; }
 .soft-press:active { transform: scale(.97); }
 
+/* Klaviatura fokusi — ko'rinadigan halqa (sichqoncha bosishida chiqmaydi).
+   Bosiladigan div'lar tugmaga aylantirilgani va qatorlar tabIndex olgani uchun kerak. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .chevron { transition: transform .2s ease, color .2s ease; }
 .lift:hover .chevron { transform: translateX(3px); color: var(--accent); }
 

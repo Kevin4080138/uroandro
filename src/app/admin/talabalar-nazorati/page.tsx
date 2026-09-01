@@ -9,21 +9,22 @@ import * as XLSX from 'xlsx'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
-import { darsTugadimi } from '@/lib/talim/useDarsProgress'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
+import { GraduationCap, CreditCard, Flame, CheckCircle2, Target, Download, TrendingUp } from 'lucide-react'
 
-type ProgressQator = { student_id: string; dars_slug: string; qadam: string; created_at: string }
-type NatijaQator = {
-  student_id: string; dars_slug: string; dars_nomi: string
-  togri_son: number; jami_savol: number; foiz: number; turi: string; created_at: string
-}
 type TalabaProfil = { id: string; full_name: string | null; email: string | null; telefon: string | null; created_at: string }
-type ObunaQator = { student_id: string; bosqich: Bosqich; faol: boolean; tugash_sanasi: string | null }
+
+// admin_talabalar_xulosa() RPC qaytaradigan xom qator (agregatsiya bazada)
+type XulosaQator = {
+  student_id: string; full_name: string | null; email: string | null; telefon: string | null; created_at: string
+  tugallangan_darslar: number; jami_qadam: number; urinishlar: number
+  ortacha_foiz: number | null; nazorat_otgan: number
+  obunalar: string[]; darslar: string[]; oxirgi_faollik: string | null
+}
 
 type TalabaXulosa = {
   profil: TalabaProfil
-  qadamlar: Map<string, Set<string>>
-  natijalar: NatijaQator[]
+  darslar: string[]        // bosqich filtri uchun tegib o'tilgan dars slug'lari
   obunalar: Bosqich[]
   tugallanganDarslar: number
   jamiQadam: number
@@ -33,7 +34,28 @@ type TalabaXulosa = {
   oxirgiFaollik: string | null
 }
 
-const BOSQICH_EMOJI: Record<string, string> = { oson: '🟢', "o'rta": '🟡', qiyin: '🔴' }
+type SaralashKalit = 'ism' | 'tugallanganDarslar' | 'jamiQadam' | 'urinishlar' | 'ortachaFoiz' | 'nazoratOtgan' | 'oxirgiFaollik'
+
+// Jadval ustunlari — kalit bo'lgani saralanadi
+const USTUNLAR: { label: string; kalit?: SaralashKalit }[] = [
+  { label: 'Talaba', kalit: 'ism' },
+  { label: 'Obuna' },
+  { label: 'Tugallangan darslar', kalit: 'tugallanganDarslar' },
+  { label: 'Qadamlar', kalit: 'jamiQadam' },
+  { label: 'Urinishlar', kalit: 'urinishlar' },
+  { label: "O'rtacha", kalit: 'ortachaFoiz' },
+  { label: 'Nazorat', kalit: 'nazoratOtgan' },
+  { label: 'Oxirgi faollik', kalit: 'oxirgiFaollik' },
+  { label: '' },
+]
+
+// Obuna bosqichi — rang + matnli belgi (faqat rang bilan ajratish rang ko'rmaydiganlar
+// uchun tushunarsiz edi).
+const BOSQICH_META: Record<string, { label: string; rang: string }> = {
+  oson: { label: 'Oson', rang: 'var(--good)' },
+  "o'rta": { label: "O'rta", rang: 'var(--warn)' },
+  qiyin: { label: 'Qiyin', rang: 'var(--danger)' },
+}
 
 function sanaFmt(s: string | null): string {
   if (!s) return '—'
@@ -41,39 +63,50 @@ function sanaFmt(s: string | null): string {
 }
 
 function faollikRang(s: string | null): string {
-  if (!s) return '#6b7280'
+  if (!s) return 'var(--muted)'
   const kun = (Date.now() - new Date(s).getTime()) / 86400000
-  if (kun <= 3) return '#16a34a'
-  if (kun <= 14) return '#d97706'
-  return '#dc2626'
+  if (kun <= 3) return 'var(--good)'
+  if (kun <= 14) return 'var(--warn)'
+  return 'var(--danger)'
+}
+
+function foizRang(f: number | null): string {
+  if (f === null) return 'var(--muted)'
+  if (f >= 70) return 'var(--good)'
+  if (f >= 50) return 'var(--warn)'
+  return 'var(--danger)'
 }
 
 export default function TalabalarNazoratiPage() {
   const supabase = createClient()
   const router = useRouter()
   const [yuklanmoqda, setYuklanmoqda] = useState(true)
-  const [talabalar, setTalabalar] = useState<TalabaProfil[]>([])
-  const [progresslar, setProgresslar] = useState<ProgressQator[]>([])
-  const [natijalar, setNatijalar] = useState<NatijaQator[]>([])
-  const [obunaQatorlar, setObunaQatorlar] = useState<ObunaQator[]>([])
+  const [xatolik, setXatolik] = useState<string | null>(null)
+  const [xulosalar, setXulosalar] = useState<TalabaXulosa[]>([])
   const [qidiruv, setQidiruv] = useState('')
   const [bosqichFiltr, setBosqichFiltr] = useState<'hammasi' | Bosqich>('hammasi')
   const [faollikFiltr, setFaollikFiltr] = useState<'hammasi' | 'faol' | 'sust'>('hammasi')
   const [obunaFiltr, setObunaFiltr] = useState<'hammasi' | 'obunali' | 'obunasiz'>('hammasi')
+  const [saralash, setSaralash] = useState<{ kalit: SaralashKalit; yon: 'asc' | 'desc' }>({ kalit: 'oxirgiFaollik', yon: 'desc' })
   const [hozir] = useState(() => Date.now())
 
   useEffect(() => {
     const yukla = async () => {
-      const [p, pr, n, o] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email, telefon, created_at').eq('role', 'student').eq('arxivlangan', false),
-        supabase.from('dars_qadam_progress').select('student_id, dars_slug, qadam, created_at'),
-        supabase.from('talim_natijalari').select('student_id, dars_slug, dars_nomi, togri_son, jami_savol, foiz, turi, created_at').order('created_at', { ascending: false }),
-        supabase.from('obunalar').select('student_id, bosqich, faol, tugash_sanasi'),
-      ])
-      setTalabalar((p.data as TalabaProfil[]) ?? [])
-      setProgresslar((pr.data as ProgressQator[]) ?? [])
-      setNatijalar((n.data as NatijaQator[]) ?? [])
-      setObunaQatorlar((o.data as ObunaQator[]) ?? [])
+      // Agregatsiya bazada bajariladi — har talaba uchun bitta xulosa qatori.
+      const { data, error } = await supabase.rpc('admin_talabalar_xulosa')
+      if (error) { setXatolik(error.message); setYuklanmoqda(false); return }
+      const rows = (data as XulosaQator[]) ?? []
+      setXulosalar(rows.map((r) => ({
+        profil: { id: r.student_id, full_name: r.full_name, email: r.email, telefon: r.telefon, created_at: r.created_at },
+        darslar: r.darslar ?? [],
+        obunalar: (r.obunalar ?? []) as Bosqich[],
+        tugallanganDarslar: Number(r.tugallangan_darslar) || 0,
+        jamiQadam: Number(r.jami_qadam) || 0,
+        urinishlar: Number(r.urinishlar) || 0,
+        ortachaFoiz: r.ortacha_foiz === null || r.ortacha_foiz === undefined ? null : Number(r.ortacha_foiz),
+        nazoratOtgan: Number(r.nazorat_otgan) || 0,
+        oxirgiFaollik: r.oxirgi_faollik,
+      })))
       setYuklanmoqda(false)
     }
     yukla()
@@ -86,63 +119,6 @@ export default function TalabalarNazoratiPage() {
     return m
   }, [])
 
-  const xulosalar = useMemo<TalabaXulosa[]>(() => {
-    const progressByStudent = new Map<string, ProgressQator[]>()
-    for (const r of progresslar) {
-      const arr = progressByStudent.get(r.student_id) ?? []
-      arr.push(r)
-      progressByStudent.set(r.student_id, arr)
-    }
-    const natijaByStudent = new Map<string, NatijaQator[]>()
-    for (const r of natijalar) {
-      const arr = natijaByStudent.get(r.student_id) ?? []
-      arr.push(r)
-      natijaByStudent.set(r.student_id, arr)
-    }
-    const obunaByStudent = new Map<string, Bosqich[]>()
-    for (const r of obunaQatorlar) {
-      const amal = r.faol && (!r.tugash_sanasi || new Date(r.tugash_sanasi).getTime() > hozir)
-      if (!amal) continue
-      const arr = obunaByStudent.get(r.student_id) ?? []
-      arr.push(r.bosqich)
-      obunaByStudent.set(r.student_id, arr)
-    }
-
-    return talabalar.map((t) => {
-      const pr = progressByStudent.get(t.id) ?? []
-      const nt = natijaByStudent.get(t.id) ?? []
-
-      const qadamlar = new Map<string, Set<string>>()
-      for (const r of pr) {
-        const s = qadamlar.get(r.dars_slug) ?? new Set<string>()
-        s.add(r.qadam)
-        qadamlar.set(r.dars_slug, s)
-      }
-
-      let tugallangan = 0
-      qadamlar.forEach((s) => { if (darsTugadimi(s)) tugallangan++ })
-
-      const foizlar = nt.map((r) => Number(r.foiz))
-      const nazoratOtgan = new Set(nt.filter((r) => r.turi === 'nazorat' && Number(r.foiz) >= 70).map((r) => r.dars_slug)).size
-
-      const sanalar = [...pr.map((r) => r.created_at), ...nt.map((r) => r.created_at)].sort()
-      const oxirgi = sanalar.length ? sanalar[sanalar.length - 1] : null
-
-      return {
-        profil: t,
-        qadamlar,
-        natijalar: nt,
-        obunalar: obunaByStudent.get(t.id) ?? [],
-        tugallanganDarslar: tugallangan,
-        jamiQadam: pr.length,
-        urinishlar: nt.length,
-        ortachaFoiz: foizlar.length ? Math.round(foizlar.reduce((a, b) => a + b, 0) / foizlar.length) : null,
-        nazoratOtgan,
-        oxirgiFaollik: oxirgi,
-      }
-    })
-  }, [talabalar, progresslar, natijalar, obunaQatorlar, hozir])
-
   const korinadigan = useMemo(() => {
     let r = xulosalar
     if (qidiruv.trim()) {
@@ -154,10 +130,7 @@ export default function TalabalarNazoratiPage() {
       )
     }
     if (bosqichFiltr !== 'hammasi') {
-      r = r.filter((x) => {
-        for (const slug of x.qadamlar.keys()) if (darsBosqichi.get(slug) === bosqichFiltr) return true
-        return x.natijalar.some((n) => darsBosqichi.get(n.dars_slug) === bosqichFiltr)
-      })
+      r = r.filter((x) => x.darslar.some((slug) => darsBosqichi.get(slug) === bosqichFiltr))
     }
     if (faollikFiltr !== 'hammasi') {
       const chegara = hozir - 7 * 86400000
@@ -169,15 +142,30 @@ export default function TalabalarNazoratiPage() {
     if (obunaFiltr !== 'hammasi') {
       r = r.filter((x) => obunaFiltr === 'obunali' ? x.obunalar.length > 0 : x.obunalar.length === 0)
     }
-    return [...r].sort((a, b) => (b.oxirgiFaollik ?? '').localeCompare(a.oxirgiFaollik ?? ''))
-  }, [xulosalar, qidiruv, bosqichFiltr, faollikFiltr, obunaFiltr, darsBosqichi, hozir])
+    const yon = saralash.yon === 'asc' ? 1 : -1
+    return [...r].sort((a, b) => {
+      let c: number
+      if (saralash.kalit === 'ism') {
+        c = (a.profil.full_name ?? '').localeCompare(b.profil.full_name ?? '')
+      } else if (saralash.kalit === 'oxirgiFaollik') {
+        c = (a.oxirgiFaollik ?? '').localeCompare(b.oxirgiFaollik ?? '')
+      } else {
+        c = ((a[saralash.kalit] as number | null) ?? -1) - ((b[saralash.kalit] as number | null) ?? -1)
+      }
+      return c * yon
+    })
+  }, [xulosalar, qidiruv, bosqichFiltr, faollikFiltr, obunaFiltr, saralash, darsBosqichi, hozir])
 
   // KPI
   const faolSoni = xulosalar.filter((x) => x.oxirgiFaollik && hozir - new Date(x.oxirgiFaollik).getTime() <= 7 * 86400000).length
   const obunaliSoni = xulosalar.filter((x) => x.obunalar.length > 0).length
   const jamiTugallangan = xulosalar.reduce((s, x) => s + x.tugallanganDarslar, 0)
-  const hammaFoizlar = natijalar.map((r) => Number(r.foiz))
-  const umumiyOrtacha = hammaFoizlar.length ? Math.round(hammaFoizlar.reduce((a, b) => a + b, 0) / hammaFoizlar.length) : 0
+  // Umumiy o'rtacha — urinishlar soniga tortilgan (og'irlashtirilgan) o'rtacha,
+  // chunki per-talaba ortachaFoiz'lardan oddiy o'rtacha olish noto'g'ri bo'lardi.
+  const jamiUrinish = xulosalar.reduce((s, x) => s + x.urinishlar, 0)
+  const umumiyOrtacha = jamiUrinish
+    ? Math.round(xulosalar.reduce((s, x) => s + (x.ortachaFoiz ?? 0) * x.urinishlar, 0) / jamiUrinish)
+    : 0
 
   const eksport = () => {
     const qatorlar = korinadigan.map((x) => ({
@@ -198,6 +186,12 @@ export default function TalabalarNazoratiPage() {
     XLSX.writeFile(wb, `talabalar-nazorati-${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
+  const saralaBosildi = (kalit: SaralashKalit) => {
+    setSaralash((s) => s.kalit === kalit
+      ? { kalit, yon: s.yon === 'asc' ? 'desc' : 'asc' }
+      : { kalit, yon: kalit === 'ism' ? 'asc' : 'desc' })  // matn — asc, son/sana — desc
+  }
+
   const filtrTugma = (faolMi: boolean) => ({
     background: faolMi ? 'var(--accent)' : 'var(--surface-2)',
     color: faolMi ? 'white' : 'var(--ink-soft)',
@@ -212,7 +206,9 @@ export default function TalabalarNazoratiPage() {
       <div className="mx-auto max-w-[1200px] px-6 py-8">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '23px', fontWeight: 900 }}>📈 Talabalar nazorati</h1>
+            <h1 style={{ margin: 0, fontSize: '23px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <TrendingUp size={22} strokeWidth={2.4} style={{ color: 'var(--accent)' }} /> Talabalar nazorati
+            </h1>
             <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
               Talaba ustiga bosing — batafsil sahifasi ochiladi
             </p>
@@ -220,26 +216,30 @@ export default function TalabalarNazoratiPage() {
           <button onClick={eksport} className="soft-press" style={{
             background: 'var(--surface)', color: 'var(--accent)', border: '1px solid var(--line)',
             borderRadius: '12px', padding: '9px 18px', fontSize: '12.5px', fontWeight: 800, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '7px',
           }}>
-            ⬇ .xlsx eksport
+            <Download size={15} strokeWidth={2.4} /> .xlsx eksport
           </button>
         </div>
 
         {/* KPI kartalar */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '20px' }}>
           {[
-            { nom: 'Jami talabalar', qiymat: talabalar.length, emoji: '🎓' },
-            { nom: 'Obunali talabalar', qiymat: obunaliSoni, emoji: '💳' },
-            { nom: '7 kunda faol', qiymat: faolSoni, emoji: '🔥' },
-            { nom: 'Tugallangan darslar', qiymat: jamiTugallangan, emoji: '✅' },
-            { nom: "O'rtacha test foizi", qiymat: `${umumiyOrtacha}%`, emoji: '🎯' },
+            { nom: 'Jami talabalar', qiymat: xulosalar.length, Icon: GraduationCap, rang: 'var(--accent)' },
+            { nom: 'Obunali talabalar', qiymat: obunaliSoni, Icon: CreditCard, rang: 'var(--good)' },
+            { nom: '7 kunda faol', qiymat: faolSoni, Icon: Flame, rang: 'var(--warn)' },
+            { nom: 'Tugallangan darslar', qiymat: jamiTugallangan, Icon: CheckCircle2, rang: 'var(--good)' },
+            { nom: "O'rtacha test foizi", qiymat: `${umumiyOrtacha}%`, Icon: Target, rang: 'var(--accent)' },
           ].map((k) => (
             <div key={k.nom} style={{
               background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px',
               padding: '16px 18px',
             }}>
-              <div style={{ fontSize: '22px', fontWeight: 900 }}>{k.emoji} {k.qiymat}</div>
-              <div style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700, marginTop: '2px' }}>{k.nom}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: k.rang, display: 'flex' }}><k.Icon size={18} strokeWidth={2.2} /></span>
+                <span style={{ fontSize: '22px', fontWeight: 900 }}>{k.qiymat}</span>
+              </div>
+              <div style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700, marginTop: '4px' }}>{k.nom}</div>
             </div>
           ))}
         </div>
@@ -276,7 +276,11 @@ export default function TalabalarNazoratiPage() {
         </div>
 
         {/* Jadval */}
-        {yuklanmoqda ? (
+        {xatolik ? (
+          <p style={{ color: 'var(--danger)', fontSize: '13.5px', background: 'var(--surface)', border: '1px solid var(--danger)', borderRadius: '12px', padding: '14px 16px' }}>
+            Ma&apos;lumotni yuklab bo&apos;lmadi: {xatolik}
+          </p>
+        ) : yuklanmoqda ? (
           <UrosferaLoaderMini />
         ) : korinadigan.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '13.5px' }}>Talaba topilmadi.</p>
@@ -286,9 +290,23 @@ export default function TalabalarNazoratiPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-                    {['Talaba', 'Obuna', 'Tugallangan darslar', 'Qadamlar', 'Urinishlar', "O'rtacha", 'Nazorat', 'Oxirgi faollik', ''].map((h) => (
-                      <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.03em', whiteSpace: 'nowrap' }}>{h}</th>
-                    ))}
+                    {USTUNLAR.map((u, i) => {
+                      const faol = u.kalit && saralash.kalit === u.kalit
+                      return (
+                        <th key={u.label || `bosh-${i}`} style={{ padding: '11px 14px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: faol ? 'var(--accent)' : 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.03em', whiteSpace: 'nowrap' }}>
+                          {u.kalit ? (
+                            <button
+                              onClick={() => saralaBosildi(u.kalit!)}
+                              aria-label={`${u.label} bo'yicha saralash`}
+                              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', textTransform: 'inherit', letterSpacing: 'inherit' }}
+                            >
+                              {u.label}
+                              <span style={{ opacity: faol ? 1 : 0.35 }}>{faol ? (saralash.yon === 'asc' ? '▲' : '▼') : '↕'}</span>
+                            </button>
+                          ) : u.label}
+                        </th>
+                      )
+                    })}
                   </tr>
                 </thead>
                 <tbody>
@@ -296,6 +314,10 @@ export default function TalabalarNazoratiPage() {
                     <tr
                       key={x.profil.id}
                       onClick={() => router.push(`/admin/talabalar-nazorati/${x.profil.id}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/admin/talabalar-nazorati/${x.profil.id}`) } }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${x.profil.full_name ?? 'Talaba'} — batafsil ko'rish`}
                       className="list-row"
                       style={{ borderBottom: '1px solid var(--line)', cursor: 'pointer' }}
                     >
@@ -304,19 +326,37 @@ export default function TalabalarNazoratiPage() {
                         <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{x.profil.email ?? x.profil.telefon ?? ''}</div>
                       </td>
                       <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                        {x.obunalar.length === 0
-                          ? <span style={{ color: 'var(--muted)', fontSize: '12px' }}>—</span>
-                          : x.obunalar.map((b) => <span key={b} title={b} style={{ fontSize: '14px', marginRight: '2px' }}>{BOSQICH_EMOJI[b]}</span>)}
+                        {x.obunalar.length === 0 ? (
+                          <span style={{ color: 'var(--muted)', fontSize: '12px' }}>—</span>
+                        ) : (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {x.obunalar.map((b) => {
+                              const m = BOSQICH_META[b]
+                              return (
+                                <span key={b} style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                  fontSize: '11px', fontWeight: 700, color: m.rang,
+                                  background: `color-mix(in srgb, ${m.rang} 12%, transparent)`,
+                                  border: `1px solid color-mix(in srgb, ${m.rang} 30%, transparent)`,
+                                  borderRadius: '999px', padding: '2px 8px',
+                                }}>
+                                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: m.rang, flexShrink: 0 }} />
+                                  {m.label}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '12px 14px', fontWeight: 800 }}>{x.tugallanganDarslar}</td>
                       <td style={{ padding: '12px 14px' }}>{x.jamiQadam}</td>
                       <td style={{ padding: '12px 14px' }}>{x.urinishlar}</td>
-                      <td style={{ padding: '12px 14px', fontWeight: 800, color: x.ortachaFoiz === null ? 'var(--muted)' : x.ortachaFoiz >= 70 ? '#16a34a' : x.ortachaFoiz >= 50 ? '#d97706' : '#dc2626' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 800, color: foizRang(x.ortachaFoiz) }}>
                         {x.ortachaFoiz === null ? '—' : `${x.ortachaFoiz}%`}
                       </td>
                       <td style={{ padding: '12px 14px' }}>
                         {x.nazoratOtgan > 0
-                          ? <span style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a', background: '#16a34a14', borderRadius: '999px', padding: '3px 10px' }}>🎓 {x.nazoratOtgan} ta</span>
+                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 800, color: 'var(--good)', background: 'color-mix(in srgb, var(--good) 12%, transparent)', borderRadius: '999px', padding: '3px 10px' }}><GraduationCap size={13} strokeWidth={2.4} /> {x.nazoratOtgan} ta</span>
                           : <span style={{ color: 'var(--muted)', fontSize: '12px' }}>—</span>}
                       </td>
                       <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
