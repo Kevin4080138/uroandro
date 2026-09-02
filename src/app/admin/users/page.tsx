@@ -4,6 +4,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
+import { KebabMenu } from '@/components/KebabMenu'
+import { Pencil, Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+
+// Qator amallari: bitta ⋮ menyu (true) yoki 3 alohida tugma (false).
+const KEBAB_AMALLAR = true
 
 type Profile = { id: string; full_name: string; role: string; telefon: string | null; email: string | null; faol: boolean; created_at: string; arxivlangan: boolean; doctor_holati: string | null; mutaxassislik: string | null; ish_joyi: string | null }
 
@@ -620,6 +625,30 @@ function FoydalanuvchiQatori({
         </td>
         <td style={{ padding: '12px 16px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{new Date(u.created_at).toLocaleDateString()}</td>
         <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+          {KEBAB_AMALLAR ? (
+            <KebabMenu
+              ariaLabel={`${u.full_name ?? 'Foydalanuvchi'} — amallar`}
+              amallar={[
+                {
+                  label: tahrirId === u.id ? 'Tahrirni yopish' : 'Login/parol',
+                  icon: <Pencil size={15} strokeWidth={2} />,
+                  onClick: () => (tahrirId === u.id ? setTahrirId(null) : tahrirniOch(u)),
+                },
+                {
+                  label: u.arxivlangan ? 'Arxivdan chiqarish' : 'Arxivlash',
+                  icon: u.arxivlangan ? <ArchiveRestore size={15} strokeWidth={2} /> : <Archive size={15} strokeWidth={2} />,
+                  onClick: () => toggleArxiv(u),
+                },
+                {
+                  label: ochirilmoqda ? "O'chirilmoqda..." : "O'chirish",
+                  icon: <Trash2 size={15} strokeWidth={2} />,
+                  onClick: () => foydalanuvchiniOchir(u),
+                  danger: true,
+                  disabled: ochirilmoqda,
+                },
+              ]}
+            />
+          ) : (
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <button
               onClick={() => (tahrirId === u.id ? setTahrirId(null) : tahrirniOch(u))}
@@ -653,6 +682,7 @@ function FoydalanuvchiQatori({
               {ochirilmoqda ? '...' : "🗑️ O'chirish"}
             </button>
           </div>
+          )}
         </td>
       </tr>
       {tahrirId === u.id && (
