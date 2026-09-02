@@ -10,7 +10,11 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
-import { GraduationCap, CreditCard, Flame, CheckCircle2, Target, Download, TrendingUp } from 'lucide-react'
+import { KebabMenu } from '@/components/KebabMenu'
+import { GraduationCap, CreditCard, Flame, CheckCircle2, Target, Download, TrendingUp, ArrowRight, ExternalLink, Link2 } from 'lucide-react'
+
+// Qator amali: "Ochish →" + ⋮ qo'shimcha amallar (true) yoki faqat "Ochish →" (false).
+const KEBAB_AMALLAR = true
 
 type TalabaProfil = { id: string; full_name: string | null; email: string | null; telefon: string | null; created_at: string }
 
@@ -89,6 +93,15 @@ export default function TalabalarNazoratiPage() {
   const [obunaFiltr, setObunaFiltr] = useState<'hammasi' | 'obunali' | 'obunasiz'>('hammasi')
   const [saralash, setSaralash] = useState<{ kalit: SaralashKalit; yon: 'asc' | 'desc' }>({ kalit: 'oxirgiFaollik', yon: 'desc' })
   const [hozir] = useState(() => Date.now())
+  const [nusxaOk, setNusxaOk] = useState(false)
+
+  const havolaNusxala = (yol: string) => {
+    const toliq = typeof window !== 'undefined' ? window.location.origin + yol : yol
+    navigator.clipboard?.writeText(toliq).then(() => {
+      setNusxaOk(true)
+      setTimeout(() => setNusxaOk(false), 1600)
+    }).catch(() => {})
+  }
 
   useEffect(() => {
     const yukla = async () => {
@@ -202,6 +215,16 @@ export default function TalabalarNazoratiPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/admin/dashboard" backLabel="Dashboard" />
+
+      {nusxaOk && (
+        <div role="status" style={{
+          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100,
+          background: 'var(--ink)', color: 'var(--bg)', borderRadius: '999px', padding: '10px 18px',
+          fontSize: '13px', fontWeight: 800, boxShadow: '0 8px 24px rgba(0,0,0,.3)',
+        }}>
+          ✓ Havola nusxalandi
+        </div>
+      )}
 
       <div className="mx-auto max-w-[1200px] px-6 py-8">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
@@ -365,7 +388,25 @@ export default function TalabalarNazoratiPage() {
                           {sanaFmt(x.oxirgiFaollik)}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 14px', color: 'var(--accent)', fontSize: '12px', fontWeight: 800, whiteSpace: 'nowrap' }}>Ochish →</td>
+                      <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                        {KEBAB_AMALLAR ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+                            <span style={{ color: 'var(--accent)', fontSize: '12px', fontWeight: 800 }}>Ochish →</span>
+                            <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} style={{ display: 'inline-flex' }}>
+                              <KebabMenu
+                                ariaLabel={`${x.profil.full_name ?? 'Talaba'} — amallar`}
+                                amallar={[
+                                  { label: 'Batafsil ochish', icon: <ArrowRight size={15} strokeWidth={2} />, onClick: () => router.push(`/admin/talabalar-nazorati/${x.profil.id}`) },
+                                  { label: 'Yangi tabda ochish', icon: <ExternalLink size={15} strokeWidth={2} />, onClick: () => window.open(`/admin/talabalar-nazorati/${x.profil.id}`, '_blank', 'noopener') },
+                                  { label: 'Profil havolasini nusxalash', icon: <Link2 size={15} strokeWidth={2} />, onClick: () => havolaNusxala(`/admin/talabalar-nazorati/${x.profil.id}`) },
+                                ]}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--accent)', fontSize: '12px', fontWeight: 800 }}>Ochish →</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
