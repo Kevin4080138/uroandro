@@ -9,6 +9,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { type TestSavoli, type UsmleSavoli } from '@/lib/talim/darslar'
 import { type TestNatija } from './types'
 import { BoshUlash } from './BoshUlash'
+import { Sheet } from '@/components/Sheet'
+
+// Izoh: pastdan chiquvchi Sheet (true) yoki har savol tagida inline matn (false).
+const SHEET_IZOH = true
 
 export function TestBlok({
   savollar,
@@ -35,6 +39,7 @@ export function TestBlok({
   const [qoldiSoniya, setQoldiSoniya] = useState(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
   const [buzilishSoni, setBuzilishSoni] = useState(0)
   const [buzilishSababliYakunlandi, setBuzilishSababliYakunlandi] = useState(false)
+  const [izohSavol, setIzohSavol] = useState<number | null>(null)
 
   const tuldi = javoblar.every((v) => v !== null)
   const togriSon = useMemo(
@@ -231,12 +236,28 @@ export function TestBlok({
                 })}
               </div>
               {izohKorsat && topshirildi && (
-                <p style={{
-                  margin: '10px 0 0 34px', fontSize: '12.5px', color: 'var(--ink-soft)',
-                  background: 'var(--surface-2)', borderRadius: '8px', padding: '8px 12px', lineHeight: 1.5,
-                }}>
-                  💡 {s.izoh}
-                </p>
+                SHEET_IZOH ? (
+                  <button
+                    onClick={() => setIzohSavol(i)}
+                    className="soft-press"
+                    style={{
+                      margin: '10px 0 0 34px', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+                      color: javoblar[i] === s.togri ? '#16a34a' : 'var(--accent)',
+                      background: 'var(--surface-2)', border: '1px solid var(--line)',
+                      borderRadius: '999px', padding: '6px 13px',
+                    }}
+                  >
+                    💡 Izohni ko&apos;rish
+                  </button>
+                ) : (
+                  <p style={{
+                    margin: '10px 0 0 34px', fontSize: '12.5px', color: 'var(--ink-soft)',
+                    background: 'var(--surface-2)', borderRadius: '8px', padding: '8px 12px', lineHeight: 1.5,
+                  }}>
+                    💡 {s.izoh}
+                  </p>
+                )
               )}
             </div>
           )
@@ -278,6 +299,99 @@ export function TestBlok({
             </button>
           )}
         </div>
+      )}
+
+      {SHEET_IZOH && (
+        <Sheet
+          ochiq={izohSavol !== null}
+          onYopish={() => setIzohSavol(null)}
+          sarlavha={izohSavol !== null ? `Savol ${izohSavol + 1} · izoh` : undefined}
+        >
+          {izohSavol !== null && (() => {
+            const s = savollar[izohSavol]
+            const javob = javoblar[izohSavol]
+            const togriMi = javob === s.togri
+            const vinyetka = (s as UsmleSavoli).vinyetka
+            return (
+              <>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '12px',
+                  fontSize: '11px', fontWeight: 800, borderRadius: '999px', padding: '4px 11px',
+                  color: togriMi ? '#16a34a' : '#dc2626',
+                  background: togriMi ? '#16a34a1a' : '#dc26261a',
+                }}>
+                  {togriMi ? '✓ To‘g‘ri javob berdingiz' : '✗ Xato javob berdingiz'}
+                </span>
+
+                {vinyetka && (
+                  <p style={{
+                    margin: '0 0 12px', fontSize: '13px', fontStyle: 'italic', color: 'var(--ink-soft)',
+                    background: 'var(--surface-2)', borderRadius: '10px', padding: '11px 13px', lineHeight: 1.6,
+                  }}>
+                    {vinyetka}
+                  </p>
+                )}
+
+                <p style={{ margin: '0 0 14px', fontSize: '14.5px', fontWeight: 700, lineHeight: 1.45, color: 'var(--ink)' }}>
+                  {s.savol}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{
+                    fontSize: '13px', fontWeight: 600, lineHeight: 1.4, color: 'var(--ink)',
+                    background: '#16a34a1a', border: '1px solid #16a34a', borderRadius: '10px', padding: '10px 13px',
+                  }}>
+                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>To‘g‘ri javob</span>
+                    {s.variantlar[s.togri]}
+                  </div>
+                  {!togriMi && javob !== null && (
+                    <div style={{
+                      fontSize: '13px', fontWeight: 600, lineHeight: 1.4, color: 'var(--ink)',
+                      background: '#dc26261a', border: '1px solid #dc2626', borderRadius: '10px', padding: '10px 13px',
+                    }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>Sizning javobingiz</span>
+                      {s.variantlar[javob]}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{
+                  fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.65,
+                  background: 'var(--surface-2)', borderRadius: '12px', padding: '13px 15px',
+                }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '5px' }}>💡 Izoh</span>
+                  {s.izoh}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px' }}>
+                  <button
+                    onClick={() => setIzohSavol(izohSavol - 1)}
+                    disabled={izohSavol === 0}
+                    className="soft-press"
+                    style={{
+                      flex: 1, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '11px',
+                      padding: '11px', fontSize: '13px', fontWeight: 800, cursor: izohSavol === 0 ? 'default' : 'pointer',
+                      color: izohSavol === 0 ? 'var(--muted)' : 'var(--ink)', opacity: izohSavol === 0 ? 0.5 : 1,
+                    }}
+                  >← Oldingi</button>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--muted)', flexShrink: 0 }}>
+                    {izohSavol + 1} / {savollar.length}
+                  </span>
+                  <button
+                    onClick={() => setIzohSavol(izohSavol + 1)}
+                    disabled={izohSavol === savollar.length - 1}
+                    className="soft-press"
+                    style={{
+                      flex: 1, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '11px',
+                      padding: '11px', fontSize: '13px', fontWeight: 800, cursor: izohSavol === savollar.length - 1 ? 'default' : 'pointer',
+                      color: izohSavol === savollar.length - 1 ? 'var(--muted)' : 'var(--ink)', opacity: izohSavol === savollar.length - 1 ? 0.5 : 1,
+                    }}
+                  >Keyingi →</button>
+                </div>
+              </>
+            )
+          })()}
+        </Sheet>
       )}
     </>
   )
