@@ -21,6 +21,11 @@ import { BoshUlash } from './bolimlar/BoshUlash'
 import { NazariyaBolimi, VideoBolimi, YuklabOlishBolimi, FlashcardBolimi } from './bolimlar/MateriallarBolimlari'
 import { AmaliyTestBolimi, UsmleTestBolimi, NazoratTestBolimi } from './bolimlar/TestBolimlari'
 import { KlinikHolatlarBolimi, InteraktivCaseBolimi, XatolarTahlilyBolimi, VaziyatliMasalaBolimi } from './bolimlar/CaseBolimlari'
+import { KeyingiQadamFab } from './KeyingiQadamFab'
+
+// FAB "keyingi qadam" prototipi. `true` — suzuvchi yetaklovchi tugma,
+// `false` — eski keng pastki navigatsiya paneli.
+const FAB_PROTOTIP = true
 
 // Darsning "yengil" tarkibi — nazariya matni va havolalar. Buni server komponent
 // (page.tsx) oldindan olib beradi, shuning uchun sahifa ochilishi bilan matn joyida
@@ -468,7 +473,24 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
         </main>
       </div>
 
-      {/* Pastki navigatsiya paneli */}
+      {/* FAB prototipi — bitta yetaklovchi suzuvchi tugma */}
+      {FAB_PROTOTIP && (
+        <KeyingiQadamFab
+          qadamlar={qadamlar}
+          joriy={joriy}
+          tugallangan={tugallangan}
+          QADAM_NOMI={QADAM_NOMI}
+          accent={accent}
+          accent2={accent2}
+          ochiqMi={ochiqMi}
+          qadamgaOt={qadamgaOt}
+          yakunlaVaDavom={yakunlaVaDavom}
+          qadamChip={qadamChip}
+        />
+      )}
+
+      {/* Pastki navigatsiya paneli (eski) */}
+      {!FAB_PROTOTIP && (
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
         background: 'var(--surface)', borderTop: '1px solid var(--line)',
@@ -511,6 +533,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
           </button>
         </div>
       </div>
+      )}
     </div>
   )
 }
