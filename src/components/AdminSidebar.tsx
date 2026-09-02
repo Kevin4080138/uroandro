@@ -10,7 +10,7 @@ import {
   UserCheck, School, Stethoscope, Video, LineChart, FolderTree, ListChecks, Award,
   Gem, ShoppingCart, CreditCard, Ticket, ClipboardList, Images, Newspaper,
   BookMarked, HelpCircle, Building2, MessageSquareText, Bell, BarChart3, Shield,
-  LayoutDashboard, LogOut, X, Menu, ChevronRight, ChevronLeft, Flower2, type LucideIcon,
+  LayoutDashboard, LogOut, X, Menu, ChevronRight, ChevronLeft, Flower2, Layers, type LucideIcon,
 } from 'lucide-react'
 
 type NavItem = { href: string; Icon: LucideIcon; label: string; tezOrada?: boolean }
@@ -29,7 +29,8 @@ const GROUPS: NavGroup[] = [
   {
     id: 'talim', Icon: GraduationCap, label: "Ta'lim",
     items: [
-      { href: '/admin/darslar', Icon: Video, label: 'Darslar tarkibi' },
+      { href: '/admin/darslar', Icon: Video, label: 'Darslar tarkibi (eski)' },
+      { href: '/admin/urologiya-darslar', Icon: Layers, label: 'Urologiya darslari (3-Level)' },
       { href: '/admin/ginekologiya-darslar', Icon: Flower2, label: 'Ginekologiya darslari' },
       { href: '/admin/talabalar-nazorati', Icon: LineChart, label: 'Talabalar nazorati' },
       { href: '/admin/yonalishlari', Icon: FolderTree, label: "Yo'nalishlari", tezOrada: true },
