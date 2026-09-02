@@ -16,7 +16,7 @@ import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData, getRankFromStages } from '@/lib/rank'
 import {
   BookOpen, BarChart3, Library, Target, Dna, Calculator, Scissors, FolderTree,
-  Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye, Newspaper,
+  Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye, Newspaper, Archive,
 } from 'lucide-react'
 
 export default function StudentDashboard() {
@@ -118,7 +118,8 @@ export default function StudentDashboard() {
   const oxirgiTugadi = oxirgiQadamlar.length > 0 && oxirgiTugallangan >= oxirgiQadamlar.length
 
   const UROLOGIYA_KARTALAR = [
-    { Icon: BookOpen, title: 'Darslar', desc: 'Foundation → Clinical → Advanced', c: 'var(--accent)', href: '/student/urologiya/darslar' },
+    { Icon: BookOpen, title: 'Yangi darslar', desc: 'Foundation → Clinical → Advanced', c: 'var(--accent)', href: '/student/urologiya/darslar' },
+    { Icon: Archive, title: 'Eski darslar', desc: 'Avvalgi urologiya kurslari', c: 'var(--muted)', href: '/student/darslar' },
     { Icon: Newspaper, title: 'Yangiliklar', desc: 'Tibbiy yangilik va maqolalar', c: 'var(--accent-2)', href: '/student/yangiliklar' },
     { Icon: BarChart3, title: 'Natijalarim', desc: 'Test natijalari va progress', c: 'var(--good)', href: '/student/natijalarim' },
     { Icon: Library, title: 'Kutubxona', desc: "O'quv materiallar", c: 'var(--warn)', href: '/student/kutubxona' },
