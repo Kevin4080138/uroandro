@@ -113,15 +113,18 @@ holatni bilmaydi.
 [TestBlok:877](src/app/student/darslar/[slug]/DarsClient.tsx#L877)) — ikkinchi qurilma yoki
 devtools'ni to'smaydi. Jiddiy imtihon uchun yetarli emas.
 
-- [ ] **Haqiqatni hujjatlashtirish** — nazorat/USMLE bloki "nazorat, imtihon emas" degan
-      taxminni kod izohida va (kerak bo'lsa) UI'da aniq qilish. Soxta xavfsizlik va'da qilinmasin.
-- [ ] Server tomonida oqilona chek: bir nazoratni **qayta topshirish oralig'i**, urinishlar
-      soni va vaqt tamg'asi `talim_natijalari` da (allaqachon `created_at` bor) — anomaliyani
-      keyin ko'rish uchun. Klient-only bloklashga ishonilmaydi.
-- [ ] Serverga savol/javob to'g'riligini ko'chirish g'oyasi (hozir to'g'ri javob klientda) —
-      bu **katta ish**, alohida band sifatida belgilab qo'yiladi, bu rejada bajarilmaydi.
-- [ ] Hozircha: mavjud brauzer-hodisa nazorati qoladi, lekin "buzilish" hodisasi
-      `talim_natijalari` ga (yoki audit'ga) yoziladi — o'qituvchi ko'rishi uchun.
+- [x] **Haqiqat hujjatlashtirildi** — [TestBlok](src/app/student/darslar/[slug]/bolimlar/TestBlok.tsx)
+      izohi va migratsiya izohi "brauzer OS darajasida bloklay olmaydi, jiddiy imtihon kafolati emas"
+      deb aniq aytadi. UI ham soxta va'da bermaydi (ogohlantirib → avtomatik yakunlaydi).
+- [x] **Buzilish hodisasi yoziladi** — migratsiya [`20260917000000_nazorat_qoidabuzarlik.sql`](supabase/migrations/20260917000000_nazorat_qoidabuzarlik.sql)
+      `talim_natijalari.qoidabuzarlik` ustunini qo'shadi. TestBlok buzilish sababli yakunlanganda
+      `qoidabuzarlik: true` uzatadi; Nazorat `saqla` uni bazaga yozadi.
+- [x] **O'qituvchiga ko'rinadi** — talaba batafsil sahifasida
+      ([[id]/page.tsx](src/app/admin/talabalar-nazorati/[id]/page.tsx)) urinish yonida
+      "⚠️ Qoidabuzarlik" badge.
+- [ ] **Ataylab qilinmadi** — server tomonida bir-urinish qat'iy cheklovi (unique constraint):
+      qayta topshirish "admin/shifokor orqali rasmiylashtiriladi" oqimini buzmaslik uchun;
+      hozir klient cheklaydi. Va to'g'ri javobni serverga ko'chirish — katta ish, alohida.
 
 ---
 

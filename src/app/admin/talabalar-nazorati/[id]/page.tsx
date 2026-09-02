@@ -14,7 +14,7 @@ import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 type ProgressQator = { dars_slug: string; qadam: string; created_at: string }
 type NatijaQator = {
   dars_slug: string; dars_nomi: string
-  togri_son: number; jami_savol: number; foiz: number; turi: string; created_at: string
+  togri_son: number; jami_savol: number; foiz: number; turi: string; created_at: string; qoidabuzarlik?: boolean
 }
 type Profil = { id: string; full_name: string | null; email: string | null; telefon: string | null; created_at: string }
 type Obuna = { bosqich: Bosqich; faol: boolean; tugash_sanasi: string | null; created_at: string }
@@ -51,7 +51,7 @@ export default function TalabaBatafsilPage() {
       const [p, pr, n, o] = await Promise.all([
         supabase.from('profiles').select('id, full_name, email, telefon, created_at').eq('id', id).maybeSingle(),
         supabase.from('dars_qadam_progress').select('dars_slug, qadam, created_at').eq('student_id', id),
-        supabase.from('talim_natijalari').select('dars_slug, dars_nomi, togri_son, jami_savol, foiz, turi, created_at').eq('student_id', id).order('created_at', { ascending: false }),
+        supabase.from('talim_natijalari').select('dars_slug, dars_nomi, togri_son, jami_savol, foiz, turi, created_at, qoidabuzarlik').eq('student_id', id).order('created_at', { ascending: false }),
         supabase.from('obunalar').select('bosqich, faol, tugash_sanasi, created_at').eq('student_id', id),
       ])
       setProfil((p.data as Profil) ?? null)
@@ -275,6 +275,9 @@ export default function TalabaBatafsilPage() {
                                   }}>{Math.round(Number(u.foiz))}%</span>
                                   {u.turi === 'nazorat' && Number(u.foiz) >= 70 && (
                                     <span style={{ fontSize: '10px', fontWeight: 800, color: '#16a34a' }}>O&apos;TDI</span>
+                                  )}
+                                  {u.qoidabuzarlik && (
+                                    <span title="Oyna/tab almashtirish tufayli avtomatik yakunlangan" style={{ fontSize: '10px', fontWeight: 800, color: '#dc2626', background: '#dc262614', borderRadius: '999px', padding: '1px 7px' }}>⚠️ Qoidabuzarlik</span>
                                   )}
                                   <span style={{ color: 'var(--muted)', fontSize: '11px', marginLeft: 'auto' }}>{sanaFmt(u.created_at)}</span>
                                 </div>

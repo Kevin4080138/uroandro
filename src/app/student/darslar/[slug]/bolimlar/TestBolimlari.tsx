@@ -130,7 +130,7 @@ export function NazoratTestBolimi({
     tekshir()
   }, [darsSlug, bank, savolSoni, supabase])
 
-  const saqla = async ({ togriSon, jami }: TestNatija) => {
+  const saqla = async ({ togriSon, jami, qoidabuzarlik }: TestNatija) => {
     setYakunlandi({ togriSon, jami })
     setSaqlashXato(null)
     const { data: { user } } = await supabase.auth.getUser()
@@ -138,6 +138,7 @@ export function NazoratTestBolimi({
     const { error } = await supabase.from('talim_natijalari').insert({
       student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
       togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'nazorat',
+      qoidabuzarlik: !!qoidabuzarlik,
     })
     // Nazorat natijasi sertifikatga bog'liq — saqlanmasa albatta bildiramiz.
     if (error) setSaqlashXato("⚠️ Natija saqlanmadi! Internetni tekshirib, admin/shifokorga murojaat qiling — aks holda sertifikat hisobga olinmaydi.")

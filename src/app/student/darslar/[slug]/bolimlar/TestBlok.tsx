@@ -80,7 +80,7 @@ export function TestBlok({
         if (yangi >= 2) {
           setBuzilishSababliYakunlandi(true)
           setTopshirildi(true)
-          onTopshirish({ togriSon, jami: savollar.length })
+          onTopshirish({ togriSon, jami: savollar.length, qoidabuzarlik: true })
         }
         return yangi
       })
