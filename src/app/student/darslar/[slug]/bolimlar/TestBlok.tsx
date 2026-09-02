@@ -23,6 +23,7 @@ export function TestBlok({
   boshlashSarlavha,
   boshlashTugma,
   onTopshirish,
+  avtomatikBoshla,
 }: {
   savollar: (TestSavoli | UsmleSavoli)[]
   izohKorsat: boolean
@@ -32,8 +33,9 @@ export function TestBlok({
   boshlashSarlavha: React.ReactNode
   boshlashTugma: string
   onTopshirish: (natija: TestNatija) => void | Promise<void>
+  avtomatikBoshla?: boolean
 }) {
-  const [boshlandi, setBoshlandi] = useState(false)
+  const [boshlandi, setBoshlandi] = useState(!!avtomatikBoshla)
   const [javoblar, setJavoblar] = useState<(number | null)[]>(Array(savollar.length).fill(null))
   const [topshirildi, setTopshirildi] = useState(false)
   const [qoldiSoniya, setQoldiSoniya] = useState(vaqtDaqiqa ? vaqtDaqiqa * 60 : 0)
@@ -54,14 +56,14 @@ export function TestBlok({
         if (s <= 1) {
           clearInterval(interval)
           setTopshirildi(true)
-          onTopshirish({ togriSon, jami: savollar.length })
+          onTopshirish({ togriSon, jami: savollar.length, javoblar })
           return 0
         }
         return s - 1
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [boshlandi, topshirildi, vaqtDaqiqa, togriSon, savollar.length, onTopshirish])
+  }, [boshlandi, topshirildi, vaqtDaqiqa, togriSon, savollar.length, onTopshirish, javoblar])
 
   const javobBer = (i: number, val: number) => {
     if (topshirildi) return
@@ -70,7 +72,7 @@ export function TestBlok({
 
   const topshir = () => {
     setTopshirildi(true)
-    onTopshirish({ togriSon, jami: savollar.length })
+    onTopshirish({ togriSon, jami: savollar.length, javoblar })
   }
 
   // Qattiq rejim — fullscreen majburlash va oyna/tab almashtirishni aniqlash.
@@ -85,7 +87,7 @@ export function TestBlok({
         if (yangi >= 2) {
           setBuzilishSababliYakunlandi(true)
           setTopshirildi(true)
-          onTopshirish({ togriSon, jami: savollar.length, qoidabuzarlik: true })
+          onTopshirish({ togriSon, jami: savollar.length, qoidabuzarlik: true, javoblar })
         }
         return yangi
       })
@@ -100,7 +102,7 @@ export function TestBlok({
       document.removeEventListener('visibilitychange', korinishOzgardi)
       document.removeEventListener('fullscreenchange', fullscreenOzgardi)
     }
-  }, [qattiqRejim, boshlandi, topshirildi, togriSon, savollar.length, onTopshirish])
+  }, [qattiqRejim, boshlandi, topshirildi, togriSon, savollar.length, onTopshirish, javoblar])
 
   // Test tugagach (yoki sahifadan chiqilganda) fullscreen rejimidan chiqamiz.
   useEffect(() => {
@@ -147,7 +149,7 @@ export function TestBlok({
   }
 
   const foiz = Math.round((togriSon / savollar.length) * 100)
-  const natijaRang = foiz >= 80 ? '#16a34a' : foiz >= 60 ? '#d97706' : '#dc2626'
+  const natijaRang = foiz >= 80 ? 'var(--good)' : foiz >= 60 ? 'var(--warn)' : 'var(--danger)'
   const daqiqa = Math.floor(qoldiSoniya / 60)
   const soniya = qoldiSoniya % 60
 
@@ -156,7 +158,7 @@ export function TestBlok({
       {vaqtDaqiqa && !topshirildi && (
         <div className="rise" style={{
           marginBottom: '16px', textAlign: 'center', fontSize: '15px', fontWeight: 800,
-          color: qoldiSoniya <= 60 ? '#dc2626' : 'var(--ink)',
+          color: qoldiSoniya <= 60 ? 'var(--danger)' : 'var(--ink)',
         }}>
           ⏱ Qolgan vaqt: {daqiqa}:{soniya.toString().padStart(2, '0')}
         </div>
@@ -223,8 +225,8 @@ export function TestBlok({
                       aria-pressed={tanlandi}
                       style={{
                         textAlign: 'left',
-                        border: togriJavob ? '1px solid #16a34a' : notogriTanlandi ? '1px solid #dc2626' : tanlandi ? '1px solid var(--accent)' : '1px solid var(--line)',
-                        background: togriJavob ? '#16a34a1a' : notogriTanlandi ? '#dc26261a' : tanlandi ? 'var(--accent-soft)' : 'var(--surface-2)',
+                        border: togriJavob ? '1px solid var(--good)' : notogriTanlandi ? '1px solid var(--danger)' : tanlandi ? '1px solid var(--accent)' : '1px solid var(--line)',
+                        background: togriJavob ? 'color-mix(in srgb, var(--good) 10%, transparent)' : notogriTanlandi ? 'color-mix(in srgb, var(--danger) 10%, transparent)' : tanlandi ? 'var(--accent-soft)' : 'var(--surface-2)',
                         color: 'var(--ink)',
                         borderRadius: '10px', padding: '9px 14px', fontSize: '13px', fontWeight: 600,
                         cursor: topshirildi ? 'default' : 'pointer',
@@ -243,7 +245,7 @@ export function TestBlok({
                     style={{
                       margin: '10px 0 0 34px', display: 'inline-flex', alignItems: 'center', gap: '6px',
                       fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
-                      color: javoblar[i] === s.togri ? '#16a34a' : 'var(--accent)',
+                      color: javoblar[i] === s.togri ? 'var(--good)' : 'var(--accent)',
                       background: 'var(--surface-2)', border: '1px solid var(--line)',
                       borderRadius: '999px', padding: '6px 13px',
                     }}
@@ -283,7 +285,7 @@ export function TestBlok({
           padding: '24px', textAlign: 'center',
         }}>
           {buzilishSababliYakunlandi && (
-            <p style={{ margin: '0 0 12px', fontSize: '12.5px', fontWeight: 700, color: '#dc2626' }}>
+            <p style={{ margin: '0 0 12px', fontSize: '12.5px', fontWeight: 700, color: 'var(--danger)' }}>
               ⚠️ Test qoidabuzarlik (oyna/tab almashtirish) tufayli avtomatik yakunlandi.
             </p>
           )}
@@ -317,8 +319,8 @@ export function TestBlok({
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '12px',
                   fontSize: '11px', fontWeight: 800, borderRadius: '999px', padding: '4px 11px',
-                  color: togriMi ? '#16a34a' : '#dc2626',
-                  background: togriMi ? '#16a34a1a' : '#dc26261a',
+                  color: togriMi ? 'var(--good)' : 'var(--danger)',
+                  background: togriMi ? 'color-mix(in srgb, var(--good) 10%, transparent)' : 'color-mix(in srgb, var(--danger) 10%, transparent)',
                 }}>
                   {togriMi ? '✓ To‘g‘ri javob berdingiz' : '✗ Xato javob berdingiz'}
                 </span>
@@ -339,17 +341,17 @@ export function TestBlok({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                   <div style={{
                     fontSize: '13px', fontWeight: 600, lineHeight: 1.4, color: 'var(--ink)',
-                    background: '#16a34a1a', border: '1px solid #16a34a', borderRadius: '10px', padding: '10px 13px',
+                    background: 'color-mix(in srgb, var(--good) 10%, transparent)', border: '1px solid var(--good)', borderRadius: '10px', padding: '10px 13px',
                   }}>
-                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>To‘g‘ri javob</span>
+                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--good)', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>To‘g‘ri javob</span>
                     {s.variantlar[s.togri]}
                   </div>
                   {!togriMi && javob !== null && (
                     <div style={{
                       fontSize: '13px', fontWeight: 600, lineHeight: 1.4, color: 'var(--ink)',
-                      background: '#dc26261a', border: '1px solid #dc2626', borderRadius: '10px', padding: '10px 13px',
+                      background: 'color-mix(in srgb, var(--danger) 10%, transparent)', border: '1px solid var(--danger)', borderRadius: '10px', padding: '10px 13px',
                     }}>
-                      <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>Sizning javobingiz</span>
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: '3px' }}>Sizning javobingiz</span>
                       {s.variantlar[javob]}
                     </div>
                   )}

@@ -100,15 +100,15 @@ export function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string
   )
 }
 
-export function NazoratTestBolimi({
-  darsSlug, darsNomi, bank, savolSoni, vaqtDaqiqa, otishFoizi,
-}: {
-  darsSlug: string; darsNomi: string; bank: TestSavoli[]; savolSoni: number; vaqtDaqiqa: number; otishFoizi: number
+export function NazoratTestBolimi({ darsSlug, vaqtDaqiqa, otishFoizi }: {
+  darsSlug: string; vaqtDaqiqa: number; otishFoizi: number
 }) {
   const supabase = createClient()
   const [yuklanmoqda, setYuklanmoqda] = useState(true)
   const [avvalgiNatija, setAvvalgiNatija] = useState<{ togri_son: number; jami_savol: number; foiz: number; created_at: string } | null>(null)
   const [savollar, setSavollar] = useState<TestSavoli[]>([])
+  const [urinishId, setUrinishId] = useState<string | null>(null)
+  const [boshlanmoqda, setBoshlanmoqda] = useState(false)
   const [yakunlandi, setYakunlandi] = useState<TestNatija | null>(null)
   const [saqlashXato, setSaqlashXato] = useState<string | null>(null)
 
@@ -124,46 +124,48 @@ export function NazoratTestBolimi({
         .eq('turi', 'nazorat')
         .maybeSingle()
       setAvvalgiNatija(data ?? null)
-      setSavollar(shuffleVaTanla(bank, Math.min(savolSoni, bank.length)).map(variantlarniAralashtir))
       setYuklanmoqda(false)
     }
     tekshir()
-  }, [darsSlug, bank, savolSoni, supabase])
+  }, [darsSlug, supabase])
 
-  const saqla = async ({ togriSon, jami, qoidabuzarlik }: TestNatija) => {
-    setYakunlandi({ togriSon, jami })
+  const boshlash = async () => {
+    setBoshlanmoqda(true); setSaqlashXato(null)
+    document.documentElement.requestFullscreen?.().catch(() => {})
+    const res = await fetch('/api/nazorat/urinish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amal: 'boshlash', darsSlug }) })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) { setSaqlashXato(json.error ?? 'Nazoratni boshlashda xato yuz berdi.'); setBoshlanmoqda(false); return }
+    setUrinishId(json.urinishId)
+    setSavollar((json.savollar as { savol: string; variantlar: string[]; vinyetka?: string }[]).map((s) => ({ ...s, togri: -1, izoh: '' })))
+    setBoshlanmoqda(false)
+  }
+
+  const saqla = async ({ qoidabuzarlik, javoblar }: TestNatija) => {
     setSaqlashXato(null)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setSaqlashXato('Tizimga kirilmagan — natija saqlanmadi.'); return }
-    const { error } = await supabase.from('talim_natijalari').insert({
-      student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
-      togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'nazorat',
-      qoidabuzarlik: !!qoidabuzarlik,
-    })
-    // Nazorat natijasi sertifikatga bog'liq — saqlanmasa albatta bildiramiz.
-    if (error) setSaqlashXato("⚠️ Natija saqlanmadi! Internetni tekshirib, admin/shifokorga murojaat qiling — aks holda sertifikat hisobga olinmaydi.")
+    const res = await fetch('/api/nazorat/urinish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amal: 'topshirish', urinishId, javoblar, qoidabuzarlik: !!qoidabuzarlik }) })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) { setSaqlashXato(json.error ?? "Natija serverda tekshirilmadi."); return }
+    setYakunlandi({ togriSon: json.togriSon, jami: json.jami })
   }
 
   if (yuklanmoqda) return <UrosferaLoaderMini />
-  if (bank.length === 0) return <BoshUlash matn="Nazorat testi savollari tez orada qo'shiladi." />
-
   if (avvalgiNatija) {
     const otdi = avvalgiNatija.foiz >= otishFoizi
     return (
       <div className="rise" style={{
-        background: 'var(--surface)', border: `2px solid ${otdi ? '#16a34a' : '#dc2626'}33`, borderRadius: '16px',
+        background: 'var(--surface)', border: `2px solid ${otdi ? 'var(--good)' : 'var(--danger)'}`, borderRadius: '16px',
         padding: '26px', textAlign: 'center',
       }}>
         <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
           Siz bu nazorat testini allaqachon topshirgansiz
         </div>
-        <div style={{ fontSize: '36px', fontWeight: 800, margin: '8px 0', color: otdi ? '#16a34a' : '#dc2626' }}>
+        <div style={{ fontSize: '36px', fontWeight: 800, margin: '8px 0', color: otdi ? 'var(--good)' : 'var(--danger)' }}>
           {avvalgiNatija.togri_son} / {avvalgiNatija.jami_savol} ({avvalgiNatija.foiz}%)
         </div>
         <p style={{ margin: 0, fontSize: '13px', color: 'var(--ink-soft)' }}>
           {new Date(avvalgiNatija.created_at).toLocaleString('uz-UZ')}
         </p>
-        <p style={{ margin: '14px 0 0', fontSize: '13.5px', fontWeight: 700, color: otdi ? '#16a34a' : '#dc2626' }}>
+        <p style={{ margin: '14px 0 0', fontSize: '13.5px', fontWeight: 700, color: otdi ? 'var(--good)' : 'var(--danger)' }}>
           {otdi ? `✓ Sertifikat olish chegarasi (${otishFoizi}%) bajarildi.` : `Sertifikat chegarasi (${otishFoizi}%) bajarilmadi.`}
         </p>
       </div>
@@ -175,14 +177,14 @@ export function NazoratTestBolimi({
     const otdi = foiz >= otishFoizi
     return (
       <div className="rise" style={{
-        background: 'var(--surface)', border: `2px solid ${otdi ? '#16a34a' : '#dc2626'}33`, borderRadius: '16px',
+        background: 'var(--surface)', border: `2px solid ${otdi ? 'var(--good)' : 'var(--danger)'}`, borderRadius: '16px',
         padding: '26px', textAlign: 'center',
       }}>
         <div style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>Yakuniy natija</div>
-        <div style={{ fontSize: '40px', fontWeight: 800, margin: '8px 0', color: otdi ? '#16a34a' : '#dc2626' }}>
+        <div style={{ fontSize: '40px', fontWeight: 800, margin: '8px 0', color: otdi ? 'var(--good)' : 'var(--danger)' }}>
           {yakunlandi.togriSon} / {yakunlandi.jami} ({foiz}%)
         </div>
-        <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: otdi ? '#16a34a' : '#dc2626' }}>
+        <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: otdi ? 'var(--good)' : 'var(--danger)' }}>
           {otdi ? `🏅 Tabriklaymiz! Sertifikat olish huquqiga ega bo'ldingiz.` : `Sertifikat chegarasi (${otishFoizi}%) bajarilmadi — qaytadan urinish admin/shifokor orqali rasmiylashtiriladi.`}
         </p>
         {saqlashXato && (
@@ -194,6 +196,18 @@ export function NazoratTestBolimi({
     )
   }
 
+  if (!urinishId) return (
+    <div className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '26px 28px', textAlign: 'center' }}>
+      {saqlashXato && <SaqlashXatosi matn={saqlashXato} />}
+      <p style={{ fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.65 }}>
+        Bu yopiq nazoratda savollar va ball server tomonidan boshqariladi. <strong>{vaqtDaqiqa} daqiqa</strong>, bitta urinish; {otishFoizi}% va yuqori natija talab qilinadi.
+      </p>
+      <button onClick={boshlash} disabled={boshlanmoqda} className="btn-animated soft-press" style={{ background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 26px', fontSize: '14.5px', fontWeight: 700, cursor: boshlanmoqda ? 'wait' : 'pointer' }}>
+        {boshlanmoqda ? 'Tayyorlanmoqda…' : 'Nazorat testini boshlash'}
+      </button>
+    </div>
+  )
+
   return (
     <TestBlok
       savollar={savollar}
@@ -201,6 +215,7 @@ export function NazoratTestBolimi({
       vaqtDaqiqa={vaqtDaqiqa}
       qaytaUrinishKorinsin={false}
       qattiqRejim
+      avtomatikBoshla
       boshlashSarlavha={
         <>
           Bu — <strong>yakkama-yakka, yopiq</strong> nazorat testi: <strong>{savollar.length} savol</strong>,{' '}

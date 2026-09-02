@@ -45,12 +45,11 @@ export type DarsMatni = {
 type DarsBanklari = {
   savollar_banki: TestSavoli[] | null
   usmle_savollar: UsmleSavoli[] | null
-  nazorat_savollar: TestSavoli[] | null
   flashcardlar: Flashcard[] | null
 }
 
 const BOSH_BANKLAR: DarsBanklari = {
-  savollar_banki: null, usmle_savollar: null, nazorat_savollar: null, flashcardlar: null,
+  savollar_banki: null, usmle_savollar: null, flashcardlar: null,
 }
 
 // Savol banklari va flashcardlar og'ir (dars bo'yicha 100+ savol, 20-40 karta)
@@ -73,7 +72,7 @@ function useDarsBanklari(slug: string, kerakmi: boolean) {
     sorovYuborildi.current = slug
     supabase
       .from('dars_tarkibi')
-      .select('savollar_banki, usmle_savollar, nazorat_savollar, flashcardlar')
+      .select('savollar_banki, usmle_savollar, flashcardlar')
       .eq('dars_slug', slug)
       .maybeSingle()
       .then(({ data }) => {
@@ -98,7 +97,6 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const konspektYoli = tarkib?.konspekt_url ?? dars?.konspektUrl
   const prezentatsiyaYoli = tarkib?.prezentatsiya_url ?? dars?.prezentatsiyaUrl
   const amaliySavolSoni = dars?.amaliySavolSoni ?? 20
-  const nazoratSavolSoni = tarkib?.nazorat_savol_soni ?? dars?.nazoratSavolSoni ?? 20
   const nazoratVaqtDaqiqa = tarkib?.nazorat_vaqt_daqiqa ?? dars?.nazoratVaqtDaqiqa ?? 15
   const sertifikatOtishFoizi = tarkib?.sertifikat_otish_foizi ?? dars?.sertifikatOtishFoizi ?? 70
 
@@ -155,7 +153,6 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
   const amaliyBank = banklar?.savollar_banki?.length ? banklar.savollar_banki
     : dars?.savollarBanki?.length ? dars.savollarBanki : dars?.test ?? []
   const usmleBank = banklar?.usmle_savollar ?? dars?.usmleSavollar ?? []
-  const nazoratBank = banklar?.nazorat_savollar ?? dars?.nazoratSavollar ?? []
   const flashcardlar = banklar?.flashcardlar ?? []
 
   // Qadam ochiqmi: birinchisi har doim; keyingilari oldingi qadam yakunlangach.
@@ -301,7 +298,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               display: 'flex', alignItems: 'center', gap: '11px', width: 'calc(100% - 24px)', boxSizing: 'border-box', textAlign: 'left', font: 'inherit',
               margin: '0 12px 8px', padding: '10px 12px', borderRadius: '14px',
               cursor: ochiq ? 'pointer' : 'not-allowed',
-              background: tugadi ? '#16a34a12' : faol ? accent + '14' : 'var(--surface-2)',
+              background: tugadi ? 'color-mix(in srgb, var(--good) 8%, transparent)' : faol ? accent + '14' : 'var(--surface-2)',
               border: faol ? `1.5px solid ${accent}` : '1px solid transparent',
               opacity: ochiq ? 1 : 0.5,
               transition: 'all .15s ease',
@@ -310,9 +307,9 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
             <div style={{
               width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: tugadi ? '#16a34a1f' : faol ? accent + '22' : 'var(--surface)',
-              border: tugadi ? '1.5px solid #16a34a' : faol ? `1.5px solid ${accent}` : '1px solid var(--line)',
-              color: tugadi ? '#16a34a' : faol ? accent : 'var(--muted)',
+              background: tugadi ? 'color-mix(in srgb, var(--good) 12%, transparent)' : faol ? accent + '22' : 'var(--surface)',
+              border: tugadi ? '1.5px solid var(--good)' : faol ? `1.5px solid ${accent}` : '1px solid var(--line)',
+              color: tugadi ? 'var(--good)' : faol ? accent : 'var(--muted)',
             }}>
               {tugadi ? <CheckCircle2 size={17} strokeWidth={2} /> : ochiq ? <ma.Icon size={17} strokeWidth={2} /> : <Lock size={15} strokeWidth={2} />}
             </div>
@@ -324,7 +321,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
             </div>
             <span style={{
               fontSize: '10px', fontWeight: 800, flexShrink: 0, whiteSpace: 'nowrap',
-              color: tugadi ? '#16a34a' : faol ? accent : 'var(--muted)',
+              color: tugadi ? 'var(--good)' : faol ? accent : 'var(--muted)',
               background: 'var(--surface)', border: '1px solid var(--line)',
               borderRadius: '999px', padding: '3px 8px',
             }}>{qadamChip(t)}</span>
@@ -462,12 +459,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               ? <UsmleTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={usmleBank} />
               : <BoshUlash matn="USMLE savollari tez orada qo'shiladi." />
             )}
-            {qadam === 'nazorat' && (!banklarYuklandi
-              ? <BoshUlash matn="Savollar yuklanmoqda..." />
-              : nazoratBank.length > 0
-              ? <NazoratTestBolimi darsSlug={dars.slug} darsNomi={dars.sarlavha} bank={nazoratBank} savolSoni={nazoratSavolSoni} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />
-              : <BoshUlash matn="Nazorat testi tez orada qo'shiladi." />
-            )}
+            {qadam === 'nazorat' && <NazoratTestBolimi darsSlug={dars.slug} vaqtDaqiqa={nazoratVaqtDaqiqa} otishFoizi={sertifikatOtishFoizi} />}
             {qadam === 'klinik' && (klinikHolatlar.length > 0
               ? <KlinikHolatlarBolimi holatlar={klinikHolatlar} />
               : <BoshUlash matn="Klinik holatlar tez orada qo'shiladi." />
@@ -532,7 +524,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
 
           <div style={{ flex: 1, textAlign: 'center', fontSize: '11.5px', color: 'var(--muted)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} className="hidden sm:flex">
             {tugallangan.has(qadam)
-              ? <><CheckCircle2 size={14} strokeWidth={2} style={{ color: '#16a34a' }} /> Bu qadam tugallangan</>
+              ? <><CheckCircle2 size={14} strokeWidth={2} style={{ color: 'var(--good)' }} /> Bu qadam tugallangan</>
               : <>{(() => { const QI = QADAM_NOMI[qadam].Icon; return <QI size={14} strokeWidth={2} /> })()} {QADAM_NOMI[qadam].nom}</>}
           </div>
 

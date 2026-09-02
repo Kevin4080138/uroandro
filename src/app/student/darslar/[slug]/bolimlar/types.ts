@@ -10,4 +10,4 @@ export type Adabiyot = { nom: string; url: string }
 
 // Test topshirilganda qaytadigan natija (amaliy/USMLE/nazorat umumiy).
 // `qoidabuzarlik` — nazoratda oyna/tab almashtirish tufayli avtomatik yakunlangan bo'lsa true.
-export type TestNatija = { togriSon: number; jami: number; qoidabuzarlik?: boolean }
+export type TestNatija = { togriSon: number; jami: number; qoidabuzarlik?: boolean; javoblar?: (number | null)[] }

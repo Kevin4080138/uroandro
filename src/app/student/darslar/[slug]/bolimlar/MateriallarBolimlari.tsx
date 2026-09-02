@@ -339,11 +339,11 @@ export function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
         <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 12px' }}>{jami} ta karta tugadi!</h3>
         <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '20px' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#16a34a' }}>{bilganlar.size}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--good)' }}>{bilganlar.size}</div>
             <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Bildim</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#dc2626' }}>{bilmaganlar.size}</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--danger)' }}>{bilmaganlar.size}</div>
             <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Bilmadim</div>
           </div>
         </div>
@@ -361,8 +361,8 @@ export function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
           <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{joriy + 1} / {jami}</span>
           <div style={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
-            <span style={{ color: '#16a34a', fontWeight: 700 }}>✅ {bilganlar.size}</span>
-            <span style={{ color: '#dc2626', fontWeight: 700 }}>❌ {bilmaganlar.size}</span>
+            <span style={{ color: 'var(--good)', fontWeight: 700 }}>✅ {bilganlar.size}</span>
+            <span style={{ color: 'var(--danger)', fontWeight: 700 }}>❌ {bilmaganlar.size}</span>
             <button onClick={aralashtir} style={{
               background: 'none', border: 'none', cursor: 'pointer',
               color: 'var(--muted)', fontSize: '12px', fontWeight: 600, padding: 0,
@@ -408,13 +408,13 @@ export function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
       {ochiq && (
         <div className="rise" style={{ display: 'flex', gap: '10px' }}>
           <button onClick={bilmadi} style={{
-            flex: 1, background: '#dc262612', color: '#dc2626',
-            border: '1.5px solid #dc2626', borderRadius: '12px', padding: '12px',
+            flex: 1, background: 'color-mix(in srgb, var(--danger) 8%, transparent)', color: 'var(--danger)',
+            border: '1.5px solid var(--danger)', borderRadius: '12px', padding: '12px',
             fontSize: '14px', fontWeight: 700, cursor: 'pointer',
           }}>✗ Bilmadim</button>
           <button onClick={bildi} style={{
-            flex: 1, background: '#16a34a12', color: '#16a34a',
-            border: '1.5px solid #16a34a', borderRadius: '12px', padding: '12px',
+            flex: 1, background: 'color-mix(in srgb, var(--good) 8%, transparent)', color: 'var(--good)',
+            border: '1.5px solid var(--good)', borderRadius: '12px', padding: '12px',
             fontSize: '14px', fontWeight: 700, cursor: 'pointer',
           }}>✓ Bildim</button>
         </div>

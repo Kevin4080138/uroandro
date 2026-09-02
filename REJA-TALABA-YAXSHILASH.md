@@ -124,9 +124,16 @@ devtools'ni to'smaydi. Jiddiy imtihon uchun yetarli emas.
 - [x] **O'qituvchiga ko'rinadi** — talaba batafsil sahifasida
       ([[id]/page.tsx](src/app/admin/talabalar-nazorati/[id]/page.tsx)) urinish yonida
       "⚠️ Qoidabuzarlik" badge.
-- [ ] **Ataylab qilinmadi** — server tomonida bir-urinish qat'iy cheklovi (unique constraint):
-      qayta topshirish "admin/shifokor orqali rasmiylashtiriladi" oqimini buzmaslik uchun;
-      hozir klient cheklaydi. Va to'g'ri javobni serverga ko'chirish — katta ish, alohida.
+- [x] **Server-authoritative nazorat** — `nazorat_urinishlari` yopiq jadvali va
+      `/api/nazorat/urinish` route: server savollar/variantlarni aralashtiradi, klientga `togri`
+      indeksini bermaydi, deadline va bir urinishni server tekshiradi, ballni server hisoblaydi.
+      Klient endi nazorat bankini yuklamaydi va `talim_natijalari`ga bevosita yozmaydi.
+- [x] **Bir urinish** — `(student_id, dars_slug)` unique constraint bilan serverda; qayta
+      topshirish uchun admin urinish yozuvini rasmiy qayta ochishi/o'chirishi kerak.
+
+> Fizik cheklov: oddiy veb-ilova ikkinchi qurilmani ko'ra olmaydi. Server-authoritative ball,
+> deadline va bir urinish soxtalashtirishni yopadi; masofaviy proktoringsiz shaxsni 100% nazorat
+> qilish va'da qilinmaydi.
 
 ---
 

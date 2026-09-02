@@ -127,9 +127,9 @@ export function KeyingiQadamFab({
                 <span style={{
                   width: '40px', height: '40px', borderRadius: '999px', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: tugadi ? '#16a34a1f' : 'var(--surface)',
-                  border: tugadi ? '1.5px solid #16a34a' : `1.5px solid ${accent}55`,
-                  color: tugadi ? '#16a34a' : ki ? accent : 'var(--muted)',
+                  background: tugadi ? 'color-mix(in srgb, var(--good) 12%, transparent)' : 'var(--surface)',
+                  border: tugadi ? '1.5px solid var(--good)' : `1.5px solid ${accent}55`,
+                  color: tugadi ? 'var(--good)' : ki ? accent : 'var(--muted)',
                   boxShadow: '0 4px 14px rgba(0,0,0,.14)',
                 }}>
                   {tugadi ? <CheckCircle2 size={19} strokeWidth={2} /> : ki ? <ma.Icon size={18} strokeWidth={2} /> : <Lock size={15} strokeWidth={2} />}
