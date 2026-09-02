@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { bannerlarniTanla } from '@/lib/bannerSelection'
+import { KebabMenu } from '@/components/KebabMenu'
+import { Pencil, Eye, EyeOff, Pin, PinOff, Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+
+// Banner qatori amallari: ⋮ menyu (true) yoki alohida tugmalar (false).
+// Tartib strelkalari (↑↓) menyuda emas, inline qoladi — tez-tez ishlatiladi.
+const KEBAB_AMALLAR = true
 
 type Banner = {
   id: string
@@ -603,6 +609,36 @@ export default function AdminBannerlarPage() {
                     )}
                   </div>
                 </div>
+                {KEBAB_AMALLAR ? (
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center' }}>
+                    {tab === 'faol' && (
+                      <>
+                        <button onClick={() => tartibOzgartir(b.id, 'up')} disabled={i === 0} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)', opacity: i === 0 ? 0.4 : 1 }} aria-label="Yuqoriga">↑</button>
+                        <button onClick={() => tartibOzgartir(b.id, 'down')} disabled={i === koringan.length - 1} style={{ ...btnSm, color: 'var(--muted)', borderColor: 'var(--line)', opacity: i === koringan.length - 1 ? 0.4 : 1 }} aria-label="Pastga">↓</button>
+                      </>
+                    )}
+                    <div style={{ marginLeft: 'auto' }}>
+                      <KebabMenu
+                        ariaLabel={`${b.sarlavha} — amallar`}
+                        amallar={tab === 'faol' ? [
+                          { label: 'Tahrirlash', icon: <Pencil size={15} strokeWidth={2} />, onClick: () => startEdit(b) },
+                          { label: b.faol ? 'Yashirish' : "Ko'rsatish", icon: b.faol ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />, onClick: () => toggleFaol(b) },
+                          ...(b.content_origin === 'manual' ? [{
+                            label: b.is_pinned ? 'Mahkamlashni olib tashlash' : 'Tepaga mahkamlash',
+                            icon: b.is_pinned ? <PinOff size={15} strokeWidth={2} /> : <Pin size={15} strokeWidth={2} />,
+                            onClick: () => togglePinned(b),
+                          }] : []),
+                          { label: 'Arxivlash', icon: <Archive size={15} strokeWidth={2} />, onClick: () => arxivla(b) },
+                          { label: "O'chirish", icon: <Trash2 size={15} strokeWidth={2} />, onClick: () => ochirish(b.id), danger: true },
+                        ] : [
+                          { label: 'Arxivdan chiqarish', icon: <ArchiveRestore size={15} strokeWidth={2} />, onClick: () => arxivdanChiqar(b) },
+                          { label: 'Tahrirlash', icon: <Pencil size={15} strokeWidth={2} />, onClick: () => startEdit(b) },
+                          { label: "O'chirish", icon: <Trash2 size={15} strokeWidth={2} />, onClick: () => ochirish(b.id), danger: true },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                ) : (
                 <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
                   {tab === 'faol' ? (
                     <>
@@ -622,6 +658,7 @@ export default function AdminBannerlarPage() {
                     </>
                   )}
                 </div>
+                )}
               </div>
             ))}
           </div>
