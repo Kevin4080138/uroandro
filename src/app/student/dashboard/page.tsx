@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { DARSLAR, darsTop, BOSQICH_YOLI, type Bosqich } from '@/lib/talim/darslar'
+import { DARSLAR, darsTop, BOSQICH_YOLI, BOSQICH_RANG, type Bosqich } from '@/lib/talim/darslar'
 import { BOSQICH_QADAMLARI, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import { BannerHero } from '@/components/BannerHero'
 import { BannerCarousel } from '@/components/BannerCarousel'
@@ -62,7 +62,7 @@ export default function StudentDashboard() {
       const ginList = (ginN ?? []) as { dars_slug: string; foiz?: number }[]
       const ishlangan = new Set(ginList.map((r) => r.dars_slug))
       setGinOrtacha(ginList.length ? Math.round(ginList.reduce((s, n) => s + (n.foiz ?? 0), 0) / ginList.length) : 0)
-      const GB = [{ id: 'oson', nom: 'Oson', rang: '#16a34a' }, { id: 'orta', nom: "O'rta", rang: '#d97706' }, { id: 'qiyin', nom: 'Qiyin', rang: '#dc2626' }]
+      const GB = [{ id: 'oson', nom: 'Oson', rang: BOSQICH_RANG['oson'].token }, { id: 'orta', nom: "O'rta", rang: BOSQICH_RANG["o'rta"].token }, { id: 'qiyin', nom: 'Qiyin', rang: BOSQICH_RANG['qiyin'].token }]
       setGinBosqich(GB.map((b) => {
         const list = (ginD ?? []).filter((d: { slug: string; bosqich: string }) => d.bosqich === b.id)
         return { ...b, jami: list.length, tugadi: list.filter((d: { slug: string }) => ishlangan.has(d.slug)).length }
@@ -94,9 +94,9 @@ export default function StudentDashboard() {
 
   // Bosqich kesimidagi progress: tugallangan (nazariya+amaliy) darslar soni
   const BOSQICH_MA: { id: Bosqich; nom: string; rang: string }[] = [
-    { id: 'oson', nom: 'Oson', rang: '#16a34a' },
-    { id: "o'rta", nom: "O'rta", rang: '#d97706' },
-    { id: 'qiyin', nom: 'Qiyin', rang: '#dc2626' },
+    { id: 'oson', nom: 'Oson', rang: BOSQICH_RANG['oson'].token },
+    { id: "o'rta", nom: "O'rta", rang: BOSQICH_RANG["o'rta"].token },
+    { id: 'qiyin', nom: 'Qiyin', rang: BOSQICH_RANG['qiyin'].token },
   ]
   const bosqichProgress = BOSQICH_MA.map((b) => {
     const jami = DARSLAR.filter((d) => d.bosqich === b.id).length

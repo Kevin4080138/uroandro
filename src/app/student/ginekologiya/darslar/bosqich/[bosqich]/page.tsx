@@ -9,24 +9,26 @@ import {
   BookOpen, Video, Layers, ClipboardCheck, Building2, Award, GraduationCap,
   CheckCircle2, Lock, Clock, type LucideIcon,
 } from 'lucide-react'
+import { BOSQICH_RANG } from '@/lib/talim/darslar'
 
 type GinDars = { slug: string; sarlavha: string; kategoriya: string | null; qisqa: string | null; daqiqa: number; test_savollar: unknown }
 
+// Ginekologiya-ga xos matnlar; rang/gradient bosqich yagona manbasidan.
 const BOSQICH_MA: Record<string, { nom: string; ost: string; emoji: string; tavsif: string; gradient: string; accent: string }> = {
   oson: {
     nom: 'Foundation', ost: 'Ginekologiya asoslari', emoji: '🌱',
     tavsif: 'Ginekologiyani noldan tushunish — anatomiya, fiziologiya, hayz sikli, tekshirish va kontratseptsiya asoslari.',
-    gradient: 'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)', accent: '#16a34a',
+    gradient: BOSQICH_RANG['oson'].gradient, accent: BOSQICH_RANG['oson'].accent,
   },
   orta: {
     nom: 'Clinical', ost: 'Klinik ginekologiya', emoji: '🩺',
     tavsif: 'Kasallikni simptomdan tanish, differensial tashxis va asosiy diagnostika-davolash algoritmini o‘rganish.',
-    gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)', accent: '#d97706',
+    gradient: BOSQICH_RANG["o'rta"].gradient, accent: BOSQICH_RANG["o'rta"].accent,
   },
   qiyin: {
     nom: 'Advanced Gynecology', ost: 'Murakkab klinik fikrlash', emoji: '👑',
     tavsif: 'Murakkab klinik vaziyatlarni tahlil qilish — PCOS, onkologiya, bepushtlik, homiladorlik va menopauza.',
-    gradient: 'linear-gradient(135deg, #dc2626 0%, #e11d48 50%, #9333ea 100%)', accent: '#dc2626',
+    gradient: BOSQICH_RANG['qiyin'].gradient, accent: BOSQICH_RANG['qiyin'].accent,
   },
 }
 

@@ -60,6 +60,18 @@ export const BOSQICHLAR: { id: Bosqich; nom: string; emoji: string; tavsif: stri
   },
 ]
 
+// Bosqich ranglari — YAGONA MANBA. Ilgari #16a34a/#d97706/#dc2626 hexlari 6+ faylda
+// qayta-qayta yozilardi; bitta ranni o'zgartirish uchun hamma faylni tahrirlash kerak edi.
+//  - `token`    — semantik dizayn-token (matn/badge/progress uchun afzal, temaga moslashadi)
+//  - `accent`   — banner gradientiga mos vivid hex (hero bloklar shu bilan uyg'un turadi)
+//  - `gradient` — bosqich sahifasi bannerining dekorativ gradienti
+// Emoji [BOSQICHLAR] da yagona manbada — bu yerda takrorlanmaydi.
+export const BOSQICH_RANG: Record<Bosqich, { token: string; accent: string; gradient: string }> = {
+  oson:   { token: 'var(--good)',   accent: '#16a34a', gradient: 'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)' },
+  "o'rta": { token: 'var(--warn)',   accent: '#d97706', gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)' },
+  qiyin:  { token: 'var(--danger)', accent: '#dc2626', gradient: 'linear-gradient(135deg, #dc2626 0%, #e11d48 50%, #9333ea 100%)' },
+}
+
 // URL'da apostrof noqulay bo'lgani uchun (o'rta), bosqichlar uchun alohida yo'l-nom moslamasi.
 export const BOSQICH_YOLI: Record<Bosqich, string> = { oson: 'oson', "o'rta": 'orta', qiyin: 'qiyin' }
 

@@ -4,25 +4,13 @@ import { useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { DARSLAR, BOSQICHLAR, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
+import { DARSLAR, BOSQICHLAR, BOSQICH_RANG, bosqichYolidanTop, bosqichBoyichaTartibla, type Dars } from '@/lib/talim/darslar'
 import { useMeningObunalarim } from '@/lib/talim/useObuna'
 import { useUmumiyProgress, darsOchiqmi, darsTugadimi } from '@/lib/talim/useDarsProgress'
 import {
   BookOpen, Video, FolderDown, Layers, ClipboardCheck, Award, GraduationCap,
   Building2, Puzzle, CheckCircle2, Lock, Gift, Clock, type LucideIcon,
 } from 'lucide-react'
-
-const BOSQICH_GRADIENT: Record<string, string> = {
-  oson:   'linear-gradient(135deg, #16a34a 0%, #059669 50%, #0d9488 100%)',
-  "o'rta": 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
-  qiyin:  'linear-gradient(135deg, #dc2626 0%, #e11d48 50%, #9333ea 100%)',
-}
-
-const BOSQICH_ACCENT: Record<string, string> = {
-  oson: '#16a34a',
-  "o'rta": '#d97706',
-  qiyin: '#dc2626',
-}
 
 const KATEGORIYA_RANGI: Record<string, string> = {
   Prostata:                       '#2563eb',
@@ -223,8 +211,8 @@ export default function BosqichDarslariPage() {
     [bosqichDarslari]
   )
   const royxat = filtr === 'Hammasi' ? bosqichDarslari : bosqichDarslari.filter((d) => d.kategoriya === filtr)
-  const gradient = BOSQICH_GRADIENT[bosqich ?? ''] ?? BOSQICH_GRADIENT['oson']
-  const accent = BOSQICH_ACCENT[bosqich ?? ''] ?? '#16a34a'
+  const gradient = BOSQICH_RANG[bosqich ?? 'oson'].gradient
+  const accent = BOSQICH_RANG[bosqich ?? 'oson'].accent
   const bolimlar = bosqichBolimlar(bosqich ?? 'oson')
 
   if (!bosqich || !bosqichMa) {

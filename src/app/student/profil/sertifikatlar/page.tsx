@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Header } from '@/components/Header'
-import { BOSQICHLAR, BOSQICH_KATEGORIYA_TARTIBI, type Bosqich } from '@/lib/talim/darslar'
+import { BOSQICHLAR, BOSQICH_KATEGORIYA_TARTIBI, BOSQICH_RANG, type Bosqich } from '@/lib/talim/darslar'
 import type { BobHolati, BosqichHolati } from '@/lib/talim/sertifikat'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
@@ -27,12 +27,6 @@ type Holat = {
   mavjud: Mavjud[]
   ism: string
   ismQulflangan: boolean
-}
-
-const BOSQICH_RANG: Record<string, string> = {
-  oson: '#16a34a',
-  "o'rta": '#ca8a04',
-  qiyin: '#dc2626',
 }
 
 export default function SertifikatlarPage() {
@@ -120,7 +114,7 @@ export default function SertifikatlarPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {sertifikatliBosqichlar.map((b) => {
               const meta = BOSQICHLAR.find((x) => x.id === b.bosqich)
-              const rang = BOSQICH_RANG[b.bosqich] ?? 'var(--accent)'
+              const rang = BOSQICH_RANG[b.bosqich as Bosqich]?.token ?? 'var(--accent)'
               const bor = mavjudTop('bosqich', b.bosqich)
               const foiz = b.jami > 0 ? Math.round((b.otgan / b.jami) * 100) : 0
               const kalit = `bosqich|${b.bosqich}|`
@@ -196,7 +190,7 @@ export default function SertifikatlarPage() {
               .filter((b) => b.bosqich === meta.id)
               .sort((a, c) => tartib.indexOf(a.kategoriya) - tartib.indexOf(c.kategoriya))
             if (boblar.length === 0) return null
-            const rang = BOSQICH_RANG[meta.id] ?? 'var(--accent)'
+            const rang = BOSQICH_RANG[meta.id as Bosqich]?.token ?? 'var(--accent)'
 
             return (
               <div key={meta.id} style={{ marginBottom: '18px' }}>
