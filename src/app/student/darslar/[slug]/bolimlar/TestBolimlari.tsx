@@ -13,65 +13,90 @@ import { type TestNatija } from './types'
 import { TestBlok } from './TestBlok'
 import { BoshUlash } from './BoshUlash'
 
+// Natija saqlanmaganda test tepasida ko'rinadigan ogohlantirish.
+function SaqlashXatosi({ matn }: { matn: string }) {
+  return (
+    <p role="alert" style={{
+      margin: '0 0 14px', fontSize: '12.5px', fontWeight: 600, color: 'var(--danger)',
+      background: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+      border: '1px solid var(--danger)', borderRadius: '10px', padding: '10px 14px', lineHeight: 1.5,
+    }}>
+      {matn}
+    </p>
+  )
+}
+
 export function AmaliyTestBolimi({ darsSlug, darsNomi, bank, savolSoni = 20 }: { darsSlug: string; darsNomi: string; bank: TestSavoli[]; savolSoni?: number }) {
   const supabase = createClient()
+  const [saqlashXato, setSaqlashXato] = useState<string | null>(null)
   const savollar = useMemo(
     () => shuffleVaTanla(bank, Math.min(savolSoni, bank.length)).map(variantlarniAralashtir),
     [bank, savolSoni]
   )
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
+    setSaqlashXato(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from('talim_natijalari').insert({
+    const { error } = await supabase.from('talim_natijalari').insert({
       student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
       togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'amaliy',
     })
+    if (error) setSaqlashXato("Natija saqlanmadi — internetni tekshiring. Bu urinish hisobga olinmagan bo'lishi mumkin.")
   }
 
   if (savollar.length === 0) return <BoshUlash matn="Savollar yuklanmoqda..." />
 
   return (
-    <TestBlok
-      key={savollar.map((s) => s.savol).join('|')}
-      savollar={savollar}
-      izohKorsat
-      qaytaUrinishKorinsin
-      boshlashSarlavha={<>Bankdan tasodifiy <strong>{savollar.length} ta</strong> savol tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
-      boshlashTugma="Testni boshlash →"
-      onTopshirish={saqla}
-    />
+    <>
+      {saqlashXato && <SaqlashXatosi matn={saqlashXato} />}
+      <TestBlok
+        key={savollar.map((s) => s.savol).join('|')}
+        savollar={savollar}
+        izohKorsat
+        qaytaUrinishKorinsin
+        boshlashSarlavha={<>Bankdan tasodifiy <strong>{savollar.length} ta</strong> savol tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
+        boshlashTugma="Testni boshlash →"
+        onTopshirish={saqla}
+      />
+    </>
   )
 }
 
 export function UsmleTestBolimi({ darsSlug, darsNomi, bank }: { darsSlug: string; darsNomi: string; bank: UsmleSavoli[] }) {
   const supabase = createClient()
+  const [saqlashXato, setSaqlashXato] = useState<string | null>(null)
   const savollar = useMemo(
     () => shuffleVaTanla(bank, Math.min(5, bank.length)).map(variantlarniAralashtir),
     [bank]
   )
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
+    setSaqlashXato(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from('talim_natijalari').insert({
+    const { error } = await supabase.from('talim_natijalari').insert({
       student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
       togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'usmle',
     })
+    if (error) setSaqlashXato("Natija saqlanmadi — internetni tekshiring. Bu urinish hisobga olinmagan bo'lishi mumkin.")
   }
 
   if (savollar.length === 0) return <BoshUlash matn="Savollar yuklanmoqda..." />
 
   return (
-    <TestBlok
-      key={savollar.map((s) => s.savol).join('|')}
-      savollar={savollar}
-      izohKorsat
-      qaytaUrinishKorinsin
-      boshlashSarlavha={<>USMLE uslubidagi bankdan tasodifiy <strong>{savollar.length} ta</strong> klinik vinyetka savoli tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
-      boshlashTugma="USMLE testni boshlash →"
-      onTopshirish={saqla}
-    />
+    <>
+      {saqlashXato && <SaqlashXatosi matn={saqlashXato} />}
+      <TestBlok
+        key={savollar.map((s) => s.savol).join('|')}
+        savollar={savollar}
+        izohKorsat
+        qaytaUrinishKorinsin
+        boshlashSarlavha={<>USMLE uslubidagi bankdan tasodifiy <strong>{savollar.length} ta</strong> klinik vinyetka savoli tanlandi. Xohlagancha qayta urinishingiz mumkin.</>}
+        boshlashTugma="USMLE testni boshlash →"
+        onTopshirish={saqla}
+      />
+    </>
   )
 }
 
@@ -85,6 +110,7 @@ export function NazoratTestBolimi({
   const [avvalgiNatija, setAvvalgiNatija] = useState<{ togri_son: number; jami_savol: number; foiz: number; created_at: string } | null>(null)
   const [savollar, setSavollar] = useState<TestSavoli[]>([])
   const [yakunlandi, setYakunlandi] = useState<TestNatija | null>(null)
+  const [saqlashXato, setSaqlashXato] = useState<string | null>(null)
 
   useEffect(() => {
     const tekshir = async () => {
@@ -106,12 +132,15 @@ export function NazoratTestBolimi({
 
   const saqla = async ({ togriSon, jami }: TestNatija) => {
     setYakunlandi({ togriSon, jami })
+    setSaqlashXato(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase.from('talim_natijalari').insert({
+    if (!user) { setSaqlashXato('Tizimga kirilmagan — natija saqlanmadi.'); return }
+    const { error } = await supabase.from('talim_natijalari').insert({
       student_id: user.id, dars_slug: darsSlug, dars_nomi: darsNomi,
       togri_son: togriSon, jami_savol: jami, foiz: Math.round((togriSon / jami) * 100), turi: 'nazorat',
     })
+    // Nazorat natijasi sertifikatga bog'liq — saqlanmasa albatta bildiramiz.
+    if (error) setSaqlashXato("⚠️ Natija saqlanmadi! Internetni tekshirib, admin/shifokorga murojaat qiling — aks holda sertifikat hisobga olinmaydi.")
   }
 
   if (yuklanmoqda) return <UrosferaLoaderMini />
@@ -155,6 +184,11 @@ export function NazoratTestBolimi({
         <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: otdi ? '#16a34a' : '#dc2626' }}>
           {otdi ? `🏅 Tabriklaymiz! Sertifikat olish huquqiga ega bo'ldingiz.` : `Sertifikat chegarasi (${otishFoizi}%) bajarilmadi — qaytadan urinish admin/shifokor orqali rasmiylashtiriladi.`}
         </p>
+        {saqlashXato && (
+          <p role="alert" style={{ margin: '14px 0 0', fontSize: '12.5px', fontWeight: 700, color: 'var(--danger)', lineHeight: 1.5 }}>
+            {saqlashXato}
+          </p>
+        )}
       </div>
     )
   }

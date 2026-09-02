@@ -376,6 +376,11 @@ export function FlashcardBolimi({ kartalar }: { kartalar: Flashcard[] }) {
 
       <div
         onClick={() => setOchiq((o) => !o)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOchiq((o) => !o) } }}
+        role="button"
+        tabIndex={0}
+        aria-pressed={ochiq}
+        aria-label={ochiq ? 'Kartani yopish (savolga qaytish)' : 'Kartani ochish (javobni ko\'rish)'}
         className="rise"
         style={{
           cursor: 'pointer', minHeight: '200px',

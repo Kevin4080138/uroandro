@@ -277,12 +277,15 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
         const faol = i === joriy
         const ochiq = ochiqMi(i)
         return (
-          <div
+          <button
             key={t}
             onClick={() => qadamgaOt(i)}
+            disabled={!ochiq}
+            aria-current={faol ? 'step' : undefined}
+            aria-label={`${i + 1}. ${ma.nom} — ${tugadi ? 'tugallangan' : ochiq ? ma.turi : 'qulflangan, avval oldingi qadamni yakunlang'}`}
             className="soft-press"
             style={{
-              display: 'flex', alignItems: 'center', gap: '11px',
+              display: 'flex', alignItems: 'center', gap: '11px', width: 'calc(100% - 24px)', boxSizing: 'border-box', textAlign: 'left', font: 'inherit',
               margin: '0 12px 8px', padding: '10px 12px', borderRadius: '14px',
               cursor: ochiq ? 'pointer' : 'not-allowed',
               background: tugadi ? '#16a34a12' : faol ? accent + '14' : 'var(--surface-2)',
@@ -312,7 +315,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
               background: 'var(--surface)', border: '1px solid var(--line)',
               borderRadius: '999px', padding: '3px 8px',
             }}>{qadamChip(t)}</span>
-          </div>
+          </button>
         )
       })}
 

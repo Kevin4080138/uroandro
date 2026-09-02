@@ -74,14 +74,14 @@ optimistik `setYonalish` qiladi-yu, `supabase.update` ni **`await` qilmaydi va x
 tarmoq uzilса foydalanuvchi bilmaydi, UI noto'g'ri holatda qoladi. Progress yakunlash
 (`yakunlaVaDavom`, test `saqla`) ham ko'pi shunday.
 
-- [ ] `yonalishAlmashtir`: `await` + `error` tekshiruvi; xato bo'lsa `setYonalish` ni
-      eski qiymatga **rollback** + kichik xato bildirish (admin'dagi banner namunasi).
-- [ ] Test/nazorat `saqla` funksiyalari ([DarsClient](src/app/student/darslar/[slug]/DarsClient.tsx#L1092)
-      va b.): natija saqlanmasa foydalanuvchiga bildirish ("natija saqlanmadi, qayta urinib ko'ring"),
-      chunki bu progress/sertifikatga ta'sir qiladi.
-- [ ] Progress qadam yakunlash (`useDarsProgress.yakunla`) — jadval xatosida jimgina o'tib
-      ketmasin; hech bo'lmasa konsolga emas, holatga yozilsin.
-- [ ] Kichik umumiy toast/banner yordamchisi (admin `amalXato` naqshi) — talaba bo'limi bo'ylab.
+- [x] `yonalishAlmashtir` ([dashboard](src/app/student/dashboard/page.tsx)): `await` + `error`
+      tekshiruvi; xato bo'lsa eski yo'nalishga **rollback** + `role="alert"` bildirish.
+- [x] Test `saqla` funksiyalari ([TestBolimlari](src/app/student/darslar/[slug]/bolimlar/TestBolimlari.tsx)):
+      amaliy/USMLE — saqlanmasa test tepasida ogohlantirish; **nazorat** — natija ekranida
+      qattiq ogohlantirish (sertifikatga bog'liq, "admin/shifokorga murojaat qiling").
+- [ ] Progress qadam yakunlash (`useDarsProgress.yakunla`) — kechiktirildi (kichik, past ta'sir;
+      qadam belgilanmasa keyingi kirishda qayta belgilanadi). Keyingi tozalash.
+- [x] Umumiy xato ko'rsatish naqshi (`role="alert"` banner) talaba bo'limida qo'llandi.
 
 ---
 
@@ -91,14 +91,19 @@ tarmoq uzilса foydalanuvchi bilmaydi, UI noto'g'ri holatda qoladi. Progress ya
 klaviatura/aria yo'q. Qulflangan qadamda `cursor: not-allowed` bor, lekin ekran-o'quvchi
 holatni bilmaydi.
 
-- [ ] Bosiladigan `<div onClick>` (dars kartalari, bosqich kartalari, qadam chiplari) →
-      `<button>` yoki navigatsiya bo'lsa `<Link>`.
-- [ ] Qulflangan qadam: `disabled` + `aria-disabled="true"` + `title`/`aria-label`
-      ("Avval oldingi qadamni yakunlang"). `cursor: not-allowed` yolg'iz yetarli emas.
-- [ ] Faol/tugallangan/qulflangan holat `aria-label` yoki `aria-current` bilan bildiriladi.
-- [ ] Test variant tugmalari: `<button>` + tanlangan holat `aria-pressed`.
-- [ ] Global `:focus-visible` allaqachon qo'shilgan ([globals.css](src/app/globals.css)) — yangi
-      tugmalar undan foydalanadi.
+- [x] Qadam chiplari ([DarsClient](src/app/student/darslar/[slug]/DarsClient.tsx) `Tarkib`)
+      `<div onClick>` → `<button disabled={!ochiq}>` + `aria-current="step"` (faol) + `aria-label`.
+- [x] Qulflangan qadam: `disabled` + `aria-label` ("qulflangan, avval oldingi qadamni yakunlang").
+      `cursor:not-allowed` endi yolg'iz emas.
+- [x] Test variant tugmalari ([TestBlok](src/app/student/darslar/[slug]/bolimlar/TestBlok.tsx)): `aria-pressed`.
+- [x] Case-runner javob variantlari (Interaktiv/Xatolar/Vaziyatli `<div>`): `role="button"` +
+      `tabIndex` + `onKeyDown` (Enter/Space) + `aria-pressed`/`aria-disabled`. Klinik allaqachon `<button>`.
+- [x] Case-menyu tanlash kartalari (4) va flashcard flip-kartasi: `role="button"` + klaviatura + `aria-label`.
+- [x] Yo'nalish almashtirgichi ([dashboard](src/app/student/dashboard/page.tsx)): `aria-pressed`.
+- [x] Global `:focus-visible` ([globals.css](src/app/globals.css)) — yangi tugmalar undan foydalanadi.
+- [ ] **Kechiktirildi** — dars ro'yxati kartalari ([darslar/page.tsx](src/app/student/darslar/page.tsx),
+      [bosqich/[bosqich]](src/app/student/darslar/bosqich/[bosqich]/page.tsx)): bespoke navigatsion
+      `<div onClick>` kartalar. Alohida a11y o'tishi (bu PR asosiy assessment interaksiyalariga qaratildi).
 
 ---
 

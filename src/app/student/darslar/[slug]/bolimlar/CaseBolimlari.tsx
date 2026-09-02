@@ -74,7 +74,7 @@ export function KlinikHolatlarBolimi({ holatlar }: { holatlar: KlinikHolat[] }) 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {holatlar.map((h, i) => (
-          <div key={h.id} onClick={() => boshla(i)} className="rise lift" style={{
+          <div key={h.id} onClick={() => boshla(i)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); boshla(i) } }} role="button" tabIndex={0} aria-label={`${h.sarlavha} — boshlash`} className="rise lift" style={{
             background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? 'var(--good)' : 'var(--line)'}`,
             borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.07}s`,
           }}>
@@ -279,7 +279,7 @@ export function InteraktivCaseBolimi({ caselar }: { caselar: InteraktivCase[] })
           </p>
         </div>
         {caselar.map((c, i) => (
-          <div key={c.id} onClick={() => boshla(i)} className="rise lift" style={{
+          <div key={c.id} onClick={() => boshla(i)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); boshla(i) } }} role="button" tabIndex={0} aria-label={`${c.sarlavha} — boshlash`} className="rise lift" style={{
             background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? '#16a34a' : 'var(--line)'}`,
             borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.07}s`,
           }}>
@@ -374,6 +374,11 @@ export function InteraktivCaseBolimi({ caselar }: { caselar: InteraktivCase[] })
                   return next
                 })
               }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !tekshirildi) { e.preventDefault(); (e.currentTarget as HTMLElement).click() } }}
+              role="button"
+              tabIndex={tekshirildi ? -1 : 0}
+              aria-pressed={tanlanganMi}
+              aria-disabled={tekshirildi}
               className={tekshirildi ? '' : 'soft-press'}
               style={{ background: bg, border, borderRadius: '12px', padding: '14px 16px', cursor: tekshirildi ? 'default' : 'pointer', transition: 'all .15s' }}
             >
@@ -461,7 +466,7 @@ export function XatolarTahlilyBolimi({ tahlillar }: { tahlillar: XatoTahlil[] })
           </p>
         </div>
         {tahlillar.map((t, i) => (
-          <div key={t.id} onClick={() => boshla(i)} className="rise lift" style={{
+          <div key={t.id} onClick={() => boshla(i)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); boshla(i) } }} role="button" tabIndex={0} aria-label={`${t.sarlavha} — boshlash`} className="rise lift" style={{
             background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? '#16a34a' : 'var(--line)'}`,
             borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.06}s`,
           }}>
@@ -529,6 +534,11 @@ export function XatolarTahlilyBolimi({ tahlillar }: { tahlillar: XatoTahlil[] })
           }
           return (
             <div key={i} onClick={() => { if (!tekshirildi) setTanlangan(i) }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !tekshirildi) { e.preventDefault(); setTanlangan(i) } }}
+              role="button"
+              tabIndex={tekshirildi ? -1 : 0}
+              aria-pressed={tanlanganMi}
+              aria-disabled={tekshirildi}
               className={tekshirildi ? '' : 'soft-press'}
               style={{ background: bg, border, borderRadius: '12px', padding: '14px 16px', cursor: tekshirildi ? 'default' : 'pointer', transition: 'all .15s' }}
             >
@@ -625,7 +635,7 @@ export function VaziyatliMasalaBolimi({ masalalar }: { masalalar: VaziyatliMasal
           </p>
         </div>
         {masalalar.map((m, i) => (
-          <div key={m.id} onClick={() => boshla(i)} className="rise lift" style={{
+          <div key={m.id} onClick={() => boshla(i)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); boshla(i) } }} role="button" tabIndex={0} aria-label={`${m.sarlavha} — boshlash`} className="rise lift" style={{
             background: 'var(--surface)', border: `1.5px solid ${yakunlangan.has(i) ? '#16a34a' : 'var(--line)'}`,
             borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', animationDelay: `${i * 0.07}s`,
           }}>
@@ -694,6 +704,11 @@ export function VaziyatliMasalaBolimi({ masalalar }: { masalalar: VaziyatliMasal
           }
           return (
             <div key={i} onClick={() => { if (!tekshirildi) setTanlangan(i) }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !tekshirildi) { e.preventDefault(); setTanlangan(i) } }}
+              role="button"
+              tabIndex={tekshirildi ? -1 : 0}
+              aria-pressed={tanlanganMi}
+              aria-disabled={tekshirildi}
               className={tekshirildi ? '' : 'soft-press'}
               style={{ background: bg, border, borderRadius: '12px', padding: '14px 16px', cursor: tekshirildi ? 'default' : 'pointer', transition: 'all .15s' }}
             >

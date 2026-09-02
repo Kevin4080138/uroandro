@@ -29,6 +29,7 @@ export default function StudentDashboard() {
   const [oxirgiSlug, setOxirgiSlug] = useState<string | null>(null)
   const [ginOrtacha, setGinOrtacha] = useState(0)
   const [unvonlarOchiq, setUnvonlarOchiq] = useState(false)
+  const [yonalishXato, setYonalishXato] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
   const { seriya } = useSeriya()
@@ -144,9 +145,16 @@ export default function StudentDashboard() {
 
   async function yonalishAlmashtir(y: 'urologiya' | 'ginekologiya') {
     if (y === yonalish) return
-    setYonalish(y)
+    const eski = yonalish
+    setYonalish(y)              // optimistik — UI darrov almashadi
+    setYonalishXato(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) supabase.from('profiles').update({ yonalish: y }).eq('id', user.id)
+    if (!user) return
+    const { error } = await supabase.from('profiles').update({ yonalish: y }).eq('id', user.id)
+    if (error) {
+      setYonalish(eski)        // saqlanmadi — eski yo'nalishga qaytamiz
+      setYonalishXato("Yo'nalishni saqlab bo'lmadi — internetni tekshirib, qayta urinib ko'ring.")
+    }
   }
 
   const NAZAR_KARTALAR = [
@@ -301,13 +309,19 @@ export default function StudentDashboard() {
             {([['urologiya', 'Urologiya', 'var(--accent)'], ['ginekologiya', 'Ginekologiya', 'var(--gyn)']] as const).map(([id, nom, rang]) => {
               const faol = yonalish === id
               return (
-                <button key={id} onClick={() => yonalishAlmashtir(id)} className="soft-press" style={{
+                <button key={id} onClick={() => yonalishAlmashtir(id)} aria-pressed={faol} className="soft-press" style={{
                   flex: 1, border: 'none', borderRadius: '9px', padding: '9px 6px', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
                   background: faol ? rang : 'transparent', color: faol ? '#fff' : 'var(--muted)',
                 }}>{nom}</button>
               )
             })}
           </div>
+
+          {yonalishXato && (
+            <p role="alert" style={{ margin: '-8px 0 16px', fontSize: '12.5px', fontWeight: 600, color: 'var(--danger)' }}>
+              {yonalishXato}
+            </p>
+          )}
 
           {/* Bo'limlar */}
           <p className="rise" style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, margin: '0 0 12px', animationDelay: '.1s', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>

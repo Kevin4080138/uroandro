@@ -215,6 +215,7 @@ export function TestBlok({
                       key={v}
                       onClick={() => javobBer(i, vi)}
                       disabled={topshirildi}
+                      aria-pressed={tanlandi}
                       style={{
                         textAlign: 'left',
                         border: togriJavob ? '1px solid #16a34a' : notogriTanlandi ? '1px solid #dc2626' : tanlandi ? '1px solid var(--accent)' : '1px solid var(--line)',
