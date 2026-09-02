@@ -4,6 +4,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
+import { KebabMenu } from '@/components/KebabMenu'
+import { Pencil, Trash2 } from 'lucide-react'
+
+// Dars karta amallari: ⋮ menyu (true) yoki tag tugmalari (false).
+const KEBAB_AMALLAR = true
 
 type TestSavol = { savol: string; variantlar: string[]; togri: number; izoh?: string }
 type GinDars = {
@@ -265,11 +270,22 @@ export default function AdminGinDarslarPage() {
                       <p style={{ margin: '0 0 2px', fontSize: '13.5px', fontWeight: 700 }}>{d.sarlavha}</p>
                       <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>{BOLIMLAR.find((x) => x.id === d.bolim)?.nom ?? 'Darslar'} · {d.slug} {d.kategoriya ? `· ${d.kategoriya}` : ''} {d.faol ? '' : '· yashirin'}</p>
                     </div>
+                    {KEBAB_AMALLAR && (
+                      <KebabMenu
+                        ariaLabel={`${d.sarlavha} — amallar`}
+                        amallar={[
+                          { label: 'Tahrirlash', icon: <Pencil size={15} strokeWidth={2} />, onClick: () => tahrirla(d) },
+                          { label: "O'chirish", icon: <Trash2 size={15} strokeWidth={2} />, onClick: () => ochir(d), danger: true },
+                        ]}
+                      />
+                    )}
                   </div>
+                  {!KEBAB_AMALLAR && (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '9px' }}>
                     <button onClick={() => tahrirla(d)} style={{ background: 'var(--surface-2)', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>✏️ Tahrir</button>
                     <button onClick={() => ochir(d)} style={{ background: 'var(--surface-2)', border: '1px solid var(--danger)', color: 'var(--danger)', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>🗑 O&apos;chir</button>
                   </div>
+                  )}
                 </div>
               ))}
             </div>
