@@ -11,6 +11,7 @@ import { BannerHero } from '@/components/BannerHero'
 import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard, UnvonlarModal } from '@/components/RankBadge'
+import { BosqichGrid, type BosqichItem } from '@/components/BosqichGrid'
 import { SeriyaKarta } from '@/components/SeriyaKarta'
 import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData, getRankFromStages } from '@/lib/rank'
@@ -18,6 +19,9 @@ import {
   BookOpen, BarChart3, Library, Target, Dna, Calculator, Scissors, FolderTree,
   Trophy, Users, Stethoscope, Play, PartyPopper, Rocket, ArrowRight, LayoutGrid, Eye, Newspaper, Archive,
 } from 'lucide-react'
+
+// Bosqich progressi: ingichka chiziqlar (false) yoki bold Grid plitalar (true).
+const GRID_PROTOTIP = true
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
@@ -268,7 +272,13 @@ export default function StudentDashboard() {
                   {(yonalish === 'ginekologiya' ? ginBosqich : bosqichProgress).reduce((s, b) => s + b.tugadi, 0)} ta dars tugallandi
                 </span>
               </div>
-              {/* Har qator bosilsa o'sha bo'lim/bosqich sahifasiga o'tadi */}
+              {/* Har bosqich bosilsa o'sha bosqich sahifasiga o'tadi */}
+              {GRID_PROTOTIP ? (
+                <BosqichGrid
+                  items={(yonalish === 'ginekologiya' ? ginBosqich : bosqichProgress) as BosqichItem[]}
+                  onOpen={(b) => router.push(yonalish === 'ginekologiya' ? '/student/ginekologiya/darslar' : `/student/darslar/bosqich/${BOSQICH_YOLI[b.id as Bosqich]}`)}
+                />
+              ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {(yonalish === 'ginekologiya' ? ginBosqich : bosqichProgress).map((b) => (
                   <div
@@ -296,6 +306,7 @@ export default function StudentDashboard() {
                   </div>
                 ))}
               </div>
+              )}
             </div>
             </div>
 
