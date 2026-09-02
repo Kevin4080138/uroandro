@@ -23,8 +23,12 @@ jobs:
           MEDICAL_NEWS_CRON_URL: ${{ secrets.MEDICAL_NEWS_CRON_URL }}
         shell: bash
         run: |
-          if [[ -z "$CRON_SECRET" || -z "$MEDICAL_NEWS_CRON_URL" ]]; then
-            echo "Required Medical Content Hub secrets are not configured." >&2
+          missing=()
+          [[ -z "$CRON_SECRET" ]] && missing+=("CRON_SECRET")
+          [[ -z "$MEDICAL_NEWS_CRON_URL" ]] && missing+=("MEDICAL_NEWS_CRON_URL")
+          if (( ${#missing[@]} > 0 )); then
+            echo "Missing GitHub Actions secrets: ${missing[*]}" >&2
+            echo "Configure them in Repository settings > Secrets and variables > Actions." >&2
             exit 1
           fi
 
