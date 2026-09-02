@@ -124,6 +124,10 @@ export default function DarslarPage() {
           {/* ===== OSON — bepul, ochiq ===== */}
           <div
             onClick={() => och('oson')}
+            onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); och('oson') } }}
+            role="link"
+            tabIndex={0}
+            aria-label="Oson bosqich — Asoslar, 100% bepul"
             className="rise lift"
             style={{
               background: 'var(--surface)',
@@ -178,6 +182,10 @@ export default function DarslarPage() {
           {/* ===== O'RTA — eng ommabop ===== */}
           <div
             onClick={() => och("o'rta")}
+            onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); och("o'rta") } }}
+            role="link"
+            tabIndex={0}
+            aria-label="O'rta bosqich — Klinik chuqurlik"
             className="rise lift"
             style={{
               background: 'var(--surface)',
@@ -249,6 +257,10 @@ export default function DarslarPage() {
           {/* ===== QIYIN — premium dark ===== */}
           <div
             onClick={() => och('qiyin')}
+            onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); och('qiyin') } }}
+            role="link"
+            tabIndex={0}
+            aria-label="Qiyin bosqich — Mutaxassis darajasi"
             className="rise lift"
             style={{
               background: 'linear-gradient(160deg,#171123 0%,#1e1229 55%,#2a0f1d 100%)',

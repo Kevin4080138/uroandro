@@ -70,6 +70,15 @@ function DarsKartasi({ dars, tartib, qulflangan, bosqich, ketmaKetYopiq, tugadi,
   return (
     <div
       onClick={ketmaKetYopiq ? undefined : onClick}
+      onKeyDown={(e) => {
+        if (ketmaKetYopiq || (e.key !== 'Enter' && e.key !== ' ')) return
+        e.preventDefault()
+        onClick()
+      }}
+      role="link"
+      tabIndex={ketmaKetYopiq ? -1 : 0}
+      aria-disabled={ketmaKetYopiq}
+      aria-label={`${dars.sarlavha}${tugadi ? ' — tugallangan' : ketmaKetYopiq ? ' — qulflangan, avval oldingi darsni tugating' : qulflangan ? ' — obuna talab qilinadi' : ''}`}
       className={ketmaKetYopiq ? 'rise' : 'rise lift'}
       style={{
         animationDelay: `${Math.min(tartib * 0.05, 0.35)}s`,

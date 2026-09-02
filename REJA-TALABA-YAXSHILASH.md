@@ -79,8 +79,9 @@ tarmoq uzilса foydalanuvchi bilmaydi, UI noto'g'ri holatda qoladi. Progress ya
 - [x] Test `saqla` funksiyalari ([TestBolimlari](src/app/student/darslar/[slug]/bolimlar/TestBolimlari.tsx)):
       amaliy/USMLE — saqlanmasa test tepasida ogohlantirish; **nazorat** — natija ekranida
       qattiq ogohlantirish (sertifikatga bog'liq, "admin/shifokorga murojaat qiling").
-- [ ] Progress qadam yakunlash (`useDarsProgress.yakunla`) — kechiktirildi (kichik, past ta'sir;
-      qadam belgilanmasa keyingi kirishda qayta belgilanadi). Keyingi tozalash.
+- [x] Progress qadam yakunlash (`useDarsProgress.yakunla`) — optimistik yozuv xato bersa
+      rollback qiladi va `false` qaytaradi; DarsClient keyingi qadamga o'tmaydi, `role="alert"`
+      bilan qayta urinish xabarini ko'rsatadi. Saqlash vaqtida FAB/tugma bloklanadi.
 - [x] Umumiy xato ko'rsatish naqshi (`role="alert"` banner) talaba bo'limida qo'llandi.
 
 ---
@@ -101,9 +102,10 @@ holatni bilmaydi.
 - [x] Case-menyu tanlash kartalari (4) va flashcard flip-kartasi: `role="button"` + klaviatura + `aria-label`.
 - [x] Yo'nalish almashtirgichi ([dashboard](src/app/student/dashboard/page.tsx)): `aria-pressed`.
 - [x] Global `:focus-visible` ([globals.css](src/app/globals.css)) — yangi tugmalar undan foydalanadi.
-- [ ] **Kechiktirildi** — dars ro'yxati kartalari ([darslar/page.tsx](src/app/student/darslar/page.tsx),
-      [bosqich/[bosqich]](src/app/student/darslar/bosqich/[bosqich]/page.tsx)): bespoke navigatsion
-      `<div onClick>` kartalar. Alohida a11y o'tishi (bu PR asosiy assessment interaksiyalariga qaratildi).
+- [x] Dars ro'yxati kartalari ([darslar/page.tsx](src/app/student/darslar/page.tsx),
+      [bosqich/[bosqich]](src/app/student/darslar/bosqich/[bosqich]/page.tsx)): `role="link"`,
+      `tabIndex`, Enter/Space klaviatura navigatsiyasi va mazmunli `aria-label`; ketma-ket qulflangan
+      karta `aria-disabled` bilan fokusdan chiqariladi.
 
 ---
 

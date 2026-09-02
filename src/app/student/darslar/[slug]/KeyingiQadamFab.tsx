@@ -15,7 +15,7 @@ type QadamMa = { Icon: LucideIcon; nom: string; turi: string }
 
 export function KeyingiQadamFab({
   qadamlar, joriy, tugallangan, QADAM_NOMI, accent, accent2,
-  ochiqMi, qadamgaOt, yakunlaVaDavom, qadamChip,
+  ochiqMi, qadamgaOt, yakunlaVaDavom, qadamChip, progressSaqlanmoqda,
 }: {
   qadamlar: Tab[]
   joriy: number
@@ -25,8 +25,9 @@ export function KeyingiQadamFab({
   accent2: string
   ochiqMi: (i: number) => boolean
   qadamgaOt: (i: number) => void
-  yakunlaVaDavom: () => void
+  yakunlaVaDavom: () => Promise<void>
   qadamChip: (t: Tab) => string
+  progressSaqlanmoqda: boolean
 }) {
   const [ochiq, setOchiq] = useState(false)
 
@@ -179,10 +180,12 @@ export function KeyingiQadamFab({
         {/* Asosiy yetaklovchi tugma */}
         <button
           onClick={bosildi}
+          disabled={progressSaqlanmoqda}
+          aria-busy={progressSaqlanmoqda}
           className="soft-press"
           style={{
             position: 'relative', display: 'flex', alignItems: 'center', gap: '11px',
-            border: 'none', cursor: 'pointer', font: 'inherit',
+            border: 'none', cursor: progressSaqlanmoqda ? 'wait' : 'pointer', font: 'inherit',
             background: oxirgi && joriyTugadi ? 'var(--surface)' : `linear-gradient(135deg, ${accent}, ${accent2})`,
             color: oxirgi && joriyTugadi ? 'var(--ink-soft)' : 'white',
             borderRadius: '999px', padding: '9px 9px 9px 18px',
@@ -194,8 +197,8 @@ export function KeyingiQadamFab({
             <span style={{
               fontSize: '9.5px', fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase',
               opacity: oxirgi && joriyTugadi ? 0.7 : 0.85,
-            }}>{ustNom}</span>
-            <span style={{ fontSize: '14px', fontWeight: 900, whiteSpace: 'nowrap' }}>{astNom}</span>
+            }}>{progressSaqlanmoqda ? 'Kuting' : ustNom}</span>
+            <span style={{ fontSize: '14px', fontWeight: 900, whiteSpace: 'nowrap' }}>{progressSaqlanmoqda ? 'Saqlanmoqda…' : astNom}</span>
           </span>
           <span
             className={jonli ? 'kqf-pulse' : undefined}

@@ -142,7 +142,8 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
 
   const [joriy, setJoriy] = useState(0)
   const [tarkibOchiq, setTarkibOchiq] = useState(false)
-  const { tugallangan, yakunla } = useDarsProgress(slug)
+  const [progressSaqlanmoqda, setProgressSaqlanmoqda] = useState(false)
+  const { tugallangan, yakunla, saqlashXatosi, saqlashXatosiniTozala } = useDarsProgress(slug)
   const { bosqichniki: bosqichTariflari } = useTariflar()
 
   const qadam = qadamlar[Math.min(joriy, qadamlar.length - 1)]
@@ -170,8 +171,15 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const yakunlaVaDavom = () => {
-    yakunla(qadam)
+  const yakunlaVaDavom = async () => {
+    if (progressSaqlanmoqda) return
+    // Tugallangan qadamda DB yozuvi takrorlanmaydi; faqat keyingisiga o'tamiz.
+    if (!tugallangan.has(qadam)) {
+      setProgressSaqlanmoqda(true)
+      const saqlandi = await yakunla(qadam)
+      setProgressSaqlanmoqda(false)
+      if (!saqlandi) return
+    }
     if (joriy < qadamlar.length - 1) {
       setJoriy(joriy + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -404,6 +412,19 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
         {/* Asosiy kontent */}
         <main style={{ flex: 1, minWidth: 0, padding: '24px 16px 120px' }}>
           <div className="mx-auto max-w-[760px]">
+            {saqlashXatosi && (
+              <div role="alert" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                marginBottom: '16px', padding: '11px 14px', borderRadius: '12px',
+                color: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 10%, var(--surface))',
+                border: '1px solid color-mix(in srgb, var(--danger) 35%, var(--line))', fontSize: '13px', fontWeight: 700,
+              }}>
+                <span>{saqlashXatosi}</span>
+                <button onClick={saqlashXatosiniTozala} aria-label="Xabarni yopish" style={{
+                  border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '16px', padding: '2px 5px',
+                }}>×</button>
+              </div>
+            )}
             {/* Qadam sarlavhasi */}
             <div className="rise" style={{ marginBottom: '18px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -485,6 +506,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
           ochiqMi={ochiqMi}
           qadamgaOt={qadamgaOt}
           yakunlaVaDavom={yakunlaVaDavom}
+          progressSaqlanmoqda={progressSaqlanmoqda}
           qadamChip={qadamChip}
         />
       )}
@@ -516,6 +538,7 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
 
           <button
             onClick={yakunlaVaDavom}
+            disabled={progressSaqlanmoqda}
             className="soft-press"
             style={{
               background: tugallangan.has(qadam)
@@ -523,11 +546,11 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
                 : `linear-gradient(135deg,${accent},${accent2})`,
               color: tugallangan.has(qadam) ? 'var(--ink-soft)' : 'white',
               border: tugallangan.has(qadam) ? '1px solid var(--line)' : 'none',
-              borderRadius: '12px', padding: '11px 20px', fontSize: '13px', fontWeight: 800, cursor: 'pointer',
+              borderRadius: '12px', padding: '11px 20px', fontSize: '13px', fontWeight: 800, cursor: progressSaqlanmoqda ? 'wait' : 'pointer',
               flexShrink: 0, marginLeft: 'auto',
             }}
           >
-            {joriy === qadamlar.length - 1
+            {progressSaqlanmoqda ? 'Saqlanmoqda…' : joriy === qadamlar.length - 1
               ? (tugallangan.has(qadam) ? '🎉 Dars tugallandi' : 'Darsni yakunlash 🎉')
               : (tugallangan.has(qadam) ? 'Keyingisi →' : '✓ Yakunlash va davom etish')}
           </button>

@@ -27,6 +27,7 @@ export function useDarsProgress(slug: string) {
   const supabase = createClient()
   const [tugallangan, setTugallangan] = useState<Set<string>>(new Set())
   const [yuklandi, setYuklandi] = useState(false)
+  const [saqlashXatosi, setSaqlashXatosi] = useState<string | null>(null)
 
   useEffect(() => {
     const yukla = async () => {
@@ -44,27 +45,39 @@ export function useDarsProgress(slug: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
-  const yakunla = useCallback(async (qadam: string) => {
+  const yakunla = useCallback(async (qadam: string): Promise<boolean> => {
+    setSaqlashXatosi(null)
+    const avvalBorEdi = tugallangan.has(qadam)
     // Avval lokal belgilaymiz — UI kutmasin; jadval hali yaratilmagan bo'lsa ham buzilmaydi.
     setTugallangan((s) => {
       if (s.has(qadam)) return s
       return new Set(s).add(qadam)
     })
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase
+    if (!user) {
+      if (!avvalBorEdi) setTugallangan((s) => { const n = new Set(s); n.delete(qadam); return n })
+      setSaqlashXatosi("Progressni saqlash uchun tizimga qayta kiring.")
+      return false
+    }
+    const { error } = await supabase
       .from('dars_qadam_progress')
       .upsert(
         { student_id: user.id, dars_slug: slug, qadam },
         { onConflict: 'student_id,dars_slug,qadam', ignoreDuplicates: true }
       )
+    if (error) {
+      if (!avvalBorEdi) setTugallangan((s) => { const n = new Set(s); n.delete(qadam); return n })
+      setSaqlashXatosi("Progress saqlanmadi. Internetni tekshirib, qayta urinib ko'ring.")
+      return false
+    }
     // Kunlik seriya: qaysi qadam bo'lishidan qat'i nazar, bugungi kun faol deb belgilanadi.
     // Takroriy qadamlar ham bo'ladi (upsert ignoreDuplicates) — seriya baribir kuniga bir marta sanaladi.
     await seriyaBelgila()
+    return true
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug])
+  }, [slug, tugallangan])
 
-  return { tugallangan, yuklandi, yakunla }
+  return { tugallangan, yuklandi, yakunla, saqlashXatosi, saqlashXatosiniTozala: () => setSaqlashXatosi(null) }
 }
 
 // Talabaning barcha darslar bo'yicha progressi — bosqich sahifasida
