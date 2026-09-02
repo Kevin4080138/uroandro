@@ -6,6 +6,12 @@
 
 *Yaratilgan: 2026-09-02. Manba: Dr. Arabboyev modul rejasi (2026-08-21).*
 
+> ⚠️ **YANGILANDI (2026-09-02):** Skelet (34 modul, 126 dars) tuzildi/deploy qilindi,
+> lekin "har mavzu = to'liq kurs" yondashuvi zerikarli. Kontent va pedagogik model
+> — **darslarni ~60 ga birlashtirish, formatlarni modul darajasiga chiqarish** —
+> endi [REJA-UROLOGIYA-KONTENT.md](REJA-UROLOGIYA-KONTENT.md) da. Baza `kurs_modullar`+`modul_id`
+> ga normalizatsiya qilinadi. Quyidagi struktura reja (A/B/C) — poydevor tarixi.
+
 ---
 
 ## 0. Qabul qilingan qarorlar (2026-09-02)
