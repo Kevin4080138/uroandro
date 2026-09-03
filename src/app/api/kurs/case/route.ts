@@ -179,13 +179,25 @@ export async function POST(req: Request) {
     const oxirgi = bosqichNo >= bosqichlar.length - 1
     const yangiJavoblar = { qadamlar }
 
+    // Parallel yakunlash chekka holati: 0 qatorga ta'sir qilsa mavjud holatni
+    // qayta o'qib idempotent javob (yakunlangan) yoki 409 qaytaramiz.
+    const yakunlanganmi = async () => {
+      const { data } = await admin
+        .from('kurs_urinishlar').select('yakunlangan_at').eq('id', urinishId).maybeSingle()
+      return !!(data as { yakunlangan_at: string | null } | null)?.yakunlangan_at
+    }
+
     if (oxirgi) {
-      const { error: updErr } = await admin
+      const { data: updData, error: updErr } = await admin
         .from('kurs_urinishlar')
         .update({ javoblar: yangiJavoblar, yakunlangan_at: new Date().toISOString() })
         .eq('id', urinishId)
         .is('yakunlangan_at', null)
+        .select('id')
       if (updErr) return NextResponse.json({ error: 'Saqlanmadi' }, { status: 500 })
+      if (((updData as { id: string }[] | null) ?? []).length === 0) {
+        return NextResponse.json({ ok: true, tugadi: true, yakunlangan: true })
+      }
       const togriSon = qadamlar.filter((q) => q.togri).length
       return NextResponse.json({
         ok: true, tugadi: true,
@@ -194,12 +206,17 @@ export async function POST(req: Request) {
       })
     }
 
-    const { error: updErr } = await admin
+    const { data: updData, error: updErr } = await admin
       .from('kurs_urinishlar')
       .update({ javoblar: yangiJavoblar })
       .eq('id', urinishId)
       .is('yakunlangan_at', null)
+      .select('id')
     if (updErr) return NextResponse.json({ error: 'Saqlanmadi' }, { status: 500 })
+    if (((updData as { id: string }[] | null) ?? []).length === 0) {
+      if (await yakunlanganmi()) return NextResponse.json({ ok: true, tugadi: true, yakunlangan: true })
+      return NextResponse.json({ error: 'Urinish holati o‘zgardi', code: 'CASE_STATE_CONFLICT' }, { status: 409 })
+    }
 
     return NextResponse.json({
       ok: true,
