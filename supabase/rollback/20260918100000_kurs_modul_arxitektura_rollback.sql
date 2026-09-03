@@ -1,5 +1,5 @@
 -- ============================================================
--- ROLLBACK — 20260918000000_kurs_modul_arxitektura.sql uchun
+-- ROLLBACK — 20260918100000_kurs_modul_arxitektura.sql uchun
 --
 -- ⚠️ BU FAYL MIGRATSIYA EMAS. Supabase migration pipeline uni AVTOMATIK
 -- ISHLATMAYDI (shu sabab supabase/migrations/ EMAS, supabase/rollback/ da).

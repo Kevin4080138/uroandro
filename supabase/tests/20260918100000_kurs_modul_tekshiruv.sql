@@ -1,5 +1,5 @@
 -- ============================================================
--- TEKSHIRUV / ASSERT — 20260918000000_kurs_modul_arxitektura.sql
+-- TEKSHIRUV / ASSERT — 20260918100000_kurs_modul_arxitektura.sql
 --
 -- Migratsiya Run qilingandan KEYIN bu faylni Supabase → SQL Editor da
 -- Run qiling. Barcha ASSERT o'tsa oxirida "HAMMA TEKSHIRUV O'TDI" chiqadi;

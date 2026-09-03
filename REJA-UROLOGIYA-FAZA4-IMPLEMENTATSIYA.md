@@ -71,7 +71,7 @@ obuna tekshiruvida faqat helper ichida map qilinadi.
 - **Eng oxirgi migratsiya:** `20260917000000_nazorat_qoidabuzarlik.sql`.
 - ⚠️ **Mavjud to'qnashuv:** `20260916000000` **ikki** faylda ishlatilgan
   (`admin_analitika_rpc` + `kurs_darslar_3level`). Yangi faylda bu takrorlanmaydi.
-- **Taklif etilgan yangi nom:** **`20260918000000_kurs_modul_arxitektura.sql`**
+- **Taklif etilgan yangi nom:** **`20260918100000_kurs_modul_arxitektura.sql`**
   (barcha mavjuddan katta, takrorlanmaydigan timestamp).
 - **Nom to'qnashuvi tekshiruvi (TOZA):** `kurs_modullar`, `kurs_savollar`,
   `kurs_flashcardlar`, `kurs_caselar`, `kurs_progress`, `kurs_urinishlar` — hech
@@ -83,7 +83,7 @@ obuna tekshiruvida faqat helper ichida map qilinadi.
 
 ## 1. Faza 4.1 — Schema va migratsiya
 
-**Fayl:** `supabase/migrations/20260918000000_kurs_modul_arxitektura.sql`
+**Fayl:** `supabase/migrations/20260918100000_kurs_modul_arxitektura.sql`
 (bitta idempotent migratsiya; Supabase SQL Editor'da Run — **bu fazada Run QILINMAYDI**).
 
 ### 1.1 Umumiy konvensiyalar
@@ -228,7 +228,7 @@ SELECT bepul, count(*) FROM kurs_modullar GROUP BY bepul;             -- true 7 
 ```
 
 **Rollback SQL — executable migratsiyalar katalogiga QO'YILMAYDI.**
-`supabase/rollback/20260918000000_kurs_modul_arxitektura_rollback.sql` da saqlanadi, boshida aniq
+`supabase/rollback/20260918100000_kurs_modul_arxitektura_rollback.sql` da saqlanadi, boshida aniq
 izoh: *«Bu fayl migratsiya emas — Supabase avtomatik ishlatmaydi; faqat qo'lda, ongli ravishda Run qilinadi»*.
 ```sql
 -- QO'LDA ROLLBACK — avtomatik ishlamaydi. Tartib muhim.
@@ -287,7 +287,7 @@ FOR SELECT USING (
 ### 1.11 Duplicate timestamp preflight (`20260916000000`)
 
 - Mavjud duplicate (`admin_analitika_rpc` + `kurs_darslar_3level`) **rename/tahrir QILINMAYDI**.
-- Faza 4.1 dan oldin **preflight:** lokal va remote migration history yangi `20260918000000`
+- Faza 4.1 dan oldin **preflight:** lokal va remote migration history yangi `20260918100000`
   ni qabul qilishini tekshirish (`supabase migration list` yoki `schema_migrations` tekshiruvi).
   Duplicate versiya yangi migratsiyani bloklamasligiga ishonch hosil qilmasdan **remote Run tavsiya etilmaydi**.
 
@@ -425,7 +425,7 @@ deploy, o'z testi bilan, eski tizimni buzmaydi, faqat shu vazif fayllari):
 
 | # | Commit | Fayllar (asosiy) | Testlar |
 |---|--------|------------------|---------|
-| 1 | `feat(db): add normalized course module schema` | `supabase/migrations/20260918000000_kurs_modul_arxitektura.sql` (+ rollback SQL fayli) | migratsiya idempotentligi, backfill, RLS, `modul_id IS NULL=0` |
+| 1 | `feat(db): add normalized course module schema` | `supabase/migrations/20260918100000_kurs_modul_arxitektura.sql` (+ rollback SQL fayli) | migratsiya idempotentligi, backfill, RLS, `modul_id IS NULL=0` |
 | 2 | `feat(api): add secure course progress and assessment routes` | `src/app/api/kurs/{progress,test,case}/route.ts`, `src/lib/kurs/kirish.ts`, TS turlari | `togri` sizmasligi, baho serverda, idempotentlik, access 403 |
 | 3 | `feat(admin): add course module editor` | `src/app/admin/kurs/modullar/*` | CRUD, draft→nashr |
 | 4 | `feat(admin): add structured lesson editor` | `src/app/admin/kurs/darslar/*` (+ tezkor savol panel) | modul picker, slug unique, tezkor 2–3 |
@@ -436,14 +436,14 @@ deploy, o'z testi bilan, eski tizimni buzmaydi, faqat shu vazif fayllari):
 keladi; 6-commit faqat uchidan-uchiga va RLS matritsa tekshiruvlari. Bu prior kelishuvga mos.
 
 **Chegara aniqligi:** `20260916000000` duplicate timestamp'ini bu commitlar **tuzatmaydi**
-(mavjud, aralashmaydi) — yangi fayl `20260918000000` bilan qochiladi.
+(mavjud, aralashmaydi) — yangi fayl `20260918100000` bilan qochiladi.
 
 ---
 
 ## 6. Har subfaza uchun acceptance criteria
 
 ### 4.1 Schema
-- **Kirish sharti:** worktree toza, migratsiya versiyasi bo'sh (`20260918000000`).
+- **Kirish sharti:** worktree toza, migratsiya versiyasi bo'sh (`20260918100000`).
 - **Fayllar:** 1 migratsiya + 1 rollback SQL.
 - **Vazifalar:** 6 jadval, `kurs_darslar` ustunlari, **`kurs_darslar` SELECT policy parent-modul
   tekshiruvi (§1.10)**, index, trigger, 34 modul (**hammasi draft**) + backfill.
@@ -532,7 +532,7 @@ keladi; 6-commit faqat uchidan-uchiga va RLS matritsa tekshiruvlari. Bu prior ke
 5. **Rollback SQL** executable migratsiyalar katalogiga qo'yilmaydi — `supabase/rollback/` da,
    avtomatik ishlamasligi aniq yozilgan (§1.9).
 6. **Duplicate `20260916000000` preflight** (§1.11) Faza 4.1 dan oldin; rename/tahrir yo'q; migration
-   history yangi `20260918000000` ni qabul qilishini tekshirmasdan remote Run yo'q.
+   history yangi `20260918100000` ni qabul qilishini tekshirmasdan remote Run yo'q.
 
 ---
 
@@ -557,7 +557,7 @@ keladi; 6-commit faqat uchidan-uchiga va RLS matritsa tekshiruvlari. Bu prior ke
 
 ## 10. Yakuniy taqdimot (xulosa)
 
-1. **Migratsiya fayli nomi:** `supabase/migrations/20260918000000_kurs_modul_arxitektura.sql`.
+1. **Migratsiya fayli nomi:** `supabase/migrations/20260918100000_kurs_modul_arxitektura.sql`.
 2. **Subfaza/commit jadvali:** §5 (6 commit) — 4.1 db → 4.2 api → 4.3a/b/c admin → 4.4 test.
 3. **O'zgaradigan/yangi fayllar:**
    - Yangi: migratsiya + rollback SQL; `src/app/api/kurs/{progress,test,case}/route.ts`;

@@ -14,7 +14,7 @@
 --   • L2/L3 (orta/qiyin) nashri DB CHECK bilan bloklangan (vaqtinchalik).
 --   • 126 skelet SAQLANADI — fizik merge yo'q, faqat modulga bog'lanadi.
 --   • kurs_darslar.faol ustuni qoladi; SELECT policy parent modul nashr'ini tekshiradi.
---   • Rollback: supabase/rollback/20260918000000_..._rollback.sql (avtomatik EMAS).
+--   • Rollback: supabase/rollback/20260918100000_..._rollback.sql (avtomatik EMAS).
 -- ============================================================
 
 -- ── Kursga xos updated_at trigger funksiyasi ──
