@@ -16,16 +16,16 @@
 -- yolg'on yashil ko'rinishi mumkin. IF NOT (...) THEN RAISE EXCEPTION doim ishlaydi.
 DO $$
 BEGIN
-  IF NOT ((SELECT count(*) FROM public.kurs_modullar) = 34) THEN
-    RAISE EXCEPTION '34 modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar); END IF;
-  IF NOT ((SELECT count(*) FROM public.kurs_darslar WHERE modul_id IS NULL) = 0) THEN
-    RAISE EXCEPTION 'modul_id IS NULL bo''lmasin (topildi: %)', (SELECT count(*) FROM public.kurs_darslar WHERE modul_id IS NULL); END IF;
-  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE holat = 'draft') = 34) THEN
-    RAISE EXCEPTION 'hammasi draft bo''lishi kerak (draft: %)', (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'draft'); END IF;
-  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE bepul = true) = 7) THEN
-    RAISE EXCEPTION '7 bepul (oson) modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar WHERE bepul = true); END IF;
-  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE holat = 'nashr') = 0) THEN
-    RAISE EXCEPTION 'auto-publish yo''q bo''lishi kerak (nashr: %)', (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'nashr'); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya') = 34) THEN
+    RAISE EXCEPTION '34 modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya'); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_darslar WHERE yonalish='urologiya' AND modul_no IS NOT NULL AND modul_id IS NULL) = 0) THEN
+    RAISE EXCEPTION 'modul_id IS NULL bo''lmasin (topildi: %)', (SELECT count(*) FROM public.kurs_darslar WHERE yonalish='urologiya' AND modul_no IS NOT NULL AND modul_id IS NULL); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND holat = 'draft') = 34) THEN
+    RAISE EXCEPTION 'hammasi draft bo''lishi kerak (draft: %)', (SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND holat = 'draft'); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND bepul = true) = 7) THEN
+    RAISE EXCEPTION '7 bepul (oson) modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND bepul = true); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND holat = 'nashr') = 0) THEN
+    RAISE EXCEPTION 'auto-publish yo''q bo''lishi kerak (nashr: %)', (SELECT count(*) FROM public.kurs_modullar WHERE yonalish='urologiya' AND holat = 'nashr'); END IF;
 
   -- Katalog: constraint/policy/index mavjudligi
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_modullar_nashr_bloki') THEN

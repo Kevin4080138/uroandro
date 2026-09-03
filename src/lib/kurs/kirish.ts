@@ -43,6 +43,7 @@ export type KirishSabab =
   | 'dars-faol-emas'
   | 'bosqich-notogri'
   | 'obuna-yoq'
+  | 'db-xato'
 
 export type KirishNatija = {
   ruxsat: boolean
@@ -75,21 +76,23 @@ export async function darsgaKirishBormi(
   darsId: string,
   opts: { adminMi: boolean }
 ): Promise<KirishNatija> {
-  const { data: darsData } = await admin
+  const { data: darsData, error: darsErr } = await admin
     .from('kurs_darslar')
     .select('id, faol, bepul_namuna, modul_id, bosqich')
     .eq('id', darsId)
     .maybeSingle()
+  if (darsErr) return { ruxsat: false, sabab: 'db-xato' }
   const dars = darsData as DarsRow | null
   if (!dars) return { ruxsat: false, sabab: 'dars-topilmadi' }
 
   let modul: ModulRow | undefined
   if (dars.modul_id) {
-    const { data: modulData } = await admin
+    const { data: modulData, error: modulErr } = await admin
       .from('kurs_modullar')
       .select('id, holat, bepul, bosqich')
       .eq('id', dars.modul_id)
       .maybeSingle()
+    if (modulErr) return { ruxsat: false, sabab: 'db-xato', dars }
     modul = (modulData as ModulRow | null) ?? undefined
   }
 
@@ -114,12 +117,13 @@ export async function darsgaKirishBormi(
     return { ruxsat: false, sabab: 'bosqich-notogri', dars, modul }
   }
 
-  const { data: obunaData } = await admin
+  const { data: obunaData, error: obunaErr } = await admin
     .from('obunalar')
     .select('tugash_sanasi')
     .eq('student_id', userId)
     .eq('bosqich', obunaBosqich)
     .eq('faol', true)
+  if (obunaErr) return { ruxsat: false, sabab: 'db-xato', dars, modul }
   const obunalar = (obunaData as { tugash_sanasi: string | null }[] | null) ?? []
   const faolObuna = obunalar.some(
     (o) => !o.tugash_sanasi || new Date(o.tugash_sanasi) > new Date()
@@ -143,11 +147,12 @@ export async function modulgaKirishBormi(
   modulId: string,
   opts: { adminMi: boolean }
 ): Promise<ModulKirishNatija> {
-  const { data: modulData } = await admin
+  const { data: modulData, error: modulErr } = await admin
     .from('kurs_modullar')
     .select('id, holat, bepul, bosqich')
     .eq('id', modulId)
     .maybeSingle()
+  if (modulErr) return { ruxsat: false, sabab: 'db-xato' }
   const modul = (modulData as ModulRow | null) ?? undefined
   if (!modul) return { ruxsat: false, sabab: 'modul-topilmadi' }
 
@@ -159,12 +164,13 @@ export async function modulgaKirishBormi(
   const obunaBosqich = bosqichMap(modul.bosqich)
   if (!obunaBosqich) return { ruxsat: false, sabab: 'bosqich-notogri', modul }
 
-  const { data: obunaData } = await admin
+  const { data: obunaData, error: obunaErr } = await admin
     .from('obunalar')
     .select('tugash_sanasi')
     .eq('student_id', userId)
     .eq('bosqich', obunaBosqich)
     .eq('faol', true)
+  if (obunaErr) return { ruxsat: false, sabab: 'db-xato', modul }
   const obunalar = (obunaData as { tugash_sanasi: string | null }[] | null) ?? []
   const faolObuna = obunalar.some(
     (o) => !o.tugash_sanasi || new Date(o.tugash_sanasi) > new Date()

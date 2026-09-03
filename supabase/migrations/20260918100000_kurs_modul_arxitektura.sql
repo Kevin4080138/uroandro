@@ -344,14 +344,15 @@ SELECT d.yonalish, d.bosqich, d.modul_no,
        CASE WHEN d.bosqich = 'oson' THEN true ELSE false END,
        true, 1, d.modul_no
 FROM public.kurs_darslar d
-WHERE d.modul_no IS NOT NULL
+WHERE d.yonalish = 'urologiya' AND d.modul_no IS NOT NULL
 GROUP BY d.yonalish, d.bosqich, d.modul_no
 ON CONFLICT (yonalish, bosqich, modul_no) DO NOTHING;
 
 UPDATE public.kurs_darslar d
 SET modul_id = m.id
 FROM public.kurs_modullar m
-WHERE m.yonalish = d.yonalish AND m.bosqich = d.bosqich AND m.modul_no = d.modul_no
+WHERE d.yonalish = 'urologiya'
+  AND m.yonalish = d.yonalish AND m.bosqich = d.bosqich AND m.modul_no = d.modul_no
   AND d.modul_id IS DISTINCT FROM m.id;
 
 -- ════════════════════════════════════════════════════════════
@@ -364,10 +365,10 @@ DECLARE
   v_draft   int;
   v_bepul   int;
 BEGIN
-  SELECT count(*) INTO v_modul  FROM public.kurs_modullar;
-  SELECT count(*) INTO v_orphan FROM public.kurs_darslar WHERE modul_id IS NULL;
-  SELECT count(*) INTO v_draft  FROM public.kurs_modullar WHERE holat = 'draft';
-  SELECT count(*) INTO v_bepul  FROM public.kurs_modullar WHERE bepul = true;
+  SELECT count(*) INTO v_modul  FROM public.kurs_modullar WHERE yonalish = 'urologiya';
+  SELECT count(*) INTO v_orphan FROM public.kurs_darslar WHERE yonalish = 'urologiya' AND modul_no IS NOT NULL AND modul_id IS NULL;
+  SELECT count(*) INTO v_draft  FROM public.kurs_modullar WHERE yonalish = 'urologiya' AND holat = 'draft';
+  SELECT count(*) INTO v_bepul  FROM public.kurs_modullar WHERE yonalish = 'urologiya' AND bepul = true;
   RAISE NOTICE 'kurs_modullar: % (kutilgan 34)', v_modul;
   RAISE NOTICE 'modul_id IS NULL darslar: % (kutilgan 0)', v_orphan;
   RAISE NOTICE 'draft modullar: % (kutilgan 34)', v_draft;
