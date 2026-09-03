@@ -22,6 +22,7 @@ import { NazariyaBolimi, VideoBolimi, YuklabOlishBolimi, FlashcardBolimi } from 
 import { AmaliyTestBolimi, UsmleTestBolimi, NazoratTestBolimi } from './bolimlar/TestBolimlari'
 import { KlinikHolatlarBolimi, InteraktivCaseBolimi, XatolarTahlilyBolimi, VaziyatliMasalaBolimi } from './bolimlar/CaseBolimlari'
 import { KeyingiQadamFab } from './KeyingiQadamFab'
+import { showToast } from '@/components/Toast'
 
 // FAB "keyingi qadam" prototipi. `true` — suzuvchi yetaklovchi tugma,
 // `false` — eski keng pastki navigatsiya paneli.
@@ -175,7 +176,10 @@ export function DarsClient({ slug, tarkib }: { slug: string; tarkib: DarsMatni |
       setProgressSaqlanmoqda(true)
       const saqlandi = await yakunla(qadam)
       setProgressSaqlanmoqda(false)
+      // Xato bo'lsa inline banner (saqlashXatosi) ko'rsatadi — bu yerda to'xtaymiz.
       if (!saqlandi) return
+      // Muvaffaqiyatli saqlandi — o'tkinchi tasdiq (talaba progressiga ishonsin).
+      showToast(joriy === qadamlar.length - 1 ? 'Dars tugallandi — progress saqlandi' : 'Progress saqlandi', 'success')
     }
     if (joriy < qadamlar.length - 1) {
       setJoriy(joriy + 1)
