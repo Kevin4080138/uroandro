@@ -38,6 +38,7 @@ type ModulRow = {
 
 export type KirishSabab =
   | 'dars-topilmadi'
+  | 'modul-topilmadi'
   | 'modul-nashr-emas'
   | 'dars-faol-emas'
   | 'bosqich-notogri'
@@ -126,4 +127,48 @@ export async function darsgaKirishBormi(
   if (faolObuna) return { ruxsat: true, dars, modul }
 
   return { ruxsat: false, sabab: 'obuna-yoq', dars, modul }
+}
+
+export type ModulKirishNatija = {
+  ruxsat: boolean
+  sabab?: KirishSabab
+  modul?: ModulRow
+}
+
+// Modul darajasidagi kirish (modul test/USMLE/case uchun):
+//   admin → doim ruxsat. Aks holda modul holat='nashr', so'ng bepul YOKI faol obuna.
+export async function modulgaKirishBormi(
+  admin: SupabaseClient,
+  userId: string,
+  modulId: string,
+  opts: { adminMi: boolean }
+): Promise<ModulKirishNatija> {
+  const { data: modulData } = await admin
+    .from('kurs_modullar')
+    .select('id, holat, bepul, bosqich')
+    .eq('id', modulId)
+    .maybeSingle()
+  const modul = (modulData as ModulRow | null) ?? undefined
+  if (!modul) return { ruxsat: false, sabab: 'modul-topilmadi' }
+
+  if (opts.adminMi) return { ruxsat: true, modul }
+
+  if (modul.holat !== 'nashr') return { ruxsat: false, sabab: 'modul-nashr-emas', modul }
+  if (modul.bepul) return { ruxsat: true, modul }
+
+  const obunaBosqich = bosqichMap(modul.bosqich)
+  if (!obunaBosqich) return { ruxsat: false, sabab: 'bosqich-notogri', modul }
+
+  const { data: obunaData } = await admin
+    .from('obunalar')
+    .select('tugash_sanasi')
+    .eq('student_id', userId)
+    .eq('bosqich', obunaBosqich)
+    .eq('faol', true)
+  const obunalar = (obunaData as { tugash_sanasi: string | null }[] | null) ?? []
+  const faolObuna = obunalar.some(
+    (o) => !o.tugash_sanasi || new Date(o.tugash_sanasi) > new Date()
+  )
+  if (faolObuna) return { ruxsat: true, modul }
+  return { ruxsat: false, sabab: 'obuna-yoq', modul }
 }
