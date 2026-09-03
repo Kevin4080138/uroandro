@@ -12,6 +12,7 @@ import {
   UserPlus, CalendarDays, CreditCard, Flame, MessageSquare, ClipboardList,
   Users, Building2, Globe, FileText, GraduationCap, TrendingUp, Shield, Megaphone,
   Images, Stethoscope, UserRound, Wrench, ChevronRight,
+  Layers, BookOpen, FlaskConical,
 } from 'lucide-react'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 
@@ -231,6 +232,9 @@ export default function AdminDashboard() {
                 { Icon: Globe, title: 'Katalog nazorati', href: '/admin/katalog', c: 'var(--accent)' },
                 { Icon: FileText, title: 'Kontent', href: '/admin/content', c: 'var(--accent-2)' },
                 { Icon: GraduationCap, title: 'Darslar', href: '/admin/darslar', c: 'var(--warn)' },
+                { Icon: Layers, title: 'Kurs modullari', href: '/admin/kurs/modullar', c: 'var(--accent)' },
+                { Icon: BookOpen, title: 'Kurs darslari', href: '/admin/kurs/darslar', c: 'var(--accent)' },
+                { Icon: FlaskConical, title: 'Kurs praktikumi', href: '/admin/kurs/praktikum', c: 'var(--accent-2)' },
                 { Icon: MessageSquare, title: 'Fikrlar', href: '/admin/fikrlar', c: 'var(--accent-2)' },
                 { Icon: TrendingUp, title: 'Statistika', href: '/admin/statistika', c: 'var(--good)' },
                 { Icon: Shield, title: 'Audit log', href: '/admin/audit', c: 'var(--danger)' },
