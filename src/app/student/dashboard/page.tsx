@@ -12,6 +12,7 @@ import { BannerCarousel } from '@/components/BannerCarousel'
 import { SkeletonDashboard } from '@/components/Skeleton'
 import { RankCard, UnvonlarModal } from '@/components/RankBadge'
 import { BosqichGrid, type BosqichItem } from '@/components/BosqichGrid'
+import { showToast } from '@/components/Toast'
 import { SeriyaKarta } from '@/components/SeriyaKarta'
 import { useSeriya } from '@/lib/talim/seriya'
 import { getRank, getProgressData, getRankFromStages } from '@/lib/rank'
@@ -159,6 +160,9 @@ export default function StudentDashboard() {
     if (error) {
       setYonalish(eski)        // saqlanmadi — eski yo'nalishga qaytamiz
       setYonalishXato("Yo'nalishni saqlab bo'lmadi — internetni tekshirib, qayta urinib ko'ring.")
+      showToast("Yo'nalish saqlanmadi — qayta urinib ko'ring", 'error')
+    } else {
+      showToast(y === 'ginekologiya' ? "Ginekologiya yo'nalishiga o'tdingiz" : "Urologiya yo'nalishiga o'tdingiz", 'success')
     }
   }
 
