@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 import { KebabMenu } from '@/components/KebabMenu'
+import { showToast } from '@/components/Toast'
 import { Pencil, Archive, ArchiveRestore, Trash2 } from 'lucide-react'
 
 // Qator amallari: bitta ⋮ menyu (true) yoki 3 alohida tugma (false).
@@ -48,7 +49,6 @@ export default function AdminUsersPage() {
   const [xato, setXato] = useState<string | null>(null)
   const [arxivKorsat, setArxivKorsat] = useState(false)
   const [ochirilmoqda, setOchirilmoqda] = useState<string | null>(null)
-  const [amalXato, setAmalXato] = useState<string | null>(null)
   const [tanlanganlar, setTanlanganlar] = useState<Set<string>>(new Set())
   const [bulkYuklanmoqda, setBulkYuklanmoqda] = useState(false)
   const [obunalar, setObunalar] = useState<Record<string, Set<string>>>({})
@@ -127,12 +127,12 @@ export default function AdminUsersPage() {
       })
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
-        setAmalXato(j.error ?? "Amalni bajarib bo'lmadi")
+        showToast(j.error ?? "Amalni bajarib bo'lmadi", 'error')
         return false
       }
       return true
     } catch (e: any) {
-      setAmalXato(e?.message ?? 'Tarmoq xatosi')
+      showToast(e?.message ?? 'Tarmoq xatosi', 'error')
       return false
     }
   }
@@ -261,19 +261,6 @@ export default function AdminUsersPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/admin/dashboard" backLabel="Admin bosh sahifasi" />
-
-      {amalXato && (
-        <div role="alert" style={{
-          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100,
-          background: 'var(--danger)', color: 'white', borderRadius: '12px', padding: '12px 18px',
-          fontSize: '13px', fontWeight: 600, boxShadow: 'var(--shadow)', display: 'flex', alignItems: 'center', gap: '12px', maxWidth: '90vw',
-        }}>
-          <span>{amalXato}</span>
-          <button onClick={() => setAmalXato(null)} style={{ background: 'rgba(255,255,255,.25)', border: 'none', color: 'white', borderRadius: '6px', padding: '2px 8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
-            Yopish
-          </button>
-        </div>
-      )}
 
       <div className="fade-in px-4 py-6 sm:px-8 sm:py-8">
 

@@ -11,6 +11,7 @@ import { Header } from '@/components/Header'
 import { DARSLAR, BOSQICHLAR, type Bosqich } from '@/lib/talim/darslar'
 import { UrosferaLoaderMini } from '@/components/UrosferaLoader'
 import { KebabMenu } from '@/components/KebabMenu'
+import { showToast } from '@/components/Toast'
 import { GraduationCap, CreditCard, Flame, CheckCircle2, Target, Download, TrendingUp, ArrowRight, ExternalLink, Link2 } from 'lucide-react'
 
 // Qator amali: "Ochish →" + ⋮ qo'shimcha amallar (true) yoki faqat "Ochish →" (false).
@@ -93,14 +94,11 @@ export default function TalabalarNazoratiPage() {
   const [obunaFiltr, setObunaFiltr] = useState<'hammasi' | 'obunali' | 'obunasiz'>('hammasi')
   const [saralash, setSaralash] = useState<{ kalit: SaralashKalit; yon: 'asc' | 'desc' }>({ kalit: 'oxirgiFaollik', yon: 'desc' })
   const [hozir] = useState(() => Date.now())
-  const [nusxaOk, setNusxaOk] = useState(false)
-
   const havolaNusxala = (yol: string) => {
     const toliq = typeof window !== 'undefined' ? window.location.origin + yol : yol
-    navigator.clipboard?.writeText(toliq).then(() => {
-      setNusxaOk(true)
-      setTimeout(() => setNusxaOk(false), 1600)
-    }).catch(() => {})
+    navigator.clipboard?.writeText(toliq)
+      .then(() => showToast('Havola nusxalandi', 'success'))
+      .catch(() => showToast('Nusxalab bo‘lmadi', 'error'))
   }
 
   useEffect(() => {
@@ -215,16 +213,6 @@ export default function TalabalarNazoratiPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <Header backHref="/admin/dashboard" backLabel="Dashboard" />
-
-      {nusxaOk && (
-        <div role="status" style={{
-          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100,
-          background: 'var(--ink)', color: 'var(--bg)', borderRadius: '999px', padding: '10px 18px',
-          fontSize: '13px', fontWeight: 800, boxShadow: '0 8px 24px rgba(0,0,0,.3)',
-        }}>
-          ✓ Havola nusxalandi
-        </div>
-      )}
 
       <div className="mx-auto max-w-[1200px] px-6 py-8">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
