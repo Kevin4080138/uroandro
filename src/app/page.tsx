@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { BannerCarousel } from '@/components/BannerCarousel'
 import { HeroVisual } from '@/components/landing/HeroVisual'
 import { ProductMarquee } from '@/components/landing/ProductMarquee'
 import { ScreenshotMarquee, ARALASH_SKRINSHOTLAR } from '@/components/landing/ScreenshotMarquee'
@@ -132,9 +132,8 @@ function Landing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const eshikka = (e: Eshik) => {
+  const eshikniEsla = (e: Eshik) => {
     try { localStorage.setItem('urosfera_rol', e.kalit) } catch {}
-    router.push(e.href)
   }
 
   return (
@@ -151,7 +150,7 @@ function Landing() {
           maxWidth: 1140, margin: '0 auto', padding: '13px 20px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
         }}>
-          <a
+          <Link
             href="/"
             style={{
               display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0,
@@ -168,31 +167,32 @@ function Landing() {
             <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.02em' }}>
               Uro<span style={{ color: 'var(--accent)' }}>sfera</span>
             </span>
-          </a>
+          </Link>
 
           <div className="nav-havolalar" style={{ gap: 26, alignItems: 'center' }}>
             <a href="#imkoniyatlar" style={{ fontSize: 13.5, color: 'var(--ink-soft)', textDecoration: 'none', fontWeight: 600 }}>Imkoniyatlar</a>
             <a href="#bolimlar" style={{ fontSize: 13.5, color: 'var(--ink-soft)', textDecoration: 'none', fontWeight: 600 }}>Bo&apos;limlar</a>
-            <a href="/shifokorlar" style={{ fontSize: 13.5, color: 'var(--ink-soft)', textDecoration: 'none', fontWeight: 600 }}>Shifokorlar</a>
+            <Link href="/shifokorlar" style={{ fontSize: 13.5, color: 'var(--ink-soft)', textDecoration: 'none', fontWeight: 600 }}>Shifokorlar</Link>
           </div>
 
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            <button onClick={() => router.push('/auth/login')} className="soft-press" style={{
+            <Link href="/auth/login" className="soft-press" style={{
               background: 'none', border: '1px solid var(--line)', color: 'var(--ink)',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer', borderRadius: 999, padding: '8px 16px',
-            }}>Kirish</button>
-            <button onClick={() => router.push('/auth/register')} className="soft-press" style={{
+              fontSize: 13, fontWeight: 600, cursor: 'pointer', borderRadius: 999, padding: '8px 16px', textDecoration: 'none',
+            }}>Kirish</Link>
+            <Link href="/auth/register" className="soft-press" style={{
               background: 'var(--accent)', border: 'none', color: '#fff',
-              fontSize: 13, fontWeight: 700, cursor: 'pointer', borderRadius: 999, padding: '8px 16px',
-            }}>Boshlash</button>
+              fontSize: 13, fontWeight: 700, cursor: 'pointer', borderRadius: 999, padding: '8px 16px', textDecoration: 'none',
+            }}>Boshlash</Link>
           </div>
         </nav>
       </header>
 
       {/* ══ Davom etish tasmasi (oldin tanlagan mehmon uchun) ══ */}
       {saqlangan && (
-        <button
-          onClick={() => eshikka(saqlangan)}
+        <Link
+          href={saqlangan.href}
+          onClick={() => eshikniEsla(saqlangan)}
           className="fade-in"
           style={{
             width: '100%', border: 'none', cursor: 'pointer', textAlign: 'center',
@@ -202,7 +202,7 @@ function Landing() {
           }}
         >
           {saqlangan.belgi} {saqlangan.sarlavha.replace('Men ', '').replace(/man$/, '')} bo&apos;limiga davom etish →
-        </button>
+        </Link>
       )}
 
       {/* ══ Hero ══ */}
@@ -240,15 +240,15 @@ function Landing() {
               <div className="rise hero-tugmalar" style={{
                 display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', animationDelay: '.15s',
               }}>
-                <button onClick={() => router.push('/auth/register')} className="lift" style={{
+                <Link href="/auth/register" className="lift" style={{
                   background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 14,
                   padding: '15px 30px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer',
-                  boxShadow: '0 10px 28px rgba(37,99,235,.28)',
-                }}>Bepul boshlash →</button>
-                <button onClick={() => router.push('/shifokorlar')} className="lift" style={{
+                  boxShadow: '0 10px 28px rgba(37,99,235,.28)', textDecoration: 'none',
+                }}>Bepul boshlash →</Link>
+                <Link href="/shifokorlar" className="lift" style={{
                   background: 'var(--surface)', color: 'var(--ink)', border: '1.5px solid var(--line)',
-                  borderRadius: 14, padding: '15px 30px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer',
-                }}>Shifokor topish</button>
+                  borderRadius: 14, padding: '15px 30px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer', textDecoration: 'none',
+                }}>Shifokor topish</Link>
               </div>
 
               <p className="rise" style={{
@@ -305,8 +305,9 @@ function Landing() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             {ESHIKLAR.map((e, i) => (
               <Reveal key={e.kalit} kechikish={i * 90}>
-                <button
-                  onClick={() => eshikka(e)}
+                <Link
+                  href={e.href}
+                  onClick={() => eshikniEsla(e)}
                   className="lift soft-press"
                   style={{
                     width: '100%', height: '100%', textAlign: 'left', cursor: 'pointer',
@@ -356,15 +357,10 @@ function Landing() {
                   }}>
                     Ochish →
                   </span>
-                </button>
+                </Link>
               </Reveal>
             ))}
           </div>
-        </section>
-
-        {/* ══ E'lonlar (admin panelidan boshqariladi) ══ */}
-        <section style={{ padding: '36px 0 0' }}>
-          <BannerCarousel role="landing" faqatShuRol />
         </section>
 
         {/* ══ Nega Urosfera ══ */}
@@ -414,10 +410,10 @@ function Landing() {
                 Ro&apos;yxatdan o&apos;tish bepul va bir daqiqa vaqt oladi.
                 Telefon raqamingiz yetarli.
               </p>
-              <button onClick={() => router.push('/auth/register')} className="lift" style={{
+              <Link href="/auth/register" className="lift" style={{
                 background: '#fff', color: 'var(--accent)', border: 'none', borderRadius: 14,
-                padding: '15px 36px', fontSize: 15.5, fontWeight: 800, cursor: 'pointer',
-              }}>Ro&apos;yxatdan o&apos;tish →</button>
+                padding: '15px 36px', fontSize: 15.5, fontWeight: 800, cursor: 'pointer', textDecoration: 'none', display: 'inline-block',
+              }}>Ro&apos;yxatdan o&apos;tish →</Link>
             </div>
           </Reveal>
         </section>
@@ -433,9 +429,9 @@ function Landing() {
             O&apos;zbekiston urologiya ekotizimi — shifokor, talaba va bemor bir platformada.
           </p>
           <div style={{ display: 'flex', gap: 22, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/shifokorlar" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Shifokorlar katalogi</a>
-            <a href="/auth/login" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Kirish</a>
-            <a href="/auth/register" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Ro&apos;yxatdan o&apos;tish</a>
+            <Link href="/shifokorlar" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Shifokorlar katalogi</Link>
+            <Link href="/auth/login" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Kirish</Link>
+            <Link href="/auth/register" style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'none' }}>Ro&apos;yxatdan o&apos;tish</Link>
           </div>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 22 }}>
             © 2026 Urosfera. Barcha huquqlar himoyalangan.

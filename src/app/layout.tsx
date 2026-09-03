@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope } from 'next/font/google'
 import './globals.css'
-import Script from 'next/script'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { PwaRegistrar } from '@/components/PwaRegistrar'
 import { TelegramAutoLogin } from '@/components/TelegramAutoLogin'
@@ -25,7 +24,20 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Urosfera', statusBarStyle: 'default' },
   icons: { icon: '/icon-192.png', apple: '/apple-touch-icon.png' },
-  openGraph: { siteName: 'Urosfera', locale: 'uz_UZ', type: 'website' },
+  openGraph: {
+    siteName: 'Urosfera',
+    locale: 'uz_UZ',
+    type: 'website',
+    title: "Urosfera — urologiya va andrologiya platformasi",
+    description: "Urologiya — o'zbek tilida, bir platformada.",
+    images: [{ url: '/og.png', width: 1672, height: 941, alt: 'Urosfera platformasi' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Urosfera — urologiya va andrologiya platformasi",
+    description: "Urologiya — o'zbek tilida, bir platformada.",
+    images: ['/og.png'],
+  },
 }
 
 export const viewport: Viewport = {
@@ -40,8 +52,6 @@ export default function RootLayout({
   return (
     <html lang="uz" data-theme="dark" className={`${manrope.variable} ${manropeDisplay.variable}`}>
       <body>
-        {/* Telegram Mini App SDK — window.Telegram.WebApp ni ta'minlaydi */}
-        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <ThemeProvider>{children}</ThemeProvider>
         <TelegramAutoLogin />
         <PwaRegistrar />

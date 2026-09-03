@@ -6,6 +6,7 @@
 // Yangi foydalanuvchi bo'lsa: Talaba/Bemor tanlash ekrani chiqadi.
 
 import { useEffect, useState } from 'react'
+import Script from 'next/script'
 import { createClient } from '@/lib/supabase'
 
 type TgWebApp = {
@@ -26,6 +27,7 @@ export function TelegramAutoLogin() {
   const [holat, setHolat] = useState<'tekshirilyapti' | 'rol' | 'kirilmoqda' | 'yopiq'>('yopiq')
   const [ism, setIsm] = useState('')
   const [xato, setXato] = useState<string | null>(null)
+  const [sdkTayyor, setSdkTayyor] = useState(false)
 
   const kir = async (initData: string, role: string | undefined) => {
     setXato(null)
@@ -92,6 +94,7 @@ export function TelegramAutoLogin() {
   }
 
   useEffect(() => {
+    if (!sdkTayyor) return
     const tg = (window as unknown as { Telegram?: { WebApp?: TgWebApp } }).Telegram?.WebApp
     if (!tg?.initData) return // Telegram ichida emas — hech narsa qilmaymiz
 
@@ -108,16 +111,26 @@ export function TelegramAutoLogin() {
     }
     boshla()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [sdkTayyor])
 
-  if (holat === 'yopiq') return null
+  const sdk = (
+    <Script
+      src="https://telegram.org/js/telegram-web-app.js"
+      strategy="afterInteractive"
+      onReady={() => setSdkTayyor(true)}
+    />
+  )
+
+  if (holat === 'yopiq') return sdk
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      background: 'var(--bg)', color: 'var(--ink)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
-    }}>
+    <>
+      {sdk}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'var(--bg)', color: 'var(--ink)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
+      }}>
       <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
         {(holat === 'tekshirilyapti' || holat === 'kirilmoqda') && (
           <>
@@ -177,6 +190,7 @@ export function TelegramAutoLogin() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }

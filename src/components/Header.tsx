@@ -4,7 +4,11 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 import { ProfileMenu } from './ProfileMenu'
 import { NotificationBell } from './NotificationBell'
+import { TalabaSideMenu } from './TalabaSideMenu'
 import { ArrowLeft, Sun, Moon } from 'lucide-react'
+
+// Talaba bo'limi uchun chapdan chiquvchi to'liq navigatsiya (side menu).
+const SIDE_MENU_TALABA = true
 
 export function Header({
   backHref, backLabel = 'Bosh sahifa', actions,
@@ -27,6 +31,8 @@ export function Header({
       style={{ background: 'var(--header)', borderBottom: '1px solid var(--line)' }}
     >
       <div className="flex min-w-0 shrink items-center gap-2 sm:gap-3">
+        {/* Talaba bo'limida — chapda to'liq navigatsiya menyusi (☰) */}
+        {SIDE_MENU_TALABA && pathname.startsWith('/student') && <TalabaSideMenu />}
         {/* Orqaga tugmasi — chapda, foydalanuvchi kutgan joyda; telefonda faqat strelka */}
         {backHref && (
           <button

@@ -240,13 +240,13 @@ export function BannerCarousel({
 
         {banners.length > 1 && (
           <>
-            <button onClick={(e) => { e.stopPropagation(); prev() }} style={{
+            <button aria-label="Oldingi banner" onClick={(e) => { e.stopPropagation(); prev() }} style={{
               position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
             }}>‹</button>
-            <button onClick={(e) => { e.stopPropagation(); next() }} style={{
+            <button aria-label="Keyingi banner" onClick={(e) => { e.stopPropagation(); next() }} style={{
               position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
               background: 'rgba(0,0,0,0.35)', border: 'none', borderRadius: '50%',
               width: '28px', height: '28px', color: 'white', fontSize: '14px',
@@ -263,6 +263,8 @@ export function BannerCarousel({
             <button
               key={i}
               onClick={() => goTo(i)}
+              aria-label={`${i + 1}-bannerni ko'rsatish`}
+              aria-current={i === idx ? 'true' : undefined}
               style={{
                 width: i === idx ? '20px' : '7px', height: '7px',
                 borderRadius: '4px', border: 'none', padding: 0, cursor: 'pointer',

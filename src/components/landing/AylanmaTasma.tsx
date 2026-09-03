@@ -100,8 +100,8 @@ export function AylanmaTasma({
       onWheel={pauza}
     >
       <div style={{ display: 'flex', gap, width: 'max-content', alignItems: 'flex-start' }}>
-        {children}
-        {children}
+        <div style={{ display: 'contents' }}>{children}</div>
+        <div aria-hidden="true" style={{ display: 'contents' }}>{children}</div>
       </div>
     </div>
   )
