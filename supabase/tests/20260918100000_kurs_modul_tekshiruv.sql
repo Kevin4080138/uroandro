@@ -1,37 +1,53 @@
 -- ============================================================
--- TEKSHIRUV / ASSERT — 20260918100000_kurs_modul_arxitektura.sql
+-- TEKSHIRUV — 20260918100000_kurs_modul_arxitektura.sql
 --
 -- Migratsiya Run qilingandan KEYIN bu faylni Supabase → SQL Editor da
--- Run qiling. Barcha ASSERT o'tsa oxirida "HAMMA TEKSHIRUV O'TDI" chiqadi;
+-- Run qiling. Hammasi o'tsa oxirida "HAMMA TEKSHIRUV O'TDI" chiqadi;
 -- birortasi yiqilsa RAISE EXCEPTION bilan to'xtaydi.
+-- ASSERT ishlatilmaydi (check_asserts=off da jim o'tishi mumkin) — IF/RAISE.
 --
 -- A qism — o'qish (read-only): sanoq va katalog invariantlari.
 -- B qism — salbiy testlar (RESTRICT / nashr CHECK): TRANZAKSIYA ichida,
 --          oxirida ROLLBACK — hech narsa o'zgarmaydi.
 -- ============================================================
 
--- ── A) READ-ONLY ASSERTLAR ──
+-- ── A) READ-ONLY TEKSHIRUVLAR (explicit IF/RAISE — ASSERT emas) ──
+-- ASSERT ishlatilmaydi: plpgsql.check_asserts=off bo'lsa jim o'tib, testlar
+-- yolg'on yashil ko'rinishi mumkin. IF NOT (...) THEN RAISE EXCEPTION doim ishlaydi.
 DO $$
-DECLARE n int;
 BEGIN
-  ASSERT (SELECT count(*) FROM public.kurs_modullar) = 34, '34 modul kutilgan';
-  ASSERT (SELECT count(*) FROM public.kurs_darslar WHERE modul_id IS NULL) = 0, 'modul_id IS NULL bo''lmasin';
-  ASSERT (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'draft') = 34, 'hammasi draft';
-  ASSERT (SELECT count(*) FROM public.kurs_modullar WHERE bepul = true) = 7, '7 bepul (oson) modul';
-  ASSERT (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'nashr') = 0, 'auto-publish yo''q';
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar) = 34) THEN
+    RAISE EXCEPTION '34 modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_darslar WHERE modul_id IS NULL) = 0) THEN
+    RAISE EXCEPTION 'modul_id IS NULL bo''lmasin (topildi: %)', (SELECT count(*) FROM public.kurs_darslar WHERE modul_id IS NULL); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE holat = 'draft') = 34) THEN
+    RAISE EXCEPTION 'hammasi draft bo''lishi kerak (draft: %)', (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'draft'); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE bepul = true) = 7) THEN
+    RAISE EXCEPTION '7 bepul (oson) modul kutilgan (topildi: %)', (SELECT count(*) FROM public.kurs_modullar WHERE bepul = true); END IF;
+  IF NOT ((SELECT count(*) FROM public.kurs_modullar WHERE holat = 'nashr') = 0) THEN
+    RAISE EXCEPTION 'auto-publish yo''q bo''lishi kerak (nashr: %)', (SELECT count(*) FROM public.kurs_modullar WHERE holat = 'nashr'); END IF;
 
   -- Katalog: constraint/policy/index mavjudligi
-  ASSERT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_modullar_nashr_bloki'), 'nashr_bloki CHECK bor';
-  ASSERT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_darslar_modul_fk'), 'modul_fk (RESTRICT) bor';
-  ASSERT (SELECT confdeltype FROM pg_constraint WHERE conname = 'kurs_darslar_modul_fk') = 'r', 'FK ON DELETE RESTRICT bo''lsin';
-  ASSERT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_savollar_bogliq_chk'), 'savol eksklyuziv CHECK bor';
-  ASSERT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'kurs_darslar' AND policyname = 'kurs_darslar_select'), 'kurs_darslar_select policy bor';
-  ASSERT (SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_savollar') = 1, 'kurs_savollar faqat admin policy (SELECT public yo''q)';
-  ASSERT (SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_caselar') = 1, 'kurs_caselar faqat admin policy';
-  ASSERT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'kurs_urinishlar_ochiq_test_uniq'), 'ochiq test partial unique bor';
-  ASSERT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'kurs_urinishlar_ochiq_case_uniq'), 'ochiq case partial unique bor';
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_modullar_nashr_bloki') THEN
+    RAISE EXCEPTION 'nashr_bloki CHECK topilmadi'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_darslar_modul_fk') THEN
+    RAISE EXCEPTION 'kurs_darslar_modul_fk topilmadi'; END IF;
+  IF NOT ((SELECT confdeltype FROM pg_constraint WHERE conname = 'kurs_darslar_modul_fk') = 'r') THEN
+    RAISE EXCEPTION 'FK ON DELETE RESTRICT bo''lishi kerak (confdeltype: %)', (SELECT confdeltype FROM pg_constraint WHERE conname = 'kurs_darslar_modul_fk'); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'kurs_savollar_bogliq_chk') THEN
+    RAISE EXCEPTION 'savol eksklyuziv CHECK topilmadi'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'kurs_darslar' AND policyname = 'kurs_darslar_select') THEN
+    RAISE EXCEPTION 'kurs_darslar_select policy topilmadi'; END IF;
+  IF NOT ((SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_savollar') = 1) THEN
+    RAISE EXCEPTION 'kurs_savollar faqat admin policy bo''lishi kerak (policy soni: %)', (SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_savollar'); END IF;
+  IF NOT ((SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_caselar') = 1) THEN
+    RAISE EXCEPTION 'kurs_caselar faqat admin policy bo''lishi kerak (policy soni: %)', (SELECT count(*) FROM pg_policies WHERE tablename = 'kurs_caselar'); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'kurs_urinishlar_ochiq_test_uniq') THEN
+    RAISE EXCEPTION 'ochiq test partial unique topilmadi'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'kurs_urinishlar_ochiq_case_uniq') THEN
+    RAISE EXCEPTION 'ochiq case partial unique topilmadi'; END IF;
 
-  RAISE NOTICE 'A qism: READ-ONLY assertlar OK';
+  RAISE NOTICE 'A qism: READ-ONLY tekshiruvlar OK';
 END $$;
 
 -- ── B) SALBIY TESTLAR — tranzaksiya ichida, oxirida ROLLBACK ──
