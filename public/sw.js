@@ -1,5 +1,5 @@
 // ─── PWA offline keshi ────────────────────────────────────
-const KESH = 'urosfera-v1'
+const KESH = 'urosfera-v2'
 self.addEventListener('install', () => {
   self.skipWaiting()
 })
