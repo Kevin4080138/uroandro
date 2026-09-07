@@ -144,7 +144,7 @@ export default function StudentDashboard() {
     { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=klassifikatsiyalar' },
     { Icon: BarChart3, title: 'Natijalarim', desc: 'Ginekologiya test natijalari', c: 'var(--gyn)', href: '/student/ginekologiya/natijalarim' },
     { Icon: Trophy, title: 'Reyting', desc: "Ginekologiya reytingi", c: 'var(--gyn)', href: '/student/ginekologiya/reyting' },
-    { Icon: Calculator, title: 'Kalkulyatorlar', desc: 'Shkala va formulalar', c: 'var(--gyn)', href: '#', tezOrada: true },
+    { Icon: Calculator, title: 'Kalkulyatorlar', desc: '25 ta shkala va klinik formula', c: 'var(--gyn)', href: '/student/ginekologiya/kalkulyatorlar' },
   ]
 
   const KARTALAR: any[] = yonalish === 'ginekologiya' ? GIN_KARTALAR : UROLOGIYA_KARTALAR
