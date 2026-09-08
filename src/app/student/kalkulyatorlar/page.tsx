@@ -13,7 +13,7 @@ import { KALKULYATORLAR, KALK_KATEGORIYALARI } from '@/lib/kalkulyatorlar'
 
 // Talaba qobig'i tayyor bo'lgan kalkulyatorlar — bular /student/kalkulyatorlar/<slug>
 // da ochiladi (bemor-panelsiz). Qolganlari hozircha shifokor sahifasiga o'tadi.
-const TALABA_SAHIFALI = new Set(['ipss', 'psa', 'egfr'])
+const TALABA_SAHIFALI = new Set(['ipss', 'psa', 'egfr', 'prostata-hajmi', 'uroflowmetriya', 'spermogramma'])
 function kalkYoli(slug: string) {
   return TALABA_SAHIFALI.has(slug) ? `/student/kalkulyatorlar/${slug}` : `/doctor/calculators/${slug}`
 }

@@ -70,6 +70,54 @@ export function fpsaXavf(foiz: number) {
   return { daraja: 'Past xavf', ehtimol: '~8%', rang: '#16a34a' }
 }
 
+// ─── Prostata hajmi (ellipsoid formula) ───────────────────────────────────
+// O'lchamlar mm da; V (sm³) = 0.52 × (a/10) × (b/10) × (c/10).
+export function prostataHajm(aMm: number, bMm: number, cMm: number) {
+  return (aMm / 10) * (bMm / 10) * (cMm / 10) * 0.52
+}
+
+export function prostataHajmDarajasi(hajm: number) {
+  if (hajm < 25) return { nom: 'Normal hajm', rang: '#16a34a' }
+  if (hajm < 40) return { nom: 'Yengil kattalashgan', rang: '#65a30d' }
+  if (hajm < 60) return { nom: "O'rtacha kattalashgan", rang: '#d97706' }
+  if (hajm < 100) return { nom: 'Sezilarli kattalashgan', rang: '#ea580c' }
+  return { nom: 'Juda katta', rang: '#dc2626' }
+}
+
+// ─── Uroflowmetriya ────────────────────────────────────────────────────────
+// Qmax (mL/s) izohi — siyilgan hajm ≥150 mL bo'lganda eng ishonchli.
+export function qmaxIzoh(qmax: number, yosh: number) {
+  const chegara = yosh >= 60 ? 10 : 15
+  if (qmax >= chegara + 5) return { nom: 'Normal oqim', rang: '#16a34a' }
+  if (qmax >= chegara) return { nom: 'Chegara holat', rang: '#d97706' }
+  return { nom: 'Pasaygan oqim (obstruktiv)', rang: '#dc2626' }
+}
+
+// ─── Spermogramma (WHO 2021, 6-nashr, 5-sentil pastki chegaralari) ─────────
+export const SPERMA_MEZONLARI = [
+  { key: 'hajm', label: 'Ejakulyat hajmi', birlik: 'mL', min: 1.4 },
+  { key: 'konsentratsiya', label: 'Sperma konsentratsiyasi', birlik: 'mln/mL', min: 16 },
+  { key: 'umumiy_son', label: 'Umumiy sperma soni', birlik: 'mln/ejakulyat', min: 39 },
+  { key: 'umumiy_harakat', label: 'Umumiy harakatchanlik (PR+NP)', birlik: '%', min: 42 },
+  { key: 'progressiv_harakat', label: 'Progressiv harakatchanlik (PR)', birlik: '%', min: 30 },
+  { key: 'tiriklik', label: 'Tiriklik (vitality)', birlik: '%', min: 54 },
+  { key: 'morfologiya', label: 'Normal morfologiya', birlik: '%', min: 4 },
+  { key: 'ph', label: 'pH', birlik: '', min: 7.2 },
+] as const
+
+export function spermaTashxis(natija: Record<string, { qiymat: number; norma: boolean }>) {
+  const past: string[] = []
+  if (natija.konsentratsiya && !natija.konsentratsiya.norma) past.push('oligozoospermiya')
+  if (natija.umumiy_harakat && !natija.umumiy_harakat.norma) past.push('astenozoospermiya')
+  if (natija.morfologiya && !natija.morfologiya.norma) past.push('teratozoospermiya')
+
+  if (natija.konsentratsiya?.qiymat === 0) return { nom: 'Azoospermiya', tavsif: "Ejakulyatda sperma hujayralari aniqlanmadi. Qo'shimcha tekshiruv (gormonal profil, genetik tahlil, TESE) tavsiya etiladi.", rang: '#dc2626' }
+  if (past.length === 0) return { nom: 'Normozoospermiya', tavsif: "Barcha asosiy ko'rsatkichlar WHO 2021 me'zonlari doirasida.", rang: '#16a34a' }
+  if (past.length >= 3) return { nom: 'Oligoastenoteratozoospermiya (OAT)', tavsif: "Konsentratsiya, harakatchanlik va morfologiyaning barchasi pasaygan — bepushtlik bo'yicha androlog konsultatsiyasi tavsiya etiladi.", rang: '#dc2626' }
+  const nomlar: Record<string, string> = { oligozoospermiya: 'Oligozoospermiya', astenozoospermiya: 'Astenozoospermiya', teratozoospermiya: 'Teratozoospermiya' }
+  return { nom: past.map((p) => nomlar[p]).join(' + '), tavsif: "Bir yoki bir nechta ko'rsatkich me'yordan past — androlog konsultatsiyasi va qayta tekshiruv (2-3 oydan keyin) tavsiya etiladi.", rang: '#d97706' }
+}
+
 // O'nlik son: vergulni ham qabul qilamiz ("5,2" → 5.2).
 export function sonOqi(qiymat: string) {
   return parseFloat(qiymat.replace(',', '.'))

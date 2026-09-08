@@ -6,20 +6,13 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
 import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
+import { qmaxIzoh } from '@/lib/urologiyaHisoblash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px', fontWeight: 600 }
-
-// Qmax (mL/s) bo'yicha taxminiy izoh (erkaklar uchun, hajm ≥150 mL bo'lganda eng ishonchli)
-function qmaxIzoh(qmax: number, yosh: number) {
-  const chegara = yosh >= 60 ? 10 : 15
-  if (qmax >= chegara + 5) return { nom: 'Normal oqim', rang: '#16a34a' }
-  if (qmax >= chegara) return { nom: "Chegara holat", rang: '#d97706' }
-  return { nom: 'Pasaygan oqim (obstruktiv)', rang: '#dc2626' }
-}
 
 export default function UroflowmetriyaKalkulyator() {
   return (

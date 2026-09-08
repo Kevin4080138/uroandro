@@ -6,20 +6,13 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
 import { kalkulyatorNatijasiniSaqla } from '@/lib/kalkulyatorSaqlash'
+import { prostataHajm, prostataHajmDarajasi as hajmDarajasi } from '@/lib/urologiyaHisoblash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px', fontWeight: 600 }
-
-function hajmDarajasi(hajm: number) {
-  if (hajm < 25) return { nom: 'Normal hajm', rang: '#16a34a' }
-  if (hajm < 40) return { nom: "Yengil kattalashgan", rang: '#65a30d' }
-  if (hajm < 60) return { nom: "O'rtacha kattalashgan", rang: '#d97706' }
-  if (hajm < 100) return { nom: "Sezilarli kattalashgan", rang: '#ea580c' }
-  return { nom: 'Juda katta', rang: '#dc2626' }
-}
 
 export default function ProstataHajmiKalkulyator() {
   return (
@@ -50,7 +43,7 @@ function ProstataHajmiIchki() {
   const tuldi = [aN, bN, cN].every((v) => Number.isFinite(v) && v > 0)
 
   // Ellipsoid formula: V = 0.52 × uzunlik × kenglik × balandlik (sm), o'lchamlar mm dan sm ga o'tkaziladi
-  const hajm = useMemo(() => (tuldi ? (aN / 10) * (bN / 10) * (cN / 10) * 0.52 : null), [aN, bN, cN, tuldi])
+  const hajm = useMemo(() => (tuldi ? prostataHajm(aN, bN, cN) : null), [aN, bN, cN, tuldi])
   const daraja = hajm !== null ? hajmDarajasi(hajm) : null
 
   const psaN = parseFloat(psa)

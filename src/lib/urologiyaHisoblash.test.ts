@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   ckdEpi2021, egfrBosqich,
   ipssDaraja, psaYoshMezoni, fpsaXavf, sonOqi,
+  prostataHajm, prostataHajmDarajasi, qmaxIzoh, spermaTashxis, SPERMA_MEZONLARI,
 } from './urologiyaHisoblash'
 
 describe('ckdEpi2021 (CKD-EPI 2021, irqsiz)', () => {
@@ -76,6 +77,55 @@ describe('fpsaXavf chegaralari', () => {
   it('past risk yuqori %fPSAda (25+)', () => {
     expect(fpsaXavf(25).daraja).toBe('Past xavf')
     expect(fpsaXavf(30).daraja).toBe('Past xavf')
+  })
+})
+
+describe('prostataHajm (ellipsoid)', () => {
+  it('40×35×32 mm → ~23.3 sm³', () => {
+    expect(prostataHajm(40, 35, 32)).toBeCloseTo(23.3, 1)
+  })
+  it('bosqich chegaralari', () => {
+    expect(prostataHajmDarajasi(24.9).nom).toBe('Normal hajm')
+    expect(prostataHajmDarajasi(25).nom).toBe('Yengil kattalashgan')
+    expect(prostataHajmDarajasi(40).nom).toContain("O'rtacha")
+    expect(prostataHajmDarajasi(60).nom).toBe('Sezilarli kattalashgan')
+    expect(prostataHajmDarajasi(100).nom).toBe('Juda katta')
+  })
+})
+
+describe('qmaxIzoh (yoshga bog\'liq chegara)', () => {
+  it('<60 yosh: chegara 15', () => {
+    expect(qmaxIzoh(20, 50).nom).toBe('Normal oqim')
+    expect(qmaxIzoh(15, 50).nom).toBe('Chegara holat')
+    expect(qmaxIzoh(14, 50).nom).toContain('Pasaygan')
+  })
+  it('≥60 yosh: chegara 10', () => {
+    expect(qmaxIzoh(15, 65).nom).toBe('Normal oqim')
+    expect(qmaxIzoh(10, 65).nom).toBe('Chegara holat')
+    expect(qmaxIzoh(9, 65).nom).toContain('Pasaygan')
+  })
+})
+
+describe('spermaTashxis (WHO 2021)', () => {
+  const q = (over: Record<string, number>) => {
+    const r: Record<string, { qiymat: number; norma: boolean }> = {}
+    for (const m of SPERMA_MEZONLARI) {
+      const v = over[m.key] ?? m.min // default: aynan me'zonda (norma)
+      r[m.key] = { qiymat: v, norma: v >= m.min }
+    }
+    return r
+  }
+  it('barchasi me\'zonda → Normozoospermiya', () => {
+    expect(spermaTashxis(q({})).nom).toBe('Normozoospermiya')
+  })
+  it('konsentratsiya 0 → Azoospermiya', () => {
+    expect(spermaTashxis(q({ konsentratsiya: 0 })).nom).toBe('Azoospermiya')
+  })
+  it('konsentratsiya + harakat + morfologiya past → OAT', () => {
+    expect(spermaTashxis(q({ konsentratsiya: 10, umumiy_harakat: 30, morfologiya: 2 })).nom).toContain('OAT')
+  })
+  it('faqat konsentratsiya past → Oligozoospermiya', () => {
+    expect(spermaTashxis(q({ konsentratsiya: 10 })).nom).toBe('Oligozoospermiya')
   })
 })
 
