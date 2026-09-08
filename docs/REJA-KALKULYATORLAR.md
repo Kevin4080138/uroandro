@@ -26,7 +26,20 @@ Bu reja auditdagi kamchiliklar va takliflarni bosqichlarga ajratadi.
 - Kartadagi "NIMA O'RGANASIZ" o'quv izohi kalkulyator ichida ham ko'rinsin.
 - 22 urologiya vositasi bosqichma-bosqich ko'chiriladi (avval eng ko'p ishlatiladiganlari: IPSS, PSA, eGFR, prostata hajmi, uroflowmetriya).
 
-## Faza 2 — Yagona klinik izoh standarti (barcha kalkulyatorlar)
+## Faza 2 — Yagona klinik izoh standarti (barcha kalkulyatorlar) 🟡 BOSHLANDI
+
+Bajarildi:
+- Umumiy `KlinikIzoh` komponenti (`src/components/KlinikIzoh.tsx`) — 5 qism + `ChegaraviyBelgi`.
+- Urologiya talaba sahifalari (IPSS, PSA, eGFR) to'liq standartga o'tkazildi (chegaraviy belgi bilan).
+- Ginekologiya kontent modeli 5 qism bilan kengaytirildi (`buNimaEmas`, `keyingiQadam`,
+  `klinikMisol`, `kopUchraydiganXato`); `KalkulyatorKontent`/`KalkulyatorInfoSahifa` ularni ko'rsatadi;
+  3 jonli gin kalkulyatori (homiladorlik-muddati, gestatsion-yosh-utt, homila-vazni) to'ldirildi.
+
+Qoldi:
+- Qolgan gin kalkulyator/ma'lumot sahifalarini 5 qism bilan to'ldirish.
+- Yangi urologiya talaba sahifalari qo'shilganda shu standartni qo'llash.
+
+Standart (eslatma uchun):
 
 Har bir talaba kalkulyatori bir xil besh qismli tuzilishga ega bo'lsin:
 

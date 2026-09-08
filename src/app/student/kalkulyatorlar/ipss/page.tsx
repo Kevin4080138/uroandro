@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { UrologiyaKalkulyatorQobiq, NimaOrganasiz, UroOgohlantirish, uroInput, uroKarta, uroLabel } from '@/components/UrologiyaKalkulyatorQobiq'
+import { UrologiyaKalkulyatorQobiq, UroOgohlantirish, uroInput, uroKarta, uroLabel } from '@/components/UrologiyaKalkulyatorQobiq'
+import { KlinikIzoh, ChegaraviyBelgi } from '@/components/KlinikIzoh'
 import { IPSS_SAVOLLAR, IPSS_QOL_VARIANTLAR, ipssDaraja } from '@/lib/urologiyaHisoblash'
 
 export default function IpssTalabaPage() {
@@ -10,6 +11,7 @@ export default function IpssTalabaPage() {
   const tayyor = javob.every(v => v !== null)
   const jami = useMemo(() => (tayyor ? (javob as number[]).reduce((s, v) => s + v, 0) : null), [javob, tayyor])
   const natija = jami !== null ? ipssDaraja(jami) : null
+  const chegaraviy = jami === 7 || jami === 8 || jami === 19 || jami === 20 // yengil/o'rta yoki o'rta/og'ir chegarasi
 
   return <UrologiyaKalkulyatorQobiq title="IPSS / AUA-SS" subtitle="Prostata bezi (LUTS) simptomlarining og‘irligini 7 savol bo‘yicha 0–35 ballda va hayot sifati (QoL) indeksini baholaydi.">
     <section className="rise" style={{ ...uroKarta, marginBottom: '16px' }}>
@@ -47,12 +49,33 @@ export default function IpssTalabaPage() {
         </div>
         <div style={{ marginTop: '6px', fontSize: '15px', fontWeight: 700, color: natija.rang }}>{natija.nom}</div>
         <p style={{ margin: '8px 0 0', fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{natija.tavsif}</p>
+        {chegaraviy && <div><ChegaraviyBelgi matn="Chegaraviy ball — bezovtalik (QoL) bilan birga hal qiling" /></div>}
       </>}
       <UroOgohlantirish>Ballar: 0–7 yengil · 8–19 o‘rtacha · 20–35 og‘ir. QoL (8-savol) jamiga qo‘shilmaydi, lekin davolash qaroriga kuchli ta’sir qiladi.</UroOgohlantirish>
     </section>
 
-    <NimaOrganasiz>
-      IPSS simptom <strong>og‘irligini</strong> o‘lchaydi, sababini emas — bir xil ball BPH, giperaktiv qovuq yoki prostatitda bo‘lishi mumkin. Eng muhim amaliy nuqta: <strong>ball emas, bezovtalik (QoL)</strong> davolashni belgilaydi. Talaba sifatida IPSSni vaqt bo‘yicha (davolashdan oldin/keyin) taqqoslash uchun ishlating.
-    </NimaOrganasiz>
+    <KlinikIzoh
+      data={{
+        anglatadi: 'IPSS pastki siydik yo‘llari simptomlarining (LUTS) og‘irligini 0–35 ballda o‘lchaydi; QoL (8-savol) esa bemor bu holatdan qanchalik bezovta ekanini alohida ko‘rsatadi.',
+        anglatmaydi: [
+          'Sabab tashxisini qo‘ymaydi — bir xil ball BPH, giperaktiv qovuq yoki prostatitda bo‘lishi mumkin.',
+          'Prostata hajmini yoki saraton xavfini o‘lchamaydi.',
+          'Ball o‘zi dori yoki jarrohlik ko‘rsatmasini bermaydi.',
+        ],
+        keyingiQadam: [
+          'Bezovtalik (QoL), tungi siyish, oqim va qoldiq siydikni birga baholang.',
+          'Kerak bo‘lsa: siydik tahlili, PSA, uroflowmetriya, qoldiq hajm UTT.',
+          'O‘rta–og‘irda urolog bilan davolash variantlarini muhokama qiling.',
+        ],
+        misol: {
+          vaziyat: '68 yosh, IPSS 12 (o‘rtacha), lekin QoL 5 — juda bezovta.',
+          javob: 'Ball o‘rtacha bo‘lsa-da, yuqori bezovtalik tufayli hayot tarzini o‘zgartirish + alfa-blokator muhokama qilinadi. Ball emas, bezovtalik yetakchi.',
+        },
+        kopXato: [
+          'Ballni bezovtalikdan ustun qo‘yish — past ball ham bemorni juda bezovta qilishi mumkin.',
+          'QoL (8-savol)ni umumiy jamiga qo‘shib yuborish.',
+        ],
+      }}
+    />
   </UrologiyaKalkulyatorQobiq>
 }

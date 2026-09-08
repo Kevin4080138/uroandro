@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { GINEKOLOGIYA_KALKULYATORLARI_KONTENTI } from '@/lib/ginekologiyaKalkulyatorKontenti'
+import { GINEKOLOGIYA_KALKULYATORLARI_KONTENTI, type KalkulyatorKontenti } from '@/lib/ginekologiyaKalkulyatorKontenti'
 
 export function kontentTop(slug: string) {
   return GINEKOLOGIYA_KALKULYATORLARI_KONTENTI.find((k) => k.slug === slug) ?? null
@@ -55,9 +55,30 @@ function KontentBolim({ sarlavha, satrlar, raqamli }: { sarlavha: string; satrla
   )
 }
 
+// 5-qismli standartning qo'shimcha qismlari (mavjud bo'lganda ko'rsatiladi).
+function BeshQismQoshimcha({ k }: { k: KalkulyatorKontenti }) {
+  return (
+    <>
+      <KontentBolim sarlavha="Bu nimani anglatmaydi" satrlar={k.buNimaEmas ?? []} />
+      <KontentBolim sarlavha="Keyingi qadam" satrlar={k.keyingiQadam ?? []} raqamli />
+      {k.klinikMisol && (
+        <div style={{ marginTop: '18px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>Klinik misol</div>
+          <div style={{ background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '12px 14px', fontSize: '13.5px', lineHeight: 1.6 }}>
+            <p style={{ margin: '0 0 6px' }}><strong>Vaziyat:</strong> {k.klinikMisol.vaziyat}</p>
+            <p style={{ margin: 0 }}><strong>Javob:</strong> {k.klinikMisol.javob}</p>
+          </div>
+        </div>
+      )}
+      <KontentBolim sarlavha="Ko‘p uchraydigan xato" satrlar={k.kopUchraydiganXato ?? []} />
+    </>
+  )
+}
+
 /**
- * Jonli kalkulyator sahifasi ostiga qo'yiladigan kontent bloki:
- * klinik izoh + cheklovlar + manbalar (maydon/hisoblash jonli UI bilan takrorlanmaydi).
+ * Jonli kalkulyator sahifasi ostiga qo'yiladigan kontent bloki (5-qismli standart):
+ * klinik izoh → natija talqini → nimani anglatmaydi → keyingi qadam → misol →
+ * ko'p uchraydigan xato → cheklovlar → manbalar.
  */
 export function KalkulyatorKontent({ slug }: { slug: string }) {
   const k = kontentTop(slug)
@@ -66,11 +87,12 @@ export function KalkulyatorKontent({ slug }: { slug: string }) {
     <section className="rise" style={{ ...ginKarta, marginTop: '16px' }}>
       {k.batafsilIzoh && (
         <>
-          <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>Klinik izoh</div>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>Klinik izoh (bu nimani anglatadi)</div>
           <p style={{ margin: 0, fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.65 }}>{k.batafsilIzoh}</p>
         </>
       )}
       <KontentBolim sarlavha="Natija talqini" satrlar={k.natijaTalqini} />
+      <BeshQismQoshimcha k={k} />
       <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
       <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
     </section>
@@ -99,6 +121,7 @@ export function KalkulyatorInfoSahifa({ slug }: { slug: string }) {
         <KontentBolim sarlavha="Kiritiladigan ma'lumotlar" satrlar={k.maydonlar} />
         <KontentBolim sarlavha="Qanday hisoblanadi" satrlar={k.hisoblash} raqamli />
         <KontentBolim sarlavha="Natija talqini" satrlar={k.natijaTalqini} />
+        <BeshQismQoshimcha k={k} />
         <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
         <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
         <KlinikOgohlantirish>Ushbu ma'lumot standartlarga asoslangan.</KlinikOgohlantirish>

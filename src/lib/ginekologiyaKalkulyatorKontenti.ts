@@ -20,6 +20,12 @@ export type KalkulyatorKontenti = {
   natijaTalqini: string[]
   cheklovlar: string[]
   manbalar: string[]
+  // 5-qismli klinik izoh standartining qo'shimcha qismlari (ixtiyoriy —
+  // bosqichma-bosqich to'ldiriladi):
+  buNimaEmas?: string[]
+  keyingiQadam?: string[]
+  klinikMisol?: { vaziyat: string; javob: string }
+  kopUchraydiganXato?: string[]
 }
 
 export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
@@ -39,6 +45,24 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Asosiy natija hafta + kun ko'rinishida beriladi.", "Taxminiy tug'ruq sanasi alohida ko'rsatiladi.", "Natija yonida gestatsion va embrion yoshining farqi tushuntiriladi."],
     cheklovlar: ["Hayz sanasi noma'lum yoki sikl notekis bo'lsa aniqlik pasayadi.", "ART/IVF homiladorlikda embrion ko'chirilgan sana va embrion yoshi ishlatiladi.", "Birinchi trimestrdagi sifatli UTT sanalashi ko'pincha ishonchliroq."],
     manbalar: ["ACOG Committee Opinion 700 Methods for Estimating the Due Date", "AIUM va SMFM homiladorlikni sanalash tavsiyalari"],
+    buNimaEmas: [
+      "Homiladorlik borligini tasdiqlamaydi — buni test/UTT aniqlaydi.",
+      "Aniq tug'ruq kunini kafolatlamaydi — TTS atrofida ±2 hafta normal.",
+      "Embrionning haqiqiy yoshini bermaydi (u ~2 hafta kam).",
+    ],
+    keyingiQadam: [
+      "Birinchi trimestr UTT (CRL) bilan muddatni tasdiqlang.",
+      "Hayz noma'lum yoki sikl notekis bo'lsa, UTT sanasiga tayaning.",
+      "ART/IVF bo'lsa embrion ko'chirish sanasidan hisoblang.",
+    ],
+    klinikMisol: {
+      vaziyat: "OHS 7-avgust, 28 kunlik sikl, bugun 8-sentabr.",
+      javob: "Gestatsion muddat 4 hafta 4 kun, TTS ~14-may. Embrionning haqiqiy yoshi esa ~2 hafta 4 kun — hujjatga gestatsion muddat yoziladi.",
+    },
+    kopUchraydiganXato: [
+      "Gestatsion muddatni embrion yoshi bilan aralashtirish.",
+      "Notekis siklda kalendarga ishonib, UTT sanasini e'tiborsiz qoldirish.",
+    ],
   },
   {
     slug: 'gestatsion-yosh-utt',
@@ -51,6 +75,24 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Natija hafta + kun ko'rinishida beriladi.", "Birinchi trimestrda odatiy aniqlik taxminan +/-5-7 kun."],
     cheklovlar: ["Formula asosan 9 hafta 0 kundan 13 hafta 6 kungacha validatsiya qilingan.", "CRL 84 mm dan oshganda kompozit ikkinchi trimestr biometriyasi afzal.", "Keyingi UTTlarda o'sish farqi sabab tug'ruq sanasini odatda qayta o'zgartirmaslik kerak."],
     manbalar: ["Papageorghiou va boshqalar INTERGROWTH-21st CRL dating standard 2014", "ACOG Committee Opinion 700"],
+    buNimaEmas: [
+      "Homila sog'lig'ini yoki nuqsonni baholamaydi — bu alohida UTT vazifasi.",
+      "13 hafta 6 kundan keyin ishonchli emas (CRL 84 mm dan oshganda).",
+      "Keyingi UTTlarda o'sish farqi bo'lsa ham TTS ni odatda qayta o'zgartirmaydi.",
+    ],
+    keyingiQadam: [
+      "CRL to'g'ri midsagittal kesimda, 3 o'lchov o'rtachasida olinsin.",
+      "CRL 84 mm dan katta bo'lsa ikkinchi trimestr biometriyasiga o'ting.",
+      "Muddatni birinchi ishonchli UTTga qarab belgilang va keyin saqlang.",
+    ],
+    klinikMisol: {
+      vaziyat: "CRL 45 mm, UTT bugun o'tkazildi.",
+      javob: "Gestatsion yosh ~11 hafta 1 kun. Bu OHS bo'yicha hisobdan ishonchliroq — muddat shunga ko'ra belgilanadi.",
+    },
+    kopUchraydiganXato: [
+      "CRL 84 mm dan oshganda ham CRL formulasiga tayanish.",
+      "Har bir keyingi UTTda TTS ni qayta hisoblab o'zgartirish.",
+    ],
   },
   {
     slug: 'homila-vazni',
@@ -63,6 +105,24 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Natija gramm va kilogrammda ko'rsatiladi.", "Yonida taxminiy +/-10 foizlik diapazon berilishi mumkin.", "Gestatsion yosh ma'lum bo'lsa, percentil alohida standart jadval orqali aniqlanadi."],
     cheklovlar: ["Bu haqiqiy vazn emas; individual xatolik 10 foizdan katta bo'lishi mumkin.", "Noto'g'ri UTT kesimi yoki o'lchov xatosi natijaga kuchli ta'sir qiladi.", "Percentil uchun bir xil tanlangan o'sish standarti izchil ishlatilishi kerak."],
     manbalar: ["Hadlock FP va boshqalar Am J Obstet Gynecol 1985", "ISUOG fetal biometry guidance"],
+    buNimaEmas: [
+      "Haqiqiy tug'ilish vaznini bermaydi — xatolik ±10% va undan ko'p bo'lishi mumkin.",
+      "Makrosomiya yoki FGR tashxisini yakka o'zi qo'ymaydi.",
+      "Gestatsion yoshsiz percentilni aniqlamaydi.",
+    ],
+    keyingiQadam: [
+      "Gestatsion yoshga mos percentil bilan o'sishni baholang.",
+      "Bitta o'lchovga emas, ketma-ket UTT dinamikasiga qarang.",
+      "Doppler va suv miqdorini birga baholab, FGR/makrosomiyani ko'rib chiqing.",
+    ],
+    klinikMisol: {
+      vaziyat: "BPD 90, HC 330, AC 350, FL 70 mm.",
+      javob: "Taxminiy vazn ~3305 g (±10% ≈ 2975–3636 g). Bu — taxmin; qaror percentil va dinamika bilan chiqariladi.",
+    },
+    kopUchraydiganXato: [
+      "Taxminiy vaznni haqiqiy vazndek qabul qilish.",
+      "Bitta UTT asosida makrosomiya deb kesar rejalashtirish.",
+    ],
   },
   {
     slug: 'bishop',
