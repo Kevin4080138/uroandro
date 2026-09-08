@@ -26,6 +26,8 @@ export type KalkulyatorKontenti = {
   keyingiQadam?: string[]
   klinikMisol?: { vaziyat: string; javob: string }
   kopUchraydiganXato?: string[]
+  // Litsenziya holati — himoyalangan anketa/model bo'lsa ko'rsatiladi.
+  litsenziya?: string
 }
 
 export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
@@ -279,6 +281,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Past, yoshga mos yoki yuqori diapazon ko'rsatiladi.", "Yuqori AMH PCOS bilan uchrashi mumkin, ammo tashxis emas."],
     cheklovlar: ["Turli assay natijalari to'liq almashtirilmaydi.", "Kontratseptivlar va ayrim klinik holatlar AMHga ta'sir qilishi mumkin.", "Universal yosh formulasi mavjud emas; jadval manbasi UI da ko'rsatilishi shart."],
     manbalar: ["ASRM ovarian reserve testing committee opinion", "ESHRE ovarian stimulation guideline", "Ishlatiladigan assay ishlab chiqaruvchisi referenslari"],
+    litsenziya: "AMH yosh-referens jadvali assay ishlab chiqaruvchisiga bog'liq — mos jadval manbasini ko'rsating.",
     buNimaEmas: ["Tabiiy homilador bo'lish imkonini bevosita o'lchamaydi.", "Tuxum sifatini baholamaydi.", "Assaylar orasida to'liq almashtirilmaydi."],
     keyingiQadam: ["Tanlangan assayning yoshga xos referensi bilan solishtiring.", "Antral follikula soni (AFC) bilan birga baholang.", "Yuqori AMHda PCOSni klinik jihatdan ko'rib chiqing."],
     klinikMisol: { vaziyat: "32 yosh, AMH yoshga nisbatan past.", javob: "Tuxumdon zaxirasi pastroq bo'lishi mumkin; bu homilador bo'lolmaslik degani emas — reproduktolog bilan rejalashtiriladi." },
@@ -311,6 +314,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Yuqori ball simptomlar og'irroq ekanini bildiradi.", "Takroriy baholash davolashga javobni ko'rsatadi."],
     cheklovlar: ["Menopauza tashxisini yakka o'zi qo'ymaydi.", "Rasmiy yoki validatsiya qilingan o'zbekcha tarjima bo'lmasa savollarni erkin tarjima qilib klinik valid deb ko'rsatmaslik kerak."],
     manbalar: ["Menopause Rating Scale official manual", "Heinemann va boshqalar MRS validation publications"],
+    litsenziya: "MRS rasmiy qo'llanma va validatsiya qilingan tarjimani talab qiladi; erkin tarjima klinik valid emas.",
     buNimaEmas: ["Menopauza tashxisini yakka o'zi qo'ymaydi.", "Simptom sababini aniqlamaydi.", "Gormonal davolash ko'rsatmasini o'zi bermaydi."],
     keyingiQadam: ["Simptomlarni domenlar (somatik/psixologik/urogenital) bo'yicha baholang.", "Davolashdan oldin va keyin ballni taqqoslang.", "Validatsiya qilingan tarjimadan foydalaning."],
     klinikMisol: { vaziyat: "52 yosh, issiq bosishlar va uyqu buzilishi, MRS yuqori.", javob: "Simptom yuki katta — hayot tarzi va (ko'rsatma bo'lsa) gormonal terapiya muhokama qilinadi; ball dinamikani kuzatadi." },
@@ -327,6 +331,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["10 yillik katta osteoporotik sinish foizi.", "10 yillik son bo'g'imi sinishi foizi.", "Davolash chegarasi mahalliy qo'llanmaga bog'liq."],
     cheklovlar: ["Premenopauzal ayollar uchun odatiy vosita emas.", "Doza-javob va yiqilishlar kabi ayrim xavflarni to'liq hisobga olmaydi.", "FRAX nomi va algoritmi litsenziya talablariga ega."],
     manbalar: ["FRAX Sheffield official tool and terms", "Mahalliy osteoporoz klinik qo'llanmasi"],
+    litsenziya: "FRAX nomi va algoritmi litsenziyaga ega — rasmiy vosita/APIga havola qiling, formulani qayta yozmang.",
     buNimaEmas: ["Suyak zichligini (BMD) o'lchamaydi — u kiritiladi.", "Premenopauzal ayollar uchun odatiy vosita emas.", "Yiqilish xavfini to'liq hisobga olmaydi."],
     keyingiQadam: ["Rasmiy FRAX (mamlakat modeli) kalkulyator/API dan foydalaning.", "Davolash chegarasini mahalliy qo'llanma bilan solishtiring.", "Kerak bo'lsa femoral bo'yin BMD qo'shing."],
     klinikMisol: { vaziyat: "68 yosh ayol, oldingi sinish, BMD past.", javob: "10 yillik xavf yuqori chiqishi mumkin — davolash qarori mahalliy chegara va klinik kontekstga ko'ra." },
@@ -359,6 +364,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Natija past yoki yuqori xavf sifatida assayga xos cutoff bo'yicha beriladi."],
     cheklovlar: ["Buyrak funksiyasi pasayganda HE4 ko'tarilishi mumkin.", "Tuxumdon saratoni skriningi uchun ishlatilmaydi.", "Assaylar o'rtasida formulani ko'chirish mumkin emas."],
     manbalar: ["Moore va boshqalar ROMA validation studies", "Ishlatiladigan HE4 va CA-125 assay yo'riqnomasi"],
+    litsenziya: "ROMA assay platformasiga bog'liq — cutofflar ishlab chiqaruvchi yo'riqnomasiga muvofiq ishlatilsin.",
     buNimaEmas: ["Skrining testi emas — faqat adneksal massada yordamchi.", "Malignlik tashxisini qo'ymaydi.", "Assaylar orasida formulani ko'chirib bo'lmaydi."],
     keyingiQadam: ["Tanlangan platformaning validatsiya qilingan cutofflarini ishlating.", "Buyrak funksiyasi pasayganda HE4ni ehtiyot bilan talqin qiling.", "Yuqori xavfda onkoginekologik boshqaruv."],
     klinikMisol: { vaziyat: "Postmenopauza, HE4 va CA-125 yuqori → ROMA yuqori xavf.", javob: "Onkoginekologik markazga yo'naltiriladi; ROMA operatsiya rejasiga yordamchi, skrining emas." },
@@ -391,6 +397,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Har bir toifa uchun foizlar va umumiy malignlik xavfi ko'rsatiladi.", "Yo'naltirish cutoffi mahalliy protokolga bog'liq."],
     cheklovlar: ["Operatsiya rejalashtirilayotgan adneksal massa populyatsiyasida qo'llanadi.", "Skrining va gistologiya o'rnini bosmaydi.", "Rasmiy modelning foydalanish va litsenziya shartlari tekshiriladi."],
     manbalar: ["Van Calster va boshqalar BMJ 2014 ADNEX model", "IOTA Group official tools"],
+    litsenziya: "IOTA ADNEX rasmiy modeli — foydalanish shartlarini tekshiring, koeffitsiyentlarni qayta yozmang.",
     buNimaEmas: ["Skrining vositasi emas.", "Gistologiyani almashtirmaydi.", "Modelni koeffitsiyentlarsiz taxminan qayta yozib bo'lmaydi."],
     keyingiQadam: ["Rasmiy IOTA ADNEX kalkulyatoridan foydalaning.", "Yo'naltirish cutoffini mahalliy protokol bilan belgilang.", "CA-125 bilan yoki usiz variantni to'g'ri tanlang."],
     klinikMisol: { vaziyat: "Katta solid massa, ascit, papillyar proyeksiyalar.", javob: "ADNEX yuqori malignlik ehtimolini beradi — onkoginekologik boshqaruvga; foizlar klinik qaror bilan birlashtiriladi." },
@@ -407,6 +414,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["Natija kuzatuv, 1 yoki 3 yillik qayta tekshiruv, kolposkopiya, yoki ayrim yuqori xavf holatlarda tezlashtirilgan davolash kabi harakatni ko'rsatadi."],
     cheklovlar: ["Oddiy ommaviy saraton xavfi yoki simptomli bemor diagnostikasi uchun emas.", "Qo'llanma yangilanib turadi; statik nusxa eskirishi mumkin.", "Rasmiy ASCCP modeliga havola berish xavfsizroq."],
     manbalar: ["2019 ASCCP Risk Based Management Consensus Guidelines", "ASCCP Enduring Guidelines and official web application"],
+    litsenziya: "ASCCP risk vositasi — rasmiy web ilovaga havola qiling; statik nusxa eskiradi.",
     buNimaEmas: ["Oddiy ball kalkulyatori emas — joriy va oldingi tarixga bog'liq.", "Simptomli bemor diagnostikasi uchun emas.", "Statik nusxa eskirishi mumkin."],
     keyingiQadam: ["ASCCPning joriy rasmiy risk vositasidan foydalaning.", "Risk chegarasini klinik harakatga (kuzatuv/kolposkopiya/davolash) xaritalang.", "Oldingi HPV va sitologiya natijalarini to'liq kiriting."],
     klinikMisol: { vaziyat: "HPV+ va ASC-US, oldingi natijalar normal.", javob: "ASCCP riski keyingi qadamni (masalan 1 yildan keyin qayta yoki kolposkopiya) belgilaydi — faqat sitologiya nomiga qarab emas." },
@@ -427,6 +435,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     keyingiQadam: ["Davolashdan oldin va keyin ballni taqqoslang.", "Simptom va anatomiya (POP-Q) bilan birga baholang.", "Litsenziya va tarjima masalasini hal qiling."],
     klinikMisol: { vaziyat: "Prolapsli bemor, kundalik faoliyati cheklangan.", javob: "PFIQ-7 ta'sir darajasini son bilan ko'rsatadi va davolash samarasini kuzatishga yordam beradi; bu tashxis emas." },
     kopUchraydiganXato: ["Ballni anatomik og'irlik deb talqin qilish.", "Litsenziyasiz savollarni platformaga joylash."],
+    litsenziya: "PFIQ-7 mualliflik huquqi bilan himoyalangan — foydalanish/tarjima ruxsati va validatsiya kerak; savollar litsenziyasiz joylanmaydi.",
   },
   {
     slug: 'pfdi-20',
@@ -443,6 +452,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     keyingiQadam: ["Uch domen (POPDI/CRADI/UDI) bo'yicha simptomni baholang.", "Davolash dinamikasini kuzating.", "Rasmiy tarjima va foydalanish shartlarini tekshiring."],
     klinikMisol: { vaziyat: "Aralash tos tubi simptomlari (prolaps + siydik).", javob: "PFDI-20 simptom yukini son bilan beradi va qaysi domen ustunligini ko'rsatib yo'naltiruvga yordam beradi." },
     kopUchraydiganXato: ["Ballni tashxis deb qabul qilish.", "Litsenziyasiz savollarni ishlatish."],
+    litsenziya: "PFDI-20 mualliflik huquqi bilan himoyalangan — foydalanish/tarjima ruxsati va validatsiya kerak; savollar litsenziyasiz joylanmaydi.",
   },
   {
     slug: 'pop-q',
@@ -471,6 +481,7 @@ export const GINEKOLOGIYA_KALKULYATORLARI_KONTENTI: KalkulyatorKontenti[] = [
     natijaTalqini: ["1-5 yengil.", "6-12 o'rta.", "13-18 og'ir.", "19-21 juda og'ir."],
     cheklovlar: ["Sabab yoki urodinamik tashxisni aniqlamaydi.", "ICIQ modullari mualliflik huquqi bilan himoyalangan; ruxsat va validatsiya qilingan tarjima talab qilinadi."],
     manbalar: ["ICIQ official validation and translation guidance", "Avery va boshqalar Neurourology and Urodynamics 2004"],
+    litsenziya: "ICIQ mualliflik huquqi bilan himoyalangan (iciq.net/licences) — tijoriy platformada alohida litsenziya va validatsiya qilingan tarjima talab etiladi.",
     buNimaEmas: ["Sabab yoki urodinamik tashxisni aniqlamaydi.", "Tutolmaslik turini (stress/urgent) yakka o'zi tasdiqlamaydi.", "Litsenziyasiz erkin tarjima klinik valid emas."],
     keyingiQadam: ["Tutolmaslik turini anamnez va tekshiruv bilan aniqlang.", "Og'ir ballda urodinamika yoki mutaxassisni ko'rib chiqing.", "ICIQ ruxsati va validatsiya qilingan tarjimani ta'minlang."],
     klinikMisol: { vaziyat: "Ball 14 (og'ir), yo'talganda oqadi.", javob: "Og'ir ta'sir — stress komponenti ehtimoli; tur anamnez/tekshiruv bilan aniqlanadi, ball faqat og'irlikni beradi." },

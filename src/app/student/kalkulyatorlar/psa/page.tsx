@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { UrologiyaKalkulyatorQobiq, UroOgohlantirish, uroInput, uroKarta, uroLabel } from '@/components/UrologiyaKalkulyatorQobiq'
-import { KlinikIzoh, ChegaraviyBelgi } from '@/components/KlinikIzoh'
+import { KlinikIzoh, ChegaraviyBelgi, ManbaMeta } from '@/components/KlinikIzoh'
 import { psaYoshMezoni, fpsaXavf, PSAD_CHEGARA, sonOqi } from '@/lib/urologiyaHisoblash'
 
 export default function PsaTalabaPage() {
@@ -76,5 +76,8 @@ export default function PsaTalabaPage() {
         ],
       }}
     />
+    <section className="rise" style={{ ...uroKarta, marginTop: '16px' }}>
+      <ManbaMeta />
+    </section>
   </UrologiyaKalkulyatorQobiq>
 }

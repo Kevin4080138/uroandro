@@ -76,7 +76,21 @@ Tarixiy reja (bajarildi):
   - ball chegarasining aynan ikki tomonidagi qiymatlar (masalan RMI 199/200, Bishop 5/8, Apgar 3/4/6/7).
 - Har bir formula uchun kamida 1 ta ma'lum "oltin" qiymat (nashrdagi misol) bilan solishtirish.
 
-## Faza 4 — Manba versiyalash va litsenziya auditi (kamchilik #3, #6)
+## Faza 4 — Manba versiyalash va litsenziya auditi (kamchilik #3, #6) 🟡 BOSHLANDI
+
+Bajarildi:
+- Umumiy `ManbaMeta` komponenti — har bir kalkulyator ostida **oxirgi tibbiy tekshiruv sanasi + mas'ul muharrir**, kerak bo'lsa **litsenziya holati** (⚖️).
+- Ginekologiya kontent modeliga `litsenziya` maydoni; himoyalangan anketa/modellarga
+  (ICIQ, PFIQ-7, PFDI-20, MRS, FRAX, ROMA, IOTA ADNEX, ASCCP, AMH) holat yozildi va sahifada ko'rsatiladi.
+- Urologiya talaba sahifalari (IPSS, PSA, eGFR, prostata-hajmi, uroflowmetriya, spermogramma) `ManbaMeta` bilan.
+- To'liq audit hujjati: `docs/ANKETA-LITSENZIYA-AUDIT.md`.
+
+Qoldi:
+- Har bir ⚠️/⛔ anketa uchun rasmiy litsenziya/ruxsatni yozma olish; olingach validatsiyalangan tarjima bilan savol banki.
+- Manbalarga versiyali to'g'ridan-to'g'ri URL (hozir nom+yil bor).
+- Shifokor bo'limidagi IIEF-5, OAB-V8, ADAM, AMS, PEDT, EHS sahifalariga litsenziya izohi.
+
+Tarixiy reja (qism bajarildi):
 
 **Manba metadatasi** — har bir kalkulyator/tasnif manbasida:
 - gayd nomi, nashr/versiya, to'g'ridan-to'g'ri havola;

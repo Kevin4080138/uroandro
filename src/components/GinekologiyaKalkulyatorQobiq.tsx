@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { GINEKOLOGIYA_KALKULYATORLARI_KONTENTI, type KalkulyatorKontenti } from '@/lib/ginekologiyaKalkulyatorKontenti'
+import { ManbaMeta } from '@/components/KlinikIzoh'
 
 export function kontentTop(slug: string) {
   return GINEKOLOGIYA_KALKULYATORLARI_KONTENTI.find((k) => k.slug === slug) ?? null
@@ -95,6 +96,7 @@ export function KalkulyatorKontent({ slug }: { slug: string }) {
       <BeshQismQoshimcha k={k} />
       <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
       <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
+      <ManbaMeta litsenziya={k.litsenziya} />
     </section>
   )
 }
@@ -124,6 +126,7 @@ export function KalkulyatorInfoSahifa({ slug }: { slug: string }) {
         <BeshQismQoshimcha k={k} />
         <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
         <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
+        <ManbaMeta litsenziya={k.litsenziya} />
         <KlinikOgohlantirish>Ushbu ma'lumot standartlarga asoslangan.</KlinikOgohlantirish>
       </section>
     </GinekologiyaKalkulyatorQobiq>

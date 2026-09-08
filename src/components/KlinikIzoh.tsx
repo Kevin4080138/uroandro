@@ -43,6 +43,21 @@ function Royxat({ satrlar }: { satrlar: ReactNode[] }) {
   )
 }
 
+// Manba metadatasi: oxirgi tibbiy tekshiruv sanasi, mas'ul muharrir va
+// (kerak bo'lsa) litsenziya holati. Har bir kalkulyator ostida ko'rsatiladi.
+export function ManbaMeta({ litsenziya, tekshirilgan = '2026-09', muharrir = 'Urosfera tibbiy guruh' }: { litsenziya?: string; tekshirilgan?: string; muharrir?: string }) {
+  return (
+    <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px dashed var(--line)', fontSize: '11.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+      <div>Oxirgi tibbiy tekshiruv: <strong>{tekshirilgan}</strong> · Mas'ul muharrir: {muharrir}</div>
+      {litsenziya && (
+        <div style={{ marginTop: '5px', display: 'flex', gap: '6px', color: 'var(--warn)' }}>
+          <span>⚖️</span><span><strong>Litsenziya:</strong> {litsenziya}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function KlinikIzoh({ data, rang = 'var(--accent)' }: { data: KlinikIzohMalumot; rang?: string }) {
   return (
     <section className="rise" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '16px', padding: '20px 22px', marginTop: '16px' }}>

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { UrologiyaKalkulyatorQobiq, UroOgohlantirish, uroInput, uroKarta, uroLabel } from '@/components/UrologiyaKalkulyatorQobiq'
-import { KlinikIzoh } from '@/components/KlinikIzoh'
+import { KlinikIzoh, ManbaMeta } from '@/components/KlinikIzoh'
 import { SPERMA_MEZONLARI, spermaTashxis, sonOqi } from '@/lib/urologiyaHisoblash'
 
 export default function SpermogrammaTalabaPage() {
@@ -74,5 +74,8 @@ export default function SpermogrammaTalabaPage() {
         ],
       }}
     />
+    <section className="rise" style={{ ...uroKarta, marginTop: '16px' }}>
+      <ManbaMeta litsenziya="WHO 2021 me’zonlari ochiq; laboratoriya hisobot shakli va tarjimasini rasmiy manba bilan solishtiring." />
+    </section>
   </UrologiyaKalkulyatorQobiq>
 }

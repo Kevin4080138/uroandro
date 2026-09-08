@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { UrologiyaKalkulyatorQobiq, UroOgohlantirish, uroInput, uroKarta, uroLabel } from '@/components/UrologiyaKalkulyatorQobiq'
-import { KlinikIzoh, ChegaraviyBelgi } from '@/components/KlinikIzoh'
+import { KlinikIzoh, ChegaraviyBelgi, ManbaMeta } from '@/components/KlinikIzoh'
 import { IPSS_SAVOLLAR, IPSS_QOL_VARIANTLAR, ipssDaraja } from '@/lib/urologiyaHisoblash'
 
 export default function IpssTalabaPage() {
@@ -77,5 +77,8 @@ export default function IpssTalabaPage() {
         ],
       }}
     />
+    <section className="rise" style={{ ...uroKarta, marginTop: '16px' }}>
+      <ManbaMeta litsenziya="IPSS/AUA-SS keng qo‘llaniladi va erkin tarqalgan; ba’zi rasmiy tarjimalar litsenziya talab qilishi mumkin — rasmiy manbani tekshiring." />
+    </section>
   </UrologiyaKalkulyatorQobiq>
 }
