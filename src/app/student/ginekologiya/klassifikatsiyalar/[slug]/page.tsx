@@ -22,8 +22,15 @@ export default async function GinKlassifikatsiyaIchkiPage({ params }: PageProps<
         <h1 style={{ margin: '7px 0 5px', fontSize: 25 }}>{t.nom}</h1>
         {t.toliq && <p style={{ margin: 0, opacity: .9, fontSize: 13 }}>{t.toliq}</p>}
       </section>
+      <section className="rise" style={{ marginTop: 16, background: 'var(--gyn-soft)', border: '1px solid var(--gyn)', borderRadius: 16, padding: '18px 20px', display: 'flex', gap: 12 }}>
+        <span style={{ fontSize: 20, lineHeight: 1 }}>💡</span>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--gyn)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 5 }}>Sodda tilda</div>
+          <p style={{ margin: 0, lineHeight: 1.7, fontSize: 14.5, color: 'var(--ink)' }}>{t.nimaBu}</p>
+        </div>
+      </section>
       <section style={{ marginTop: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
-        <h2 style={{ fontSize: 17, margin: '0 0 8px' }}>Bu nima?</h2><p style={{ margin: 0, lineHeight: 1.7, fontSize: 14 }}>{t.tushuntirish}</p>
+        <h2 style={{ fontSize: 17, margin: '0 0 8px' }}>Batafsil</h2><p style={{ margin: 0, lineHeight: 1.7, fontSize: 14 }}>{t.tushuntirish}</p>
         <h2 style={{ fontSize: 17, margin: '20px 0 8px' }}>Qachon ishlatiladi?</h2><p style={{ margin: 0, lineHeight: 1.7, fontSize: 14 }}>{t.qachon}</p>
       </section>
       <section style={{ marginTop: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
