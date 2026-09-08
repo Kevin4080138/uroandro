@@ -1,3 +1,5 @@
+'use client'
+
 import { Home, MessageSquare, CalendarClock, Pill } from 'lucide-react'
 import { MeniscusNav, type NavBand } from '@/components/MeniscusNav'
 import { Toaster } from '@/components/Toast'
