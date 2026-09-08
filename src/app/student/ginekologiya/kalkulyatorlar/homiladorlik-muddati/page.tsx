@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { GinekologiyaKalkulyatorQobiq, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
+import { GinekologiyaKalkulyatorQobiq, KalkulyatorKontent, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
 import { bugungiMahalliySana, homiladorlikHisobla, sanaFormat } from '@/lib/ginekologiyaHisoblash'
 
 const bugun = bugungiMahalliySana()
@@ -24,11 +24,18 @@ export default function HomiladorlikMuddatiPage() {
     </section>
     <section className="rise" style={ginKarta}>
       {!yaroqli ? <p style={{ margin: 0, color: 'var(--muted)' }}>To‘g‘ri sanalar va 21–35 kunlik sikl uzunligini kiriting.</p> : <>
-        <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>Gestatsion muddat</div>
+        <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>Gestatsion muddat (hayz yoshi)</div>
         <div style={{ fontSize: '38px', fontWeight: 800, color: 'var(--gyn)' }}>{natija.hafta} hafta {natija.kun} kun</div>
+        {natija.embrionBor && (
+          <div style={{ marginTop: '10px', fontSize: '13px', color: 'var(--ink-soft)', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '10px 12px', lineHeight: 1.5 }}>
+            Embrionning taxminiy yoshi (urug‘lanishdan): <strong style={{ color: 'var(--ink)' }}>{natija.embrionHafta} hafta {natija.embrionKunQoldiq} kun</strong>
+            <span style={{ display: 'block', color: 'var(--muted)', marginTop: '2px' }}>Gestatsion muddat hayzning 1-kunidan sanaladi, shu sabab embrion yoshidan ~2 hafta katta. Tibbiy hujjatlarda gestatsion muddat ishlatiladi.</span>
+          </div>
+        )}
         <div style={{ marginTop: '14px', fontSize: '14px', color: 'var(--ink-soft)' }}>Taxminiy tug‘ruq sanasi: <strong style={{ color: 'var(--ink)' }}>{sanaFormat(natija.tts)}</strong></div>
       </>}
       <KlinikOgohlantirish>Hisob 28 kunlik siklda OHS + 280 kun (Naegele qoidasi), boshqa sikllarda sikl farqi bilan tuzatiladi. Birinchi trimestr UTT sanani aniqroq tasdiqlaydi.</KlinikOgohlantirish>
     </section>
+    <KalkulyatorKontent slug="homiladorlik-muddati" />
   </GinekologiyaKalkulyatorQobiq>
 }

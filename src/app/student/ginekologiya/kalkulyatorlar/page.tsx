@@ -29,8 +29,8 @@ export default function GinekologiyaKalkulyatorlarPage() {
         <div className="rise" style={{ marginBottom: '18px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 6px' }}>🌸 Ginekologiya kalkulyatorlari</h1>
           <p style={{ color: 'var(--muted)', fontSize: '13.5px', margin: 0, lineHeight: 1.6 }}>
-            Rejalashtirilgan {GINEKOLOGIYA_KALKULYATORLARI.length} ta klinik shkala va kalkulyator.
-            Hozircha ro‘yxat tayyor — hisoblash qismlarini keyin birga to‘ldiramiz.
+            {GINEKOLOGIYA_KALKULYATORLARI.length} ta klinik shkala va kalkulyator.
+            «Ishlaydi» — interaktiv hisoblash; «Ma’lumot» — to‘liq klinik ta’rif va hisoblash mantig‘i.
           </p>
         </div>
 
@@ -74,14 +74,16 @@ export default function GinekologiyaKalkulyatorlarPage() {
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
-            {royxat.map((k) => (
+            {royxat.map((k) => {
+              const jonli = k.holat === 'jonli'
+              return (
               <div
                 key={k.slug}
-                onClick={() => k.faol && router.push(`/student/ginekologiya/kalkulyatorlar/${k.slug}`)}
-                className={k.faol ? 'soft-press' : undefined}
+                onClick={() => router.push(`/student/ginekologiya/kalkulyatorlar/${k.slug}`)}
+                className="soft-press"
                 style={{
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',
-                  overflow: 'hidden', opacity: k.faol ? 1 : 0.72, cursor: k.faol ? 'pointer' : 'default',
+                  overflow: 'hidden', cursor: 'pointer',
                 }}
               >
                 <div style={{ height: '3px', background: 'linear-gradient(135deg, var(--gyn), #f472b6)' }} />
@@ -89,14 +91,18 @@ export default function GinekologiyaKalkulyatorlarPage() {
                   <span style={{ fontSize: '19px' }}>{k.icon}</span>
                   <strong style={{ fontSize: '14.5px', flex: 1 }}>{k.title}</strong>
                   <span style={{
-                    fontSize: '10.5px', color: 'var(--gyn)', background: 'var(--gyn-soft)',
+                    fontSize: '10.5px',
+                    color: jonli ? 'var(--gyn)' : 'var(--muted)',
+                    background: jonli ? 'var(--gyn-soft)' : 'var(--surface-2)',
+                    border: jonli ? 'none' : '1px solid var(--line)',
                     borderRadius: '999px', padding: '3px 8px', whiteSpace: 'nowrap', fontWeight: 700,
                   }}>
-                    {k.faol ? 'Ishlaydi' : 'Rejada'}
+                    {jonli ? 'Ishlaydi' : 'Ma’lumot'}
                   </span>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

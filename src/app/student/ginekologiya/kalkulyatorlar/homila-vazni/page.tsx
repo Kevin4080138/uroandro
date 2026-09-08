@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { GinekologiyaKalkulyatorQobiq, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
+import { GinekologiyaKalkulyatorQobiq, KalkulyatorKontent, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
 import { hadlockVazn } from '@/lib/ginekologiyaHisoblash'
 
 export default function HomilaVazniPage() {
@@ -28,5 +28,6 @@ export default function HomilaVazniPage() {
       </>}
       <KlinikOgohlantirish>Hadlock IV formulasi ishlatiladi. Natija haqiqiy vazn emas va xatolik ko‘pincha taxminan ±10% bo‘lishi mumkin; o‘sishni baholash uchun gestatsion yoshga mos percentil va ketma-ket UTT zarur.</KlinikOgohlantirish>
     </section>
+    <KalkulyatorKontent slug="homila-vazni" />
   </GinekologiyaKalkulyatorQobiq>
 }

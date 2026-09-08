@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { GinekologiyaKalkulyatorQobiq, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
+import { GinekologiyaKalkulyatorQobiq, KalkulyatorKontent, KlinikOgohlantirish, ginInput, ginKarta, ginLabel } from '@/components/GinekologiyaKalkulyatorQobiq'
 import { bugungiMahalliySana, crlGestatsionYosh, sanaFormat, sanaQosh, utcSana } from '@/lib/ginekologiyaHisoblash'
 
 const bugun = bugungiMahalliySana()
@@ -28,5 +28,6 @@ export default function GestatsionYoshUttPage() {
       </>}
       <KlinikOgohlantirish>CRL bo‘yicha birinchi trimestr sanalashi eng aniq usul hisoblanadi. Formula 9–13+6 haftalik davr uchun ishlab chiqilgan; CRL 84 mm dan oshganda kompozit biometriya afzal.</KlinikOgohlantirish>
     </section>
+    <KalkulyatorKontent slug="gestatsion-yosh-utt" />
   </GinekologiyaKalkulyatorQobiq>
 }
