@@ -11,6 +11,13 @@ import { KALKULYATORLAR, KALK_KATEGORIYALARI } from '@/lib/kalkulyatorlar'
 // chegara qiymat klinik qarorni o'zgartiradi. Shu sabab har kartada `oquv`
 // izohi ochiq turadi, kalkulyatorning o'zi esa bir bosishda ochiladi.
 
+// Talaba qobig'i tayyor bo'lgan kalkulyatorlar — bular /student/kalkulyatorlar/<slug>
+// da ochiladi (bemor-panelsiz). Qolganlari hozircha shifokor sahifasiga o'tadi.
+const TALABA_SAHIFALI = new Set(['ipss', 'psa', 'egfr'])
+function kalkYoli(slug: string) {
+  return TALABA_SAHIFALI.has(slug) ? `/student/kalkulyatorlar/${slug}` : `/doctor/calculators/${slug}`
+}
+
 export default function StudentKalkulyatorlarPage() {
   const router = useRouter()
   const [filtr, setFiltr] = useState<string>('Hammasi')
@@ -83,8 +90,8 @@ export default function StudentKalkulyatorlarPage() {
                 tabIndex={k.faol ? 0 : -1}
                 aria-disabled={!k.faol}
                 aria-label={k.title}
-                onClick={() => k.faol && router.push(`/doctor/calculators/${k.slug}`)}
-                onKeyDown={(e) => { if (k.faol && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); router.push(`/doctor/calculators/${k.slug}`) } }}
+                onClick={() => k.faol && router.push(kalkYoli(k.slug))}
+                onKeyDown={(e) => { if (k.faol && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); router.push(kalkYoli(k.slug)) } }}
                 className="soft-press"
                 style={{
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',

@@ -6,33 +6,13 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
 import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
+import { psaYoshMezoni as yoshMezoni, fpsaXavf } from '@/lib/urologiyaHisoblash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px', fontWeight: 600 }
-
-// Yoshga moslashgan PSA me'zonlari (Oesterling va boshq., AUA qo'llanmasi)
-const YOSH_MEZONLARI = [
-  { oraliq: [40, 49], maxPSA: 2.5 },
-  { oraliq: [50, 59], maxPSA: 3.5 },
-  { oraliq: [60, 69], maxPSA: 4.5 },
-  { oraliq: [70, 120], maxPSA: 6.5 },
-]
-
-function yoshMezoni(yosh: number) {
-  return YOSH_MEZONLARI.find((m) => yosh >= m.oraliq[0] && yosh <= m.oraliq[1]) ?? YOSH_MEZONLARI[YOSH_MEZONLARI.length - 1]
-}
-
-// 4-10 ng/mL "kulrang zona"dagi erkin/umumiy PSA nisbati bo'yicha prostata saratoni ehtimoli (taxminiy, adabiyot asosida)
-function fpsaXavf(foiz: number) {
-  if (foiz < 10) return { daraja: 'Yuqori xavf', ehtimol: '~56%', rang: '#dc2626' }
-  if (foiz < 15) return { daraja: "O'rtacha-yuqori xavf", ehtimol: '~28%', rang: '#ea580c' }
-  if (foiz < 20) return { daraja: "O'rtacha xavf", ehtimol: '~20%', rang: '#d97706' }
-  if (foiz < 25) return { daraja: 'Past-o\'rtacha xavf', ehtimol: '~16%', rang: '#65a30d' }
-  return { daraja: 'Past xavf', ehtimol: '~8%', rang: '#16a34a' }
-}
 
 export default function PSAKalkulyator() {
   return (

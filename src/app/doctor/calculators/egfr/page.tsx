@@ -6,32 +6,13 @@ import { AppShell } from '@/components/AppShell'
 import { createClient } from '@/lib/supabase'
 import { KalkulyatorBemorPaneli } from '@/components/KalkulyatorBemorPaneli'
 import { kalkulyatorNatijasiniSaqla, yoshHisobla } from '@/lib/kalkulyatorSaqlash'
+import { ckdEpi2021, egfrBosqich as bosqich } from '@/lib/urologiyaHisoblash'
 
 const inputStyle = {
   width: '100%', background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)',
   borderRadius: '10px', padding: '10px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
 }
 const labelStyle = { color: 'var(--ink-soft)', fontSize: '13px', display: 'block', marginBottom: '6px', fontWeight: 600 }
-
-// CKD-EPI 2021 (irqsiz versiya) — kreatinin mg/dL da
-function ckdEpi2021(kreatininMgDl: number, yosh: number, jins: 'erkak' | 'ayol') {
-  const k = jins === 'ayol' ? 0.7 : 0.9
-  const a = jins === 'ayol' ? -0.241 : -0.302
-  const minScr = Math.min(kreatininMgDl / k, 1)
-  const maxScr = Math.max(kreatininMgDl / k, 1)
-  let egfr = 142 * Math.pow(minScr, a) * Math.pow(maxScr, -1.2) * Math.pow(0.9938, yosh)
-  if (jins === 'ayol') egfr *= 1.012
-  return egfr
-}
-
-function bosqich(egfr: number) {
-  if (egfr >= 90) return { nom: 'G1 — Normal yoki yuqori', rang: '#16a34a' }
-  if (egfr >= 60) return { nom: 'G2 — Yengil pasaygan', rang: '#65a30d' }
-  if (egfr >= 45) return { nom: "G3a — O'rtacha pasaygan", rang: '#d97706' }
-  if (egfr >= 30) return { nom: "G3b — O'rtacha-og'ir pasaygan", rang: '#ea580c' }
-  if (egfr >= 15) return { nom: "G4 — Og'ir pasaygan", rang: '#dc2626' }
-  return { nom: 'G5 — Buyrak yetishmovchiligi', rang: '#991b1b' }
-}
 
 export default function EGFRKalkulyator() {
   return (
