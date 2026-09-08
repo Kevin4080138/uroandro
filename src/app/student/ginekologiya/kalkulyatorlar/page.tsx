@@ -79,7 +79,11 @@ export default function GinekologiyaKalkulyatorlarPage() {
               return (
               <div
                 key={k.slug}
+                role="button"
+                tabIndex={0}
+                aria-label={k.title}
                 onClick={() => router.push(`/student/ginekologiya/kalkulyatorlar/${k.slug}`)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/student/ginekologiya/kalkulyatorlar/${k.slug}`) } }}
                 className="soft-press"
                 style={{
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',

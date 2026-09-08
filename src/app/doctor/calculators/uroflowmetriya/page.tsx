@@ -196,7 +196,7 @@ function UroflowmetriyaIchki() {
               ≥15 mL/s normal hisoblanadi. <strong style={{ color: 'var(--ink)' }}>&lt;10 mL/s</strong> ko&apos;pincha obstruktiv tipga (masalan, BPH) xos deb baholanadi.
             </p>
             <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>
-              Manba: ICS (International Continence Society) urodinamik tekshiruv standartlari, AUA/EAU BPH qo&apos;llanmalari. Uroflowmetriya yagona tashxis vositasi emas — bosim-oqim tekshiruvi (pressure-flow study) bilan birga baholash tavsiya etiladi. Bu kalkulyator faqat klinik yordamchi vosita.
+              Manba: ICS (International Continence Society) urodinamik tekshiruv standartlari, AUA/EAU BPH qo&apos;llanmalari. Qmax chegaralari yosh, jins, siyilgan hajm va oqim egri chizig&apos;isiz yakuniy tashxis bermaydi — siyilgan hajm &lt;150 mL bo&apos;lsa natija ishonchsiz. Uroflowmetriya yagona tashxis vositasi emas — bosim-oqim tekshiruvi (pressure-flow study) bilan birga baholash tavsiya etiladi. Bu kalkulyator faqat klinik yordamchi vosita.
             </p>
           </div>
         </div>

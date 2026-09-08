@@ -217,7 +217,8 @@ function PSAIchki() {
             </p>
             <p style={{ margin: 0 }}>
               <strong style={{ color: 'var(--ink)' }}>PSAD</strong> (PSA Density — PSA zichligi) = umumiy PSA ÷ prostata hajmi (sm³). Katta prostatali bemorlarda PSA tabiiy ravishda yuqoriroq bo&apos;lishi mumkin,
-              PSAD shu omilni hisobga oladi. <strong>0.15 ng/mL/sm³</strong> dan yuqori qiymat saraton xavfini oshiradi deb hisoblanadi.
+              PSAD shu omilni hisobga oladi. <strong>0.15 ng/mL/sm³</strong> dan yuqori qiymat saraton xavfini oshiradi deb hisoblanadi,
+              lekin bu mutlaq biopsiya chegarasi emas — MRT (PI-RADS), prostata hajmi, yosh, anamnez va umumiy xavf bilan birga baholanadi.
             </p>
             <p style={{ margin: 0 }}>
               <strong style={{ color: 'var(--ink)' }}>%fPSA</strong> (Free PSA foizi) — qondagi PSA ikki shaklda bo&apos;ladi: erkin (free) va oqsillarga bog&apos;langan (bound).

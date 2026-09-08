@@ -41,7 +41,7 @@ const SAVOLLAR = [
 function natijaDarajasi(jami: number) {
   if (jami <= 6) return { nom: 'Past murakkablik', rang: '#16a34a', tavsif: 'Partial nefrektomiya (organ saqlovchi jarrohlik) texnik jihatdan kamroq murakkab.' }
   if (jami <= 9) return { nom: "O'rtacha murakkablik", rang: '#d97706', tavsif: 'Jarrohlik rejasini diqqat bilan tuzish, ko\'pincha tajribali jarrohlik markazida bajarish tavsiya etiladi.' }
-  return { nom: "Yuqori murakkablik", rang: '#dc2626', tavsif: 'Partial nefrektomiya texnik jihatdan yuqori murakkab, asoratlar xavfi oshgan — radikal nefrektomiya yoki yuqori malakali jarroh tavsiya etiladi.' }
+  return { nom: "Yuqori murakkablik", rang: '#dc2626', tavsif: 'Anatomik murakkablik va asorat xavfi yuqori. Ball operatsiya turini (partial yoki radikal nefrektomiya) bir o\'zi hal qilmaydi — bu o\'sma, bemor holati, buyrak funksiyasi va jarroh tajribasi bilan birga baholanadi.' }
 }
 
 export default function RenalKalkulyator() {

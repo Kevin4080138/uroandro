@@ -79,7 +79,12 @@ export default function StudentKalkulyatorlarPage() {
             {royxat.map((k) => (
               <div
                 key={k.slug}
+                role="button"
+                tabIndex={k.faol ? 0 : -1}
+                aria-disabled={!k.faol}
+                aria-label={k.title}
                 onClick={() => k.faol && router.push(`/doctor/calculators/${k.slug}`)}
+                onKeyDown={(e) => { if (k.faol && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); router.push(`/doctor/calculators/${k.slug}`) } }}
                 className="soft-press"
                 style={{
                   background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '14px',

@@ -53,7 +53,7 @@ const QOL_VARIANTLAR = [
 
 function daraja(jami: number) {
   if (jami <= 7) return { nom: 'Yengil simptomlar', rang: '#16a34a', tavsif: 'Faol kuzatuv (watchful waiting) tavsiya etiladi, hayot tarzini o\'zgartirish yetarli bo\'lishi mumkin.' }
-  if (jami <= 19) return { nom: "O'rtacha simptomlar", rang: '#d97706', tavsif: "Dorivor davolash (alfa-blokatorlar, 5-alfa-reduktaza inhibitorlari) ko'rib chiqilishi kerak." }
+  if (jami <= 19) return { nom: "O'rtacha simptomlar", rang: '#d97706', tavsif: "Ball o'zi davolashni boshlamaydi: qaror bezovtalik darajasi (QoL), asoratlar, tekshiruv natijalari va bemor xohishiga bog'liq. Kuzatuv, hayot tarzini o'zgartirish yoki dorivor davolash (alfa-blokator, 5-alfa-reduktaza inhibitori) ko'rib chiqiladi." }
   return { nom: "Og'ir simptomlar", rang: '#dc2626', tavsif: 'Urolog konsultatsiyasi va keng tekshiruv, ko\'pincha jarrohlik davolanishi ko\'rib chiqiladi.' }
 }
 

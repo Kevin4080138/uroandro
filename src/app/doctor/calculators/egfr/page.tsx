@@ -200,6 +200,12 @@ function EGFRIchki() {
               <li><strong style={{ color: '#dc2626' }}>G4</strong> (15–29) — og&apos;ir pasaygan</li>
               <li><strong style={{ color: '#991b1b' }}>G5</strong> (&lt;15) — buyrak yetishmovchiligi (dializ/transplantatsiya ehtiyoji)</li>
             </ul>
+            <p style={{ margin: 0, fontSize: '13px' }}>
+              <strong style={{ color: 'var(--ink)' }}>Muhim:</strong> bitta past eGFR (&lt;60) o&apos;z-o&apos;zicha CKD tashxisini bermaydi.
+              KDIGO bo&apos;yicha CKD uchun buzilish kamida <strong>3 oy</strong> davom etishi yoki albuminuriya kabi boshqa buyrak
+              shikasti belgisi bo&apos;lishi kerak; G1–G2 (≥60) esa faqat shunday belgi bilan birga CKD hisoblanadi. O&apos;tkir kasallik,
+              degidratatsiya va ayrim dorilar kreatininni vaqtincha oshiradi.
+            </p>
             <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>
               Manba: Inker LA va boshq. (2021) New Creatinine- and Cystatin C–Based Equations to Estimate GFR without Race. NEJM. KDIGO 2024 CKD qo&apos;llanmasi. Bu kalkulyator faqat klinik yordamchi vosita.
             </p>
