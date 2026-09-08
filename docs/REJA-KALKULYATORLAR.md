@@ -35,9 +35,10 @@ Bajarildi:
   `klinikMisol`, `kopUchraydiganXato`); `KalkulyatorKontent`/`KalkulyatorInfoSahifa` ularni ko'rsatadi;
   3 jonli gin kalkulyatori (homiladorlik-muddati, gestatsion-yosh-utt, homila-vazni) to'ldirildi.
 
+- Barcha 25 gin kalkulyatori (jonli + ma'lumot) 5 qism bilan to'ldirildi. ✅
+
 Qoldi:
-- Qolgan gin kalkulyator/ma'lumot sahifalarini 5 qism bilan to'ldirish.
-- Yangi urologiya talaba sahifalari qo'shilganda shu standartni qo'llash.
+- Yangi urologiya talaba sahifalari qo'shilganda shu standartni qo'llash (Faza 1 davomi bilan birga).
 
 Standart (eslatma uchun):
 
