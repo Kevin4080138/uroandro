@@ -42,9 +42,16 @@ Qo'shimcha:
 - Ginekologiyadagi yaxshi tuzilish (Klinik izoh / Natija talqini / Cheklovlar / Manbalar) urologiyaga ham ko'chiriladi.
 - Amalga oshirish: `ginekologiyaKalkulyatorKontenti.ts` tipini kengaytirish (`buNimaEmas`, `keyingiQadam`, `klinikMisol`, `kopUchraydiganXato`, `chegaraIzoh`) va `KalkulyatorKontent`/`KalkulyatorInfoSahifa` ni yangilash.
 
-## Faza 3 — Avtomatik testlar (kamchilik #5)
+## Faza 3 — Avtomatik testlar (kamchilik #5) ✅ BAJARILDI
 
-- Test freymvorki: **Vitest** (`npm i -D vitest`), `npm test` skripti, CI'ga ulash.
+- Test freymvorki: **Vitest** o'rnatildi (`vitest.config.ts`, `npm test` / `npm run test:watch`).
+- 36 test o'tdi: `src/lib/ginekologiyaHisoblash.test.ts` (19) va `src/lib/urologiyaHisoblash.test.ts` (17).
+- Qamrab olingan: kabisa/oy oxiri sanalari, sikl tuzatishi, embrion yoshi, INTERGROWTH CRL,
+  Hadlock (golden ~3305 g), CKD-EPI 2021 (golden 104/78), birlik almashishi (mmol↔mg/dL),
+  vergul/nuqta o'nlik, ball chegaralari (egfrBosqich, ipssDaraja, fpsaXavf, RMI U/M, psaYoshMezoni).
+- Keyingi: Cockcroft–Gault qo'shilganda test qo'shish; CI'ga `npm test` ulash.
+
+Tarixiy reja (bajarildi):
 - Sof funksiyalarni sinash (`src/lib/ginekologiyaHisoblash.ts` va bo'lajak `urologiyaHisoblash.ts`):
   - kabisa yili va oy oxiri (sana o'tishi);
   - sikl uzunligi tuzatishi (21–35);
