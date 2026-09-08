@@ -141,7 +141,7 @@ export default function StudentDashboard() {
   const GIN_KARTALAR = [
     { Icon: BookOpen, title: 'Darslar', desc: 'Ginekologiya kurslari', c: 'var(--gyn)', href: '/student/ginekologiya/darslar' },
     { Icon: Scissors, title: 'Operativ ginekologiya', desc: 'Operatsiyalar, asboblar, usullar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=operativ' },
-    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: 'Ginekologik tasniflar', c: 'var(--gyn)', href: '/student/ginekologiya/darslar?bolim=klassifikatsiyalar' },
+    { Icon: FolderTree, title: 'Klassifikatsiyalar', desc: '22 ta izohli ginekologik tasnif', c: 'var(--gyn)', href: '/student/ginekologiya/klassifikatsiyalar' },
     { Icon: BarChart3, title: 'Natijalarim', desc: 'Ginekologiya test natijalari', c: 'var(--gyn)', href: '/student/ginekologiya/natijalarim' },
     { Icon: Trophy, title: 'Reyting', desc: "Ginekologiya reytingi", c: 'var(--gyn)', href: '/student/ginekologiya/reyting' },
     { Icon: Calculator, title: 'Kalkulyatorlar', desc: '25 ta shkala va klinik formula', c: 'var(--gyn)', href: '/student/ginekologiya/kalkulyatorlar' },
