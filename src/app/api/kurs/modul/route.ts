@@ -37,8 +37,11 @@ export async function POST(req: Request) {
 
   // Modul meta
   const { data: modulData } = await admin
-    .from('kurs_modullar').select('id, nom, bosqich, holat').eq('id', modulId).maybeSingle()
-  const modul = modulData as { id: string; nom: string; bosqich: string; holat: string } | null
+    .from('kurs_modullar').select('id, nom, bosqich, holat, mavzu_turi, bolim_override').eq('id', modulId).maybeSingle()
+  const modul = modulData as {
+    id: string; nom: string; bosqich: string; holat: string
+    mavzu_turi: string | null; bolim_override: Record<string, boolean> | null
+  } | null
   if (!modul) return NextResponse.json({ error: 'Modul topilmadi' }, { status: 404 })
 
   // Bank sanoqlari (head: true — faqat count, mazmun emas)
@@ -55,7 +58,10 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    modul: { id: modul.id, nom: modul.nom, bosqich: modul.bosqich, holat: modul.holat },
+    modul: {
+      id: modul.id, nom: modul.nom, bosqich: modul.bosqich, holat: modul.holat,
+      mavzu_turi: modul.mavzu_turi, bolim_override: modul.bolim_override ?? {},
+    },
     banklar: {
       flashcard: flashRes.count ?? 0,
       test: testRes.count ?? 0,

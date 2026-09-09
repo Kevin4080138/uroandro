@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/Header'
 import { KebabMenu } from '@/components/KebabMenu'
 import { Pencil, Trash2 } from 'lucide-react'
+import { MAVZU_TURLARI, BOLIMLAR, tavsiyaBolimlar, type Bolim } from '@/lib/kurs/matritsa'
 
 // Kurs modul muharriri (Faza 4.3a). kurs_modullar CRUD — admin RLS orqali.
 // Eski /admin/urologiya-darslar sahifasi SAQLANADI; bu additiv yangi sahifa.
@@ -23,7 +24,12 @@ type KursModul = {
   kredit: number
   holat: string
   sort_order: number
+  mavzu_turi: string | null
+  bolim_override: Record<string, boolean> | null
 }
+
+type OverrideHolat = Record<Bolim, 'auto' | 'on' | 'off'>
+const BOSH_OVERRIDE: OverrideHolat = { flashcard: 'auto', test: 'auto', usmle: 'auto', case: 'auto' }
 
 const YONALISHLAR = [
   { id: 'urologiya', nom: 'Urologiya' },
@@ -66,6 +72,8 @@ export default function AdminKursModullarPage() {
   const [bepul, setBepul] = useState(false)
   const [holat, setHolat] = useState('draft')
   const [sortOrder, setSortOrder] = useState(0)
+  const [mavzuTuri, setMavzuTuri] = useState('')
+  const [override, setOverride] = useState<OverrideHolat>(BOSH_OVERRIDE)
 
   const yukla = async () => {
     setYuklanmoqda(true)
@@ -91,12 +99,18 @@ export default function AdminKursModullarPage() {
   const reset = () => {
     setEditId(null); setBosqich('oson'); setModulNo(1); setNom(''); setTavsif(''); setTrack('')
     setKredit(1); setMajburiy(true); setBepul(false); setHolat('draft'); setSortOrder(0); setXabar('')
+    setMavzuTuri(''); setOverride(BOSH_OVERRIDE)
   }
 
   const tahrirla = (m: KursModul) => {
     setEditId(m.id); setBosqich(m.bosqich); setModulNo(m.modul_no); setNom(m.nom)
     setTavsif(m.tavsif ?? ''); setTrack(m.track ?? ''); setKredit(m.kredit); setMajburiy(m.majburiy)
     setBepul(m.bepul); setHolat(m.holat); setSortOrder(m.sort_order); setXabar('')
+    setMavzuTuri(m.mavzu_turi ?? '')
+    const ov = (m.bolim_override ?? {}) as Record<string, boolean>
+    const st = { ...BOSH_OVERRIDE }
+    for (const { id } of BOLIMLAR) st[id] = typeof ov[id] === 'boolean' ? (ov[id] ? 'on' : 'off') : 'auto'
+    setOverride(st)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -111,10 +125,16 @@ export default function AdminKursModullarPage() {
       return
     }
     setSaqlanmoqda(true)
+    const bolimOverride: Record<string, boolean> = {}
+    for (const { id } of BOLIMLAR) {
+      if (override[id] === 'on') bolimOverride[id] = true
+      else if (override[id] === 'off') bolimOverride[id] = false
+    }
     const payload = {
       yonalish, bosqich, modul_no: Number(modulNo) || 1, nom: nom.trim(),
       tavsif: tavsif.trim() || null, track: track.trim() || null,
       kredit: Number(kredit) || 1, majburiy, bepul, holat, sort_order: Number(sortOrder) || 0,
+      mavzu_turi: mavzuTuri || null, bolim_override: bolimOverride,
     }
     const res = editId
       ? await supabase.from('kurs_modullar').update(payload).eq('id', editId)
@@ -154,6 +174,9 @@ export default function AdminKursModullarPage() {
     ...b,
     list: modullar.filter((m) => m.bosqich === b.id),
   })), [modullar])
+
+  // Joriy tanlov bo'yicha matritsa tavsiyasi (override 'auto' shunga tushadi)
+  const tav = tavsiyaBolimlar(mavzuTuri || null, bosqich)
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '40px' }}>
@@ -212,6 +235,47 @@ export default function AdminKursModullarPage() {
           <div>
             <label style={lab}>Track (ixtiyoriy)</label>
             <input value={track} onChange={(e) => setTrack(e.target.value)} placeholder="Masalan: onkologiya" style={inp} />
+          </div>
+
+          {/* Mavzu turi — adaptiv bo'lim matritsasini boshqaradi */}
+          <div>
+            <label style={lab}>Mavzu turi (mashq bo‘limlarini avtomatik tanlaydi)</label>
+            <select value={mavzuTuri} onChange={(e) => setMavzuTuri(e.target.value)} style={inp}>
+              <option value="">— Belgilanmagan (barcha bo‘lim bank bo‘yicha) —</option>
+              {MAVZU_TURLARI.map((t) => <option key={t.id} value={t.id}>{t.nom}</option>)}
+            </select>
+          </div>
+
+          {/* Bo'lim override — 'auto' matritsaga tushadi, admin qo'lda o'zgartira oladi */}
+          <div>
+            <label style={lab}>Talaba markazida mashq bo‘limlari</label>
+            <p style={{ margin: '0 0 8px', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.5 }}>
+              «Avto» — mavzu turi va bosqichga qarab. Bank bo‘sh bo‘lsa bo‘lim baribir ko‘rinmaydi.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {BOLIMLAR.map((bl) => {
+                const holatlar: { id: 'auto' | 'on' | 'off'; nom: string }[] = [
+                  { id: 'auto', nom: `Avto (${tav[bl.id] ? 'ko‘rinadi' : 'yashirin'})` },
+                  { id: 'on', nom: 'Ko‘rsatish' },
+                  { id: 'off', nom: 'Yashirish' },
+                ]
+                return (
+                  <div key={bl.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ width: '92px', fontSize: '12.5px', fontWeight: 700 }}>{bl.nom}</span>
+                    <div style={{ display: 'flex', gap: '5px', flex: 1, minWidth: '200px' }}>
+                      {holatlar.map((h) => (
+                        <button key={h.id} type="button" onClick={() => setOverride((p) => ({ ...p, [bl.id]: h.id }))} style={{
+                          flex: 1, padding: '7px 4px', borderRadius: '8px', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer',
+                          border: `1.5px solid ${override[bl.id] === h.id ? 'var(--accent)' : 'var(--line)'}`,
+                          background: override[bl.id] === h.id ? 'var(--accent)' : 'var(--surface-2)',
+                          color: override[bl.id] === h.id ? '#fff' : 'var(--muted)',
+                        }}>{h.nom}</button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>

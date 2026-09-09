@@ -125,15 +125,19 @@ Agar keyin darsga ham kerak bo'lsa — qo'shish oson (dars belgisi bilan filtr).
 
 ---
 
-## 4. Faza C — Adaptiv matritsa (avto + admin override) 🟢
+## 4. Faza C — Adaptiv matritsa (avto + admin override) ✅ (PR-3, 2026-09-09)
 
-- [ ] `kurs_modullar` ga `mavzu_turi` (anatomiya/fiziologiya/simptom/diagnostika/kasallik/dori/jarrohlik/shoshilinch/profilaktika)
-      + ixtiyoriy `bolim_ochirilgan jsonb` (admin qo'lda o'chirgan bo'limlar) — **kichik migratsiya**.
-- [ ] `src/lib/kurs/matritsa.ts` — `koringanBolimlar(mavzu_turi, bosqich)` → AGENTS matritsasidan tavsiya.
-      Yakuniy ko'rinish = tavsiya ∩ bank-mavjud − admin-override.
-- [ ] Admin praktikum sahifasiga `mavzu_turi` + bo'lim toggle qo'shiladi.
+> **Bajarildi.** Migratsiya `20260920000000_kurs_modul_mavzu_turi.sql` — `kurs_modullar` ga
+> `mavzu_turi` (CHECK bilan 9 tur) + `bolim_override jsonb`. ⏳ **Supabase'da Run kerak.**
+> `src/lib/kurs/matritsa.ts` — `tavsiyaBolimlar(mavzu_turi, bosqich)` (AGENTS matritsasi + EASY da
+> USMLE/case yo'q qoidasi) va `bolimKorinadi(...)` (override ustma-ust). Summary route
+> `mavzu_turi`+`bolim_override` qaytaradi; modul markazi kartani **tavsiya ∩ bank-mavjud − override**
+> bo'yicha ko'rsatadi. Admin modullar muharririga mavzu turi selecti + 4 bo'lim uchun
+> Avto/Ko'rsat/Yashir boshqaruvi qo'shildi (Avto qiymati jonli ko'rsatiladi). `tsc` toza, `next build` o'tdi.
+> `mavzu_turi` NULL bo'lsa eski xatti-harakat (bank bo'yicha) saqlanadi — orqaga mos.
 
-> Shell fazasida (A/B) bo'lim faqat **mavjudlik** bilan boshqariladi — bu faza uni turga bog'laydi.
+**Fayllar:** migratsiya + `src/lib/kurs/matritsa.ts` + `api/kurs/modul/route.ts` +
+`student/.../modul/[modulId]/page.tsx` + `admin/kurs/modullar/page.tsx`.
 
 ---
 

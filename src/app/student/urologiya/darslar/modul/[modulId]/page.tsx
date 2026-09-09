@@ -10,10 +10,14 @@ import {
   CheckCircle2, XCircle, RotateCcw, Lightbulb, Trophy,
 } from 'lucide-react'
 import { BOSQICH_RANG } from '@/lib/talim/darslar'
+import { bolimKorinadi } from '@/lib/kurs/matritsa'
 
 type Banklar = { flashcard: number; test: number; usmle: number }
 type CaseMini = { id: string; sarlavha: string; jami: number }
-type Summary = { modul: { id: string; nom: string; bosqich: string; holat: string }; banklar: Banklar; caselar: CaseMini[] }
+type Summary = {
+  modul: { id: string; nom: string; bosqich: string; holat: string; mavzu_turi: string | null; bolim_override: Partial<Record<'flashcard' | 'test' | 'usmle' | 'case', boolean>> }
+  banklar: Banklar; caselar: CaseMini[]
+}
 type Flashcard = { old: string; yangi: string; kategoriya: string | null }
 type Savol = { id: string; savol: string; variantlar: string[] }
 type Faol =
@@ -94,7 +98,15 @@ export default function ModulMarkaz() {
 
   const b = xul?.banklar
   const caselar = xul?.caselar ?? []
-  const hechnima = b && b.flashcard === 0 && b.test === 0 && b.usmle === 0 && caselar.length === 0
+  // Adaptiv ko'rinish: matritsa tavsiyasi (admin override bilan) ∩ bank bo'sh emas
+  const mt = xul?.modul.mavzu_turi
+  const bq = xul?.modul.bosqich ?? 'oson'
+  const ov = xul?.modul.bolim_override
+  const koFlash = !!b && b.flashcard > 0 && bolimKorinadi('flashcard', mt, bq, ov)
+  const koTest = !!b && b.test > 0 && bolimKorinadi('test', mt, bq, ov)
+  const koUsmle = !!b && b.usmle > 0 && bolimKorinadi('usmle', mt, bq, ov)
+  const koCase = caselar.length > 0 && bolimKorinadi('case', mt, bq, ov)
+  const hechnima = !!b && !koFlash && !koTest && !koUsmle && !koCase
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)', paddingBottom: '90px' }}>
@@ -133,22 +145,22 @@ export default function ModulMarkaz() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-                {b!.flashcard > 0 && (
+                {koFlash && (
                   <Guruh nom="Eslab qolish">
                     <MashqKarta Icon={Layers} rang={rang} sarlavha="Flashcard" tavsif={`${b!.flashcard} ta karta`} onClick={() => setFaol({ tur: 'flashcard' })} />
                   </Guruh>
                 )}
-                {(b!.test > 0 || caselar.length > 0) && (
+                {(koTest || koCase) && (
                   <Guruh nom="Qo'llash">
-                    {b!.test > 0 && (
+                    {koTest && (
                       <MashqKarta Icon={ClipboardCheck} rang={rang} sarlavha="Amaliy test" tavsif={`${b!.test} ta savol · 70% o'tish`} natija={natijalar.test} onClick={() => setFaol({ tur: 'test' })} />
                     )}
-                    {caselar.map((c) => (
+                    {koCase && caselar.map((c) => (
                       <MashqKarta key={c.id} Icon={Building2} rang={rang} sarlavha={c.sarlavha} tavsif={`Klinik case · ${c.jami} bosqich`} onClick={() => setFaol({ tur: 'case', caseId: c.id, sarlavha: c.sarlavha })} />
                     ))}
                   </Guruh>
                 )}
-                {b!.usmle > 0 && (
+                {koUsmle && (
                   <Guruh nom="Tahlil qilish">
                     <MashqKarta Icon={GraduationCap} rang={rang} sarlavha="USMLE savollari" tavsif={`${b!.usmle} ta savol`} natija={natijalar.usmle} onClick={() => setFaol({ tur: 'usmle' })} />
                   </Guruh>
