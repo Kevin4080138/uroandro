@@ -93,12 +93,12 @@ export async function POST(req: Request) {
 
   const { data: savolData, error: savolErr } = await admin
     .from('kurs_savollar')
-    .select('id, togri')
+    .select('id, togri, izoh')
     .eq('dars_id', darsId)
     .eq('tur', 'tezkor')
     .order('sort_order', { ascending: true })
   if (savolErr) return NextResponse.json({ error: 'Savollar olinmadi' }, { status: 500 })
-  const savollar = (savolData as { id: string; togri: number }[] | null) ?? []
+  const savollar = (savolData as { id: string; togri: number; izoh: string | null }[] | null) ?? []
   if (savollar.length !== TEZKOR_JAMI) {
     return NextResponse.json({ code: 'TEZKOR_BANK_NOT_READY', error: 'Tezkor savollar hali tayyor emas' }, { status: 409 })
   }
@@ -144,6 +144,8 @@ export async function POST(req: Request) {
     )
   if (yozuvErr) return NextResponse.json({ error: 'Saqlanmadi' }, { status: 500 })
 
-  // Bu urinish natijasi + darsning umumiy tugatdim holati (togri indekslari YO'Q)
-  return NextResponse.json({ ok: true, togri, jami: TEZKOR_JAMI, otdi: otdiHozir, tugatdim: yakunTugatdim })
+  // Formativ tezkor test — javob YUBORILGANDAN keyin izoh + to'g'ri indeks
+  // ochiladi (cheksiz urinishli o'quv tekshiruvi; nazorat testi bu emas).
+  const natijalar = savollar.map((s) => ({ savol_id: s.id, togri: s.togri, izoh: s.izoh }))
+  return NextResponse.json({ ok: true, togri, jami: TEZKOR_JAMI, otdi: otdiHozir, tugatdim: yakunTugatdim, natijalar })
 }

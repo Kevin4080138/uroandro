@@ -12,8 +12,8 @@ import {
 import { BOSQICH_RANG } from '@/lib/talim/darslar'
 
 type KursDars = {
-  slug: string; sarlavha: string; kategoriya: string | null; qisqa: string | null
-  daqiqa: number; test_savollar: unknown; modul_no: number; modul_nom: string | null
+  id: string; modul_id: string | null; slug: string; sarlavha: string; kategoriya: string | null; qisqa: string | null
+  daqiqa: number; modul_no: number; modul_nom: string | null
 }
 
 const YONALISH = 'urologiya'
@@ -49,7 +49,7 @@ function bosqichBolimlar(bosqich: string): { Icon: LucideIcon; nom: string }[] {
   return asos
 }
 
-type Modul = { no: number; nom: string; list: KursDars[] }
+type Modul = { no: number; id: string | null; nom: string; list: KursDars[] }
 
 export default function UroBosqichDarslar() {
   const params = useParams()
@@ -67,14 +67,17 @@ export default function UroBosqichDarslar() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      const [{ data: d }, natRes] = await Promise.all([
-        supabase.from('kurs_darslar').select('slug, sarlavha, kategoriya, qisqa, daqiqa, test_savollar, modul_no, modul_nom')
+      const [{ data: d }, progRes] = await Promise.all([
+        supabase.from('kurs_darslar').select('id, modul_id, slug, sarlavha, kategoriya, qisqa, daqiqa, modul_no, modul_nom')
           .eq('yonalish', YONALISH).eq('faol', true).eq('bolim', 'darslar').eq('bosqich', bosqich)
           .order('modul_no').order('sort_order').order('created_at'),
-        user ? supabase.from('kurs_natijalar').select('dars_slug').eq('student_id', user.id) : Promise.resolve({ data: [] }),
+        user ? supabase.from('kurs_progress').select('dars_id, korildi').eq('student_id', user.id) : Promise.resolve({ data: [] }),
       ])
-      setDarslar((d ?? []) as KursDars[])
-      setTugallangan(new Set(((natRes.data ?? []) as { dars_slug: string }[]).map((r) => r.dars_slug)))
+      const darslarData = (d ?? []) as KursDars[]
+      // kurs_progress dars_id bo'yicha — slug'ga xaritalaymiz (korildi = ko'rib chiqilgan)
+      const korilganIds = new Set(((progRes.data ?? []) as { dars_id: string; korildi: boolean }[]).filter((r) => r.korildi).map((r) => r.dars_id))
+      setDarslar(darslarData)
+      setTugallangan(new Set(darslarData.filter((x) => korilganIds.has(x.id)).map((x) => x.slug)))
       setLoading(false)
     }
     load()
@@ -83,8 +86,8 @@ export default function UroBosqichDarslar() {
 
   const bolimlar = bosqichBolimlar(bosqich)
 
-  // Dars "bajarilgan" — test natijasi bor yoki testi yo'q (bloklamaydi)
-  const bajarildi = (d: KursDars) => tugallangan.has(d.slug) || !(Array.isArray(d.test_savollar) && d.test_savollar.length > 0)
+  // Dars "bajarilgan" — nazariyasi ko'rib chiqilgan (kurs_progress.korildi)
+  const bajarildi = (d: KursDars) => tugallangan.has(d.slug)
 
   // Ketma-ket qulf: darslar (modul_no, sort_order) bo'yicha tekis tartibda.
   // Dars ochiladi — undan oldingi tekis dars bajarilgan bo'lsa.
@@ -94,7 +97,7 @@ export default function UroBosqichDarslar() {
   const modullar: Modul[] = useMemo(() => {
     const m = new Map<number, Modul>()
     for (const d of darslar) {
-      const g = m.get(d.modul_no) ?? { no: d.modul_no, nom: d.modul_nom ?? `${d.modul_no}-modul`, list: [] }
+      const g = m.get(d.modul_no) ?? { no: d.modul_no, id: d.modul_id, nom: d.modul_nom ?? `${d.modul_no}-modul`, list: [] }
       if ((!g.nom || /-modul$/.test(g.nom)) && d.modul_nom) g.nom = d.modul_nom
       g.list.push(d)
       m.set(d.modul_no, g)
@@ -163,7 +166,7 @@ export default function UroBosqichDarslar() {
 
           {/* Bo'limlar chiplari */}
           <div>
-            <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Har bir darsda mavjud</p>
+            <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bu bosqichda</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {bolimlar.map((b) => (
                 <span key={b.nom} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '999px', padding: '5px 14px', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -257,6 +260,20 @@ export default function UroBosqichDarslar() {
                             </div>
                           )
                         })}
+
+                        {/* Modul mashq markazi — bilimni mustahkamlash */}
+                        {m.id && (
+                          <button onClick={() => router.push(`/student/urologiya/darslar/modul/${m.id}`)} className="soft-press"
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', textAlign: 'left', marginTop: '2px', background: ma.accent + '12', border: `1px dashed ${ma.accent}66`, borderRadius: '12px', padding: '12px 14px', cursor: 'pointer' }}>
+                            <div style={{ width: '26px', height: '26px', borderRadius: '8px', flexShrink: 0, background: ma.accent + '20', color: ma.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Layers size={15} strokeWidth={2.2} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '13px', fontWeight: 800, color: ma.accent }}>Bilimni mustahkamlash</div>
+                              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '1px' }}>Flashcard · test · case</div>
+                            </div>
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

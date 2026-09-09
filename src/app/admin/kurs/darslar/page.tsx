@@ -25,6 +25,7 @@ type KursDars = {
   kategoriya: string | null
   tur: string
   klinik_kirish: string | null
+  dars_natijalari: unknown
   nazariya_html: string | null
   video_url: string | null
   xulosa: string | null
@@ -81,6 +82,7 @@ export default function AdminKursDarslarPage() {
   const [kategoriya, setKategoriya] = useState('')
   const [tur, setTur] = useState('asosiy')
   const [klinikKirish, setKlinikKirish] = useState('')
+  const [darsNatijalari, setDarsNatijalari] = useState('') // har qatorda bitta o'quv natijasi
   const [nazariyaHtml, setNazariyaHtml] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [xulosa, setXulosa] = useState('')
@@ -97,7 +99,7 @@ export default function AdminKursDarslarPage() {
     setYuklanmoqda(true)
     const [{ data: dData }, { data: mData }] = await Promise.all([
       supabase.from('kurs_darslar').select(
-        'id, modul_id, bosqich, modul_no, modul_nom, slug, sarlavha, kategoriya, tur, klinik_kirish, nazariya_html, video_url, xulosa, daqiqa, bepul_namuna, faol, sort_order'
+        'id, modul_id, bosqich, modul_no, modul_nom, slug, sarlavha, kategoriya, tur, klinik_kirish, dars_natijalari, nazariya_html, video_url, xulosa, daqiqa, bepul_namuna, faol, sort_order'
       ).eq('yonalish', yonalish).order('bosqich').order('modul_no').order('sort_order'),
       supabase.from('kurs_modullar').select('id, bosqich, modul_no, nom').eq('yonalish', yonalish).order('bosqich').order('modul_no'),
     ])
@@ -120,7 +122,7 @@ export default function AdminKursDarslarPage() {
 
   const reset = () => {
     setEditId(null); setModulId(''); setSlug(''); setSarlavha(''); setKategoriya(''); setTur('asosiy')
-    setKlinikKirish(''); setNazariyaHtml(''); setVideoUrl(''); setXulosa(''); setDaqiqa(10)
+    setKlinikKirish(''); setDarsNatijalari(''); setNazariyaHtml(''); setVideoUrl(''); setXulosa(''); setDaqiqa(10)
     setBepulNamuna(false); setFaol(false); setXabar(''); setSlugTegildi(false)
     setTezkor(boshlangichTezkor()); setTezkorXabar('')
   }
@@ -141,6 +143,7 @@ export default function AdminKursDarslarPage() {
   const tahrirla = async (d: KursDars) => {
     setEditId(d.id); setModulId(d.modul_id ?? ''); setSlug(d.slug); setSarlavha(d.sarlavha)
     setKategoriya(d.kategoriya ?? ''); setTur(d.tur ?? 'asosiy'); setKlinikKirish(d.klinik_kirish ?? '')
+    setDarsNatijalari(Array.isArray(d.dars_natijalari) ? (d.dars_natijalari as string[]).join('\n') : '')
     setNazariyaHtml(d.nazariya_html ?? ''); setVideoUrl(d.video_url ?? ''); setXulosa(d.xulosa ?? '')
     setDaqiqa(d.daqiqa); setBepulNamuna(d.bepul_namuna); setFaol(d.faol); setXabar(''); setTezkorXabar('')
     setSlugTegildi(true)
@@ -163,7 +166,9 @@ export default function AdminKursDarslarPage() {
       yonalish, modul_id: modulId,
       bosqich: modul.bosqich, modul_no: modul.modul_no, modul_nom: modul.nom, bolim: 'darslar',
       slug: finalSlug, sarlavha: sarlavha.trim(), kategoriya: kategoriya.trim() || null, tur: tur.trim() || 'asosiy',
-      klinik_kirish: klinikKirish.trim() || null, nazariya_html: nazariyaHtml.trim() || null,
+      klinik_kirish: klinikKirish.trim() || null,
+      dars_natijalari: darsNatijalari.split('\n').map((s) => s.trim()).filter(Boolean),
+      nazariya_html: nazariyaHtml.trim() || null,
       video_url: videoUrl.trim() || null, xulosa: xulosa.trim() || null, daqiqa: Number(daqiqa) || 10,
       bepul_namuna: bepulNamuna, faol,
       sort_order: editId ? undefined : darsSoniModulda, updated_at: new Date().toISOString(),
@@ -290,6 +295,11 @@ export default function AdminKursDarslarPage() {
           <div>
             <label style={lab}>Klinik kirish (ixtiyoriy)</label>
             <textarea value={klinikKirish} onChange={(e) => setKlinikKirish(e.target.value)} rows={2} placeholder="Bemor keldi…" style={{ ...inp, resize: 'vertical' }} />
+          </div>
+
+          <div>
+            <label style={lab}>O‘quv natijalari (har qatorda bitta — talabaga «Bu darsdan keyin» ro‘yxati)</label>
+            <textarea value={darsNatijalari} onChange={(e) => setDarsNatijalari(e.target.value)} rows={3} placeholder={'Varikotseleni klinik ko‘rikda taniydi\nDarajasini aniqlaydi\nQaysi bemorga operatsiya kerakligini asoslaydi'} style={{ ...inp, resize: 'vertical' }} />
           </div>
 
           <div>
