@@ -141,12 +141,26 @@ Agar keyin darsga ham kerak bo'lsa — qo'shish oson (dars belgisi bilan filtr).
 
 ---
 
-## 5. Faza D — Bosqich nazorati + sertifikat 🟢 (keyin)
+## 5. Faza D — Bosqich sertifikati ✅ (PR-4, 2026-09-09)
 
-- [ ] Modul testlaridan (`kurs_urinishlar.otdi`) bosqichdagi barcha majburiy modullar o'tilganini hisoblash.
-- [ ] Bosqich yakuniy nazorati (server-authoritative, mavjud `nazorat` naqshi qayta ishlatiladi).
-- [ ] Sertifikat: AGENTS qoidasi — **bosqich uchun bitta**, dars uchun emas. Nazorat banki yo'q modul
-      sertifikatni arzonlashtirmasin (bank bo'sh → o'sha bosqich sertifikati e'lon qilinmaydi).
+> **Bajarildi.** Yangi `/api/kurs/sertifikat` route (`amal: 'holat'|'ber'`) — loyiqlik FAQAT
+> serverda, modul testlaridan (`kurs_urinishlar.otdi`, tur='test', 70%) hisoblanadi. Mavjud
+> `sertifikatlar` jadvali + `/sertifikat/[kod]` tekshiruv sahifasi qayta ishlatiladi (yangi jadval
+> yo'q). AGENTS qoidalari: sertifikat faqat O'rta/Qiyin (EASY da yo'q); majburiy modulda test
+> banki yo'q yoki nashr emas bo'lsa → bosqich **tayyorlanmoqda**, sertifikat berilmaydi (qadrini
+> saqlash). Bosqich sahifasida progress + holat kartasi (o'tildi / tayyorlanmoqda / olish / ko'rish).
+> `sertifikatlar` bosqichi apostrofli ("o'rta") — `bosqichMap` bilan moslashtirildi. `tsc` toza,
+> `next build` o'tdi (to'liq).
+>
+> ⚠️ Hozir L2/L3 modullari `draft` (paywall CHECK) — shu sabab orta/qiyin sertifikati **tabiiy
+> ravishda "tayyorlanmoqda"** holatida turadi; modullar nashr qilingach ochiladi (kutilgan xatti-harakat).
+
+**Fayllar:** `src/app/api/kurs/sertifikat/route.ts` + `student/.../bosqich/[bosqich]/page.tsx`
+(SertifikatKarti). Yangi migratsiya YO'Q.
+
+### 5.1 Keyingi (ixtiyoriy)
+- [ ] Alohida bosqich yakuniy imtihoni (hozir modul testlari yig'indisi sertifikat sharti).
+- [ ] Sertifikatlar sahifasida (`profil/sertifikatlar`) yangi kurs sertifikatini ko'rsatish.
 
 ---
 

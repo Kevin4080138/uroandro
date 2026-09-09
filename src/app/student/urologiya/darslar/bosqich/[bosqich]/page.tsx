@@ -282,9 +282,100 @@ export default function UroBosqichDarslar() {
             </div>
           </>
         )}
+
+        {!loading && darslar.length > 0 && bosqich !== 'oson' && (
+          <SertifikatKarti bosqich={bosqich} rang={ma.accent} />
+        )}
       </div>
 
       <BottomNav />
+    </div>
+  )
+}
+
+// ─────────────────────────── Bosqich sertifikati ───────────────────────────
+
+type SertHolat = {
+  amaldagi: boolean; jami: number; otgan: number; bankSiz: number
+  tayyorlanmoqda: boolean; loyiqmi: boolean; ortachaFoiz: number; sertifikat: string | null
+}
+
+function SertifikatKarti({ bosqich, rang }: { bosqich: string; rang: string }) {
+  const router = useRouter()
+  const [holat, setHolat] = useState<SertHolat | null>(null)
+  const [yuklandi, setYuklandi] = useState(false)
+  const [olinmoqda, setOlinmoqda] = useState(false)
+  const [xato, setXato] = useState('')
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/kurs/sertifikat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amal: 'holat', yonalish: YONALISH, bosqich }),
+        })
+        if (res.ok) setHolat((await res.json()) as SertHolat)
+      } catch { /* jim */ }
+      setYuklandi(true)
+    }
+    load()
+  }, [bosqich])
+
+  const ol = async () => {
+    setOlinmoqda(true); setXato('')
+    try {
+      const res = await fetch('/api/kurs/sertifikat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amal: 'ber', yonalish: YONALISH, bosqich }),
+      })
+      const j = await res.json()
+      if (!res.ok) { setXato(j.error ?? 'Sertifikat olinmadi'); setOlinmoqda(false); return }
+      router.push(`/sertifikat/${j.kod}`)
+    } catch { setXato('Sertifikat olinmadi — qayta urining.'); setOlinmoqda(false) }
+  }
+
+  if (!yuklandi || !holat || !holat.amaldagi) return null
+
+  const foiz = holat.jami > 0 ? Math.round((holat.otgan / holat.jami) * 100) : 0
+
+  return (
+    <div style={{ marginTop: '22px', background: 'var(--surface)', border: `1px solid ${holat.sertifikat ? '#16a34a55' : 'var(--line)'}`, borderRadius: '18px', padding: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '12px' }}>
+        <div style={{ width: '40px', height: '40px', borderRadius: '11px', flexShrink: 0, background: holat.sertifikat ? '#16a34a18' : rang + '18', color: holat.sertifikat ? '#16a34a' : rang, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Award size={22} strokeWidth={2} />
+        </div>
+        <div>
+          <div style={{ fontSize: '15px', fontWeight: 800 }}>Bosqich sertifikati</div>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '1px' }}>{holat.otgan}/{holat.jami} majburiy modul testi o‘tildi</div>
+        </div>
+      </div>
+
+      {/* Progress */}
+      <div style={{ height: '8px', borderRadius: '999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '14px' }}>
+        <div style={{ height: '100%', width: `${foiz}%`, background: holat.sertifikat ? '#16a34a' : rang, borderRadius: '999px', transition: 'width .3s' }} />
+      </div>
+
+      {xato && <p role="alert" style={{ margin: '0 0 10px', fontSize: '12.5px', color: 'var(--danger)', fontWeight: 600 }}>{xato}</p>}
+
+      {holat.sertifikat ? (
+        <button onClick={() => router.push(`/sertifikat/${holat.sertifikat}`)}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '12px', padding: '13px', fontSize: '14.5px', fontWeight: 700, cursor: 'pointer' }}>
+          <CheckCircle2 size={17} strokeWidth={2.2} /> Sertifikatni ko‘rish
+        </button>
+      ) : holat.tayyorlanmoqda ? (
+        <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Bu bosqich hali tayyorlanmoqda — {holat.bankSiz} ta majburiy modulda test banki yoki nashr yo‘q. To‘liq bo‘lgach sertifikat ochiladi.
+        </p>
+      ) : holat.loyiqmi ? (
+        <button onClick={ol} disabled={olinmoqda}
+          style={{ width: '100%', background: rang, color: '#fff', border: 'none', borderRadius: '12px', padding: '13px', fontSize: '14.5px', fontWeight: 700, cursor: olinmoqda ? 'not-allowed' : 'pointer', opacity: olinmoqda ? 0.6 : 1 }}>
+          {olinmoqda ? 'Olinmoqda…' : 'Sertifikatni olish'}
+        </button>
+      ) : (
+        <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Barcha majburiy modul testlaridan (70%) o‘tsangiz, bosqich sertifikati ochiladi.
+        </p>
+      )}
     </div>
   )
 }
