@@ -80,6 +80,61 @@ export function ovulyatsiyaHisob(oxirgiHayz: string, siklKunlari: number) {
   return { keyingiHayz, ovulyatsiya, fertilBosh, fertilTugash: ovulyatsiya }
 }
 
+// ─── RCOG Green-top 37a: homiladorlik/puerperiyda VTE xavfi ────────────────
+// Har omilга antenatal (ante) va postnatal (post) ball. Nomlar — o'z ta'rifimiz.
+export type VteOmil = { key: string; label: string; ante: number; post: number }
+export const RCOG_VTE_OMILLAR: VteOmil[] = [
+  { key: 'oldingi_vte', label: "Oldingi VTE (bir martalik, katta jarrohlik bilan bog'liq emas)", ante: 4, post: 3 },
+  { key: 'oldingi_vte_kop', label: 'Oldingi takroriy VTE', ante: 4, post: 3 },
+  { key: 'trombofiliya_yuqori', label: 'Yuqori xavfli trombofiliya', ante: 3, post: 3 },
+  { key: 'trombofiliya_past', label: 'Past xavfli trombofiliya (simptomsiz)', ante: 1, post: 1 },
+  { key: 'komorbid', label: "Tibbiy komorbidlik (SLE, saraton, yurak/o'pka, IBD, nefrotik sindrom)", ante: 3, post: 3 },
+  { key: 'yosh35', label: 'Yosh > 35', ante: 1, post: 1 },
+  { key: 'bmi30', label: 'BMI 30–39', ante: 1, post: 1 },
+  { key: 'bmi40', label: 'BMI ≥ 40', ante: 2, post: 2 },
+  { key: 'paritet3', label: 'Paritet ≥ 3', ante: 1, post: 1 },
+  { key: 'chekish', label: 'Chekish', ante: 1, post: 1 },
+  { key: 'varikoz', label: 'Katta varikoz venalar', ante: 1, post: 1 },
+  { key: 'preeklampsiya', label: 'Joriy preeklampsiya', ante: 1, post: 1 },
+  { key: 'ivf', label: 'ART/IVF (antenatal)', ante: 1, post: 0 },
+  { key: 'kop_homila', label: "Ko'p homilalik", ante: 1, post: 1 },
+  { key: 'elektiv_kesar', label: 'Elektiv kesar', ante: 0, post: 1 },
+  { key: 'shosh_kesar', label: 'Shoshilinch kesar', ante: 0, post: 2 },
+  { key: 'uzoq_tugruq', label: "Uzoq tug'ruq > 24 soat", ante: 0, post: 1 },
+  { key: 'pph', label: 'PPH > 1 L yoki qon quyish', ante: 0, post: 1 },
+  { key: 'vaqtinchalik', label: 'Vaqtinchalik: infeksiya / immobilizatsiya / degidratatsiya / OHSS', ante: 1, post: 1 },
+]
+
+export function rcogVteBaho(tanlangan: Set<string>, rejim: 'ante' | 'post') {
+  const jami = RCOG_VTE_OMILLAR.filter((o) => tanlangan.has(o.key)).reduce((s, o) => s + (rejim === 'ante' ? o.ante : o.post), 0)
+  if (rejim === 'ante') {
+    if (jami >= 4) return { jami, tavsif: "Birinchi trimestrdan LMWH profilaktikasini ko'rib chiqing", rang: '#dc2626' }
+    if (jami === 3) return { jami, tavsif: "28-haftadan LMWH profilaktikasini ko'rib chiqing", rang: '#d97706' }
+    return { jami, tavsif: 'Mobilizatsiya va gidratatsiya; rutin profilaktika shart emas', rang: '#16a34a' }
+  }
+  if (jami >= 2) return { jami, tavsif: "Kamida 10 kun LMWH profilaktikasini ko'rib chiqing", rang: '#dc2626' }
+  if (jami === 1) return { jami, tavsif: 'Rejaga qarab: 10 kun profilaktika ba\'zi hollarda ko\'rib chiqiladi', rang: '#d97706' }
+  return { jami, tavsif: 'Erta mobilizatsiya; rutin profilaktika shart emas', rang: '#16a34a' }
+}
+
+// ─── Preeklampsiya — aspirin profilaktikasi (ACOG/USPSTF xavf omillari) ─────
+export const PREEK_YUQORI_OMILLAR = [
+  'Oldingi homiladorlikda preeklampsiya', "Ko'p homilalik", 'Surunkali gipertoniya',
+  'Tip 1 yoki 2 diabet', 'Buyrak kasalligi', 'Autoimmun kasallik (SLE, APS)',
+]
+export const PREEK_ORTA_OMILLAR = [
+  'Birinchi homiladorlik', 'BMI > 30', 'Oilaviy anamnez (ona yoki opa-singil)',
+  'Yosh ≥ 35', 'Ijtimoiy-demografik omillar', 'Oldingi noxush natija yoki past tug\'ilish vazni', '> 10 yil homiladorlik intervali',
+]
+
+export function preekAspirinBaho(yuqoriSoni: number, ortaSoni: number) {
+  const tavsiyaEtiladi = yuqoriSoni >= 1
+  const korilsin = !tavsiyaEtiladi && ortaSoni >= 2
+  if (tavsiyaEtiladi) return { holat: 'tavsiya' as const, matn: 'Past dozali aspirin tavsiya etiladi (≥1 yuqori xavf omili)', rang: '#dc2626' }
+  if (korilsin) return { holat: 'korilsin' as const, matn: "Past dozali aspirin ko'rib chiqiladi (≥2 o'rta xavf omili)", rang: '#d97706' }
+  return { holat: 'shart_emas' as const, matn: 'Rutin aspirin ko\'rsatmasi yo\'q — standart kuzatuv', rang: '#16a34a' }
+}
+
 export function bugungiMahalliySana() {
   const hozir = new Date()
   const yil = hozir.getFullYear()

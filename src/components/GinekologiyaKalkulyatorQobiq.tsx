@@ -42,16 +42,42 @@ export function KlinikOgohlantirish({ children }: { children: ReactNode }) {
   return <p style={{ margin: '16px 0 0', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.55 }}>{children} Bu kalkulyator o‘quv va klinik yordamchi vosita; yakuniy qarorni mutaxassis qabul qiladi.</p>
 }
 
-// Kontent spetsifikatsiyasidagi ro'yxatli bo'lim (cheklovlar, manbalar, hisoblash…)
-function KontentBolim({ sarlavha, satrlar, raqamli }: { sarlavha: string; satrlar: string[]; raqamli?: boolean }) {
-  if (!satrlar?.length) return null
-  const Teg = raqamli ? 'ol' : 'ul'
+// Bo'lim sarlavhasi: ikonka + rangli yozuv (barcha kontent bo'limlari uchun yagona).
+function BolimSarlavha({ nishon, sarlavha, rang }: { nishon: string; sarlavha: string; rang: string }) {
   return (
-    <div style={{ marginTop: '18px' }}>
-      <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>{sarlavha}</div>
-      <Teg style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {satrlar.map((s, i) => <li key={i} style={{ fontSize: '13.5px', color: 'var(--ink-soft)', lineHeight: 1.55 }}>{s}</li>)}
-      </Teg>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+      <span style={{ fontSize: '15px', lineHeight: 1 }}>{nishon}</span>
+      <span style={{ fontSize: '12.5px', fontWeight: 800, color: rang, textTransform: 'uppercase', letterSpacing: '.05em' }}>{sarlavha}</span>
+    </div>
+  )
+}
+
+// Rangli nuqta/raqamli markerли ro'yxatli bo'lim.
+function KontentBolim({ nishon, sarlavha, rang, satrlar, raqamli }: { nishon: string; sarlavha: string; rang: string; satrlar?: string[]; raqamli?: boolean }) {
+  if (!satrlar?.length) return null
+  return (
+    <div style={{ marginTop: '20px' }}>
+      <BolimSarlavha nishon={nishon} sarlavha={sarlavha} rang={rang} />
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {satrlar.map((s, i) => (
+          <li key={i} style={{ display: 'flex', gap: '10px', fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>
+            {raqamli
+              ? <span style={{ flexShrink: 0, width: '19px', height: '19px', borderRadius: '50%', background: `color-mix(in srgb, ${rang} 16%, transparent)`, color: rang, fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1px' }}>{i + 1}</span>
+              : <span style={{ flexShrink: 0, width: '6px', height: '6px', borderRadius: '50%', background: rang, marginTop: '8px' }} />}
+            <span>{s}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Klinik izoh (batafsil matn) — ikonka + chap aksent chizig'i bilan.
+function KlinikIzohBloki({ matn }: { matn: string }) {
+  return (
+    <div>
+      <BolimSarlavha nishon="🧭" sarlavha="Bu nimani anglatadi" rang="var(--gyn)" />
+      <p style={{ margin: 0, fontSize: '14.5px', color: 'var(--ink)', lineHeight: 1.7, borderLeft: '3px solid var(--gyn)', paddingLeft: '14px' }}>{matn}</p>
     </div>
   )
 }
@@ -60,18 +86,18 @@ function KontentBolim({ sarlavha, satrlar, raqamli }: { sarlavha: string; satrla
 function BeshQismQoshimcha({ k }: { k: KalkulyatorKontenti }) {
   return (
     <>
-      <KontentBolim sarlavha="Bu nimani anglatmaydi" satrlar={k.buNimaEmas ?? []} />
-      <KontentBolim sarlavha="Keyingi qadam" satrlar={k.keyingiQadam ?? []} raqamli />
+      <KontentBolim nishon="🚫" sarlavha="Bu nimani anglatmaydi" rang="var(--danger)" satrlar={k.buNimaEmas} />
+      <KontentBolim nishon="➡️" sarlavha="Keyingi qadam" rang="var(--gyn)" satrlar={k.keyingiQadam} raqamli />
       {k.klinikMisol && (
-        <div style={{ marginTop: '18px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>Klinik misol</div>
-          <div style={{ background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '12px 14px', fontSize: '13.5px', lineHeight: 1.6 }}>
-            <p style={{ margin: '0 0 6px' }}><strong>Vaziyat:</strong> {k.klinikMisol.vaziyat}</p>
-            <p style={{ margin: 0 }}><strong>Javob:</strong> {k.klinikMisol.javob}</p>
+        <div style={{ marginTop: '20px' }}>
+          <BolimSarlavha nishon="🩺" sarlavha="Klinik misol" rang="var(--good)" />
+          <div style={{ background: 'color-mix(in srgb, var(--good) 8%, var(--surface-2))', border: '1px solid color-mix(in srgb, var(--good) 30%, var(--line))', borderRadius: '12px', padding: '14px 16px', fontSize: '14px', lineHeight: 1.65 }}>
+            <p style={{ margin: '0 0 7px' }}><strong style={{ color: 'var(--ink)' }}>Vaziyat:</strong> <span style={{ color: 'var(--ink-soft)' }}>{k.klinikMisol.vaziyat}</span></p>
+            <p style={{ margin: 0 }}><strong style={{ color: 'var(--good)' }}>Javob:</strong> <span style={{ color: 'var(--ink-soft)' }}>{k.klinikMisol.javob}</span></p>
           </div>
         </div>
       )}
-      <KontentBolim sarlavha="Ko‘p uchraydigan xato" satrlar={k.kopUchraydiganXato ?? []} />
+      <KontentBolim nishon="⚠️" sarlavha="Ko‘p uchraydigan xato" rang="var(--warn)" satrlar={k.kopUchraydiganXato} />
     </>
   )
 }
@@ -86,16 +112,11 @@ export function KalkulyatorKontent({ slug }: { slug: string }) {
   if (!k) return null
   return (
     <section className="rise" style={{ ...ginKarta, marginTop: '16px' }}>
-      {k.batafsilIzoh && (
-        <>
-          <div style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '8px' }}>Klinik izoh (bu nimani anglatadi)</div>
-          <p style={{ margin: 0, fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.65 }}>{k.batafsilIzoh}</p>
-        </>
-      )}
-      <KontentBolim sarlavha="Natija talqini" satrlar={k.natijaTalqini} />
+      {k.batafsilIzoh && <KlinikIzohBloki matn={k.batafsilIzoh} />}
+      <KontentBolim nishon="📊" sarlavha="Natija talqini" rang="var(--gyn)" satrlar={k.natijaTalqini} />
       <BeshQismQoshimcha k={k} />
-      <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
-      <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
+      <KontentBolim nishon="🔒" sarlavha="Cheklovlar" rang="var(--muted)" satrlar={k.cheklovlar} />
+      <KontentBolim nishon="📚" sarlavha="Manbalar" rang="var(--muted)" satrlar={k.manbalar} />
       <ManbaMeta litsenziya={k.litsenziya} />
     </section>
   )
@@ -119,13 +140,13 @@ export function KalkulyatorInfoSahifa({ slug }: { slug: string }) {
         </p>
       </section>
       <section className="rise" style={ginKarta}>
-        <p style={{ margin: 0, fontSize: '14px', color: 'var(--ink-soft)', lineHeight: 1.65 }}>{k.batafsilIzoh}</p>
-        <KontentBolim sarlavha="Kiritiladigan ma'lumotlar" satrlar={k.maydonlar} />
-        <KontentBolim sarlavha="Qanday hisoblanadi" satrlar={k.hisoblash} raqamli />
-        <KontentBolim sarlavha="Natija talqini" satrlar={k.natijaTalqini} />
+        <KlinikIzohBloki matn={k.batafsilIzoh} />
+        <KontentBolim nishon="📝" sarlavha="Kiritiladigan ma'lumotlar" rang="var(--gyn)" satrlar={k.maydonlar} />
+        <KontentBolim nishon="🧮" sarlavha="Qanday hisoblanadi" rang="var(--gyn)" satrlar={k.hisoblash} raqamli />
+        <KontentBolim nishon="📊" sarlavha="Natija talqini" rang="var(--gyn)" satrlar={k.natijaTalqini} />
         <BeshQismQoshimcha k={k} />
-        <KontentBolim sarlavha="Cheklovlar" satrlar={k.cheklovlar} />
-        <KontentBolim sarlavha="Manbalar" satrlar={k.manbalar} />
+        <KontentBolim nishon="🔒" sarlavha="Cheklovlar" rang="var(--muted)" satrlar={k.cheklovlar} />
+        <KontentBolim nishon="📚" sarlavha="Manbalar" rang="var(--muted)" satrlar={k.manbalar} />
         <ManbaMeta litsenziya={k.litsenziya} />
         <KlinikOgohlantirish>Ushbu ma'lumot standartlarga asoslangan.</KlinikOgohlantirish>
       </section>

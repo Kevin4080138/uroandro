@@ -3,6 +3,7 @@ import {
   utcSana, sanaQosh, kunFarqi,
   homiladorlikHisobla, crlGestatsionYosh, hadlockVazn,
   faiHisob, homaIr, rmiHisob, ovulyatsiyaHisob, sanaFormat,
+  rcogVteBaho, preekAspirinBaho,
 } from './ginekologiyaHisoblash'
 
 const iso = (d: Date) => d.toISOString().slice(0, 10)
@@ -98,6 +99,46 @@ describe('rmiHisob (RMI I)', () => {
   })
   it('3 belgi, postmenopauza, CA-125 85 → RMI 765', () => {
     expect(rmiHisob(3, true, 85).rmi).toBe(3 * 3 * 85)
+  })
+})
+
+describe('rcogVteBaho (RCOG 37a)', () => {
+  it('antenatal: oldingi VTE → 4 ball → 1-trimestr', () => {
+    const r = rcogVteBaho(new Set(['oldingi_vte']), 'ante')
+    expect(r.jami).toBe(4)
+    expect(r.tavsif).toContain('Birinchi trimestr')
+  })
+  it('antenatal: komorbid → 3 ball → 28-hafta', () => {
+    expect(rcogVteBaho(new Set(['komorbid']), 'ante').tavsif).toContain('28-hafta')
+  })
+  it('antenatal: yosh35 + bmi30 → 2 ball → profilaktikasiz', () => {
+    const r = rcogVteBaho(new Set(['yosh35', 'bmi30']), 'ante')
+    expect(r.jami).toBe(2)
+    expect(r.tavsif).toContain('Mobilizatsiya')
+  })
+  it('postnatal: shoshilinch kesar → 2 ball → 10 kun', () => {
+    const r = rcogVteBaho(new Set(['shosh_kesar']), 'post')
+    expect(r.jami).toBe(2)
+    expect(r.tavsif).toContain('10 kun')
+  })
+  it('ivf faqat antenatal (postnatalда 0 ball)', () => {
+    expect(rcogVteBaho(new Set(['ivf']), 'post').jami).toBe(0)
+    expect(rcogVteBaho(new Set(['ivf']), 'ante').jami).toBe(1)
+  })
+})
+
+describe('preekAspirinBaho', () => {
+  it('≥1 yuqori → tavsiya', () => {
+    expect(preekAspirinBaho(1, 0).holat).toBe('tavsiya')
+  })
+  it('≥2 o\'rta → ko\'rib chiqiladi', () => {
+    expect(preekAspirinBaho(0, 2).holat).toBe('korilsin')
+  })
+  it('1 o\'rta → shart emas', () => {
+    expect(preekAspirinBaho(0, 1).holat).toBe('shart_emas')
+  })
+  it('yuqori o\'rtadan ustun', () => {
+    expect(preekAspirinBaho(2, 3).holat).toBe('tavsiya')
   })
 })
 
