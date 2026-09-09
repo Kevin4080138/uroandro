@@ -31,6 +31,9 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/darslar', Icon: Video, label: 'Darslar tarkibi (eski)' },
       { href: '/admin/urologiya-darslar', Icon: Layers, label: 'Urologiya darslari (3-Level)' },
+      { href: '/admin/kurs/modullar', Icon: FolderTree, label: 'Kurs modullari' },
+      { href: '/admin/kurs/yangi-darslar', Icon: BookMarked, label: 'Yangi darslar (to‘ldirish)' },
+      { href: '/admin/kurs/praktikum', Icon: ClipboardList, label: 'Modul praktikum' },
       { href: '/admin/ginekologiya-darslar', Icon: Flower2, label: 'Ginekologiya darslari' },
       { href: '/admin/talabalar-nazorati', Icon: LineChart, label: 'Talabalar nazorati' },
       { href: '/admin/yonalishlari', Icon: FolderTree, label: "Yo'nalishlari", tezOrada: true },

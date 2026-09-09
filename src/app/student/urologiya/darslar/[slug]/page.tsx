@@ -7,6 +7,7 @@ import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
 import { Clock, CheckCircle2, XCircle, ArrowRight, Lightbulb, Layers } from 'lucide-react'
 import { BOSQICH_RANG } from '@/lib/talim/darslar'
+import { MavzuniMustahkamlash } from './MavzuniMustahkamlash'
 
 type KursDars = {
   id: string
@@ -312,6 +313,9 @@ export default function UroDarsViewer() {
                 )}
               </div>
             )}
+
+            {/* ── Mavzuni mustahkamlash (dars-darajali: flashcard + amaliy) ── */}
+            <MavzuniMustahkamlash darsId={dars.id} rang={rang} />
 
             {/* Xulosa */}
             {dars.xulosa && (
