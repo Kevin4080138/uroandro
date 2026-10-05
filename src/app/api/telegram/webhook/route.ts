@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { SAYT_URL, miniAppTugmalari, chatIdniProfilgaBogla } from '@/lib/telegramSend'
+import { authenticQuizWebhook, recordQuizPoll } from '@/lib/telegramQuiz.server'
+import { parsePollUpdate, QuizError } from '@/lib/telegramQuiz'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -158,8 +160,23 @@ async function sendOTP(chatId: number, phone: string) {
 // ─────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  let body
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
+  if (body?.poll) {
+    // Poll statistikasi faqat Telegram bilan kelishilgan maxfiy header orqali qabul qilinadi.
+    try {
+      if (!authenticQuizWebhook(req.headers.get('x-telegram-bot-api-secret-token'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      if (body.poll.type !== 'quiz') return NextResponse.json({ ok: true })
+      const snapshot = parsePollUpdate(body)
+      await recordQuizPoll(snapshot)
+      return NextResponse.json({ ok: true })
+    } catch (error) {
+      if (error instanceof QuizError && error.status === 400) return NextResponse.json({ ok: true })
+      // Baza vaqtincha ishlamasa Telegram qayta yetkazadi; natija yo'qolmaydi.
+      return NextResponse.json({ error: 'Poll update unavailable' }, { status: 503 })
+    }
+  }
   try {
-    const body = await req.json()
 
     // Inline tugma bosilishi (kelajakda kerak bo'ladi) — javobsiz qolmasin
     if (body?.callback_query) {
@@ -176,6 +193,8 @@ export async function POST(req: NextRequest) {
 
     const message = body?.message
     if (!message) return NextResponse.json({ ok: true })
+    // OTP va shaxsiy menyu guruhdagi quiz muhokamalariga javob bermasin.
+    if (message.chat?.type !== 'private') return NextResponse.json({ ok: true })
 
     const chatId: number = message.chat.id
 

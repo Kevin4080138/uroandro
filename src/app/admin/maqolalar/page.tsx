@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { createClient } from '@/lib/supabase'
 import type { NewsRow, NewsStatus } from '@/lib/newsTypes'
 import { MaqolaEditor, blankManual, type ActionName } from './MaqolaEditor'
+import { ContentTabs } from './ContentTabs'
 
 const STATUS: NewsStatus[] = ['draft', 'approved', 'published', 'rejected', 'failed']
 const LABEL: Record<NewsStatus, string> = { draft: 'Qoralama', approved: 'Tasdiqlangan', published: 'Nashr qilingan', rejected: 'Rad etilgan', failed: 'Xatoli' }
@@ -127,6 +128,7 @@ export default function AdminMaqolalarPage() {
   return <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
     <Header backHref="/admin/dashboard" backLabel="Admin paneli" />
     <div style={{ maxWidth: '680px', margin: '0 auto', padding: '18px 14px 56px' }}>
+      <ContentTabs />
       <h1 style={{ fontSize: '21px', margin: '0 0 4px' }}>📰 Maqolalar</h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: '13px', lineHeight: 1.5 }}>Qo‘lda maqola qo‘shish hamda avtomatik yangiliklarni tekshirish, tahrirlash va nashr qilish.</p>
 
