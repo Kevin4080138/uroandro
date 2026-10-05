@@ -5,6 +5,7 @@ import { QuizError } from './telegramQuiz'
 import { deliverQuiz } from './telegramQuiz.server'
 import { sendTelegramPost } from './telegramPosts.server'
 import type { TelegramSchedule } from './telegramSchedule'
+import type { TelegramSource } from './telegramContent'
 
 export function scheduleDbError(error: { code?: string } | null) {
   if (!error) return
@@ -19,20 +20,26 @@ export function schedulerAuthorized(header: string | null) {
   return actual.length === expected.length && timingSafeEqual(actual, expected)
 }
 
+/** Read-only production check: never claims a job or sends a Telegram message. */
+export async function telegramSchedulerHealth() {
+  const db = createAdminClient()
+  const [state, plans] = await Promise.all([
+    db.from('telegram_scheduler_state').select('last_run_at,lease_until').eq('id', true).single(),
+    db.from('telegram_schedules').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+  ])
+  scheduleDbError(state.error); scheduleDbError(plans.error)
+  return { ready: !!process.env.TELEGRAM_BOT_TOKEN, bot_configured: !!process.env.TELEGRAM_BOT_TOKEN,
+    last_run_at: state.data?.last_run_at ?? null, pending_count: plans.count ?? 0 }
+}
+
 async function scheduledPost(schedule: TelegramSchedule) {
   const db = createAdminClient()
-  const { data: post, error } = await db.from('telegram_posts').select('*').eq('id', schedule.post_id!).single()
-  scheduleDbError(error)
-  if (!post || post.revision !== schedule.revision || post.status !== 'approved' || !post.body?.trim()) throw new QuizError('Post tasdiqlanmagan yoki versiyasi o‘zgargan.', 409)
-  const dest = await db.from('telegram_destinations').select('*').eq('id', schedule.destination_id).single()
-  scheduleDbError(dest.error)
-  if (!dest.data?.is_active || !['posts', 'both'].includes(dest.data.use_for)) throw new QuizError('Telegram manzili faol emas.', 409)
-  // The unique job constraint arbitrates races against the manual send endpoint.
-  const job = await db.from('telegram_delivery_jobs').insert({ post_id: post.id, destination_id: dest.data.id,
-    revision: post.revision, payload: { ...post, destination: dest.data }, status: 'sending', attempts: 1, locked_at: new Date().toISOString() }).select('id').single()
+  const job = await db.rpc('claim_scheduled_telegram_post', { p_schedule_id: schedule.id })
   scheduleDbError(job.error)
   if (!job.data) throw new QuizError('Yuborish yozuvi yaratilmadi.', 500)
-  const result = await sendTelegramPost(post, dest.data.chat_id)
+  const post = job.data.payload as { id: string; revision: number; title: string; body: string; image_url: string | null;
+    image_credit: string | null; sources: TelegramSource[]; destination: { id: string; chat_id: string } }
+  const result = await sendTelegramPost(post, post.destination.chat_id)
   for (const part of result.parts) {
     const write = await db.from('telegram_delivery_parts').insert({ job_id: job.data.id, part_key: part.key, method: part.method, status: 'sent', telegram_message_id: part.messageId })
     scheduleDbError(write.error)
@@ -43,7 +50,7 @@ async function scheduledPost(schedule: TelegramSchedule) {
   const finish = await db.from('telegram_delivery_jobs').update({ status, last_error: reason, locked_at: null }).eq('id', job.data.id)
   scheduleDbError(finish.error)
   const update = await db.from('telegram_posts').update({ status: result.error ? 'failed' : 'sent',
-    telegram_message_ids: result.parts.map(p => p.messageId), sent_to_destination_id: dest.data.id,
+    telegram_message_ids: result.parts.map(p => p.messageId), sent_to_destination_id: post.destination.id,
     sent_at: result.error ? null : new Date().toISOString(), last_error: reason }).eq('id', post.id).eq('revision', post.revision)
   scheduleDbError(update.error)
   return { status, reason } as const
@@ -67,7 +74,7 @@ export async function runTelegramScheduler() {
       return { processed: 1, id: schedule.id, status: 'failed' }
     }
     if (schedule.quiz_id) {
-      const detail = await deliverQuiz(schedule.quiz_id, schedule.destination_id, schedule.revision)
+      const detail = await deliverQuiz(schedule.quiz_id, schedule.destination_id, schedule.revision, schedule.id)
       const job = detail.jobs.find(j => j.destination_id === schedule.destination_id)
       status = job?.status === 'sent' ? 'sent' : job?.status === 'failed' ? 'failed' : 'uncertain'
       reason = status === 'sent' ? null : 'Quiz yuborilmadi yoki qisman yuborildi. Quizlar bo‘limida tafsilotlarni tekshiring.'

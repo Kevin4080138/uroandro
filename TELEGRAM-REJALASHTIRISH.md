@@ -6,7 +6,9 @@ mintaqasida bo'lsa ham, kiritilgan vaqt Toshkent vaqti deb olinadi.
 
 ## Bir martalik ishga tushirish
 
-1. Supabase SQL Editor'da `supabase/migrations/20261005030000_telegram_schedules.sql` ni bajaring.
+1. Supabase SQL Editor'da ketma-ket `supabase/migrations/20261005030000_telegram_schedules.sql`
+   va `supabase/migrations/20261005040000_telegram_schedule_delivery_guards.sql` ni bajaring.
+   Birinchi fayl avval bajarilgan bo'lsa, faqat ikkinchisini bajaring.
    Avvalgi Telegram postlar/quiz migratsiyalari allaqachon bajarilgan bo'lishi kerak.
 2. Kodni production'ga joylang. Vercel Production muhitida `TELEGRAM_BOT_TOKEN` va kamida
    16 belgili tasodifiy `CRON_SECRET` bo'lsin. Mavjud CRON_SECRET ishlatiladi; uni almashtirsangiz
@@ -57,6 +59,14 @@ Oxirgi tekshiruv yangilanmasa: Supabase Cron job faolmi, Vault secret nomlari va
 Vercel production deploy tugaganmi, CRON_SECRET mosmi — tekshiring. pg_net HTTP javobida 401
 kalit mos emasligini, 503 migratsiya/bot sozlamasi yo'qligini ko'rsatishi mumkin.
 Supabase project pauza holatida bo'lsa, cron ishlamaydi.
+
+`GET /api/cron/telegram-kontent?check=1` + `Authorization: Bearer <CRON_SECRET>` faqat
+holatni o'qiydi: bot sozlanganmi, pending rejalar soni, oxirgi tekshiruv vaqti. Bu tekshiruv
+xabar yubormaydi va rejani egallamaydi. `check=1` siz endpoint worker'ni ishga tushiradi.
+
+SQL audit: `node scripts/verify-telegram-sql.mjs <pglite/dist/index.js>` barcha Telegram
+migratsiyalarini alohida, vaqtinchalik PostgreSQL muhitida bajaradi. U 23 ta migratsiya,
+ruxsat, tahrirlash, bekor qilish, yuborish va uzilish holatini tekshiradi; jonli bazaga tegmaydi.
 
 Avtomatik tekshiruvni o'chirish:
 

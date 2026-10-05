@@ -33,7 +33,7 @@ describe('Scheduler authorization and delivery', () => {
     mocks.rpc.mockResolvedValueOnce({ data: schedule, error: null })
     mocks.quiz.mockResolvedValue({ jobs: [{ destination_id: 'destination', status: 'sent' }] })
     expect(await runTelegramScheduler()).toMatchObject({ status: 'sent' })
-    expect(mocks.quiz).toHaveBeenCalledWith('quiz', 'destination', 2)
+    expect(mocks.quiz).toHaveBeenCalledWith('quiz', 'destination', 2, 'schedule')
     expect(mocks.rpc).toHaveBeenLastCalledWith('finish_telegram_schedule', { p_id: 'schedule', p_status: 'sent', p_error: null })
   })
   it('marks unexpected send failures uncertain without retrying', async () => {

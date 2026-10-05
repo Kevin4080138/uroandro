@@ -125,14 +125,16 @@ async function telegramRequest<T>(method: string, body: Record<string, unknown>)
   }
   return json.result as T
 }
-export async function deliverQuiz(id: string, destinationId: string, revision: number) {
+export async function deliverQuiz(id: string, destinationId: string, revision: number, scheduleId?: string) {
   if (!process.env.TELEGRAM_BOT_TOKEN) throw new QuizError('Telegram bot kaliti sozlanmagan.', 503)
   const detail = await quizDetail(id)
   // Revalidate persisted questions before any external write.
   quizSaveInput({ ...detail.quiz, status: 'approved' })
   for (const q of detail.quiz.questions) if (q.image_url) validateQuizImageUrl(q.image_url, id)
   const db = createAdminClient()
-  const { data, error } = await db.rpc('claim_telegram_quiz_delivery', { p_quiz_id: id, p_destination_id: destinationId, p_revision: revision })
+  const { data, error } = scheduleId
+    ? await db.rpc('claim_scheduled_telegram_quiz', { p_schedule_id: scheduleId })
+    : await db.rpc('claim_telegram_quiz_delivery', { p_quiz_id: id, p_destination_id: destinationId, p_revision: revision })
   checked(error)
   const job = data as QuizJob
   const ledger: QuizDeliveryLedger = {
