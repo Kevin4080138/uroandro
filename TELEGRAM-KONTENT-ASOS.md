@@ -99,7 +99,9 @@ Yangi migratsiya va native poll ko'rinishi jonli Supabase/Telegram muhitida aloh
 
 ## Keyingi ishlar
 
-4-bosqich: rejalashtirish UI, worker, taqvim va mavzular ro'yxati.
+4-bosqich: rejalashtirish UI, vaqt bo'yicha ro'yxat va worker qo'shildi.
+Ishga tushirish: [TELEGRAM-REJALASHTIRISH.md](TELEGRAM-REJALASHTIRISH.md).
+Takrorlanuvchi rejalar va mavzular ro'yxatidan ommaviy generatsiya keyingi ishlar bo'lib qoladi.
 
 ## Tekshirish
 

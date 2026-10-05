@@ -7,6 +7,7 @@ const tabs = [
   ['/admin/maqolalar', 'Maqolalar'],
   ['/admin/maqolalar/telegram', 'Telegram postlar'],
   ['/admin/maqolalar/quizlar', 'Quizlar'],
+  ['/admin/maqolalar/rejalar', 'Rejalashtirish'],
 ] as const
 
 export function ContentTabs() {

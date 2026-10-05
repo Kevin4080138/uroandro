@@ -139,7 +139,7 @@ export async function saveTelegramPostImage(postId: string, candidate: TelegramI
     quality -= 8
     optimized = await sharp(Buffer.from(bytes)).rotate().resize({ width: 1600, withoutEnlargement: true }).webp({ quality }).toBuffer()
   }
-  const path = `telegram-postlar/${postId}.webp`
+  const path = `telegram-postlar/${postId}/${crypto.randomUUID()}.webp`
   const supabase = createAdminClient()
   const { error } = await supabase.storage.from('bannerlar').upload(path, optimized, { contentType: 'image/webp', upsert: true })
   if (error) throw new Error(`Rasmni Storage’ga saqlab bo‘lmadi: ${error.message}`)
