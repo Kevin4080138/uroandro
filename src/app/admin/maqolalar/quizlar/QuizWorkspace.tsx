@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { Header } from '@/components/Header'
 import { ContentTabs } from '../ContentTabs'
-import { CONTENT_STATUS_LABELS, type TelegramContentOverview } from '@/lib/telegramContent'
+import { CONTENT_STATUS_LABELS, type TelegramContentOverview, type TelegramDestination } from '@/lib/telegramContent'
 import { balanceQuizAnswers, emptyQuizQuestion, QUIZ_LIMIT, quizSaveInput, quizWarnings, type QuizDetail, type QuizDraft, type QuizQuestion } from '@/lib/telegramQuiz'
 import { QuizQuestionEditor } from './QuizQuestionEditor'
 import { QuizDestinations } from './QuizDestinations'
@@ -70,6 +70,11 @@ export function QuizWorkspace() {
   const update = (patch: Partial<QuizDraft>) => setDraft((q) => q ? { ...q, ...patch } : q)
   const changeQuestion = (index: number, question: QuizQuestion) => update({ questions: draft!.questions.map((q, n) => n === index ? question : q) })
   const destinations = (overview?.destinations ?? []).filter((d) => d.is_active && ['both', 'quizzes'].includes(d.use_for))
+  const postOnlyDestinations = (overview?.destinations ?? []).filter((d) => d.is_active && d.use_for === 'posts')
+  const saveDestination = (value: Omit<TelegramDestination, 'id'>, id: string | null) => run('Manzil saqlanmoqda…', async () => {
+    await api(ROOT, id ? 'PATCH' : 'POST', { ...value, resource: 'destination', ...(id ? { id } : {}) })
+    setOverview(await api<TelegramContentOverview>(ROOT)); setNotice('Manzil saqlandi.')
+  })
   const warnings = draft ? quizWarnings(draft.questions) : []
   const canSend = draft && !dirty && ['approved', 'sent', 'failed'].includes(draft.status) && destinationId && overview?.botConfigured
   const thisJob = detail?.jobs.find((j) => j.destination_id === destinationId)
@@ -160,7 +165,11 @@ export function QuizWorkspace() {
                 </div>)}
                 <p className={s.muted}>Telegramda izoh javob tanlangandan keyin quiz ichida ochiladi. Vaziyat va rasm bo‘lsa, ular savoldan oldin yuboriladi.</p>
                 <label className={s.label}>Yuboriladigan manzil<select className={s.input} disabled={disabled} value={destinationId} onChange={(e) => setDestinationId(e.target.value)}><option value="">Manzilni tanlang</option>{destinations.map((d) => <option key={d.id} value={d.id}>{d.name} · {d.chat_id}</option>)}</select></label>
-                {!destinations.length && <p className={s.muted}>Quyidagi sozlamalarda quiz uchun faol manzil qo‘shing.</p>}
+                {!destinations.length && !postOnlyDestinations.length && <p className={s.muted}>Quyidagi sozlamalarda quiz uchun faol manzil qo‘shing.</p>}
+                {postOnlyDestinations.map((d) => <div className={s.spread} key={d.id}>
+                  <span className={s.muted}><strong>{d.name}</strong> mavjud, lekin faqat postlar uchun sozlangan.</span>
+                  <button className={s.secondary} disabled={disabled} onClick={() => void saveDestination({ name: d.name, chat_id: d.chat_id, chat_type: d.chat_type, use_for: 'both', is_active: true }, d.id).then((ok) => { if (ok) setDestinationId(d.id) })}>Quiz uchun ham yoqish</button>
+                </div>)}
                 {dirty && <p className={s.muted}>Yuborishdan oldin o‘zgarishlarni saqlang va tasdiqlang.</p>}
                 <button className={s.button} disabled={disabled || !canSend || Boolean(blocked)} onClick={() => {
                   const name = destinations.find((d) => d.id === destinationId)?.name
@@ -185,10 +194,7 @@ export function QuizWorkspace() {
             </>}
           </div>
         </div>
-        <div style={{ marginTop: 18 }}><QuizDestinations destinations={overview.destinations} disabled={disabled} save={(value, id) => run('Manzil saqlanmoqda…', async () => {
-          await api(ROOT, id ? 'PATCH' : 'POST', { ...value, resource: 'destination', ...(id ? { id } : {}) })
-          setOverview(await api<TelegramContentOverview>(ROOT)); setNotice('Manzil saqlandi.')
-        })} /></div>
+        <div style={{ marginTop: 18 }}><QuizDestinations destinations={overview.destinations} disabled={disabled} save={saveDestination} /></div>
       </>}
     </div>
   </div>
