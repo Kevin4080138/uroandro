@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@/lib/supabaseAdmin', () => ({ createAdminClient: vi.fn() }))
-import { searchTelegramPostImages, telegramImageQuery } from './telegramPosts.server'
+import { searchTelegramPinterest, searchTelegramPostImages, telegramImageQuery } from './telegramPosts.server'
 
 beforeEach(() => {
   vi.stubEnv('PIXABAY_API_KEY', 'private-key')
@@ -53,6 +53,20 @@ it('calls Scrappa Search Pins with the documented host and parameters', async ()
   expect(parsed.searchParams.has('filter')).toBe(false)
   expect(options.headers['x-rapidapi-host']).toBe(parsed.hostname)
   expect(results[0].source_url).toBe('https://www.pinterest.com/pin/123/')
+})
+
+it('passes a validated bookmark to Scrappa pagination', async () => {
+  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ pins: [], nextBookmark: null })))
+  vi.stubGlobal('fetch', fetch)
+  await searchTelegramPinterest('kidney anatomy', 'NEXT_123=')
+  const parsed = new URL(fetch.mock.calls[0][0])
+  expect(parsed.searchParams.get('bookmark')).toBe('NEXT_123=')
+})
+it('rejects malformed bookmarks before calling Scrappa', async () => {
+  const fetch = vi.fn()
+  vi.stubGlobal('fetch', fetch)
+  await expect(searchTelegramPinterest('kidney', 'bad bookmark?')).rejects.toThrow('sahifalash kaliti')
+  expect(fetch).not.toHaveBeenCalled()
 })
 
 it('preserves an explicit query without broadening it or calling AI', async () => {

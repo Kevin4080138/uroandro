@@ -2,8 +2,8 @@ import 'server-only'
 
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabaseAdmin'
-import type { TelegramImageCandidate, TelegramSource } from '@/lib/telegramContent'
-import { imageProviderUrl, pixabayImages, pinterestImages, validatePinterestSource } from './telegramImages'
+import type { TelegramImageCandidate, TelegramPinterestSearchResult, TelegramSource } from '@/lib/telegramContent'
+import { imageProviderUrl, pixabayImages, pinterestSearchResults, validatePinterestSource } from './telegramImages'
 
 const GEMINI_TIMEOUT_MS = 30_000
 const SEARCH_TIMEOUT_MS = 15_000
@@ -141,20 +141,7 @@ export async function telegramImageQuery(topic: string, query?: string) {
 
 export async function searchTelegramPostImages(query: string, provider: 'stock' | 'pinterest' = 'stock'): Promise<TelegramImageCandidate[]> {
   const safeQuery = clean(query, 160)
-  if (provider === 'pinterest') {
-    const key = process.env.PINTEREST_RAPIDAPI_KEY?.trim()
-    if (!key) throw new Error('Pinterest uchun PINTEREST_RAPIDAPI_KEY kerak.')
-    const host = 'pinterest-scraper6.p.rapidapi.com'
-    const params = new URLSearchParams({ query: safeQuery, limit: '30' })
-    let response: Response
-    try {
-      response = await fetch(`https://${host}/api/pinterest/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
-        redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
-    } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
-    if (response.status >= 500) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI provayderi ichki xato qaytardi; bu javob API kalitining to‘g‘riligini tasdiqlamaydi.`)
-    if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI’dagi Scrappa Pinterest Scraper obunasi, kalit va limitni tekshiring.`)
-    return pinterestImages(await response.json())
-  }
+  if (provider === 'pinterest') return (await searchTelegramPinterest(query)).images
   const tasks: Promise<TelegramImageCandidate[]>[] = []
   const pixabayKey = process.env.PIXABAY_API_KEY?.trim()
   if (pixabayKey) tasks.push((async () => {
@@ -188,6 +175,26 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
   return results.flatMap(result => result.status === 'fulfilled' ? result.value : []).slice(0, 12)
 }
 
+export async function searchTelegramPinterest(query: string, bookmark?: string): Promise<TelegramPinterestSearchResult> {
+  const safeQuery = clean(query, 160)
+  const key = process.env.PINTEREST_RAPIDAPI_KEY?.trim()
+  if (!key) throw new Error('Pinterest uchun PINTEREST_RAPIDAPI_KEY kerak.')
+  const host = 'pinterest-scraper6.p.rapidapi.com'
+  const params = new URLSearchParams({ query: safeQuery, limit: '30' })
+  if (bookmark) {
+    if (bookmark.length > 4096 || !/^[A-Za-z0-9_=|*+/.:~-]+$/.test(bookmark)) throw new Error('Pinterest sahifalash kaliti noto‘g‘ri.')
+    params.set('bookmark', bookmark)
+  }
+  let response: Response
+  try {
+    response = await fetch(`https://${host}/api/pinterest/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
+      redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
+  } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
+  if (response.status >= 500) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI provayderi ichki xato qaytardi; bu javob API kalitining to‘g‘riligini tasdiqlamaydi.`)
+  if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI’dagi Scrappa Pinterest Scraper obunasi, kalit va limitni tekshiring.`)
+  return pinterestSearchResults(await response.json())
+}
+
 export async function saveTelegramPostImage(postId: string, candidate: TelegramImageCandidate) {
   validatePinterestSource(candidate)
   let url = imageProviderUrl(candidate.image_url, candidate.provider)
@@ -211,12 +218,19 @@ export async function saveTelegramPostImage(postId: string, candidate: TelegramI
   if (declaredSize > 8 * 1024 * 1024) throw new Error('Rasm hajmi 8 MB dan katta.')
   const bytes = await response.arrayBuffer()
   if (bytes.byteLength > 8 * 1024 * 1024) throw new Error('Rasm hajmi 8 MB dan katta.')
-  let quality = 78
-  let optimized = await sharp(Buffer.from(bytes)).rotate().resize({ width: 1600, withoutEnlargement: true }).webp({ quality }).toBuffer()
-  while (optimized.byteLength > 150 * 1024 && quality > 42) {
-    quality -= 8
-    optimized = await sharp(Buffer.from(bytes)).rotate().resize({ width: 1600, withoutEnlargement: true }).webp({ quality }).toBuffer()
+  const source = sharp(Buffer.from(bytes)).rotate()
+  let optimized: Buffer | null = null
+  let fallback: Buffer | null = null
+  for (const width of [1600, 1400, 1200, 1000, 900, 800, 720, 640]) {
+    for (const quality of [82, 74, 66, 58, 50, 42]) {
+      const candidate = await source.clone().resize({ width, withoutEnlargement: true }).webp({ quality, effort: 6, smartSubsample: true }).toBuffer()
+      fallback = candidate
+      if (candidate.byteLength <= 150 * 1024) { optimized = candidate; break }
+    }
+    if (optimized) break
   }
+  optimized ??= fallback
+  if (!optimized) throw new Error('Rasmni optimallashtirib bo‘lmadi.')
   const path = `telegram-postlar/${postId}/${crypto.randomUUID()}.webp`
   const supabase = createAdminClient()
   const { error } = await supabase.storage.from('bannerlar').upload(path, optimized, { contentType: 'image/webp', upsert: true })

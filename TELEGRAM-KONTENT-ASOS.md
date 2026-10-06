@@ -33,6 +33,7 @@ Kanal/guruh ID si matn sifatida saqlanadi. @username kichik harfga keltiriladi. 
 - Gemini manbalarga tayangan o'zbekcha qoralama va inglizcha rasm qidiruv iborasini yaratadi.
 - Pixabay, Pexels va Unsplash'dan litsenziya/manba ko'rsatilgan rasm variantlari chiqadi; tanlangan rasm 1600 px gacha va taxminan 150 KB WebP qilib `bannerlar/telegram-postlar` yo'liga ko'chiriladi. Pixabay qidiruv javobi API talabiga muvofiq 24 soat keshlanadi.
 - Pinterest RapidAPI alohida qidiruv sifatida ishlaydi. Muallif tasdig‘i mavjud deb qabul qilinadi; admin rasmni bevosita tanlaydi, pin manbasi va tasdiq yozuvi Storage ma'lumotlarida saqlanadi.
+- Pinterest natijalari `nextBookmark` orqali davom ettiriladi. Rasm pinlari asl nisbatda ko'rsatiladi; video pinlari alohida qidiruvda Pinterest manbasiga havola bilan chiqadi.
 - Pinterest provayderi 5xx ichki xato qaytarsa so'rov avtomatik takrorlanmaydi (RapidAPI kvotasini bekorga sarflamaslik uchun); mavjud ochiq rasm provayderlari natijalari ogohlantirish bilan ko'rsatiladi.
 - Matn, sarlavha, auditoriya va holat tahrirlanadi; eski versiya revision jadvaliga yoziladi.
 - Ilmiy manbasiz post tasdiqlanmaydi. Telegramga faqat tasdiqlangan post va faol post manzili yuboriladi.

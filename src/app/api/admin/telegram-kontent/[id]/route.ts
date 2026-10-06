@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { postUpdateInput, uuid, type TelegramImageCandidate, type TelegramSource } from '@/lib/telegramContent'
-import { generateTelegramPost, saveTelegramPostImage, searchTelegramPostImages, sendTelegramPost, telegramImageQuery } from '@/lib/telegramPosts.server'
+import { generateTelegramPost, saveTelegramPostImage, searchTelegramPinterest, searchTelegramPostImages, sendTelegramPost, telegramImageQuery } from '@/lib/telegramPosts.server'
 
 async function admin() {
   const client = await createServerSupabase()
@@ -78,7 +78,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!user) return jsonError('Faqat admin uchun.', 403)
   try {
     const id = await postId(context)
-    const body = await request.json() as { action?: string; audience?: string; query?: string; provider?: string; candidate?: unknown; destinationId?: string }
+    const body = await request.json() as { action?: string; audience?: string; query?: string; provider?: string; media?: string
+      bookmark?: string; candidate?: unknown; destinationId?: string }
     const { data: post, error: readError } = await getPost(id)
     if (readError) return dbError(readError)
     if (!post) return jsonError('Post topilmadi.', 404)
@@ -103,9 +104,17 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       const imageResult = (images: TelegramImageCandidate[], warning = '') => NextResponse.json({ images, imageQuery: query,
         warning: [warning, !images.length ? `“${query}” uchun rasm topilmadi. Aniq inglizcha sinonim bilan urinib ko‘ring.` : ''].filter(Boolean).join(' ') })
       if (body.provider === 'pinterest') {
-        try { return imageResult(await searchTelegramPostImages(query, 'pinterest')) }
+        const bookmark = typeof body.bookmark === 'string' && body.bookmark ? body.bookmark : undefined
+        const media = body.media === 'video' ? 'video' : 'image'
+        try {
+          const found = await searchTelegramPinterest(query, bookmark)
+          const count = media === 'video' ? found.videos.length : found.images.length
+          return NextResponse.json({ ...found, imageQuery: query,
+            warning: count ? '' : `Bu sahifada “${query}” uchun ${media === 'video' ? 'video' : 'rasm'} topilmadi. “Yana” tugmasi bilan keyingi sahifani tekshiring.` })
+        }
         catch (error) {
           const warning = error instanceof Error ? error.message : 'Pinterest xizmati javob bermadi.'
+          if (media === 'video' || bookmark) return jsonError(warning, 502)
           try { return imageResult(await searchTelegramPostImages(query, 'stock'), `${warning} Ochiq rasm manbalari ham tekshirildi.`) }
           catch (fallbackError) {
             const detail = fallbackError instanceof Error ? fallbackError.message : 'Ochiq rasm qidiruvi javob bermadi.'

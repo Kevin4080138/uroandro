@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { imageProviderUrl, pinterestImages, pixabayImages, validatePinterestSource } from './telegramImages'
+import { imageProviderUrl, pinterestImages, pinterestSearchResults, pixabayImages, validatePinterestSource } from './telegramImages'
 
 describe('Telegram rasm provayderlari', () => {
   it('filters videos before limiting image results', () => {
@@ -10,6 +10,17 @@ describe('Telegram rasm provayderlari', () => {
   it('distinguishes an empty Scrappa response from a malformed response', () => {
     expect(pinterestImages({ pins: [] })).toEqual([])
     expect(() => pinterestImages({ message: 'Failed' })).toThrow()
+  })
+  it('returns video pins and the next bookmark separately', () => {
+    const result = pinterestSearchResults({ nextBookmark: 'NEXT_123=', pins: [{ id: '123', is_video: true,
+      image_url: 'https://i.pinimg.com/736x/a.jpg', video_url: 'https://v1.pinimg.com/videos/a.m3u8' }] })
+    expect(result.images).toEqual([])
+    expect(result.videos[0]).toMatchObject({ provider: 'pinterest', source_url: 'https://www.pinterest.com/pin/123/' })
+    expect(result.nextBookmark).toBe('NEXT_123=')
+  })
+  it('drops video URLs from unapproved hosts', () => {
+    expect(pinterestSearchResults({ pins: [{ id: '123', is_video: true,
+      image_url: 'https://i.pinimg.com/736x/a.jpg', video_url: 'https://evil.example/a.mp4' }] }).videos).toEqual([])
   })
   it('drops unsafe Scrappa images and malformed pins', () => {
     expect(pinterestImages({ pins: [null, { id: '123', image_url: 'https://evil.example/a.jpg' }, { id: 123, image_url: 'https://i.pinimg.com/a.jpg' }] })).toEqual([])

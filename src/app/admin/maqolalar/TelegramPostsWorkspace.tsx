@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { Header } from '@/components/Header'
 import { ContentTabs } from './ContentTabs'
-import { CONTENT_STATUS_LABELS, type ContentDraft, type TelegramContentOverview, type TelegramDestination, type TelegramImageCandidate } from '@/lib/telegramContent'
+import { CONTENT_STATUS_LABELS, type ContentDraft, type TelegramContentOverview, type TelegramDestination, type TelegramImageCandidate, type TelegramVideoCandidate } from '@/lib/telegramContent'
 
 const panel: CSSProperties = { padding: 18, border: '1px solid var(--line)', borderRadius: 14, background: 'var(--surface)' }
 const field: CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid var(--line)', background: 'var(--surface-2)', color: 'var(--ink)', font: 'inherit' }
@@ -28,6 +28,9 @@ export function TelegramPostsWorkspace() {
   const [destinationId, setDestinationId] = useState('')
   const [destination, setDestination] = useState(blankDestination)
   const [images, setImages] = useState<TelegramImageCandidate[]>([])
+  const [videos, setVideos] = useState<TelegramVideoCandidate[]>([])
+  const [nextBookmark, setNextBookmark] = useState<string | null>(null)
+  const [searchMedia, setSearchMedia] = useState<'image' | 'video'>('image')
   const [imageQuery, setImageQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [busy, setBusy] = useState('')
@@ -79,10 +82,12 @@ export function TelegramPostsWorkspace() {
       const result = await api(`/api/admin/telegram-kontent/${selected.id}`, 'POST', { action: name, ...extra })
       if (result.post) updateLocal(result.post)
       if (result.imageQuery) setImageQuery(result.imageQuery)
-      if (result.images) setImages(result.images)
+      if (result.images) setImages((current) => extra.append ? [...current, ...result.images.filter((item: TelegramImageCandidate) => !current.some((old) => old.source_url === item.source_url))] : result.images)
+      if (result.videos) setVideos((current) => extra.append ? [...current, ...result.videos.filter((item: TelegramVideoCandidate) => !current.some((old) => old.source_url === item.source_url))] : result.videos)
+      if ('nextBookmark' in result) setNextBookmark(result.nextBookmark ?? null)
       if (result.warning) setNotice(result.warning)
       if (name === 'generate') setNotice('AI qoralama va ilmiy manbalar tayyorlandi.')
-      if (name === 'select-image') { setImages([]); setNotice('Rasm optimallashtirilib saqlandi.') }
+      if (name === 'select-image') { setImages([]); setVideos([]); setNextBookmark(null); setNotice('Rasm asl nisbatda optimallashtirilib saqlandi.') }
       if (name === 'send') setNotice('Post Telegramga yuborildi.')
     })
   }
@@ -129,7 +134,7 @@ export function TelegramPostsWorkspace() {
             <select aria-label="Holat filtri" style={{ ...field, width: 145 }} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Hammasi</option>{Object.entries(CONTENT_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
           {!data && <p>Yuklanmoqda…</p>}
           {data && !visible.length && <p style={{ color: 'var(--muted)' }}>Bu holatda post yo‘q.</p>}
-          {visible.map((post) => <button type="button" key={post.id} onClick={() => { setSelected(post); setImages([]); setImageQuery('') }}
+          {visible.map((post) => <button type="button" key={post.id} onClick={() => { setSelected(post); setImages([]); setVideos([]); setNextBookmark(null); setImageQuery('') }}
             style={{ width: '100%', textAlign: 'left', padding: '12px 0', border: 0, borderTop: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer' }}>
             <strong>{post.title}</strong><div style={{ marginTop: 5, color: post.id === selected?.id ? 'var(--accent)' : 'var(--muted)', fontSize: 12 }}>{CONTENT_STATUS_LABELS[post.status]}</div>
           </button>)}
@@ -157,12 +162,13 @@ export function TelegramPostsWorkspace() {
 
             <section style={panel}>
               <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Rasm</h2>
-              {selected.image_url && <figure style={{ margin: '0 0 14px' }}><img src={selected.image_url} alt="Post rasmi" style={{ width: '100%', maxHeight: 340, objectFit: 'cover', borderRadius: 12 }} /><figcaption style={{ marginTop: 6, color: 'var(--muted)', fontSize: 12 }}>{selected.image_credit} · {selected.image_license}</figcaption></figure>}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><input disabled={disabled || sent} style={{ ...field, flex: '1 1 260px' }} value={imageQuery} onChange={(event) => setImageQuery(event.target.value)} placeholder="Inglizcha rasm qidiruv iborasi" />
-                <button disabled={disabled || sent || !data?.imageSearchConfigured} title={!data?.imageSearchConfigured ? 'PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'stock', query: imageQuery })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Ochiq rasmlar'}</button>
-                <button disabled={disabled || sent || !data?.pinterestConfigured} title={!data?.pinterestConfigured ? 'PINTEREST_RAPIDAPI_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'pinterest', query: imageQuery })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Pinterest'}</button></div>
+              {selected.image_url && <figure style={{ margin: '0 0 14px' }}><img src={selected.image_url} alt="Post rasmi" style={{ display: 'block', width: 'auto', maxWidth: '100%', height: 'auto', maxHeight: 520, margin: '0 auto', objectFit: 'contain', borderRadius: 12 }} /><figcaption style={{ marginTop: 6, color: 'var(--muted)', fontSize: 12 }}>{selected.image_credit} · {selected.image_license}</figcaption></figure>}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><input disabled={disabled || sent} style={{ ...field, flex: '1 1 260px' }} value={imageQuery} onChange={(event) => { setImageQuery(event.target.value); setNextBookmark(null) }} placeholder="Inglizcha rasm qidiruv iborasi" />
+                <button disabled={disabled || sent || !data?.imageSearchConfigured} title={!data?.imageSearchConfigured ? 'PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak' : undefined} style={secondary} onClick={() => { setSearchMedia('image'); setVideos([]); setNextBookmark(null); void action('search-images', { provider: 'stock', query: imageQuery }) }}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Ochiq rasmlar'}</button>
+                <button disabled={disabled || sent || !data?.pinterestConfigured} title={!data?.pinterestConfigured ? 'PINTEREST_RAPIDAPI_KEY kerak' : undefined} style={secondary} onClick={() => { setSearchMedia('image'); setNextBookmark(null); void action('search-images', { provider: 'pinterest', media: 'image', query: imageQuery }) }}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Pinterest rasmlar'}</button>
+                <button disabled={disabled || sent || !data?.pinterestConfigured} style={secondary} onClick={() => { setSearchMedia('video'); setNextBookmark(null); void action('search-images', { provider: 'pinterest', media: 'video', query: imageQuery }) }}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Pinterest videolar'}</button></div>
               {images.some((image) => image.provider === 'pinterest') && <p style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.5 }}>Pinterest rasmi tanlanganda pin manbasi va muallif tasdig‘i avtomatik saqlanadi.</p>}
-              {images.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 10, marginTop: 14 }}>{images.map((image, index) => {
+              {searchMedia === 'image' && images.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 10, marginTop: 14 }}>{images.map((image, index) => {
                 return <article key={`${image.provider}-${index}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 8, background: 'var(--surface-2)' }}>
                   <a href={image.image_url} target="_blank" rel="noreferrer" title="Rasmni to‘liq ochish"><img loading="lazy" src={image.preview_url} alt="Rasm varianti — to‘liq ochish" style={{ width: '100%', height: 240, objectFit: 'contain', borderRadius: 7 }} /></a>
                   <small style={{ display: 'block', marginTop: 7 }}>{image.credit}<br />{image.license}</small>
@@ -170,6 +176,12 @@ export function TelegramPostsWorkspace() {
                   <button type="button" disabled={disabled} onClick={() => void action('select-image', { candidate: image })} style={{ ...secondary, width: '100%', marginTop: 9 }}>Tanlash</button>
                 </article>
               })}</div>}
+              {searchMedia === 'video' && videos.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 10, marginTop: 14 }}>{videos.map((video, index) => <article key={`${video.source_url}-${index}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 8, background: 'var(--surface-2)' }}>
+                <img loading="lazy" src={video.preview_url} alt="Pinterest video muqovasi" style={{ display: 'block', width: '100%', height: 240, objectFit: 'contain', borderRadius: 7 }} />
+                <small style={{ display: 'block', marginTop: 7 }}>{video.credit} · Video</small>
+                <a href={video.source_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: 8 }}>Videoni Pinterest’da ko‘rish</a>
+              </article>)}</div>}
+              {nextBookmark && <button type="button" disabled={disabled} style={{ ...secondary, marginTop: 14 }} onClick={() => void action('search-images', { provider: 'pinterest', media: searchMedia, query: imageQuery, bookmark: nextBookmark, append: true })}>{busy === 'search-images' ? 'Qidirilmoqda…' : searchMedia === 'video' ? 'Yana videolar' : 'Yana rasmlar'}</button>}
             </section>
 
             <section style={panel}>
@@ -180,7 +192,7 @@ export function TelegramPostsWorkspace() {
             <section style={panel}>
               <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Telegram ko‘rinishi va yuborish</h2>
               <div style={{ maxWidth: 560, borderRadius: 14, padding: 14, background: '#dceaf5', color: '#17212b', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-                {selected.image_url && <img src={selected.image_url} alt="" style={{ width: '100%', maxHeight: 280, objectFit: 'cover', borderRadius: 9, marginBottom: 10 }} />}
+                {selected.image_url && <img src={selected.image_url} alt="" style={{ display: 'block', width: 'auto', maxWidth: '100%', height: 'auto', maxHeight: 420, margin: '0 auto 10px', objectFit: 'contain', borderRadius: 9 }} />}
                 <strong>{selected.title}</strong>{'\n\n'}{selected.body || 'Post matni hali tayyor emas.'}{selected.image_credit ? `\n\n📷 ${selected.image_credit}` : ''}
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 14, alignItems: 'end' }}><label style={{ flex: 1 }}>Manzil<select disabled={disabled || sent} style={{ ...field, marginTop: 6 }} value={destinationId} onChange={(event) => setDestinationId(event.target.value)}><option value="">Manzilni tanlang</option>{destinations.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.chat_id}</option>)}</select></label>

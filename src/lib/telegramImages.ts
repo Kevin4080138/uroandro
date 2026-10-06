@@ -1,4 +1,4 @@
-import type { TelegramImageCandidate } from './telegramContent'
+import type { TelegramImageCandidate, TelegramPinterestSearchResult, TelegramVideoCandidate } from './telegramContent'
 
 export function imageProviderUrl(value: string, provider: TelegramImageCandidate['provider']) {
   const url = new URL(value)
@@ -10,19 +10,36 @@ export function imageProviderUrl(value: string, provider: TelegramImageCandidate
   return url
 }
 
-export function pinterestImages(value: unknown): TelegramImageCandidate[] {
+export function pinterestSearchResults(value: unknown): TelegramPinterestSearchResult {
   if (!value || typeof value !== 'object' || !('pins' in value) || !Array.isArray(value.pins)) {
     throw new Error('Pinterest javobi noto‘g‘ri yoki qidiruv bajarilmadi.')
   }
-  return value.pins.slice(0, 250).flatMap((pin: Record<string, unknown>) => {
+  const images: TelegramImageCandidate[] = []
+  const videos: TelegramVideoCandidate[] = []
+  for (const pin of value.pins.slice(0, 250) as Record<string, unknown>[]) {
     try {
-      if (!pin || typeof pin.id !== 'string' || !/^\d+$/.test(pin.id) || typeof pin.image_url !== 'string' || pin.is_video === true) return []
+      if (!pin || typeof pin.id !== 'string' || !/^\d+$/.test(pin.id) || typeof pin.image_url !== 'string') continue
       imageProviderUrl(pin.image_url, 'pinterest')
-      return [{ provider: 'pinterest' as const, image_url: pin.image_url, preview_url: pin.image_url,
-        source_url: `https://www.pinterest.com/pin/${pin.id}/`, credit: `Pinterest · pin ${pin.id}`,
-        license: 'Muallif tasdig‘i mavjud' }]
-    } catch { return [] }
-  }).slice(0, 24)
+      const source_url = `https://www.pinterest.com/pin/${pin.id}/`
+      const credit = `Pinterest · pin ${pin.id}`
+      if (pin.is_video === true) {
+        if (typeof pin.video_url !== 'string') continue
+        const video = new URL(pin.video_url)
+        if (video.protocol !== 'https:' || !['v1.pinimg.com', 'v.pinimg.com'].includes(video.hostname) || video.username || video.password || video.port) continue
+        videos.push({ provider: 'pinterest', video_url: video.href, preview_url: pin.image_url, source_url, credit })
+        continue
+      }
+      images.push({ provider: 'pinterest', image_url: pin.image_url, preview_url: pin.image_url,
+        source_url, credit, license: 'Muallif tasdig‘i mavjud' })
+    } catch { /* Noto‘g‘ri yoki tasdiqlanmagan hostli natija tashlab ketiladi. */ }
+  }
+  const bookmark = 'nextBookmark' in value && typeof value.nextBookmark === 'string' && value.nextBookmark.length <= 4096
+    ? value.nextBookmark : null
+  return { images: images.slice(0, 24), videos: videos.slice(0, 24), nextBookmark: bookmark }
+}
+
+export function pinterestImages(value: unknown): TelegramImageCandidate[] {
+  return pinterestSearchResults(value).images
 }
 
 export function validatePinterestSource(candidate: TelegramImageCandidate) {

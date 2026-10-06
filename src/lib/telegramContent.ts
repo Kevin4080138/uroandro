@@ -13,6 +13,12 @@ export type TelegramImageCandidate = {
   provider: 'pexels' | 'unsplash' | 'pixabay' | 'pinterest'; image_url: string; preview_url: string
   source_url: string; credit: string; license: string; tracking_url?: string; rights_confirmed?: boolean
 }
+export type TelegramVideoCandidate = {
+  provider: 'pinterest'; video_url: string; preview_url: string; source_url: string; credit: string
+}
+export type TelegramPinterestSearchResult = {
+  images: TelegramImageCandidate[]; videos: TelegramVideoCandidate[]; nextBookmark: string | null
+}
 export type ContentDraft = {
   id: string; title: string; topic: string; status: ContentStatus; created_at: string
   body?: string; audience?: 'student' | 'doctor' | 'patient'; image_url?: string | null
