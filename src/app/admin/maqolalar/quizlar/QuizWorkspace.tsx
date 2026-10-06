@@ -114,6 +114,7 @@ export function QuizWorkspace() {
                   <label className={s.label}>Auditoriya<select className={s.input} disabled={disabled || locked} value={draft.audience} onChange={(e) => update({ audience: e.target.value as QuizDraft['audience'] })}><option value="student">Talaba</option><option value="doctor">Shifokor</option><option value="patient">Keng omma</option></select></label>
                 </div>
                 {!locked && <div className={s.stack}>
+                  <p className={s.muted}>Avtomatik rejim faqat platformadagi Campbell-Walsh-Wein asosidagi inson urologiyasi darslarini manba qiladi. Mos dars topilmasa savol yaratilmaydi.</p>
                   <label className={s.label}>AI uchun talablar<textarea className={s.input} disabled={disabled} maxLength={2000} value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Masalan: nefronning turli qismlari va funksiyalarini solishtiring; har savol boshqa tuzilmani tekshirsin." /></label>
                   <details><summary>O‘z adabiyotim asosida yaratish</summary>
                     <p className={s.muted}>Maydonlar ushbu yaratish uchun ishlatiladi. Matn kiritsangiz, AI shu manbaga asoslanadi; havolaning o‘zi avtomatik o‘qilmaydi.</p>
@@ -126,7 +127,7 @@ export function QuizWorkspace() {
                   <label>AI savollar soni <select className={s.input} style={{ width: 75 }} disabled={disabled} value={count} onChange={(e) => setCount(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((n) => <option key={n}>{n}</option>)}</select></label>
                   <button className={s.button} disabled={disabled || !overview.aiConfigured} onClick={() => {
                     if (draft.questions.length && !window.confirm('Muharrirdagi savollar yangi AI qoralamasi bilan almashtirilsinmi? Saqlamaguncha bazadagi savollar saqlanadi.')) return
-                    void run('Manbalar qidirilmoqda, AI savollar tayyorlamoqda…', async () => {
+                    void run('Urologiya darsligi tanlanmoqda, savollar tekshirilmoqda…', async () => {
                       const result = await api<{ questions: QuizQuestion[] }>(path(draft.id), 'POST', { ...draft, count, instructions, source_text: sourceText, source_title: sourceTitle, source_url: sourceUrl, action: 'generate' })
                       update({ questions: result.questions }); setNotice('AI qoralamasi tayyor. Manbalar, javoblar va izohlarni tekshirib, saqlang.')
                     })
