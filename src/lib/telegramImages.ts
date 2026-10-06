@@ -11,14 +11,14 @@ export function imageProviderUrl(value: string, provider: TelegramImageCandidate
 }
 
 export function pinterestImages(value: unknown): TelegramImageCandidate[] {
-  if (!value || typeof value !== 'object' || !('success' in value) || value.success !== true || !('data' in value) || !Array.isArray(value.data)) {
+  if (!value || typeof value !== 'object' || !('pins' in value) || !Array.isArray(value.pins)) {
     throw new Error('Pinterest javobi noto‘g‘ri yoki qidiruv bajarilmadi.')
   }
-  return value.data.slice(0, 12).flatMap((pin: Record<string, unknown>) => {
+  return value.pins.slice(0, 12).flatMap((pin: Record<string, unknown>) => {
     try {
-      if (!pin || typeof pin.id !== 'string' || !/^\d+$/.test(pin.id) || typeof pin.imageURL !== 'string' || pin.type === 'video') return []
-      imageProviderUrl(pin.imageURL, 'pinterest')
-      return [{ provider: 'pinterest' as const, image_url: pin.imageURL, preview_url: pin.imageURL,
+      if (!pin || typeof pin.id !== 'string' || !/^\d+$/.test(pin.id) || typeof pin.image_url !== 'string' || pin.is_video === true) return []
+      imageProviderUrl(pin.image_url, 'pinterest')
+      return [{ provider: 'pinterest' as const, image_url: pin.image_url, preview_url: pin.image_url,
         source_url: `https://www.pinterest.com/pin/${pin.id}/`, credit: `Pinterest · pin ${pin.id}`,
         license: 'Foydalanish huquqi tekshirilmagan' }]
     } catch { return [] }

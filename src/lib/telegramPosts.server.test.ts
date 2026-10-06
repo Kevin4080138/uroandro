@@ -41,6 +41,20 @@ it('reports Pinterest 500 without claiming the key was accepted', async () => {
   await expect(searchTelegramPostImages('kidney', 'pinterest')).rejects.not.toThrow('Kalit qabul qilindi')
 })
 
+it('calls Scrappa Search Pins with the documented host and parameters', async () => {
+  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ pins: [{ id: '123', image_url: 'https://i.pinimg.com/originals/a.jpg', is_video: false }] })))
+  vi.stubGlobal('fetch', fetch)
+  const results = await searchTelegramPostImages('kidney anatomy', 'pinterest')
+  const [url, options] = fetch.mock.calls[0]
+  const parsed = new URL(url)
+  expect(parsed.origin + parsed.pathname).toBe('https://pinterest-scraper6.p.rapidapi.com/api/pinterest/search')
+  expect(parsed.searchParams.get('query')).toBe('kidney anatomy')
+  expect(parsed.searchParams.get('limit')).toBe('6')
+  expect(parsed.searchParams.has('filter')).toBe(false)
+  expect(options.headers['x-rapidapi-host']).toBe(parsed.hostname)
+  expect(results[0].source_url).toBe('https://www.pinterest.com/pin/123/')
+})
+
 it('preserves an explicit query without broadening it or calling AI', async () => {
   const fetch = vi.fn()
   vi.stubGlobal('fetch', fetch)

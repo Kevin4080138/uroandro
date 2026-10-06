@@ -40,7 +40,7 @@ Kanal/guruh ID si matn sifatida saqlanadi. @username kichik harfga keltiriladi. 
 
 Qo'shimcha migratsiya: `supabase/migrations/20261005010000_telegram_posts_delivery.sql`.
 
-Kerakli server muhit o'zgaruvchilari: `GEMINI_API_KEY`, `GEMINI_MODEL`, ochiq rasm qidiruvi uchun kamida bittasi `PIXABAY_API_KEY`, `PEXELS_API_KEY` yoki `UNSPLASH_ACCESS_KEY`, hamda `TELEGRAM_BOT_TOKEN`. Pinterest uchun RapidAPI obunasidagi kalit `PINTEREST_RAPIDAPI_KEY` nomi bilan qo'shiladi; host va endpoint kodda qat'iy belgilangan.
+Kerakli server muhit o'zgaruvchilari: `GEMINI_API_KEY`, `GEMINI_MODEL`, ochiq rasm qidiruvi uchun kamida bittasi `PIXABAY_API_KEY`, `PEXELS_API_KEY` yoki `UNSPLASH_ACCESS_KEY`, hamda `TELEGRAM_BOT_TOKEN`. Pinterest uchun [Scrappa Pinterest Scraper](https://rapidapi.com/scrappa/api/pinterest-scraper6) xizmatiga kirish huquqi bo'lgan RapidAPI kaliti `PINTEREST_RAPIDAPI_KEY` nomi bilan qo'shiladi. Endpoint: `GET https://pinterest-scraper6.p.rapidapi.com/api/pinterest/search?query=...&limit=6`; javob `pins[].id`, `pins[].image_url`, `pins[].is_video` bo'yicha o'qiladi. Eski EaseApi3 obunasi yangi xizmatga kirish bermaydi. Kalitni almashtirgandan so'ng Vercel redeploy kerak.
 
 ## Quizlar — 3-bosqich
 

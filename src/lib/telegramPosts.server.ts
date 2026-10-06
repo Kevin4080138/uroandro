@@ -144,15 +144,15 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
   if (provider === 'pinterest') {
     const key = process.env.PINTEREST_RAPIDAPI_KEY?.trim()
     if (!key) throw new Error('Pinterest uchun PINTEREST_RAPIDAPI_KEY kerak.')
-    const host = 'pinterest-search-api.p.rapidapi.com'
-    const params = new URLSearchParams({ query: safeQuery, filter: 'all', limit: '6' })
+    const host = 'pinterest-scraper6.p.rapidapi.com'
+    const params = new URLSearchParams({ query: safeQuery, limit: '6' })
     let response: Response
     try {
-      response = await fetch(`https://${host}/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
+      response = await fetch(`https://${host}/api/pinterest/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
         redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
     } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
     if (response.status >= 500) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI provayderi ichki xato qaytardi; bu javob API kalitining to‘g‘riligini tasdiqlamaydi.`)
-    if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI obunasi, kalit va limitni tekshiring.`)
+    if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI’dagi Scrappa Pinterest Scraper obunasi, kalit va limitni tekshiring.`)
     return pinterestImages(await response.json())
   }
   const tasks: Promise<TelegramImageCandidate[]>[] = []
