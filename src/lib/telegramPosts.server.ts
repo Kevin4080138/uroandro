@@ -292,13 +292,12 @@ export async function sendTelegramPost(post: { title: string; body: string; imag
   const token = process.env.TELEGRAM_BOT_TOKEN
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN sozlanmagan.')
   const text = telegramPostHtml(post)
-  const reply_markup = { inline_keyboard: post.sources.slice(0, 3).map((source, index) => [{ text: `📚 Manba ${index + 1}`, url: source.url }]) }
   const parts: Array<{ key: string; method: 'sendPhoto' | 'sendMessage'; messageId: string }> = []
   try {
-    if (post.image_url && text.length <= 950) parts.push({ key: 'photo-caption', method: 'sendPhoto', messageId: await telegramCall(token, 'sendPhoto', { chat_id: chatId, photo: post.image_url, caption: text, parse_mode: 'HTML', reply_markup }) })
+    if (post.image_url && text.length <= 950) parts.push({ key: 'photo-caption', method: 'sendPhoto', messageId: await telegramCall(token, 'sendPhoto', { chat_id: chatId, photo: post.image_url, caption: text, parse_mode: 'HTML' }) })
     else {
       if (post.image_url) parts.push({ key: 'photo', method: 'sendPhoto', messageId: await telegramCall(token, 'sendPhoto', { chat_id: chatId, photo: post.image_url }) })
-      parts.push({ key: 'text', method: 'sendMessage', messageId: await telegramCall(token, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', link_preview_options: { is_disabled: true }, reply_markup }) })
+      parts.push({ key: 'text', method: 'sendMessage', messageId: await telegramCall(token, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', link_preview_options: { is_disabled: true } }) })
     }
     return { parts, error: null }
   } catch (error) {

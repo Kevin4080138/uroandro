@@ -109,5 +109,6 @@ it('sends the formatted post using Telegram HTML mode', async () => {
   expect(payload.parse_mode).toBe('HTML')
   expect(payload.text).toContain('Original manba')
   expect(payload.text).toContain('✈️ <a href=')
-  expect(payload.reply_markup.inline_keyboard[0][0].url).toBe('https://pubmed.ncbi.nlm.nih.gov/123/')
+  expect(payload.reply_markup).toBeUndefined()
+  expect(payload.text).not.toContain('Manba 1')
 })
