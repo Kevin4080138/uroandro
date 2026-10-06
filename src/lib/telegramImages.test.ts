@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { imageProviderUrl, pinterestImages, pixabayImages, validatePinterestRights } from './telegramImages'
 
 describe('Telegram rasm provayderlari', () => {
+  it('filters videos before limiting image results', () => {
+    const pins = Array.from({ length: 30 }, (_, i) => ({ id: String(i + 1), image_url: 'https://i.pinimg.com/a.jpg', is_video: i < 12 }))
+    expect(pinterestImages({ pins })).toHaveLength(18)
+    expect(pinterestImages({ pins: pins.map(pin => ({ ...pin, is_video: false })) })).toHaveLength(24)
+  })
   it('distinguishes an empty Scrappa response from a malformed response', () => {
     expect(pinterestImages({ pins: [] })).toEqual([])
     expect(() => pinterestImages({ message: 'Failed' })).toThrow()

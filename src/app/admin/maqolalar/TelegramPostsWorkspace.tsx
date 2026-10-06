@@ -167,7 +167,7 @@ export function TelegramPostsWorkspace() {
                 const rights = pinterestRights[image.source_url] ?? { license: '', confirmed: false }
                 const candidate = image.provider === 'pinterest' ? { ...image, license: rights.license.trim(), rights_confirmed: rights.confirmed } : image
                 return <article key={`${image.provider}-${index}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 8, background: 'var(--surface-2)' }}>
-                  <img src={image.preview_url} alt="Rasm varianti" style={{ width: '100%', height: 110, objectFit: 'cover', borderRadius: 7 }} />
+                  <a href={image.image_url} target="_blank" rel="noreferrer" title="Rasmni to‘liq ochish"><img loading="lazy" src={image.preview_url} alt="Rasm varianti — to‘liq ochish" style={{ width: '100%', height: 240, objectFit: 'contain', borderRadius: 7 }} /></a>
                   <small style={{ display: 'block', marginTop: 7 }}>{image.credit}<br />{image.license}</small>
                   <a href={image.source_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: 6, fontSize: 12 }}>Manbani ochish</a>
                   {image.provider === 'pinterest' && <div style={{ marginTop: 8 }}>

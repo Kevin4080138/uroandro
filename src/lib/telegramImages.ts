@@ -14,7 +14,7 @@ export function pinterestImages(value: unknown): TelegramImageCandidate[] {
   if (!value || typeof value !== 'object' || !('pins' in value) || !Array.isArray(value.pins)) {
     throw new Error('Pinterest javobi noto‘g‘ri yoki qidiruv bajarilmadi.')
   }
-  return value.pins.slice(0, 12).flatMap((pin: Record<string, unknown>) => {
+  return value.pins.slice(0, 250).flatMap((pin: Record<string, unknown>) => {
     try {
       if (!pin || typeof pin.id !== 'string' || !/^\d+$/.test(pin.id) || typeof pin.image_url !== 'string' || pin.is_video === true) return []
       imageProviderUrl(pin.image_url, 'pinterest')
@@ -22,7 +22,7 @@ export function pinterestImages(value: unknown): TelegramImageCandidate[] {
         source_url: `https://www.pinterest.com/pin/${pin.id}/`, credit: `Pinterest · pin ${pin.id}`,
         license: 'Foydalanish huquqi tekshirilmagan' }]
     } catch { return [] }
-  })
+  }).slice(0, 24)
 }
 
 export function validatePinterestRights(candidate: TelegramImageCandidate) {

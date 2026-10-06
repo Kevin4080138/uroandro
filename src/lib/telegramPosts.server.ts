@@ -145,7 +145,7 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
     const key = process.env.PINTEREST_RAPIDAPI_KEY?.trim()
     if (!key) throw new Error('Pinterest uchun PINTEREST_RAPIDAPI_KEY kerak.')
     const host = 'pinterest-scraper6.p.rapidapi.com'
-    const params = new URLSearchParams({ query: safeQuery, limit: '6' })
+    const params = new URLSearchParams({ query: safeQuery, limit: '30' })
     let response: Response
     try {
       response = await fetch(`https://${host}/api/pinterest/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
