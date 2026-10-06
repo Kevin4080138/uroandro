@@ -100,7 +100,15 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     if (body.action === 'search-images') {
       const query = typeof body.query === 'string' && body.query.trim() ? body.query.trim() : `${post.topic} medical healthcare`
       if (body.provider !== undefined && !['stock', 'pinterest'].includes(body.provider)) return jsonError('Rasm qidiruv provayderi noto‘g‘ri.')
-      return NextResponse.json({ images: await searchTelegramPostImages(query, body.provider === 'pinterest' ? 'pinterest' : 'stock') })
+      if (body.provider === 'pinterest') {
+        try { return NextResponse.json({ images: await searchTelegramPostImages(query, 'pinterest') }) }
+        catch (error) {
+          const warning = error instanceof Error ? error.message : 'Pinterest xizmati javob bermadi.'
+          try { return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock'), warning: `${warning} Ochiq litsenziyali rasm natijalari ko‘rsatildi.` }) }
+          catch { return jsonError(warning, 502) }
+        }
+      }
+      return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock') })
     }
 
     if (body.action === 'select-image') {

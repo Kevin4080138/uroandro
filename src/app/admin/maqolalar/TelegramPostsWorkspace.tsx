@@ -81,6 +81,7 @@ export function TelegramPostsWorkspace() {
       if (result.post) updateLocal(result.post)
       if (result.imageQuery) setImageQuery(result.imageQuery)
       if (result.images) setImages(result.images)
+      if (result.warning) setNotice(result.warning)
       if (name === 'generate') setNotice('AI qoralama va ilmiy manbalar tayyorlandi.')
       if (name === 'select-image') { setImages([]); setNotice('Rasm optimallashtirilib saqlandi.') }
       if (name === 'send') setNotice('Post Telegramga yuborildi.')

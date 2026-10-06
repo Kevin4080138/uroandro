@@ -102,6 +102,7 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
       response = await fetch(`https://${host}/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
         redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
     } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
+    if (response.status >= 500) throw new Error('RapidAPI Pinterest provayderi ichki xato qaytardi. Kalit qabul qilindi, ammo provayder hozir ishlamayapti.')
     if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI obunasi, kalit va limitni tekshiring.`)
     return pinterestImages(await response.json())
   }
