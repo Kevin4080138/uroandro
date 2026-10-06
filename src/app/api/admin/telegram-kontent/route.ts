@@ -31,7 +31,8 @@ export async function GET() {
   return NextResponse.json({ destinations: destinations.data, posts: posts.data, quizzes: quizzes.data,
     botConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim()),
     aiConfigured: Boolean(process.env.GEMINI_API_KEY?.trim() && process.env.GEMINI_MODEL?.trim()),
-    imageSearchConfigured: Boolean(process.env.PEXELS_API_KEY?.trim() || process.env.UNSPLASH_ACCESS_KEY?.trim()),
+    imageSearchConfigured: Boolean(process.env.PIXABAY_API_KEY?.trim() || process.env.PEXELS_API_KEY?.trim() || process.env.UNSPLASH_ACCESS_KEY?.trim()),
+    pinterestConfigured: Boolean(process.env.PINTEREST_RAPIDAPI_KEY?.trim()),
   }, { headers: { 'Cache-Control': 'no-store' } })
 }
 

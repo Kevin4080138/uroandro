@@ -10,8 +10,8 @@ export type TelegramDestination = {
 }
 export type TelegramSource = { title: string; url: string; provider: string }
 export type TelegramImageCandidate = {
-  provider: 'pexels' | 'unsplash'; image_url: string; preview_url: string
-  source_url: string; credit: string; license: string; tracking_url?: string
+  provider: 'pexels' | 'unsplash' | 'pixabay' | 'pinterest'; image_url: string; preview_url: string
+  source_url: string; credit: string; license: string; tracking_url?: string; rights_confirmed?: boolean
 }
 export type ContentDraft = {
   id: string; title: string; topic: string; status: ContentStatus; created_at: string
@@ -23,6 +23,7 @@ export type ContentDraft = {
 export type TelegramContentOverview = {
   destinations: TelegramDestination[]; posts: ContentDraft[]; quizzes: ContentDraft[]
   botConfigured: boolean; aiConfigured: boolean; imageSearchConfigured: boolean
+  pinterestConfigured?: boolean
 }
 
 function object(value: unknown): Record<string, unknown> {

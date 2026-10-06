@@ -28,6 +28,7 @@ export function TelegramPostsWorkspace() {
   const [destinationId, setDestinationId] = useState('')
   const [destination, setDestination] = useState(blankDestination)
   const [images, setImages] = useState<TelegramImageCandidate[]>([])
+  const [pinterestRights, setPinterestRights] = useState<Record<string, { license: string; confirmed: boolean }>>({})
   const [imageQuery, setImageQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [busy, setBusy] = useState('')
@@ -109,7 +110,7 @@ export function TelegramPostsWorkspace() {
       {notice && <p role="status" style={{ ...panel, color: 'var(--good)', borderLeft: '4px solid var(--good)' }}>{notice}</p>}
       {data && <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16, color: 'var(--muted)' }}>
         <span>{posts.length} ta post</span><span>· {destinations.length} ta faol manzil</span>
-        <span>· AI: {data.aiConfigured ? 'sozlangan' : 'sozlanmagan'}</span><span>· Rasm qidiruvi: {data.imageSearchConfigured ? 'sozlangan' : 'sozlanmagan'}</span>
+        <span>· AI: {data.aiConfigured ? 'sozlangan' : 'sozlanmagan'}</span><span>· Ochiq rasm qidiruvi: {data.imageSearchConfigured ? 'sozlangan' : 'sozlanmagan'}</span><span>· Pinterest: {data.pinterestConfigured ? 'sozlangan' : 'sozlanmagan'}</span>
         <span>· Bot: {data.botConfigured ? 'sozlangan' : 'sozlanmagan'}</span>
       </div>}
 
@@ -157,11 +158,24 @@ export function TelegramPostsWorkspace() {
             <section style={panel}>
               <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Rasm</h2>
               {selected.image_url && <figure style={{ margin: '0 0 14px' }}><img src={selected.image_url} alt="Post rasmi" style={{ width: '100%', maxHeight: 340, objectFit: 'cover', borderRadius: 12 }} /><figcaption style={{ marginTop: 6, color: 'var(--muted)', fontSize: 12 }}>{selected.image_credit} · {selected.image_license}</figcaption></figure>}
-              <div style={{ display: 'flex', gap: 8 }}><input disabled={disabled || sent} style={field} value={imageQuery} onChange={(event) => setImageQuery(event.target.value)} placeholder="Inglizcha rasm qidiruv iborasi" />
-                <button disabled={disabled || sent || !data?.imageSearchConfigured} title={!data?.imageSearchConfigured ? 'PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { query: imageQuery || `${selected.topic} medical healthcare` })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Rasm qidirish'}</button></div>
-              {images.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10, marginTop: 14 }}>{images.map((image, index) => <button key={`${image.provider}-${index}`} type="button" disabled={disabled} onClick={() => void action('select-image', { candidate: image })} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 6, background: 'var(--surface-2)', color: 'var(--ink)', cursor: 'pointer', textAlign: 'left' }}>
-                <img src={image.preview_url} alt="Rasm varianti" style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 7 }} /><small>{image.credit}<br />{image.license}</small>
-              </button>)}</div>}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><input disabled={disabled || sent} style={{ ...field, flex: '1 1 260px' }} value={imageQuery} onChange={(event) => setImageQuery(event.target.value)} placeholder="Inglizcha rasm qidiruv iborasi" />
+                <button disabled={disabled || sent || !data?.imageSearchConfigured} title={!data?.imageSearchConfigured ? 'PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'stock', query: imageQuery || `${selected.topic} medical healthcare` })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Ochiq rasmlar'}</button>
+                <button disabled={disabled || sent || !data?.pinterestConfigured} title={!data?.pinterestConfigured ? 'PINTEREST_RAPIDAPI_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'pinterest', query: imageQuery || `${selected.topic} medical healthcare` })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Pinterest'}</button></div>
+              {images.some((image) => image.provider === 'pinterest') && <p style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.5 }}>Pinterest qidiruv manbasi, litsenziya manbasi emas. Faqat muallif ruxsati yoki tijoriy foydalanishga mos litsenziyasi bor rasmni tanlang.</p>}
+              {images.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 10, marginTop: 14 }}>{images.map((image, index) => {
+                const rights = pinterestRights[image.source_url] ?? { license: '', confirmed: false }
+                const candidate = image.provider === 'pinterest' ? { ...image, license: rights.license.trim(), rights_confirmed: rights.confirmed } : image
+                return <article key={`${image.provider}-${index}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 8, background: 'var(--surface-2)' }}>
+                  <img src={image.preview_url} alt="Rasm varianti" style={{ width: '100%', height: 110, objectFit: 'cover', borderRadius: 7 }} />
+                  <small style={{ display: 'block', marginTop: 7 }}>{image.credit}<br />{image.license}</small>
+                  <a href={image.source_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: 6, fontSize: 12 }}>Manbani ochish</a>
+                  {image.provider === 'pinterest' && <div style={{ marginTop: 8 }}>
+                    <input style={field} maxLength={300} placeholder="Ruxsat yoki litsenziya nomi" value={rights.license} onChange={(event) => setPinterestRights((current) => ({ ...current, [image.source_url]: { ...rights, license: event.target.value } }))} />
+                    <label style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginTop: 8, fontSize: 12 }}><input type="checkbox" checked={rights.confirmed} onChange={(event) => setPinterestRights((current) => ({ ...current, [image.source_url]: { ...rights, confirmed: event.target.checked } }))} /> Ushbu rasmni tijoriy platformada ishlatish huquqim bor</label>
+                  </div>}
+                  <button type="button" disabled={disabled || (image.provider === 'pinterest' && (!rights.confirmed || !rights.license.trim()))} onClick={() => void action('select-image', { candidate })} style={{ ...secondary, width: '100%', marginTop: 9 }}>Tanlash</button>
+                </article>
+              })}</div>}
             </section>
 
             <section style={panel}>

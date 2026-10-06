@@ -23,11 +23,12 @@ async function postId(context: { params: Promise<{ id: string }> }) {
 function imageCandidate(value: unknown): TelegramImageCandidate {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Rasm ma’lumoti noto‘g‘ri.')
   const item = value as Record<string, unknown>
-  if (item.provider !== 'pexels' && item.provider !== 'unsplash') throw new Error('Rasm provayderi noto‘g‘ri.')
+  if (!['pexels', 'unsplash', 'pixabay', 'pinterest'].includes(String(item.provider))) throw new Error('Rasm provayderi noto‘g‘ri.')
   for (const field of ['image_url', 'preview_url', 'source_url', 'credit', 'license']) {
     if (typeof item[field] !== 'string' || !item[field]) throw new Error(`Rasmning ${field} maydoni noto‘g‘ri.`)
   }
   if (item.tracking_url !== undefined && typeof item.tracking_url !== 'string') throw new Error('Rasm tracking manzili noto‘g‘ri.')
+  if (item.rights_confirmed !== undefined && typeof item.rights_confirmed !== 'boolean') throw new Error('Rasm foydalanish huquqi tasdig‘i noto‘g‘ri.')
   return item as TelegramImageCandidate
 }
 async function getPost(id: string) {
@@ -77,7 +78,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!user) return jsonError('Faqat admin uchun.', 403)
   try {
     const id = await postId(context)
-    const body = await request.json() as { action?: string; audience?: string; query?: string; candidate?: unknown; destinationId?: string }
+    const body = await request.json() as { action?: string; audience?: string; query?: string; provider?: string; candidate?: unknown; destinationId?: string }
     const { data: post, error: readError } = await getPost(id)
     if (readError) return dbError(readError)
     if (!post) return jsonError('Post topilmadi.', 404)
@@ -98,7 +99,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     if (body.action === 'search-images') {
       const query = typeof body.query === 'string' && body.query.trim() ? body.query.trim() : `${post.topic} medical healthcare`
-      return NextResponse.json({ images: await searchTelegramPostImages(query) })
+      if (body.provider !== undefined && !['stock', 'pinterest'].includes(body.provider)) return jsonError('Rasm qidiruv provayderi noto‘g‘ri.')
+      return NextResponse.json({ images: await searchTelegramPostImages(query, body.provider === 'pinterest' ? 'pinterest' : 'stock') })
     }
 
     if (body.action === 'select-image') {

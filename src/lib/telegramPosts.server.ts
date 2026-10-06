@@ -3,6 +3,7 @@ import 'server-only'
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import type { TelegramImageCandidate, TelegramSource } from '@/lib/telegramContent'
+import { imageProviderUrl, pixabayImages, pinterestImages, validatePinterestRights } from './telegramImages'
 
 const GEMINI_TIMEOUT_MS = 30_000
 const SEARCH_TIMEOUT_MS = 15_000
@@ -89,9 +90,32 @@ export async function generateTelegramPost(topic: string, audience: 'student' | 
   return { title, body, sources, imageQuery }
 }
 
-export async function searchTelegramPostImages(query: string): Promise<TelegramImageCandidate[]> {
+export async function searchTelegramPostImages(query: string, provider: 'stock' | 'pinterest' = 'stock'): Promise<TelegramImageCandidate[]> {
   const safeQuery = clean(query, 160)
+  if (provider === 'pinterest') {
+    const key = process.env.PINTEREST_RAPIDAPI_KEY?.trim()
+    if (!key) throw new Error('Pinterest uchun PINTEREST_RAPIDAPI_KEY kerak.')
+    const host = 'pinterest-search-api.p.rapidapi.com'
+    const params = new URLSearchParams({ query: safeQuery, filter: 'all', limit: '6' })
+    let response: Response
+    try {
+      response = await fetch(`https://${host}/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
+        redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
+    } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
+    if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI obunasi, kalit va limitni tekshiring.`)
+    return pinterestImages(await response.json())
+  }
   const tasks: Promise<TelegramImageCandidate[]>[] = []
+  const pixabayKey = process.env.PIXABAY_API_KEY?.trim()
+  if (pixabayKey) tasks.push((async () => {
+    const params = new URLSearchParams({ key: pixabayKey, q: safeQuery.slice(0, 100), per_page: '6', safesearch: 'true', image_type: 'all' })
+    // Pixabay requires 24-hour response caching. The key stays on the server.
+    const response = await fetch(`https://pixabay.com/api/?${params}`, {
+      cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+    })
+    if (!response.ok) throw new Error(`Pixabay HTTP ${response.status}. API kaliti yoki so‘rov limitini tekshiring.`)
+    return pixabayImages(await response.json())
+  })())
   const pexelsKey = process.env.PEXELS_API_KEY
   if (pexelsKey) tasks.push((async () => {
     const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=4&orientation=landscape`,
@@ -111,21 +135,28 @@ export async function searchTelegramPostImages(query: string): Promise<TelegramI
       preview_url: photo.urls.small, source_url: photo.links.html, credit: `${photo.user.name} / Unsplash`,
       license: 'Unsplash License', tracking_url: photo.links.download_location }))
   })())
-  if (!tasks.length) throw new Error('Rasm qidiruvi sozlanmagan: PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak.')
-  return (await Promise.all(tasks)).flat().slice(0, 6)
+  if (!tasks.length) throw new Error('Rasm qidiruvi sozlanmagan: PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak.')
+  const results = await Promise.allSettled(tasks)
+  if (results.every(result => result.status === 'rejected')) throw new Error('Rasm qidirish xizmatlari javob bermadi. API kalitlari va limitlarni tekshiring.')
+  return results.flatMap(result => result.status === 'fulfilled' ? result.value : []).slice(0, 12)
 }
 
 export async function saveTelegramPostImage(postId: string, candidate: TelegramImageCandidate) {
-  const url = new URL(candidate.image_url)
-  const allowed = candidate.provider === 'pexels' ? url.hostname === 'images.pexels.com' : url.hostname === 'images.unsplash.com'
-  if (!allowed || url.protocol !== 'https:') throw new Error('Rasm manzili tasdiqlangan provayderga tegishli emas.')
+  validatePinterestRights(candidate)
+  let url = imageProviderUrl(candidate.image_url, candidate.provider)
   if (candidate.provider === 'unsplash' && candidate.tracking_url && process.env.UNSPLASH_ACCESS_KEY) {
     const tracking = new URL(candidate.tracking_url)
     if (tracking.protocol === 'https:' && tracking.hostname === 'api.unsplash.com') {
       await fetch(tracking, { headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` }, signal: AbortSignal.timeout(10_000) }).catch(() => null)
     }
   }
-  const response = await fetch(url, { signal: AbortSignal.timeout(20_000) })
+  let response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(20_000) })
+  for (let hop = 0; response.status >= 300 && response.status < 400 && hop < 3; hop++) {
+    const location = response.headers.get('location')
+    if (!location) throw new Error('Rasm yo‘naltirish manzili yo‘q.')
+    url = imageProviderUrl(new URL(location, url).href, candidate.provider)
+    response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(20_000) })
+  }
   if (!response.ok) throw new Error(`Rasmni yuklab bo‘lmadi: HTTP ${response.status}`)
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.startsWith('image/')) throw new Error('Tanlangan manzil rasm qaytarmadi.')

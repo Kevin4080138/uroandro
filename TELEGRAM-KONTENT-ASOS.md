@@ -31,14 +31,15 @@ Kanal/guruh ID si matn sifatida saqlanadi. @username kichik harfga keltiriladi. 
 
 - Europe PMC orqali mavzuga mos annotatsiyali ilmiy manbalar qidiriladi.
 - Gemini manbalarga tayangan o'zbekcha qoralama va inglizcha rasm qidiruv iborasini yaratadi.
-- Pexels va Unsplash'dan litsenziya/manba ko'rsatilgan rasm variantlari chiqadi; tanlangan rasm 1600 px gacha va taxminan 150 KB WebP qilib `bannerlar/telegram-postlar` yo'liga ko'chiriladi.
+- Pixabay, Pexels va Unsplash'dan litsenziya/manba ko'rsatilgan rasm variantlari chiqadi; tanlangan rasm 1600 px gacha va taxminan 150 KB WebP qilib `bannerlar/telegram-postlar` yo'liga ko'chiriladi. Pixabay qidiruv javobi API talabiga muvofiq 24 soat keshlanadi.
+- Pinterest RapidAPI alohida qidiruv sifatida ishlaydi. Pinterest rasmga foydalanish huquqini bermaydi: admin manbani ochib tekshiradi, ruxsat/litsenziya nomini kiritadi va tijoriy foydalanish huquqini tasdiqlagandan keyingina rasm Storage'ga olinadi.
 - Matn, sarlavha, auditoriya va holat tahrirlanadi; eski versiya revision jadvaliga yoziladi.
 - Ilmiy manbasiz post tasdiqlanmaydi. Telegramga faqat tasdiqlangan post va faol post manzili yuboriladi.
 - Uzun matnda rasm va matn alohida xabar bo'ladi. Yuborish ishi va har bir qism qayd etilib, noaniq natijada dublikat yuborish bloklanadi.
 
 Qo'shimcha migratsiya: `supabase/migrations/20261005010000_telegram_posts_delivery.sql`.
 
-Kerakli server muhit o'zgaruvchilari: `GEMINI_API_KEY`, `GEMINI_MODEL`, kamida bittasi `PEXELS_API_KEY` yoki `UNSPLASH_ACCESS_KEY`, hamda `TELEGRAM_BOT_TOKEN`.
+Kerakli server muhit o'zgaruvchilari: `GEMINI_API_KEY`, `GEMINI_MODEL`, ochiq rasm qidiruvi uchun kamida bittasi `PIXABAY_API_KEY`, `PEXELS_API_KEY` yoki `UNSPLASH_ACCESS_KEY`, hamda `TELEGRAM_BOT_TOKEN`. Pinterest uchun RapidAPI obunasidagi kalit `PINTEREST_RAPIDAPI_KEY` nomi bilan qo'shiladi; host va endpoint kodda qat'iy belgilangan.
 
 ## Quizlar — 3-bosqich
 
