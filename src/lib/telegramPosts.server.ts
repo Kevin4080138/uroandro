@@ -8,6 +8,30 @@ import { imageProviderUrl, pixabayImages, pinterestImages, validatePinterestRigh
 const GEMINI_TIMEOUT_MS = 30_000
 const SEARCH_TIMEOUT_MS = 15_000
 
+class ImageSearchError extends Error {}
+
+async function imageSearchJson(provider: string, url: string, options: RequestInit & { next?: { revalidate: number } }) {
+  let response: Response
+  try { response = await fetch(url, options) }
+  catch { throw new ImageSearchError(`${provider}: ulanish amalga oshmadi yoki kutish vaqti tugadi.`) }
+  if (!response.ok) {
+    let detail = 'So‘rov rad etildi.'
+    if (response.status === 401 || response.status === 403) detail = 'API kaliti, obuna yoki xizmatga kirish ruxsatini tekshiring.'
+    else if (response.status === 429) detail = 'So‘rov limiti tugagan. Keyinroq qayta urinib ko‘ring.'
+    else if (response.status >= 500) detail = 'Xizmat ichki xato qaytardi. Keyinroq qayta urinib ko‘ring.'
+    else if (response.status === 400) {
+      // Classify known messages without exposing upstream text or credentials.
+      const body = await response.text().catch(() => '')
+      detail = /invalid.*api.*key|api.*key.*invalid/i.test(body)
+        ? 'API kaliti noto‘g‘ri. Serverdagi API kalitini tekshiring.'
+        : 'So‘rov parametrlari yoki API kalitini tekshiring.'
+    }
+    throw new ImageSearchError(`${provider} HTTP ${response.status}. ${detail}`)
+  }
+  try { return await response.json() }
+  catch { throw new ImageSearchError(`${provider}: javob JSON formatida emas.`) }
+}
+
 function clean(value: string, max = 10_000) {
   return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max)
 }
@@ -102,7 +126,7 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
       response = await fetch(`https://${host}/search?${params}`, { headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host },
         redirect: 'error', cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
     } catch { throw new Error('Pinterest xizmati vaqtida javob bermadi.') }
-    if (response.status >= 500) throw new Error('RapidAPI Pinterest provayderi ichki xato qaytardi. Kalit qabul qilindi, ammo provayder hozir ishlamayapti.')
+    if (response.status >= 500) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI provayderi ichki xato qaytardi; bu javob API kalitining to‘g‘riligini tasdiqlamaydi.`)
     if (!response.ok) throw new Error(`Pinterest HTTP ${response.status}. RapidAPI obunasi, kalit va limitni tekshiring.`)
     return pinterestImages(await response.json())
   }
@@ -111,34 +135,31 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
   if (pixabayKey) tasks.push((async () => {
     const params = new URLSearchParams({ key: pixabayKey, q: safeQuery.slice(0, 100), per_page: '6', safesearch: 'true', image_type: 'all' })
     // Pixabay requires 24-hour response caching. The key stays on the server.
-    const response = await fetch(`https://pixabay.com/api/?${params}`, {
+    const data = await imageSearchJson('Pixabay', `https://pixabay.com/api/?${params}`, {
       cache: 'force-cache', next: { revalidate: 86400 }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
     })
-    if (!response.ok) throw new Error(`Pixabay HTTP ${response.status}. API kaliti yoki so‘rov limitini tekshiring.`)
-    return pixabayImages(await response.json())
+    return pixabayImages(data)
   })())
   const pexelsKey = process.env.PEXELS_API_KEY
   if (pexelsKey) tasks.push((async () => {
-    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=4&orientation=landscape`,
-      { headers: { Authorization: pexelsKey }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
-    if (!response.ok) return []
-    const data = await response.json() as { photos?: Array<{ url: string; photographer: string; src: { large: string; medium: string } }> }
+    const data = await imageSearchJson('Pexels', `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=4&orientation=landscape`,
+      { headers: { Authorization: pexelsKey }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) }) as { photos?: Array<{ url: string; photographer: string; src: { large: string; medium: string } }> }
     return (data.photos ?? []).map((photo) => ({ provider: 'pexels' as const, image_url: photo.src.large,
       preview_url: photo.src.medium, source_url: photo.url, credit: `${photo.photographer} / Pexels`, license: 'Pexels License' }))
   })())
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
   if (unsplashKey) tasks.push((async () => {
-    const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(safeQuery)}&per_page=4&orientation=landscape`,
-      { headers: { Authorization: `Client-ID ${unsplashKey}` }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
-    if (!response.ok) return []
-    const data = await response.json() as { results?: Array<{ links: { html: string; download_location?: string }; urls: { regular: string; small: string }; user: { name: string } }> }
+    const data = await imageSearchJson('Unsplash', `https://api.unsplash.com/search/photos?query=${encodeURIComponent(safeQuery)}&per_page=4&orientation=landscape`,
+      { headers: { Authorization: `Client-ID ${unsplashKey}` }, signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) }) as { results?: Array<{ links: { html: string; download_location?: string }; urls: { regular: string; small: string }; user: { name: string } }> }
     return (data.results ?? []).map((photo) => ({ provider: 'unsplash' as const, image_url: photo.urls.regular,
       preview_url: photo.urls.small, source_url: photo.links.html, credit: `${photo.user.name} / Unsplash`,
       license: 'Unsplash License', tracking_url: photo.links.download_location }))
   })())
   if (!tasks.length) throw new Error('Rasm qidiruvi sozlanmagan: PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak.')
   const results = await Promise.allSettled(tasks)
-  if (results.every(result => result.status === 'rejected')) throw new Error('Rasm qidirish xizmatlari javob bermadi. API kalitlari va limitlarni tekshiring.')
+  if (results.every(result => result.status === 'rejected')) throw new Error(results.map(result =>
+    result.reason instanceof ImageSearchError ? result.reason.message : 'Rasm qidiruvi javobini qayta ishlab bo‘lmadi.'
+  ).join(' '))
   return results.flatMap(result => result.status === 'fulfilled' ? result.value : []).slice(0, 12)
 }
 

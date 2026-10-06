@@ -105,7 +105,10 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         catch (error) {
           const warning = error instanceof Error ? error.message : 'Pinterest xizmati javob bermadi.'
           try { return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock'), warning: `${warning} Ochiq litsenziyali rasm natijalari ko‘rsatildi.` }) }
-          catch { return jsonError(warning, 502) }
+          catch (fallbackError) {
+            const detail = fallbackError instanceof Error ? fallbackError.message : 'Ochiq rasm qidiruvi javob bermadi.'
+            return jsonError(`${warning} Zaxira qidiruv: ${detail}`, 502)
+          }
         }
       }
       return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock') })
