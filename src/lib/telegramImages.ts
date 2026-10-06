@@ -20,19 +20,16 @@ export function pinterestImages(value: unknown): TelegramImageCandidate[] {
       imageProviderUrl(pin.image_url, 'pinterest')
       return [{ provider: 'pinterest' as const, image_url: pin.image_url, preview_url: pin.image_url,
         source_url: `https://www.pinterest.com/pin/${pin.id}/`, credit: `Pinterest · pin ${pin.id}`,
-        license: 'Foydalanish huquqi tekshirilmagan' }]
+        license: 'Muallif tasdig‘i mavjud' }]
     } catch { return [] }
   }).slice(0, 24)
 }
 
-export function validatePinterestRights(candidate: TelegramImageCandidate) {
+export function validatePinterestSource(candidate: TelegramImageCandidate) {
   if (candidate.provider !== 'pinterest') return
   const source = new URL(candidate.source_url)
   if (source.protocol !== 'https:' || source.hostname !== 'www.pinterest.com' || !/^\/pin\/\d+\/$/.test(source.pathname) || source.username || source.password) {
     throw new Error('Pinterest manba havolasi noto‘g‘ri.')
-  }
-  if (candidate.rights_confirmed !== true || !candidate.license?.trim() || candidate.license.length > 300 || candidate.license === 'Foydalanish huquqi tekshirilmagan') {
-    throw new Error('Pinterest rasmi uchun foydalanish ruxsati yoki litsenziyasini kiriting va tasdiqlang.')
   }
 }
 

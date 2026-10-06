@@ -3,7 +3,7 @@ import 'server-only'
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import type { TelegramImageCandidate, TelegramSource } from '@/lib/telegramContent'
-import { imageProviderUrl, pixabayImages, pinterestImages, validatePinterestRights } from './telegramImages'
+import { imageProviderUrl, pixabayImages, pinterestImages, validatePinterestSource } from './telegramImages'
 
 const GEMINI_TIMEOUT_MS = 30_000
 const SEARCH_TIMEOUT_MS = 15_000
@@ -189,7 +189,7 @@ export async function searchTelegramPostImages(query: string, provider: 'stock' 
 }
 
 export async function saveTelegramPostImage(postId: string, candidate: TelegramImageCandidate) {
-  validatePinterestRights(candidate)
+  validatePinterestSource(candidate)
   let url = imageProviderUrl(candidate.image_url, candidate.provider)
   if (candidate.provider === 'unsplash' && candidate.tracking_url && process.env.UNSPLASH_ACCESS_KEY) {
     const tracking = new URL(candidate.tracking_url)

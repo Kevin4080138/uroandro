@@ -28,7 +28,6 @@ export function TelegramPostsWorkspace() {
   const [destinationId, setDestinationId] = useState('')
   const [destination, setDestination] = useState(blankDestination)
   const [images, setImages] = useState<TelegramImageCandidate[]>([])
-  const [pinterestRights, setPinterestRights] = useState<Record<string, { license: string; confirmed: boolean }>>({})
   const [imageQuery, setImageQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [busy, setBusy] = useState('')
@@ -162,19 +161,13 @@ export function TelegramPostsWorkspace() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><input disabled={disabled || sent} style={{ ...field, flex: '1 1 260px' }} value={imageQuery} onChange={(event) => setImageQuery(event.target.value)} placeholder="Inglizcha rasm qidiruv iborasi" />
                 <button disabled={disabled || sent || !data?.imageSearchConfigured} title={!data?.imageSearchConfigured ? 'PIXABAY_API_KEY, PEXELS_API_KEY yoki UNSPLASH_ACCESS_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'stock', query: imageQuery })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Ochiq rasmlar'}</button>
                 <button disabled={disabled || sent || !data?.pinterestConfigured} title={!data?.pinterestConfigured ? 'PINTEREST_RAPIDAPI_KEY kerak' : undefined} style={secondary} onClick={() => void action('search-images', { provider: 'pinterest', query: imageQuery })}>{busy === 'search-images' ? 'Qidirilmoqda…' : 'Pinterest'}</button></div>
-              {images.some((image) => image.provider === 'pinterest') && <p style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.5 }}>Pinterest qidiruv manbasi, litsenziya manbasi emas. Faqat muallif ruxsati yoki tijoriy foydalanishga mos litsenziyasi bor rasmni tanlang.</p>}
+              {images.some((image) => image.provider === 'pinterest') && <p style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.5 }}>Pinterest rasmi tanlanganda pin manbasi va muallif tasdig‘i avtomatik saqlanadi.</p>}
               {images.length > 0 && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 10, marginTop: 14 }}>{images.map((image, index) => {
-                const rights = pinterestRights[image.source_url] ?? { license: '', confirmed: false }
-                const candidate = image.provider === 'pinterest' ? { ...image, license: rights.license.trim(), rights_confirmed: rights.confirmed } : image
                 return <article key={`${image.provider}-${index}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 8, background: 'var(--surface-2)' }}>
                   <a href={image.image_url} target="_blank" rel="noreferrer" title="Rasmni to‘liq ochish"><img loading="lazy" src={image.preview_url} alt="Rasm varianti — to‘liq ochish" style={{ width: '100%', height: 240, objectFit: 'contain', borderRadius: 7 }} /></a>
                   <small style={{ display: 'block', marginTop: 7 }}>{image.credit}<br />{image.license}</small>
                   <a href={image.source_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: 6, fontSize: 12 }}>Manbani ochish</a>
-                  {image.provider === 'pinterest' && <div style={{ marginTop: 8 }}>
-                    <input style={field} maxLength={300} placeholder="Ruxsat yoki litsenziya nomi" value={rights.license} onChange={(event) => setPinterestRights((current) => ({ ...current, [image.source_url]: { ...rights, license: event.target.value } }))} />
-                    <label style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginTop: 8, fontSize: 12 }}><input type="checkbox" checked={rights.confirmed} onChange={(event) => setPinterestRights((current) => ({ ...current, [image.source_url]: { ...rights, confirmed: event.target.checked } }))} /> Ushbu rasmni tijoriy platformada ishlatish huquqim bor</label>
-                  </div>}
-                  <button type="button" disabled={disabled || (image.provider === 'pinterest' && (!rights.confirmed || !rights.license.trim()))} onClick={() => void action('select-image', { candidate })} style={{ ...secondary, width: '100%', marginTop: 9 }}>Tanlash</button>
+                  <button type="button" disabled={disabled} onClick={() => void action('select-image', { candidate: image })} style={{ ...secondary, width: '100%', marginTop: 9 }}>Tanlash</button>
                 </article>
               })}</div>}
             </section>

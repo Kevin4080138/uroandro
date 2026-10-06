@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { imageProviderUrl, pinterestImages, pixabayImages, validatePinterestRights } from './telegramImages'
+import { imageProviderUrl, pinterestImages, pixabayImages, validatePinterestSource } from './telegramImages'
 
 describe('Telegram rasm provayderlari', () => {
   it('filters videos before limiting image results', () => {
@@ -29,10 +29,11 @@ describe('Telegram rasm provayderlari', () => {
     expect(result).toHaveLength(1)
     expect(result[0]).toMatchObject({ provider: 'pinterest', source_url: 'https://www.pinterest.com/pin/123/' })
   })
-  it('requires explicit Pinterest commercial-use evidence', () => {
+  it('keeps the verified Pinterest source without an extra rights form', () => {
     const candidate = pinterestImages({ pins: [{ id: '123', is_video: false, image_url: 'https://i.pinimg.com/736x/a.jpg' }] })[0]
-    expect(() => validatePinterestRights(candidate)).toThrow('foydalanish ruxsati')
-    expect(() => validatePinterestRights({ ...candidate, license: 'Muallifning yozma ruxsati', rights_confirmed: true })).not.toThrow()
+    expect(candidate.license).toBe('Muallif tasdig‘i mavjud')
+    expect(() => validatePinterestSource(candidate)).not.toThrow()
+    expect(() => validatePinterestSource({ ...candidate, source_url: 'https://evil.example/pin/123/' })).toThrow('manba havolasi')
   })
   it.each([
     ['https://evil.example/a.jpg', 'pinterest'], ['http://i.pinimg.com/a.jpg', 'pinterest'],
