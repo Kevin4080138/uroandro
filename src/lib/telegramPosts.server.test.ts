@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@/lib/supabaseAdmin', () => ({ createAdminClient: vi.fn() }))
-import { searchTelegramPostImages } from './telegramPosts.server'
+import { searchTelegramPostImages, telegramImageQuery } from './telegramPosts.server'
 
 beforeEach(() => {
   vi.stubEnv('PIXABAY_API_KEY', 'private-key')
@@ -39,4 +39,17 @@ it('reports Pinterest 500 without claiming the key was accepted', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 500 })))
   await expect(searchTelegramPostImages('kidney', 'pinterest')).rejects.toThrow('Pinterest HTTP 500')
   await expect(searchTelegramPostImages('kidney', 'pinterest')).rejects.not.toThrow('Kalit qabul qilindi')
+})
+
+it('preserves an explicit query without broadening it or calling AI', async () => {
+  const fetch = vi.fn()
+  vi.stubGlobal('fetch', fetch)
+  expect(await telegramImageQuery('Mavzu', ' oligozoospermia ')).toBe('oligozoospermia')
+  expect(fetch).not.toHaveBeenCalled()
+})
+it('translates a blank query to a specific medical term', async () => {
+  vi.stubEnv('GEMINI_API_KEY', 'test')
+  vi.stubEnv('GEMINI_MODEL', 'test-model')
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"query":"oligozoospermia"}' }] } }] }))))
+  expect(await telegramImageQuery('oligozospermiya', '')).toBe('oligozoospermia')
 })

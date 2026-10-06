@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { postUpdateInput, uuid, type TelegramImageCandidate, type TelegramSource } from '@/lib/telegramContent'
-import { generateTelegramPost, saveTelegramPostImage, searchTelegramPostImages, sendTelegramPost } from '@/lib/telegramPosts.server'
+import { generateTelegramPost, saveTelegramPostImage, searchTelegramPostImages, sendTelegramPost, telegramImageQuery } from '@/lib/telegramPosts.server'
 
 async function admin() {
   const client = await createServerSupabase()
@@ -98,20 +98,22 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     }
 
     if (body.action === 'search-images') {
-      const query = typeof body.query === 'string' && body.query.trim() ? body.query.trim() : `${post.topic} medical healthcare`
       if (body.provider !== undefined && !['stock', 'pinterest'].includes(body.provider)) return jsonError('Rasm qidiruv provayderi noto‘g‘ri.')
+      const query = await telegramImageQuery(post.topic, typeof body.query === 'string' ? body.query : undefined)
+      const imageResult = (images: TelegramImageCandidate[], warning = '') => NextResponse.json({ images, imageQuery: query,
+        warning: [warning, !images.length ? `“${query}” uchun rasm topilmadi. Aniq inglizcha sinonim bilan urinib ko‘ring.` : ''].filter(Boolean).join(' ') })
       if (body.provider === 'pinterest') {
-        try { return NextResponse.json({ images: await searchTelegramPostImages(query, 'pinterest') }) }
+        try { return imageResult(await searchTelegramPostImages(query, 'pinterest')) }
         catch (error) {
           const warning = error instanceof Error ? error.message : 'Pinterest xizmati javob bermadi.'
-          try { return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock'), warning: `${warning} Ochiq litsenziyali rasm natijalari ko‘rsatildi.` }) }
+          try { return imageResult(await searchTelegramPostImages(query, 'stock'), `${warning} Ochiq rasm manbalari ham tekshirildi.`) }
           catch (fallbackError) {
             const detail = fallbackError instanceof Error ? fallbackError.message : 'Ochiq rasm qidiruvi javob bermadi.'
             return jsonError(`${warning} Zaxira qidiruv: ${detail}`, 502)
           }
         }
       }
-      return NextResponse.json({ images: await searchTelegramPostImages(query, 'stock') })
+      return imageResult(await searchTelegramPostImages(query, 'stock'))
     }
 
     if (body.action === 'select-image') {
