@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@/lib/supabaseAdmin', () => ({ createAdminClient: vi.fn() }))
-import { searchTelegramPinterest, searchTelegramPostImages, telegramImageQuery } from './telegramPosts.server'
+import { searchTelegramPinterest, searchTelegramPostImages, sendTelegramPost, telegramImageQuery, telegramPostHtml } from './telegramPosts.server'
 
 beforeEach(() => {
   vi.stubEnv('PIXABAY_API_KEY', 'private-key')
@@ -80,4 +80,34 @@ it('translates a blank query to a specific medical term', async () => {
   vi.stubEnv('GEMINI_MODEL', 'test-model')
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"query":"oligozoospermia"}' }] } }] }))))
   expect(await telegramImageQuery('oligozospermiya', '')).toBe('oligozoospermia')
+})
+
+it('formats the scientific source, Urosfera signature and real social icons safely', () => {
+  vi.stubEnv('TELEGRAM_SOCIAL_URL', 'https://t.me/urosfera')
+  vi.stubEnv('INSTAGRAM_URL', 'https://instagram.com/urosfera')
+  vi.stubEnv('YOUTUBE_URL', 'https://youtube.com/@urosfera')
+  const text = telegramPostHtml({ title: '<Buyrak> & salomatlik', body: '📌 Qisqa ma’lumot', image_credit: null,
+    sources: [{ title: 'Urologiya tadqiqoti', provider: 'PubMed', url: 'https://pubmed.ncbi.nlm.nih.gov/123/' }] })
+  expect(text).toContain('<b>&lt;Buyrak&gt; &amp; salomatlik</b>')
+  expect(text).toContain('🔗 <b>Original manba:</b>')
+  expect(text).toContain('— <b>Urosfera</b> | Urologiya bilim platformasi')
+  expect(text).toContain('✈️ <a href="https://t.me/urosfera">Telegram</a>')
+  expect(text).toContain('📸 <a href="https://instagram.com/urosfera">Instagram</a>')
+  expect(text).toContain('▶️ <a href="https://youtube.com/@urosfera">YouTube</a>')
+  expect(text).not.toMatch(/[🔵🟣🔴]/u)
+})
+
+it('sends the formatted post using Telegram HTML mode', async () => {
+  vi.stubEnv('TELEGRAM_BOT_TOKEN', 'token')
+  vi.stubEnv('TELEGRAM_SOCIAL_URL', 'https://t.me/urosfera')
+  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, result: { message_id: 77 } })))
+  vi.stubGlobal('fetch', fetch)
+  const result = await sendTelegramPost({ title: '📌 Sarlavha', body: 'Matn', image_url: null, image_credit: null,
+    sources: [{ title: 'Maqola', provider: 'PubMed', url: 'https://pubmed.ncbi.nlm.nih.gov/123/' }] }, '@kanal')
+  expect(result.error).toBeNull()
+  const payload = JSON.parse(fetch.mock.calls[0][1].body)
+  expect(payload.parse_mode).toBe('HTML')
+  expect(payload.text).toContain('Original manba')
+  expect(payload.text).toContain('✈️ <a href=')
+  expect(payload.reply_markup.inline_keyboard[0][0].url).toBe('https://pubmed.ncbi.nlm.nih.gov/123/')
 })

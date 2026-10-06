@@ -61,7 +61,7 @@ test('cron endpoint auth rejects missing/wrong secrets and accepts matching bear
   assert.equal(cronRuxsatXatosi(new Request(endpoint, { headers: { authorization: 'Bearer server-secret' } }), 'server-secret'), null)
 })
 
-test('Telegram auto-send keeps one article button and linked circle footer', async () => {
+test('Telegram auto-send keeps one article button and linked platform-icon footer', async () => {
   const oldFetch = globalThis.fetch; const calls = []
   process.env.TELEGRAM_BOT_TOKEN = 'test-token'; process.env.TELEGRAM_CHANNEL_ID = '@test'
   process.env.TELEGRAM_SOCIAL_URL = 'https://t.me/urosfera'; process.env.INSTAGRAM_URL = 'https://instagram.com/urosfera'; process.env.YOUTUBE_URL = 'https://youtube.com/@urosfera'
@@ -71,7 +71,7 @@ test('Telegram auto-send keeps one article button and linked circle footer', asy
       telegram_post_uz: 'Umumiy post', telegram_message_id: null, source_url: 'https://pubmed.ncbi.nlm.nih.gov/123/', source_name: 'PubMed', image_url: null }
     assert.equal((await telegramKanalgaYangilik(news)).messageId, '77')
     assert.equal(calls[0].reply_markup.inline_keyboard.length, 1)
-    assert.match(calls[0].text, /🔵 <a href=.*>Telegram<\/a> • 🟣 <a href=.*>Instagram<\/a> • 🔴 <a href=.*>YouTube<\/a>/)
+    assert.match(calls[0].text, /✈️ <a href=.*>Telegram<\/a> • 📸 <a href=.*>Instagram<\/a> • ▶️ <a href=.*>YouTube<\/a>/)
     assert.doesNotMatch(calls[0].text, /Talaba uchun|Shifokor uchun|Bemor uchun/)
   } finally { globalThis.fetch = oldFetch }
 })

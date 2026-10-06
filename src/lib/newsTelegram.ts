@@ -66,9 +66,9 @@ export async function telegramKanalgaYangilik(news: NewsRow): Promise<{ messageI
   const youtubeUrl = safeUrl(process.env.YOUTUBE_URL)
   const telegramUrl = safeUrl(process.env.TELEGRAM_SOCIAL_URL)
   const socialLinks = [
-    telegramUrl && `🔵 <a href="${escapeHtml(telegramUrl)}">Telegram</a>`,
-    instagramUrl && `🟣 <a href="${escapeHtml(instagramUrl)}">Instagram</a>`,
-    youtubeUrl && `🔴 <a href="${escapeHtml(youtubeUrl)}">YouTube</a>`,
+    telegramUrl && `✈️ <a href="${escapeHtml(telegramUrl)}">Telegram</a>`,
+    instagramUrl && `📸 <a href="${escapeHtml(instagramUrl)}">Instagram</a>`,
+    youtubeUrl && `▶️ <a href="${escapeHtml(youtubeUrl)}">YouTube</a>`,
   ].filter((link): link is string => Boolean(link))
   const socialFooter = socialLinks.length ? `<b>Bizni kuzating:</b> ${socialLinks.join(' • ')}` : ''
   const text = [

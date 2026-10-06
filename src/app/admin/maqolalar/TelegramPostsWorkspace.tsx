@@ -194,6 +194,9 @@ export function TelegramPostsWorkspace() {
               <div style={{ maxWidth: 560, borderRadius: 14, padding: 14, background: '#dceaf5', color: '#17212b', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
                 {selected.image_url && <img src={selected.image_url} alt="" style={{ display: 'block', width: 'auto', maxWidth: '100%', height: 'auto', maxHeight: 420, margin: '0 auto 10px', objectFit: 'contain', borderRadius: 9 }} />}
                 <strong>{selected.title}</strong>{'\n\n'}{selected.body || 'Post matni hali tayyor emas.'}{selected.image_credit ? `\n\n📷 ${selected.image_credit}` : ''}
+                {selected.sources?.[0] && <>{'\n\n'}🔗 <strong>Original manba:</strong> {selected.sources[0].provider} — {selected.sources[0].title}</>}
+                {'\n\n'}— <strong>Urosfera</strong> | Urologiya bilim platformasi
+                {'\n\n'}<strong>Bizni kuzating:</strong> ✈️ Telegram • 📸 Instagram • ▶️ YouTube
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 14, alignItems: 'end' }}><label style={{ flex: 1 }}>Manzil<select disabled={disabled || sent} style={{ ...field, marginTop: 6 }} value={destinationId} onChange={(event) => setDestinationId(event.target.value)}><option value="">Manzilni tanlang</option>{destinations.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.chat_id}</option>)}</select></label>
                 <button disabled={disabled || sent || selected.status !== 'approved' || !destinationId} style={{ ...button, background: 'var(--good)' }} onClick={() => { if (confirm('Tasdiqlangan post tanlangan Telegram manziliga yuborilsinmi?')) void action('send', { destinationId }) }}>{busy === 'send' ? 'Yuborilmoqda…' : '✈️ Telegramga yuborish'}</button></div>
