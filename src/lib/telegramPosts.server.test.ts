@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@/lib/supabaseAdmin', () => ({ createAdminClient: vi.fn() }))
-import { searchTelegramPinterest, searchTelegramPostImages, sendTelegramPost, telegramImageQuery, telegramPostHtml } from './telegramPosts.server'
+import { geminiJson, searchTelegramPinterest, searchTelegramPostImages, sendTelegramPost, telegramImageQuery, telegramPostHtml } from './telegramPosts.server'
 
 beforeEach(() => {
   vi.stubEnv('PIXABAY_API_KEY', 'private-key')
@@ -80,6 +80,31 @@ it('translates a blank query to a specific medical term', async () => {
   vi.stubEnv('GEMINI_MODEL', 'test-model')
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"query":"oligozoospermia"}' }] } }] }))))
   expect(await telegramImageQuery('oligozospermiya', '')).toBe('oligozoospermia')
+})
+
+it('retries a temporary Gemini failure and returns the successful response', async () => {
+  vi.stubEnv('GEMINI_API_KEY', 'test')
+  vi.stubEnv('GEMINI_MODEL', 'test-model')
+  const fetch = vi.fn()
+    .mockResolvedValueOnce(new Response('{"error":{"message":"high demand"}}', { status: 503, headers: { 'retry-after': '0' } }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"value":"ok"}' }] } }] })))
+  vi.stubGlobal('fetch', fetch)
+  await expect(geminiJson<{ value: string }>('system', 'prompt', {
+    type: 'object', properties: { value: { type: 'string' } }, required: ['value'],
+  })).resolves.toEqual({ value: 'ok' })
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
+it('hides Gemini provider details after temporary failures are exhausted', async () => {
+  vi.stubEnv('GEMINI_API_KEY', 'test')
+  vi.stubEnv('GEMINI_MODEL', 'test-model')
+  const failure = () => new Response('{"error":{"message":"high demand: private provider detail"}}', {
+    status: 503, headers: { 'retry-after': '0' },
+  })
+  vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => failure()))
+  const request = geminiJson('system', 'prompt', { type: 'object', properties: {} })
+  await expect(request).rejects.toThrow('Gemini vaqtincha band yoki ishlamayapti. Avtomatik 3 marta urinildi.')
+  await expect(request).rejects.not.toThrow('private provider detail')
 })
 
 it('formats the scientific source, Urosfera signature and real social icons safely', () => {

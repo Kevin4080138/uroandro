@@ -6,6 +6,8 @@ import type { TelegramImageCandidate, TelegramPinterestSearchResult, TelegramSou
 import { imageProviderUrl, pixabayImages, pinterestSearchResults, validatePinterestSource } from './telegramImages'
 
 const GEMINI_TIMEOUT_MS = 30_000
+const GEMINI_MAX_ATTEMPTS = 3
+const GEMINI_RETRY_DELAYS_MS = [750, 1_800]
 const SEARCH_TIMEOUT_MS = 15_000
 
 class ImageSearchError extends Error {}
@@ -41,27 +43,68 @@ function geminiText(data: unknown) {
   return response.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim() ?? ''
 }
 
+function geminiHttpError(status: number) {
+  if (status === 429) return new Error('Gemini so‘rov limiti vaqtincha tugagan. Avtomatik 3 marta urinildi. Birozdan keyin qayta urinib ko‘ring.')
+  if ([500, 502, 503, 504].includes(status)) return new Error('Gemini vaqtincha band yoki ishlamayapti. Avtomatik 3 marta urinildi. 1–2 daqiqadan keyin qayta urinib ko‘ring.')
+  if (status === 401 || status === 403) return new Error('Gemini API kaliti yoki ruxsatlari noto‘g‘ri. Vercel’dagi GEMINI_API_KEY qiymatini tekshiring.')
+  if (status === 404) return new Error('Gemini modeli topilmadi. Vercel’dagi GEMINI_MODEL qiymatini tekshiring.')
+  return new Error(`Gemini so‘rovni rad etdi (HTTP ${status}). Model va API sozlamalarini tekshiring.`)
+}
+
+async function waitForGeminiRetry(attempt: number, response?: Response) {
+  const retryAfterHeader = response?.headers.get('retry-after')
+  const retryAfter = retryAfterHeader === null || retryAfterHeader === undefined ? Number.NaN : Number(retryAfterHeader)
+  const providerDelay = Number.isFinite(retryAfter) && retryAfter >= 0 ? retryAfter * 1_000 : null
+  const delay = providerDelay === null
+    ? GEMINI_RETRY_DELAYS_MS[attempt] ?? GEMINI_RETRY_DELAYS_MS.at(-1)!
+    : Math.min(providerDelay, 5_000)
+  if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay))
+}
+
 export async function geminiJson<T>(system: string, prompt: string, schema: Record<string, unknown>, temperature = 0.2, maxOutputTokens = 3072): Promise<T> {
   const key = process.env.GEMINI_API_KEY
   const rawModel = process.env.GEMINI_MODEL
   if (!key || !rawModel) throw new Error('Gemini sozlanmagan: GEMINI_API_KEY va GEMINI_MODEL kerak.')
   const model = rawModel.replace(/^models\//, '')
   if (!/^[a-zA-Z0-9._-]+$/.test(model)) throw new Error('GEMINI_MODEL formati noto‘g‘ri.')
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+  const request: RequestInit = {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] },
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature, maxOutputTokens } }),
-    signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
-  })
-  if (!response.ok) {
-    const raw = clean(await response.text(), 500)
-    throw new Error(`Gemini HTTP ${response.status}${raw ? `: ${raw}` : ''}`)
   }
-  const text = geminiText(await response.json())
-  if (!text) throw new Error('Gemini bo‘sh javob qaytardi.')
-  try { return JSON.parse(text.replace(/^```json\s*|\s*```$/g, '')) as T }
-  catch { throw new Error('Gemini javobi noto‘g‘ri JSON formatida.') }
+  for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt += 1) {
+    let response: Response
+    try {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        ...request,
+        signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+      })
+    } catch (error) {
+      if (attempt < GEMINI_MAX_ATTEMPTS - 1) {
+        await waitForGeminiRetry(attempt)
+        continue
+      }
+      const timedOut = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+      throw new Error(timedOut
+        ? 'Gemini belgilangan vaqtda javob bermadi. Avtomatik 3 marta urinildi. Birozdan keyin qayta urinib ko‘ring.'
+        : 'Gemini xizmatiga ulanib bo‘lmadi. Avtomatik 3 marta urinildi. Internet va xizmat holatini tekshirib, qayta urinib ko‘ring.')
+    }
+    if (!response.ok) {
+      const transient = response.status === 429 || response.status >= 500
+      if (transient && attempt < GEMINI_MAX_ATTEMPTS - 1) {
+        await response.text().catch(() => '')
+        await waitForGeminiRetry(attempt, response)
+        continue
+      }
+      throw geminiHttpError(response.status)
+    }
+    const text = geminiText(await response.json())
+    if (!text) throw new Error('Gemini bo‘sh javob qaytardi.')
+    try { return JSON.parse(text.replace(/^```json\s*|\s*```$/g, '')) as T }
+    catch { throw new Error('Gemini javobi noto‘g‘ri JSON formatida.') }
+  }
+  throw new Error('Gemini vaqtincha javob bermadi. Birozdan keyin qayta urinib ko‘ring.')
 }
 
 type MedicalResult = { title?: string; abstractText?: string; pmid?: string; id?: string; source?: string; pmcid?: string }
